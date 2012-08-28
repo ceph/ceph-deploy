@@ -1,7 +1,17 @@
 import ConfigParser
 
 
+class _TrimIndentFile(object):
+    def __init__(self, fp):
+        self.fp = fp
+
+    def readline(self):
+        line = self.fp.readline()
+        return line.lstrip(' \t')
+
+
 def parse(fp):
     cfg = ConfigParser.RawConfigParser()
-    cfg.readfp(fp)
+    ifp = _TrimIndentFile(fp)
+    cfg.readfp(ifp)
     return cfg
