@@ -1,16 +1,18 @@
 import argparse
 import logging
 import pkg_resources
+import pushy
 import sys
 
 from . import exc
 from . import validate
+from . import sudo_pushy
 
 
 log = logging.getLogger(__name__)
 
 
-def parse_args():
+def parse_args(args=None, namespace=None):
     parser = argparse.ArgumentParser(
         description='Deploy Ceph',
         )
@@ -45,14 +47,18 @@ def parse_args():
         # we want to hold on to this, for later
         prog=parser.prog,
 
+        # unit tests can override this to mock pushy; no user-visible
+        # option sets this
+        pushy=pushy.connect,
+
         cluster='ceph',
         )
-    args = parser.parse_args()
+    args = parser.parse_args(args=args, namespace=namespace)
     return args
 
 
-def main():
-    args = parse_args()
+def main(args=None, namespace=None):
+    args = parse_args(args=args, namespace=namespace)
 
     loglevel = logging.INFO
     if args.verbose:
@@ -61,6 +67,8 @@ def main():
     logging.basicConfig(
         level=loglevel,
         )
+
+    sudo_pushy.patch()
 
     try:
         return args.func(args)
