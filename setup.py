@@ -42,7 +42,7 @@ setup(
             ],
 
         'ceph_deploy.cli': [
-#            'TODO = ceph_deploy.TODO:make',
+            'new = ceph_deploy.new:make',
             ],
 
         },
