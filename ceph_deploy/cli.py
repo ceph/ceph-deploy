@@ -25,7 +25,11 @@ def parse_args():
         )
     for ep in pkg_resources.iter_entry_points('ceph_deploy.cli'):
         fn = ep.load()
-        p = sub.add_parser(ep.name, help=fn.__doc__)
+        p = sub.add_parser(
+            ep.name,
+            description=fn.__doc__,
+            help=fn.__doc__,
+            )
         # ugly kludge but i really want to have a nice way to access
         # the program name, with subcommand, later
         p.set_defaults(prog=p.prog)
