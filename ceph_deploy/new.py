@@ -11,7 +11,7 @@ log = logging.getLogger(__name__)
 
 
 def new(args):
-    log.debug('Creating new cluster named %r', args.cluster)
+    log.debug('Creating new cluster named %s', args.cluster)
     cfg = ConfigParser.RawConfigParser()
     cfg.add_section('global')
 
