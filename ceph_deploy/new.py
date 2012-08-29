@@ -2,12 +2,13 @@ import ConfigParser
 import logging
 import os
 
+from . import validate
+
 
 log = logging.getLogger(__name__)
 
 
 def new(args):
-    # TODO validate cluster name in arg parsing
     log.debug('Creating new cluster named %r', args.cluster)
     cfg = ConfigParser.RawConfigParser()
     cfg.add_section('global')
@@ -37,6 +38,7 @@ def make(parser):
         'cluster',
         metavar='CLUSTER',
         help='name of the new cluster',
+        type=validate.alphanumeric,
         )
     parser.add_argument(
         'mon',
