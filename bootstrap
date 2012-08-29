@@ -22,3 +22,4 @@ fi
 test -d virtualenv || virtualenv virtualenv
 ./virtualenv/bin/python setup.py develop
 ./virtualenv/bin/pip install -r requirements-dev.txt
+test -e ceph-deploy || ln -s virtualenv/bin/ceph-deploy .

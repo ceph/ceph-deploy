@@ -13,3 +13,5 @@
 
 /virtualenv
 /.tox
+
+/ceph-deploy
