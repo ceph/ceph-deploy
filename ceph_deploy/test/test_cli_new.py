@@ -13,12 +13,11 @@ def test_help(tmpdir, cli):
         ) as p:
         got = p.stdout.read()
         assert got == """\
-usage: ceph-deploy new [-h] CLUSTER [MON [MON ...]]
+usage: ceph-deploy new [-h] [MON [MON ...]]
 
 Start deploying a new cluster, and write a CLUSTER.conf for it.
 
 positional arguments:
-  CLUSTER     name of the new cluster
   MON         initial monitor hosts
 
 optional arguments:
@@ -28,48 +27,41 @@ optional arguments:
 
 def test_simple(tmpdir, cli):
     with cli(
-        args=['ceph-deploy', 'new', 'foo'],
+        args=['ceph-deploy', 'new'],
         ):
         pass
-    assert {p.basename for p in tmpdir.listdir()} == {'foo.conf'}
-    with tmpdir.join('foo.conf').open() as f:
+    assert {p.basename for p in tmpdir.listdir()} == {'ceph.conf'}
+    with tmpdir.join('ceph.conf').open() as f:
         cfg = conf.parse(f)
     assert cfg.sections() == ['global']
 
 
-def test_bad_name(tmpdir, cli):
-    with pytest.raises(cli.Failed) as err:
-        with cli(
-            args=['ceph-deploy', 'new', '/evil-this-should-not-be-created'],
-            stderr=subprocess.PIPE,
-            ) as p:
-            got = p.stderr.read()
-            assert got == """\
-usage: ceph-deploy new [-h] CLUSTER [MON [MON ...]]
-ceph-deploy new: error: argument CLUSTER: argument must start with a letter and contain only letters and numbers
-"""
-
-    assert err.value.status == 2
-    assert {p.basename for p in tmpdir.listdir()} == set()
+def test_named(tmpdir, cli):
+    with cli(
+        args=['ceph-deploy', '--cluster=foo', 'new'],
+        ):
+        pass
+    assert {p.basename for p in tmpdir.listdir()} == {'foo.conf'}
 
 
 def test_exists(tmpdir, cli):
     with cli(
-        args=['ceph-deploy', 'new', 'foo'],
+        args=['ceph-deploy', 'new'],
         ):
         pass
     with pytest.raises(cli.Failed) as err:
         with cli(
-            args=['ceph-deploy', 'new', 'foo'],
+            args=['ceph-deploy', 'new'],
             stderr=subprocess.PIPE,
             ) as p:
             got = p.stderr.read()
             assert got == """\
-ceph-deploy: Cluster config exists already: foo.conf
+ceph-deploy: Cluster config exists already: ceph.conf
 """
 
     assert err.value.status == 1
-    assert {p.basename for p in tmpdir.listdir()} == {'foo.conf'}
+    # no temp files left around
+    assert {p.basename for p in tmpdir.listdir()} == {'ceph.conf'}
 
 
 def pytest_funcarg__newcfg(request):
@@ -78,10 +70,10 @@ def pytest_funcarg__newcfg(request):
 
     def new(*args):
         with cli(
-            args=['ceph-deploy', 'new', 'foo'] + list(args),
+            args=['ceph-deploy', 'new'] + list(args),
             ):
             pass
-        with tmpdir.join('foo.conf').open() as f:
+        with tmpdir.join('ceph.conf').open() as f:
             cfg = conf.parse(f)
         return cfg
     return new

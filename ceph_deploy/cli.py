@@ -4,6 +4,7 @@ import pkg_resources
 import sys
 
 from . import exc
+from . import validate
 
 
 log = logging.getLogger(__name__)
@@ -17,6 +18,12 @@ def parse_args():
         '-v', '--verbose',
         action='store_true', default=None,
         help='be more verbose',
+        )
+    parser.add_argument(
+        '--cluster',
+        metavar='NAME',
+        help='name of the cluster',
+        type=validate.alphanumeric,
         )
     sub = parser.add_subparsers(
         title='commands',
@@ -37,6 +44,8 @@ def parse_args():
     parser.set_defaults(
         # we want to hold on to this, for later
         prog=parser.prog,
+
+        cluster='ceph',
         )
     args = parser.parse_args()
     return args

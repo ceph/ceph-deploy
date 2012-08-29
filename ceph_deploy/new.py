@@ -5,7 +5,6 @@ import os
 import uuid
 
 from . import exc
-from . import validate
 
 
 log = logging.getLogger(__name__)
@@ -50,12 +49,6 @@ def make(parser):
     """
     Start deploying a new cluster, and write a CLUSTER.conf for it.
     """
-    parser.add_argument(
-        'cluster',
-        metavar='CLUSTER',
-        help='name of the new cluster',
-        type=validate.alphanumeric,
-        )
     parser.add_argument(
         'mon',
         metavar='MON',
