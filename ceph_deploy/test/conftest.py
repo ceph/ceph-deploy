@@ -19,6 +19,21 @@ def _prepend_path(env):
     return env
 
 
+class CLIFailed(Exception):
+    """CLI tool failed"""
+
+    def __init__(self, args, status):
+        self.args = args
+        self.status = status
+
+    def __str__(self):
+        return '{doc}: {args}: exited with status {status}'.format(
+            doc=self.__doc__,
+            args=self.args,
+            status=self.status,
+            )
+
+
 class CLIProcess(object):
     def __init__(self, **kw):
         self.kw = kw
@@ -39,15 +54,17 @@ class CLIProcess(object):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.p.wait()
         if self.p.returncode != 0:
-            raise AssertionError(
-                'CLI tool {args!r} failed: {status}'.format(
-                    args=self.kw['args'],
-                    status=self.p.returncode,
-                    ),
+            raise CLIFailed(
+                args=self.kw['args'],
+                status=self.p.returncode,
                 )
 
 
 class CLITester(object):
+    # provide easy way for caller to access the exception class
+    # without importing us
+    Failed = CLIFailed
+
     def __init__(self, tmpdir):
         self.tmpdir = tmpdir
 

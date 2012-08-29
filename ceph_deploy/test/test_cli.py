@@ -1,3 +1,4 @@
+import pytest
 import subprocess
 
 
@@ -21,3 +22,19 @@ commands:
     new          Start deploying a new cluster, and write a CLUSTER.conf for
                  it.
 """
+
+
+def test_bad_command(tmpdir, cli):
+    with pytest.raises(cli.Failed) as err:
+        with cli(
+            args=['ceph-deploy', 'bork'],
+            stderr=subprocess.PIPE,
+            ) as p:
+            got = p.stderr.read()
+            assert got == """\
+usage: ceph-deploy [-h] [-v] COMMAND ...
+ceph-deploy: error: argument COMMAND: invalid choice: 'bork' (choose from 'new')
+"""
+
+    assert err.value.status == 2
+    assert {p.basename for p in tmpdir.listdir()} == set()
