@@ -72,19 +72,23 @@ ceph-deploy: Cluster config exists already: foo.conf
     assert {p.basename for p in tmpdir.listdir()} == {'foo.conf'}
 
 
-def pytest_funcarg__cfg(request):
+def pytest_funcarg__newcfg(request):
     tmpdir = request.getfuncargvalue('tmpdir')
     cli = request.getfuncargvalue('cli')
-    with cli(
-        args=['ceph-deploy', 'new', 'foo'],
-        ):
-        pass
-    with tmpdir.join('foo.conf').open() as f:
-        cfg = conf.parse(f)
-    return cfg
+
+    def new(*args):
+        with cli(
+            args=['ceph-deploy', 'new', 'foo'] + list(args),
+            ):
+            pass
+        with tmpdir.join('foo.conf').open() as f:
+            cfg = conf.parse(f)
+        return cfg
+    return new
 
 
-def test_uuid(cfg):
+def test_uuid(newcfg):
+    cfg = newcfg()
     fsid = cfg.get('global', 'fsid')
     # make sure it's a valid uuid
     uuid.UUID(hex=fsid)
