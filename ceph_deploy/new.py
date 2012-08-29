@@ -19,6 +19,9 @@ def new(args):
     fsid = uuid.uuid4()
     cfg.set('global', 'fsid', str(fsid))
 
+    if args.mon:
+        cfg.set('global', 'mon_initial_members', ', '.join(args.mon))
+
     tmp = '{name}.{pid}.tmp'.format(
         name=args.cluster,
         pid=os.getpid(),

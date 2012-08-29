@@ -103,3 +103,9 @@ def test_uuid(newcfg):
         + r'[0-9a-f]{12}$',
         )
     assert UUID_RE.match(fsid)
+
+
+def test_mons(newcfg):
+    cfg = newcfg('node01', 'node07', 'node34')
+    mon_initial_members = cfg.get('global', 'mon_initial_members')
+    assert mon_initial_members == 'node01, node07, node34'
