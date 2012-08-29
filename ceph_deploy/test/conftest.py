@@ -1,6 +1,10 @@
+import logging
 import os
 import subprocess
 import sys
+
+
+log = logging.getLogger(__name__)
 
 
 def _prepend_path(env):
@@ -54,10 +58,16 @@ class CLIProcess(object):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.p.wait()
         if self.p.returncode != 0:
-            raise CLIFailed(
+            err = CLIFailed(
                 args=self.kw['args'],
                 status=self.p.returncode,
                 )
+            if exc_type is None:
+                # nothing else raised, so we should complain; if
+                # something else failed, we'll just log
+                raise err
+            else:
+                log.error(str(err))
 
 
 class CLITester(object):
