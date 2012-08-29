@@ -1,6 +1,7 @@
 import ConfigParser
 import logging
 import os
+import uuid
 
 from . import validate
 
@@ -12,6 +13,10 @@ def new(args):
     log.debug('Creating new cluster named %r', args.cluster)
     cfg = ConfigParser.RawConfigParser()
     cfg.add_section('global')
+
+    fsid = uuid.uuid4()
+    cfg.set('global', 'fsid', str(fsid))
+
     tmp = '{name}.{pid}.tmp'.format(
         name=args.cluster,
         pid=os.getpid(),
