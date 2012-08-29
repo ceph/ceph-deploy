@@ -12,3 +12,15 @@ class ClusterExistsError(DeployError):
     """
     Cluster config exists already
     """
+
+
+class ConfigError(DeployError):
+    """
+    Cannot load config
+    """
+
+
+class NeedHostError(DeployError):
+    """
+    No hosts specified to deploy to.
+    """
