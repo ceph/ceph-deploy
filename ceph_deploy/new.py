@@ -1,8 +1,10 @@
 import ConfigParser
+import errno
 import logging
 import os
 import uuid
 
+from . import exc
 from . import validate
 
 
@@ -27,7 +29,13 @@ def new(args):
     try:
         with file(tmp, 'w') as f:
             cfg.write(f)
-        os.link(tmp, path)
+        try:
+            os.link(tmp, path)
+        except OSError as e:
+            if e.errno == errno.EEXIST:
+                raise exc.ClusterExistsError(path)
+            else:
+                raise
     finally:
         try:
             os.unlink(tmp)

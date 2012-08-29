@@ -53,6 +53,25 @@ ceph-deploy new: error: argument CLUSTER: argument must start with a letter and 
     assert {p.basename for p in tmpdir.listdir()} == set()
 
 
+def test_exists(tmpdir, cli):
+    with cli(
+        args=['ceph-deploy', 'new', 'foo'],
+        ):
+        pass
+    with pytest.raises(cli.Failed) as err:
+        with cli(
+            args=['ceph-deploy', 'new', 'foo'],
+            stderr=subprocess.PIPE,
+            ) as p:
+            got = p.stderr.read()
+            assert got == """\
+ceph-deploy: Cluster config exists already: foo.conf
+"""
+
+    assert err.value.status == 1
+    assert {p.basename for p in tmpdir.listdir()} == {'foo.conf'}
+
+
 def pytest_funcarg__cfg(request):
     tmpdir = request.getfuncargvalue('tmpdir')
     cli = request.getfuncargvalue('cli')
