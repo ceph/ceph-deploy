@@ -1,5 +1,6 @@
 import ConfigParser
 import logging
+import re
 
 from . import conf
 from . import exc
@@ -12,10 +13,12 @@ def mon(args):
     cfg = conf.load(args)
     if not args.mon:
         try:
-            args.mon = cfg.get('global', 'mon_initial_members')
+            mon_initial_members = cfg.get('global', 'mon_initial_members')
         except (ConfigParser.NoSectionError,
                 ConfigParser.NoOptionError):
             pass
+        else:
+            args.mon = re.split(r'[,\s]+', mon_initial_members)
 
     if not args.mon:
         raise exc.NeedHostError()
