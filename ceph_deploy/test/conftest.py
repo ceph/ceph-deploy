@@ -81,6 +81,7 @@ class CLITester(object):
     def __call__(self, **kw):
         kw.setdefault('cwd', str(self.tmpdir))
         kw['env'] = _prepend_path(kw.get('env'))
+        kw['env']['COLUMNS'] = '80'
         return CLIProcess(**kw)
 
 
