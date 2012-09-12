@@ -20,6 +20,8 @@ def new(args):
 
     if args.mon:
         cfg.set('global', 'mon_initial_members', ', '.join(args.mon))
+        # no spaces here, see http://tracker.newdream.net/issues/3145
+        cfg.set('global', 'mon_host', ','.join(args.mon))
 
     # override undesirable defaults, needed until bobtail
 
