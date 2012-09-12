@@ -21,6 +21,17 @@ def new(args):
     if args.mon:
         cfg.set('global', 'mon_initial_members', ', '.join(args.mon))
 
+    # override undesirable defaults, needed until bobtail
+
+    # http://tracker.newdream.net/issues/3136
+    cfg.set('global', 'auth supported', 'cephx')
+
+    # http://tracker.newdream.net/issues/3137
+    cfg.set('global', 'osd_journal_size', '1024')
+
+    # http://tracker.newdream.net/issues/3138
+    cfg.set('global', 'filestore_xattr_use_omap', 'true')
+
     tmp = '{name}.{pid}.tmp'.format(
         name=args.cluster,
         pid=os.getpid(),

@@ -101,3 +101,10 @@ def test_mons(newcfg):
     cfg = newcfg('node01', 'node07', 'node34')
     mon_initial_members = cfg.get('global', 'mon_initial_members')
     assert mon_initial_members == 'node01, node07, node34'
+
+
+def test_defaults(newcfg):
+    cfg = newcfg()
+    assert cfg.get('global', 'auth_supported') == 'cephx'
+    assert cfg.get('global', 'osd_journal_size') == '1024'
+    assert cfg.get('global', 'filestore_xattr_use_omap') == 'true'
