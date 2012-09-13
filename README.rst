@@ -56,6 +56,17 @@ config file are deployed. That is, the hosts you passed to
 ``ceph-deploy new`` are the default value here.
 
 
+Deploying OSDs
+==============
+
+To prepare a node for running OSDs, run::
+
+  ceph-deploy osd HOST [HOST..]
+
+After that, the hosts are able to run OSDs. To actually run OSDs, you
+need to prepare data disks for that use.
+
+
 Multiple clusters
 =================
 
