@@ -49,7 +49,7 @@ Deploying monitors
 
 To actually deploy ``ceph-mon`` to the hosts you chose, run::
 
-  ceph-deploy mon
+  ceph-deploy mon [HOST..]
 
 Without explicit hosts listed, hosts in ``mon_initial_members`` in the
 config file are deployed. That is, the hosts you passed to
