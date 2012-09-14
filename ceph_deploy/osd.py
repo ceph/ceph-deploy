@@ -6,6 +6,7 @@ from cStringIO import StringIO
 
 from . import conf
 from . import exc
+from .cliutil import priority
 from .memoize import memoize
 
 
@@ -161,6 +162,7 @@ def osd(args):
         log.debug('Host %s is now ready for osd use.', hostname)
 
 
+@priority(40)
 def make(parser):
     """
     Deploy ceph osd on remote hosts.

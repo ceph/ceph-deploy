@@ -32,10 +32,16 @@ def parse_args(args=None, namespace=None):
         metavar='COMMAND',
         help='description',
         )
-    for ep in pkg_resources.iter_entry_points('ceph_deploy.cli'):
-        fn = ep.load()
+    entry_points = [
+        (ep.name, ep.load())
+        for ep in pkg_resources.iter_entry_points('ceph_deploy.cli')
+        ]
+    entry_points.sort(
+        key=lambda (name, fn): getattr(fn, 'priority', 100),
+        )
+    for (name, fn) in entry_points:
         p = sub.add_parser(
-            ep.name,
+            name,
             description=fn.__doc__,
             help=fn.__doc__,
             )

@@ -6,6 +6,7 @@ from cStringIO import StringIO
 
 from . import conf
 from . import exc
+from .cliutil import priority
 
 
 log = logging.getLogger(__name__)
@@ -127,6 +128,7 @@ def mon(args):
         # TODO add_bootstrap_peer_hint
 
 
+@priority(30)
 def make(parser):
     """
     Deploy ceph monitor on remote hosts.

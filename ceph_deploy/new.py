@@ -5,6 +5,7 @@ import os
 import uuid
 
 from . import exc
+from .cliutil import priority
 
 
 log = logging.getLogger(__name__)
@@ -58,6 +59,7 @@ def new(args):
             pass
 
 
+@priority(10)
 def make(parser):
     """
     Start deploying a new cluster, and write a CLUSTER.conf for it.
