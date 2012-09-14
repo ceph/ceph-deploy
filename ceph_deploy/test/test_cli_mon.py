@@ -93,12 +93,8 @@ mon initial members = host1
         raise AssertionError('Unexpected exit: %s', e)
 
     ns.pushy.assert_called_once_with('ssh+sudo:host1')
-    conn.compile.assert_has_calls([
-            mock.call(mon.write_conf),
-            mock.call(mon.create_mon),
-        ])
 
-    mock_compiled[mon.write_conf].assert_called_once_with(
+    mock_compiled.pop(mon.write_conf).assert_called_once_with(
         cluster='ceph',
         conf="""\
 [global]
@@ -108,7 +104,9 @@ mon_initial_members = host1
 """,
         )
 
-    mock_compiled[mon.create_mon].assert_called_once_with(
+    mock_compiled.pop(mon.create_mon).assert_called_once_with(
         cluster='ceph',
         get_monitor_secret=mock.ANY,
         )
+
+    assert mock_compiled == {}

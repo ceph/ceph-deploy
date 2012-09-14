@@ -99,12 +99,8 @@ mon host = host1
             mock.call('ssh+sudo:storehost1'),
             mock.call('ssh+sudo:host1'),
         ])
-    conn.compile.assert_has_calls([
-            mock.call(osd.write_conf),
-            mock.call(osd.create_osd),
-        ])
 
-    mock_compiled[osd.write_conf].assert_called_once_with(
+    mock_compiled.pop(osd.write_conf).assert_called_once_with(
         cluster='ceph',
         conf="""\
 [global]
@@ -114,7 +110,9 @@ mon_host = host1
 """,
         )
 
-    mock_compiled[osd.create_osd].assert_called_once_with(
+    mock_compiled.pop(osd.create_osd).assert_called_once_with(
         cluster='ceph',
         find_key=mock.ANY,
         )
+
+    assert mock_compiled == {}
