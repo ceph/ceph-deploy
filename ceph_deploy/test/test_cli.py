@@ -22,6 +22,7 @@ commands:
   COMMAND         description
     new           Start deploying a new cluster, and write a CLUSTER.conf for
                   it.
+    install       Install Ceph packages on remote hosts.
     mon           Deploy ceph monitor on remote hosts.
     osd           Deploy ceph osd on remote hosts.
 """
@@ -36,7 +37,7 @@ def test_bad_command(tmpdir, cli):
             got = p.stderr.read()
             assert got == """\
 usage: ceph-deploy [-h] [-v] [--cluster NAME] COMMAND ...
-ceph-deploy: error: argument COMMAND: invalid choice: 'bork' (choose from 'new', 'mon', 'osd')
+ceph-deploy: error: argument COMMAND: invalid choice: 'bork' (choose from 'new', 'install', 'mon', 'osd')
 """
 
     assert err.value.status == 2

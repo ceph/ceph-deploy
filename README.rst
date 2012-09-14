@@ -44,6 +44,24 @@ The above will create a ``ceph.conf`` in your current directory. You
 can edit ``ceph.conf`` it if you want.
 
 
+Installing packages
+===================
+
+To install the Ceph software on the servers, run::
+
+  ceph-deploy install HOST [HOST..]
+
+This installs the current default *stable* release. You can choose a
+different release track with command line options, for example to use
+a release candidate::
+
+  ceph-deploy install --testing myhost1
+
+Or to test a development branch::
+
+  ceph-deploy install --dev=wip-mds-now-works-no-kidding myhost1 myhost2
+
+
 Deploying monitors
 ==================
 

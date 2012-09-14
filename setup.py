@@ -45,6 +45,7 @@ setup(
 
         'ceph_deploy.cli': [
             'new = ceph_deploy.new:make',
+            'install = ceph_deploy.install:make',
             'mon = ceph_deploy.mon:make',
             'osd = ceph_deploy.osd:make',
             ],

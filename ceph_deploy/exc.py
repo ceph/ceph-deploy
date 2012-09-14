@@ -32,6 +32,22 @@ class NeedMonError(DeployError):
     """
 
 
+class UnsupportedPlatform(DeployError):
+    """
+    Platform is not supported
+    """
+    def __init__(self, distro, codename):
+        self.distro = distro
+        self.codename = codename
+
+    def __str__(self):
+        return '{doc}: {distro} {codename}'.format(
+            doc=self.__doc__.strip(),
+            distro=self.distro,
+            codename=self.codename,
+            )
+
+
 class GenericError(DeployError):
     def __init__(self, message):
         self.message = message
