@@ -133,7 +133,7 @@ def make(parser):
     """
     parser.add_argument(
         'mon',
-        metavar='MON',
+        metavar='HOST',
         nargs='*',
         help='host to deploy on',
         )

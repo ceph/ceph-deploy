@@ -17,12 +17,12 @@ def test_help(tmpdir, cli):
         ) as p:
         got = p.stdout.read()
         assert got == """\
-usage: ceph-deploy mon [-h] [MON [MON ...]]
+usage: ceph-deploy mon [-h] [HOST [HOST ...]]
 
 Deploy ceph monitor on remote hosts.
 
 positional arguments:
-  MON         host to deploy on
+  HOST        host to deploy on
 
 optional arguments:
   -h, --help  show this help message and exit
