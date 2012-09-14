@@ -69,22 +69,35 @@ mon host = host1
 """)
 
     ns = argparse.Namespace()
-    ns.pushy = mock.Mock()
-    conn = mock.NonCallableMock(name='PushyClient')
-    ns.pushy.return_value = conn
 
-    mock_compiled = collections.defaultdict(mock.Mock)
-    conn.compile.side_effect = mock_compiled.__getitem__
+    conn_osd = mock.NonCallableMock(name='PushyClient')
+    mock_compiled_osd = collections.defaultdict(mock.Mock)
+    conn_osd.compile.side_effect = mock_compiled_osd.__getitem__
+
+    conn_mon = mock.NonCallableMock(name='PushyClient')
+    mock_compiled_mon = collections.defaultdict(mock.Mock)
+    conn_mon.compile.side_effect = mock_compiled_mon.__getitem__
+
+    ns.pushy = mock.Mock()
+
+    def _conn(url):
+        if url == 'ssh+sudo:host1':
+            return conn_mon
+        elif url == 'ssh+sudo:storehost1':
+            return conn_osd
+        else:
+            raise AssertionError('Unexpected connection url: %r', url)
+    ns.pushy.side_effect = _conn
 
     BOOTSTRAP_KEY = 'fakekeyring'
 
-    mock_compiled[osd.get_bootstrap_osd_key].return_value = BOOTSTRAP_KEY
+    mock_compiled_mon[osd.get_bootstrap_osd_key].return_value = BOOTSTRAP_KEY
 
     def _create_osd(cluster, find_key):
         key = find_key()
         assert key == BOOTSTRAP_KEY
 
-    mock_compiled[osd.create_osd].side_effect = _create_osd
+    mock_compiled_osd[osd.create_osd].side_effect = _create_osd
 
     try:
         with directory(str(tmpdir)):
@@ -95,12 +108,13 @@ mon host = host1
     except SystemExit as e:
         raise AssertionError('Unexpected exit: %s', e)
 
-    ns.pushy.assert_has_calls([
-            mock.call('ssh+sudo:storehost1'),
-            mock.call('ssh+sudo:host1'),
-        ])
+    mock_compiled_mon.pop(osd.get_bootstrap_osd_key).assert_called_once_with(
+        cluster='ceph',
+        )
 
-    mock_compiled.pop(osd.write_conf).assert_called_once_with(
+    assert mock_compiled_mon == {}
+
+    mock_compiled_osd.pop(osd.write_conf).assert_called_once_with(
         cluster='ceph',
         conf="""\
 [global]
@@ -110,9 +124,9 @@ mon_host = host1
 """,
         )
 
-    mock_compiled.pop(osd.create_osd).assert_called_once_with(
+    mock_compiled_osd.pop(osd.create_osd).assert_called_once_with(
         cluster='ceph',
         find_key=mock.ANY,
         )
 
-    assert mock_compiled == {}
+    assert mock_compiled_osd == {}
