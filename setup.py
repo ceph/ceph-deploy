@@ -48,6 +48,7 @@ setup(
             'install = ceph_deploy.install:make',
             'mon = ceph_deploy.mon:make',
             'osd = ceph_deploy.osd:make',
+            'disk = ceph_deploy.disk:make',
             ],
 
         },
