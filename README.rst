@@ -79,10 +79,9 @@ Deploying OSDs
 
 To prepare a node for running OSDs, run::
 
-  ceph-deploy osd HOST [HOST..]
+  ceph-deploy osd HOST:DISK [HOST:DISK..]
 
-After that, the hosts are able to run OSDs. To actually run OSDs, you
-need to prepare data disks for that use.
+After that, the hosts will be running OSDs for the given data disks.
 
 
 Multiple clusters

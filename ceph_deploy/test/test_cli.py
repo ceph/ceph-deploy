@@ -24,8 +24,7 @@ commands:
                   it.
     install       Install Ceph packages on remote hosts.
     mon           Deploy ceph monitor on remote hosts.
-    osd           Deploy ceph osd on remote hosts.
-    disk          Prepare a data disk on remote host.
+    osd           Prepare a data disk on remote host.
 """
 
 
@@ -38,7 +37,7 @@ def test_bad_command(tmpdir, cli):
             got = p.stderr.read()
             assert got == """\
 usage: ceph-deploy [-h] [-v] [--cluster NAME] COMMAND ...
-ceph-deploy: error: argument COMMAND: invalid choice: 'bork' (choose from 'new', 'install', 'mon', 'osd', 'disk')
+ceph-deploy: error: argument COMMAND: invalid choice: 'bork' (choose from 'new', 'install', 'mon', 'osd')
 """
 
     assert err.value.status == 2

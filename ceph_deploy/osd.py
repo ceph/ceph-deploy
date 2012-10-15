@@ -1,5 +1,7 @@
 import ConfigParser
+import argparse
 import logging
+import os.path
 import re
 
 from cStringIO import StringIO
@@ -117,13 +119,37 @@ def create_osd(cluster, find_key):
         )
 
 
+def prepare_disk(cluster, disk):
+    """
+    Run on osd node, prepares a data disk for use.
+    """
+    import subprocess
+
+    subprocess.check_call(
+        args=[
+            'ceph-disk-prepare',
+            '--',
+            disk,
+            ],
+        )
+
+    subprocess.check_call(
+        args=[
+            'udevadm',
+            'trigger',
+            '--subsystem-match=block',
+            '--action=add',
+            ],
+        )
+
+
 def osd(args):
     cfg = conf.load(args)
 
     log.debug(
-        'Deploying osd, cluster %s hosts %s',
+        'Preparing cluster %s disks %s',
         args.cluster,
-        ' '.join(args.osd),
+        ' '.join(':'.join(t) for t in args.disk),
         )
 
     @memoize
@@ -136,42 +162,67 @@ def osd(args):
             cfg=cfg,
             )
 
-    for hostname in args.osd:
-        log.debug('Deploying osd to %s', hostname)
+    bootstrapped = set()
+    for hostname, disk in args.disk:
 
         # TODO username
         sudo = args.pushy('ssh+sudo:{hostname}'.format(
                 hostname=hostname,
                 ))
 
-        write_conf_r = sudo.compile(write_conf)
-        conf_data = StringIO()
-        cfg.write(conf_data)
-        write_conf_r(
+        if hostname not in bootstrapped:
+            bootstrapped.add(hostname)
+            log.debug('Deploying osd to %s', hostname)
+
+            write_conf_r = sudo.compile(write_conf)
+            conf_data = StringIO()
+            cfg.write(conf_data)
+            write_conf_r(
+                cluster=args.cluster,
+                conf=conf_data.getvalue(),
+                )
+
+            create_osd_r = sudo.compile(create_osd)
+            error = create_osd_r(
+                cluster=args.cluster,
+                find_key=find_key,
+                )
+            if error is not None:
+                raise exc.GenericError(error)
+            log.debug('Host %s is now ready for osd use.', hostname)
+
+        log.debug('Preparing host %s disk %s', hostname, disk)
+
+        prepare_disk_r = sudo.compile(prepare_disk)
+        prepare_disk_r(
             cluster=args.cluster,
-            conf=conf_data.getvalue(),
+            disk=disk,
             )
 
-        create_osd_r = sudo.compile(create_osd)
-        error = create_osd_r(
-            cluster=args.cluster,
-            find_key=find_key,
-            )
-        if error is not None:
-            raise exc.GenericError(error)
-        log.debug('Host %s is now ready for osd use.', hostname)
+
+def colon_separated(s):
+    try:
+        (host, disk) = s.split(':', 1)
+    except ValueError:
+        raise argparse.ArgumentTypeError('must be in form HOST:DISK')
+
+    # allow just "sdb" to mean /dev/sdb
+    disk = os.path.join('/dev', disk)
+
+    return (host, disk)
 
 
 @priority(40)
 def make(parser):
     """
-    Deploy ceph osd on remote hosts.
+    Prepare a data disk on remote host.
     """
     parser.add_argument(
-        'osd',
-        metavar='HOST',
+        'disk',
         nargs='+',
-        help='host to deploy on',
+        metavar='HOST:DISK',
+        type=colon_separated,
+        help='host and disk to prepare',
         )
     parser.set_defaults(
         func=osd,

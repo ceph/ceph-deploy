@@ -17,12 +17,12 @@ def test_help(tmpdir, cli):
         ) as p:
         got = p.stdout.read()
         assert got == """\
-usage: ceph-deploy osd [-h] HOST [HOST ...]
+usage: ceph-deploy osd [-h] HOST:DISK [HOST:DISK ...]
 
-Deploy ceph osd on remote hosts.
+Prepare a data disk on remote host.
 
 positional arguments:
-  HOST        host to deploy on
+  HOST:DISK   host and disk to prepare
 
 optional arguments:
   -h, --help  show this help message and exit
@@ -32,7 +32,7 @@ optional arguments:
 def test_bad_no_conf(tmpdir, cli):
     with pytest.raises(cli.Failed) as err:
         with cli(
-            args=['ceph-deploy', 'osd', 'fakehost'],
+            args=['ceph-deploy', 'osd', 'fakehost:/does-not-exist'],
             stderr=subprocess.PIPE,
             ) as p:
             got = p.stderr.read()
@@ -43,7 +43,7 @@ ceph-deploy: Cannot load config: [Errno 2] No such file or directory: 'ceph.conf
     assert err.value.status == 1
 
 
-def test_bad_no_osd(tmpdir, cli):
+def test_bad_no_disk(tmpdir, cli):
     with tmpdir.join('ceph.conf').open('w'):
         pass
     with pytest.raises(cli.Failed) as err:
@@ -53,7 +53,7 @@ def test_bad_no_osd(tmpdir, cli):
             ) as p:
             got = p.stderr.read()
             assert got == """\
-usage: ceph-deploy osd [-h] HOST [HOST ...]
+usage: ceph-deploy osd [-h] HOST:DISK [HOST:DISK ...]
 ceph-deploy osd: error: too few arguments
 """
 
@@ -102,7 +102,7 @@ mon host = host1
     try:
         with directory(str(tmpdir)):
             main(
-                args=['-v', 'osd', 'storehost1'],
+                args=['-v', 'osd', 'storehost1:sdc'],
                 namespace=ns,
                 )
     except SystemExit as e:
@@ -127,6 +127,11 @@ mon_host = host1
     mock_compiled_osd.pop(osd.create_osd).assert_called_once_with(
         cluster='ceph',
         find_key=mock.ANY,
+        )
+
+    mock_compiled_osd.pop(osd.prepare_disk).assert_called_once_with(
+        cluster='ceph',
+        disk='/dev/sdc',
         )
 
     assert mock_compiled_osd == {}
