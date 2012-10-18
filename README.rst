@@ -33,6 +33,10 @@ To create a new Ceph cluster, you need some servers. You should be
 able to SSH to them without passwords (use SSH keys and an agent),
 and you should have passwordless ``sudo`` set up on the servers.
 
+If you edit the ``mon host`` entry in ``ceph.conf``, note that you
+need to be able to SSH to those names or IP addresses too, and not
+just the hostnames you use on the command line.
+
 To create a new configuration file, decide what hosts will run
 ``ceph-mon``, and run::
 
