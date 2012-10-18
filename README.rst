@@ -40,9 +40,20 @@ To create a new configuration file, decide what hosts will run
 
 listing the hostnames of the monitors.
 
-The above will create a ``ceph.conf`` in your current directory. You
-can edit ``ceph.conf`` it if you want.
+The above will create a ``ceph.conf`` in your current directory.
 
+Edit initial cluster configuration
+==================================
+
+In particular, you should update the ``mon_host`` setting to list the
+IP addresses you would like the monitors to bind to.  These are the
+IPs that clients will initially contact to authenticate to the
+cluster, and they need to be reachable both by external client-facing
+hosts and internal cluster daemons.  In certain cases this setting can
+be left as is (listing the monitor hostnames), but in most cases
+``/etc/hosts`` files throw a wrench by mapping the hostname to
+``127.0.1.1`` and preventing each node from reliably determining which
+IP it should bind to.
 
 Installing packages
 ===================
