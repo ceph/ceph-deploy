@@ -119,7 +119,7 @@ def create_osd(cluster, find_key):
         )
 
 
-def prepare_disk(cluster, disk):
+def prepare_disk(cluster, disk, journal):
     """
     Run on osd node, prepares a data disk for use.
     """
@@ -130,6 +130,7 @@ def prepare_disk(cluster, disk):
             'ceph-disk-prepare',
             '--',
             disk,
+            journal,
             ],
         )
 
@@ -163,7 +164,7 @@ def osd(args):
             )
 
     bootstrapped = set()
-    for hostname, disk in args.disk:
+    for hostname, disk, journal in args.disk:
 
         # TODO username
         sudo = args.pushy('ssh+sudo:{hostname}'.format(
@@ -191,25 +192,31 @@ def osd(args):
                 raise exc.GenericError(error)
             log.debug('Host %s is now ready for osd use.', hostname)
 
-        log.debug('Preparing host %s disk %s', hostname, disk)
+        log.debug('Preparing host %s disk %s journal %s', hostname, disk,
+                  journal)
 
         prepare_disk_r = sudo.compile(prepare_disk)
         prepare_disk_r(
             cluster=args.cluster,
             disk=disk,
+            journal=journal,
             )
 
 
 def colon_separated(s):
     try:
-        (host, disk) = s.split(':', 1)
+        (host, disk, journal) = s.split(':')
     except ValueError:
-        raise argparse.ArgumentTypeError('must be in form HOST:DISK')
+        raise argparse.ArgumentTypeError('must be in form HOST:DISK[:JOURNAL]')
+
+    if journal is None:
+        journal = disk
 
     # allow just "sdb" to mean /dev/sdb
     disk = os.path.join('/dev', disk)
+    journal = os.path.join('/dev', journal)
 
-    return (host, disk)
+    return (host, disk, journal)
 
 
 @priority(40)
@@ -220,7 +227,7 @@ def make(parser):
     parser.add_argument(
         'disk',
         nargs='+',
-        metavar='HOST:DISK',
+        metavar='HOST:DISK[:JOURNAL]',
         type=colon_separated,
         help='host and disk to prepare',
         )
