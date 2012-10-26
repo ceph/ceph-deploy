@@ -95,6 +95,8 @@ def install_ubuntu(codename, version_kind, version):
             '--assume-yes',
             '--',
             'ceph',
+            'ceph-common',
+            'ceph-fs-common',
             # ceph only recommends gdisk, make sure we actually have
             # it; only really needed for osds, but minimal collateral
             'gdisk',
