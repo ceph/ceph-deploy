@@ -47,6 +47,7 @@ setup(
             'new = ceph_deploy.new:make',
             'install = ceph_deploy.install:make',
             'mon = ceph_deploy.mon:make',
+            'gatherkeys = ceph_deploy.gatherkeys:make',
             'osd = ceph_deploy.osd:make',
             ],
 

@@ -88,6 +88,18 @@ Without explicit hosts listed, hosts in ``mon_initial_members`` in the
 config file are deployed. That is, the hosts you passed to
 ``ceph-deploy new`` are the default value here.
 
+Gather keys
+===========
+
+To gather authenticate keys (for administering the cluster and
+bootstrapping new nodes) to the local directory, run::
+
+  ceph-deploy gatherkeys [HOST...]
+
+where ``HOST'' is one of the monitor hosts.
+
+Once these keys are in the local directory, you can provision new OSDs etc.
+
 
 Deploying OSDs
 ==============
