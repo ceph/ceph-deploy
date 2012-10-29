@@ -42,6 +42,14 @@ def new(args):
     path = '{name}.conf'.format(
         name=args.cluster,
         )
+
+    # FIXME: create a random key
+    monkey = '[mon.]\n   key = AQBWDj5QAP6LHhAAskVBnUkYHJ7eYREmKo5qKA=='
+
+    keypath = '{name}.mon.keyring'.format(
+        name=args.cluster,
+        )
+
     try:
         with file(tmp, 'w') as f:
             cfg.write(f)
@@ -52,6 +60,17 @@ def new(args):
                 raise exc.ClusterExistsError(path)
             else:
                 raise
+
+        with file(tmp, 'w') as f:
+            f.write(mon_keyring)
+        try:
+            os.link(tmp, keypath)
+        except OSError as e:
+            if e.errno == errno.EEXIST:
+                raise exc.ClusterExistsError(path)
+            else:
+                raise
+
     finally:
         try:
             os.unlink(tmp)
