@@ -204,9 +204,12 @@ def osd(args):
 
 
 def colon_separated(s):
-    try:
+    journal = None
+    if s.count(':') == 2:
         (host, disk, journal) = s.split(':')
-    except ValueError:
+    elif s.count(':') == 1:
+        (host, disk) = s.split(':')
+    else:
         raise argparse.ArgumentTypeError('must be in form HOST:DISK[:JOURNAL]')
 
     if journal is None:
