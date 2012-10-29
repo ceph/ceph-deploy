@@ -25,7 +25,7 @@ def write_conf(cluster, conf):
     os.rename(tmp, path)
 
 
-def create_mon(cluster, get_monitor_secret):
+def create_mon(cluster, monitor_keyring):
     import os
     import socket
     import subprocess
@@ -40,21 +40,9 @@ def create_mon(cluster, get_monitor_secret):
             cluster=cluster,
             hostname=hostname,
             )
-        monitor_secret = get_monitor_secret()
 
-        # TODO don't put the key in "ps" output, stdout
-        subprocess.check_call(
-            args=[
-                'ceph-authtool',
-                keyring,
-                '--create-keyring',
-                '--name=mon.',
-                '--add-key={monitor_secret}'.format(
-                    monitor_secret=monitor_secret,
-                    ),
-                '--cap', 'mon', 'allow *',
-                ],
-            )
+        with file(keyring, 'w') as f:
+            f.write(monitor_keyring)
 
         subprocess.check_call(
             args=[
@@ -94,6 +82,13 @@ def mon(args):
     if not args.mon:
         raise exc.NeedHostError()
 
+    try:
+        with file('{cluster}.mon.keyring'.format(cluster=args.cluster),
+                  'rb') as f:
+            monitor_keyring = f.read()
+    except IOError:
+        raise RuntimeError('mon keyring not found; run \'new\' to create a new cluster')
+
     log.debug(
         'Deploying mon, cluster %s hosts %s',
         args.cluster,
@@ -102,11 +97,6 @@ def mon(args):
 
     for hostname in args.mon:
         log.debug('Deploying mon to %s', hostname)
-
-        def get_monitor_secret():
-            # TODO look for existing mons
-            # TODO create random key
-            return 'AQBWDj5QAP6LHhAAskVBnUkYHJ7eYREmKo5qKA=='
 
         # TODO username
         sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
@@ -122,7 +112,7 @@ def mon(args):
         create_mon_r = sudo.compile(create_mon)
         create_mon_r(
             cluster=args.cluster,
-            get_monitor_secret=get_monitor_secret,
+            monitor_keyring=monitor_keyring,
             )
 
         # TODO add_bootstrap_peer_hint
