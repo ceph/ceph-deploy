@@ -17,44 +17,14 @@ log = logging.getLogger(__name__)
 
 def get_bootstrap_osd_key(cluster):
     """
-    Run on mon node, extract bootstrap-osd key for `cluster`.
+    Read the bootstrap-osd key for `cluster`.
     """
-    path = '/var/lib/ceph/bootstrap-osd/{cluster}.keyring'.format(cluster=cluster)
+    path = '{cluster}.bootstrap-osd.keyring'.format(cluster=cluster)
     try:
         with file(path, 'rb') as f:
             return f.read()
     except IOError:
-        pass
-
-
-def find_bootstrap_osd_key(args, cfg):
-    """
-    Look at all the mon nodes, see if they have a bootstrap-osd key.
-
-    Returns key as string, or None.
-    """
-    log.debug('Looking for mon to grab bootstrap key from...')
-    try:
-        mon_host = cfg.get('global', 'mon_host')
-    except (ConfigParser.NoSectionError,
-            ConfigParser.NoOptionError):
-        mon_host = ''
-
-    mons = re.split(r'[,\s]+', mon_host)
-    if not mons:
-        raise exc.NeedMonError()
-
-    for hostname in mons:
-        # TODO username
-        sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
-        get_bootstrap_osd_key_r = sudo.compile(get_bootstrap_osd_key)
-        key = get_bootstrap_osd_key_r(
-            cluster=args.cluster,
-            )
-        if key is not None:
-            log.debug('Got bootstrap key from %s.', hostname)
-            return key
-
+        raise RuntimeError('bootstrap-osd keyring not found; run \'gatherkeys\'')
 
 def write_conf(cluster, conf):
     import os
@@ -69,7 +39,7 @@ def write_conf(cluster, conf):
     os.rename(tmp, path)
 
 
-def create_osd(cluster, find_key):
+def create_osd(cluster, key):
     """
     Run on osd node, writes the bootstrap key if not there yet.
 
@@ -85,9 +55,6 @@ def create_osd(cluster, find_key):
         cluster=cluster,
         )
     if not os.path.exists(path):
-        key = find_key()
-        if key is None:
-            return 'bootstrap-osd key not found, mons are not ready.'
         tmp = '{path}.{pid}.tmp'.format(
             path=path,
             pid=os.getpid(),
@@ -153,15 +120,7 @@ def osd(args):
         ' '.join(':'.join(t) for t in args.disk),
         )
 
-    @memoize
-    def find_key():
-        """
-        Wrapper function to pass config and avoid redoing work.
-        """
-        return find_bootstrap_osd_key(
-            args=args,
-            cfg=cfg,
-            )
+    key = get_bootstrap_osd_key(cluster=args.cluster)
 
     bootstrapped = set()
     for hostname, disk, journal in args.disk:
@@ -186,7 +145,7 @@ def osd(args):
             create_osd_r = sudo.compile(create_osd)
             error = create_osd_r(
                 cluster=args.cluster,
-                find_key=find_key,
+                key=key,
                 )
             if error is not None:
                 raise exc.GenericError(error)
@@ -222,7 +181,7 @@ def colon_separated(s):
     return (host, disk, journal)
 
 
-@priority(40)
+@priority(50)
 def make(parser):
     """
     Prepare a data disk on remote host.
