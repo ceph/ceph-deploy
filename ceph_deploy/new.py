@@ -50,9 +50,9 @@ def new(args):
             mon_initial_members.append(name)
             mon_host.append(ip)
 
-        cfg.set('global', 'mon_initial_members', ', '.join(mon_initial_members))
+        cfg.set('global', 'mon initial members', ', '.join(mon_initial_members))
         # no spaces here, see http://tracker.newdream.net/issues/3145
-        cfg.set('global', 'mon_host', ','.join(mon_host))
+        cfg.set('global', 'mon host', ','.join(mon_host))
 
     # override undesirable defaults, needed until bobtail
 
@@ -60,10 +60,10 @@ def new(args):
     cfg.set('global', 'auth supported', 'cephx')
 
     # http://tracker.newdream.net/issues/3137
-    cfg.set('global', 'osd_journal_size', '1024')
+    cfg.set('global', 'osd journal size', '1024')
 
     # http://tracker.newdream.net/issues/3138
-    cfg.set('global', 'filestore_xattr_use_omap', 'true')
+    cfg.set('global', 'filestore xattr use omap', 'true')
 
     tmp = '{name}.{pid}.tmp'.format(
         name=args.cluster,
