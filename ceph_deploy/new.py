@@ -74,7 +74,7 @@ def new(args):
         )
 
     # FIXME: create a random key
-    mon_keyring = '[mon.]\nkey = %s\nmon = allow *\n' % generate_auth_key()
+    mon_keyring = '[mon.]\nkey = %s\ncaps mon = allow *\n' % generate_auth_key()
 
     keypath = '{name}.mon.keyring'.format(
         name=args.cluster,
