@@ -114,6 +114,15 @@ To prepare a node for running OSDs, run::
 After that, the hosts will be running OSDs for the given data disks.
 
 
+Admin hosts
+===========
+
+To prepare a host with a ``ceph.conf`` and ``ceph.client.admin.keyring``
+keyring so that it can administer the cluster, run::
+
+  ceph-deploy admin HOST [HOST ...]
+
+
 Multiple clusters
 =================
 
