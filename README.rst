@@ -122,6 +122,21 @@ keyring so that it can administer the cluster, run::
 
   ceph-deploy admin HOST [HOST ...]
 
+Forget keys
+===========
+
+The ``new`` and ``gatherkeys`` put some Ceph authentication keys in keyrings in
+the local directory.  If you are worried about them being there for security
+reasons, run::
+
+  ceph-deploy forgetkeys
+
+and they will be removed.  If you need them again later to deploy additional
+nodes, simply re-run::
+
+  ceph-deploy gatherkeys HOST [...]
+
+and they will be retrieved from an existing monitor node.
 
 Multiple clusters
 =================
