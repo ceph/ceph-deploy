@@ -73,11 +73,11 @@ This installs the current default *stable* release. You can choose a
 different release track with command line options, for example to use
 a release candidate::
 
-  ceph-deploy install --testing myhost1
+  ceph-deploy install --testing HOST 
 
 Or to test a development branch::
 
-  ceph-deploy install --dev=wip-mds-now-works-no-kidding myhost1 myhost2
+  ceph-deploy install --dev=wip-mds-now-works-no-kidding HOST [HOST..] 
 
 
 Deploying monitors
@@ -85,7 +85,7 @@ Deploying monitors
 
 To actually deploy ``ceph-mon`` to the hosts you chose, run::
 
-  ceph-deploy mon [HOST..]
+  ceph-deploy mon HOST [HOST..]
 
 Without explicit hosts listed, hosts in ``mon_initial_members`` in the
 config file are deployed. That is, the hosts you passed to
@@ -97,7 +97,7 @@ Gather keys
 To gather authenticate keys (for administering the cluster and
 bootstrapping new nodes) to the local directory, run::
 
-  ceph-deploy gatherkeys [HOST...]
+  ceph-deploy gatherkeys HOST [HOST...]
 
 where ``HOST'' is one of the monitor hosts.
 
@@ -109,7 +109,7 @@ Deploying OSDs
 
 To prepare a node for running OSDs, run::
 
-  ceph-deploy osd HOST:DISK [HOST:DISK..]
+  ceph-deploy osd HOST:DISK[:JOURNAL] [HOST:DISK[:JOURNAL] ...]
 
 After that, the hosts will be running OSDs for the given data disks.
 
@@ -134,7 +134,7 @@ reasons, run::
 and they will be removed.  If you need them again later to deploy additional
 nodes, simply re-run::
 
-  ceph-deploy gatherkeys HOST [...]
+  ceph-deploy gatherkeys HOST [HOST...]
 
 and they will be retrieved from an existing monitor node.
 
