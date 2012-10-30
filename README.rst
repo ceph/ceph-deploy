@@ -33,31 +33,34 @@ To create a new Ceph cluster, you need some servers. You should be
 able to SSH to them without passwords (use SSH keys and an agent),
 and you should have passwordless ``sudo`` set up on the servers.
 
-If you edit the ``mon host`` entry in ``ceph.conf``, note that you
-need to be able to SSH to those names or IP addresses too, and not
-just the hostnames you use on the command line.
-
-To create a new configuration file, decide what hosts will run
-``ceph-mon``, and run::
+To create a new configuration file and secret key, decide what hosts
+will run ``ceph-mon``, and run::
 
   ceph-deploy new MON [MON..]
 
-listing the hostnames of the monitors.
+listing the hostnames of the monitors.  Each ``MON`` can be
 
-The above will create a ``ceph.conf`` in your current directory.
+ * a simple hostname.  It must be DNS resolvable without the fully
+   qualified domain name.
+ * a fully qualified domain name.  The hostname is assumed to be the
+   leading component up to the first ``.``.
+ * a ``HOST:FQDN'' pair, of both the hostname and a fully qualified
+   domain name or IP address.  For example, ``foo``,
+   ``foo.example.com``, ``foo:something.example.com``, and
+   ``foo:1.2.3.4`` are all valid.  Note, however, that the hostname
+   should match that configured on the host ``foo``.
+
+The above will create a ``ceph.conf`` and ``ceph.mon.keyring'' in your
+current directory.
 
 Edit initial cluster configuration
 ==================================
 
-In particular, you should update the ``mon_host`` setting to list the
-IP addresses you would like the monitors to bind to.  These are the
-IPs that clients will initially contact to authenticate to the
-cluster, and they need to be reachable both by external client-facing
-hosts and internal cluster daemons.  In certain cases this setting can
-be left as is (listing the monitor hostnames), but in most cases
-``/etc/hosts`` files throw a wrench by mapping the hostname to
-``127.0.1.1`` and preventing each node from reliably determining which
-IP it should bind to.
+You want to review the generated ``ceph.conf`` file and make sure that
+the ``mon_host`` setting contains the IP addresses you would like the
+monitors to bind to.  These are the IPs that clients will initially
+contact to authenticate to the cluster, and they need to be reachable
+both by external client-facing hosts and internal cluster daemons.
 
 Installing packages
 ===================

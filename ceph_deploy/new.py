@@ -6,6 +6,7 @@ import uuid
 import struct
 import time
 import base64
+import socket
 
 from . import exc
 from .cliutil import priority
@@ -33,9 +34,25 @@ def new(args):
     cfg.set('global', 'fsid', str(fsid))
 
     if args.mon:
-        cfg.set('global', 'mon_initial_members', ', '.join(args.mon))
+        mon_initial_members = []
+        mon_host = []
+
+        for m in args.mon:
+            if m.count(':'):
+                (name, host) = m.split(':')
+            else:
+                name = m
+                host = m
+            if name.count('.') > 0:
+                name = name.split('.')[0]
+            ip = socket.gethostbyname(host)
+            log.debug('Monitor %s at %s', name, ip)
+            mon_initial_members.append(name)
+            mon_host.append(ip)
+
+        cfg.set('global', 'mon_initial_members', ', '.join(mon_initial_members))
         # no spaces here, see http://tracker.newdream.net/issues/3145
-        cfg.set('global', 'mon_host', ','.join(args.mon))
+        cfg.set('global', 'mon_host', ','.join(mon_host))
 
     # override undesirable defaults, needed until bobtail
 
@@ -95,13 +112,13 @@ def new(args):
 @priority(10)
 def make(parser):
     """
-    Start deploying a new cluster, and write a CLUSTER.conf for it.
+    Start deploying a new cluster, and write a CLUSTER.conf and keyring for it.
     """
     parser.add_argument(
         'mon',
         metavar='MON',
         nargs='*',
-        help='initial monitor hosts',
+        help='initial monitor hostname, fqdn, or hostname:fqdn pair',
         )
     parser.set_defaults(
         func=new,
