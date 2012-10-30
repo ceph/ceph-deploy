@@ -44,7 +44,7 @@ listing the hostnames of the monitors.  Each ``MON`` can be
    qualified domain name.
  * a fully qualified domain name.  The hostname is assumed to be the
    leading component up to the first ``.``.
- * a ``HOST:FQDN'' pair, of both the hostname and a fully qualified
+ * a ``HOST:FQDN`` pair, of both the hostname and a fully qualified
    domain name or IP address.  For example, ``foo``,
    ``foo.example.com``, ``foo:something.example.com``, and
    ``foo:1.2.3.4`` are all valid.  Note, however, that the hostname
