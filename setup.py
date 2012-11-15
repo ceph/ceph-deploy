@@ -51,6 +51,7 @@ setup(
             'osd = ceph_deploy.osd:make',
             'forgetkeys = ceph_deploy.forgetkeys:make',
             'admin = ceph_deploy.admin:make',
+            'zapdisk = ceph_deploy.zapdisk:make',
             ],
 
         },
