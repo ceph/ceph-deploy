@@ -34,6 +34,9 @@ def create_mon(cluster, monitor_keyring):
     done_path = '/var/lib/ceph/mon/ceph-{hostname}/done'.format(
         hostname=hostname,
         )
+    upstart_path = '/var/lib/ceph/mon/ceph-{hostname}/upstart'.format(
+        hostname=hostname,
+        )
 
     if not os.path.exists(done_path):
         keyring = '/var/lib/ceph/tmp/{cluster}-{hostname}.mon.keyring'.format(
@@ -55,6 +58,10 @@ def create_mon(cluster, monitor_keyring):
             )
         os.unlink(keyring)
         with file(done_path, 'w'):
+            pass
+
+    if not os.path.exists(upstart_path):
+        with file(upstart_path, 'w'):
             pass
 
     subprocess.check_call(
