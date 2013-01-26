@@ -98,7 +98,7 @@ def new(args):
             os.link(tmp, keypath)
         except OSError as e:
             if e.errno == errno.EEXIST:
-                raise exc.ClusterExistsError(path)
+                raise exc.ClusterExistsError(keypath)
             else:
                 raise
 
