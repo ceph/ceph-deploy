@@ -86,7 +86,7 @@ def create_osd(cluster, key):
         )
 
 
-def prepare_disk(cluster, disk, journal):
+def prepare_disk(cluster, disk, journal, activate):
     """
     Run on osd node, prepares a data disk for use.
     """
@@ -101,19 +101,34 @@ def prepare_disk(cluster, disk, journal):
             ],
         )
 
+    if activate:
+        subprocess.check_call(
+            args=[
+                'udevadm',
+                'trigger',
+                '--subsystem-match=block',
+                '--action=add',
+                ],
+            )
+
+
+def activate_disk(cluster, disk, init):
+    """
+    Run on the osd node, activates a disk.
+    """
+    import subprocess
+
     subprocess.check_call(
         args=[
-            'udevadm',
-            'trigger',
-            '--subsystem-match=block',
-            '--action=add',
-            ],
-        )
+            'ceph-disk-activate',
+            '--mark-init',
+            init,
+            '--mount',
+            disk
+            ])
 
 
-def osd(args):
-    cfg = conf.load(args)
-
+def prepare(args, cfg, activate):
     log.debug(
         'Preparing cluster %s disks %s',
         args.cluster,
@@ -159,7 +174,46 @@ def osd(args):
             cluster=args.cluster,
             disk=disk,
             journal=journal,
+            activate=activate,
             )
+
+
+def activate(args, cfg):
+    log.debug(
+        'Activating cluster %s disks %s',
+        args.cluster,
+        ' '.join(':'.join(t) for t in args.disk),
+        )
+
+    for hostname, disk, journal in args.disk:
+
+        # TODO username
+        sudo = args.pushy('ssh+sudo:{hostname}'.format(
+                hostname=hostname,
+                ))
+
+        log.debug('Preparing host %s disk %s', hostname, disk)
+
+        activate_disk_r = sudo.compile(activate_disk)
+        activate_disk_r(
+            cluster=args.cluster,
+            disk=disk,
+            init='upstart',
+            )
+
+
+def osd(args):
+    cfg = conf.load(args)
+
+    if args.subcommand == 'prepare':
+        prepare(args, cfg, activate=False)
+    if args.subcommand == 'create':
+        prepare(args, cfg, activate=True)
+    elif args.subcommand == 'activate':
+        activate(args, cfg)
+    else:
+        log.error('subcommand %s not implemented', args.subcommand)
+        sys.exit(1)
 
 
 def colon_separated(s):
@@ -186,6 +240,16 @@ def make(parser):
     """
     Prepare a data disk on remote host.
     """
+    parser.add_argument(
+        'subcommand',
+        metavar='SUBCOMMAND',
+        choices=[
+            'prepare',
+            'create',
+            'activate',
+            'destroy',
+            ],
+        )
     parser.add_argument(
         'disk',
         nargs='+',
