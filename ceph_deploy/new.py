@@ -33,26 +33,28 @@ def new(args):
     fsid = uuid.uuid4()
     cfg.set('global', 'fsid', str(fsid))
 
-    if args.mon:
-        mon_initial_members = []
-        mon_host = []
+    mon_initial_members = []
+    mon_host = []
 
-        for m in args.mon:
-            if m.count(':'):
-                (name, host) = m.split(':')
-            else:
-                name = m
-                host = m
+    for m in args.mon:
+        if m.count(':'):
+            (name, host) = m.split(':')
+        else:
+            name = m
+            host = m
             if name.count('.') > 0:
                 name = name.split('.')[0]
-            ip = socket.gethostbyname(host)
-            log.debug('Monitor %s at %s', name, ip)
-            mon_initial_members.append(name)
-            mon_host.append(ip)
+        ip = socket.gethostbyname(host)
+        log.debug('Monitor %s at %s', name, ip)
+        mon_initial_members.append(name)
+        mon_host.append(ip)
 
-        cfg.set('global', 'mon initial members', ', '.join(mon_initial_members))
-        # no spaces here, see http://tracker.newdream.net/issues/3145
-        cfg.set('global', 'mon host', ','.join(mon_host))
+    log.debug('Monitor initial members are %s', mon_initial_members)
+    log.debug('Monitor addrs are %s', mon_host)
+
+    cfg.set('global', 'mon initial members', ', '.join(mon_initial_members))
+    # no spaces here, see http://tracker.newdream.net/issues/3145
+    cfg.set('global', 'mon host', ','.join(mon_host))
 
     # override undesirable defaults, needed until bobtail
 
@@ -82,6 +84,7 @@ def new(args):
         )
 
     try:
+        log.debug('Writing initial config to %s...', path)
         with file(tmp, 'w') as f:
             cfg.write(f)
         try:
@@ -93,6 +96,7 @@ def new(args):
                 raise
         os.unlink(tmp)
 
+        log.debug('Writing monitor keyring to %s...', path)
         with file(tmp, 'w') as f:
             f.write(mon_keyring)
         try:
@@ -118,7 +122,7 @@ def make(parser):
     parser.add_argument(
         'mon',
         metavar='MON',
-        nargs='*',
+        nargs='+',
         help='initial monitor hostname, fqdn, or hostname:fqdn pair',
         )
     parser.set_defaults(
