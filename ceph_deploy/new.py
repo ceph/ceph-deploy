@@ -74,6 +74,7 @@ def new(args):
         )
 
     # FIXME: create a random key
+    log.debug('Creating a random mon key...')
     mon_keyring = '[mon.]\nkey = %s\ncaps mon = allow *\n' % generate_auth_key()
 
     keypath = '{name}.mon.keyring'.format(
