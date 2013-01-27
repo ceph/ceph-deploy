@@ -36,6 +36,29 @@ def lsb_release():
     return (distro, codename)
 
 
+def uninstall_ubuntu(purge=False):
+    import subprocess
+
+    packages = [
+        'ceph',
+        'ceph-mds',
+        'ceph-common',
+        'ceph-fs-common',
+        ]
+    args = [
+        'apt-get',
+        '-q',
+        'remove',
+        '-f',
+        '-y',
+        '--force-yes',
+        ]
+    if purge:
+        args.append('--purge')
+    args.append('--')
+    args.extend(packages)
+    subprocess.check_call(args=args)
+
 def install_ubuntu(codename, version_kind, version):
     import platform
     import subprocess
@@ -138,6 +161,59 @@ def install(args):
             )
 
 
+
+def uninstall(args):
+    log.debug(
+        'Uninstalling on cluster %s hosts %s',
+        args.cluster,
+        ' '.join(args.host),
+        )
+
+    for hostname in args.host:
+        log.debug('Detecting platform for host %s ...', hostname)
+
+        # TODO username
+        sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
+        lsb_release_r = sudo.compile(lsb_release)
+        (distro, codename) = lsb_release_r()
+
+        # TODO only ubuntu 12.04 is supported right now
+        if (distro != 'Ubuntu'
+            or codename != 'precise'):
+            raise exc.UnsupportedPlatform(distro=distro, codename=codename)
+
+        log.debug('Uninstalling on host %s ...', hostname)
+        uninstall_r = sudo.compile(uninstall_ubuntu)
+        uninstall_r()
+
+
+def purge(args):
+    log.debug(
+        'Purging from cluster %s hosts %s',
+        args.cluster,
+        ' '.join(args.host),
+        )
+
+    for hostname in args.host:
+        log.debug('Detecting platform for host %s ...', hostname)
+
+        # TODO username
+        sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
+        lsb_release_r = sudo.compile(lsb_release)
+        (distro, codename) = lsb_release_r()
+
+        # TODO only ubuntu 12.04 is supported right now
+        if (distro != 'Ubuntu'
+            or codename != 'precise'):
+            raise exc.UnsupportedPlatform(distro=distro, codename=codename)
+
+        log.debug('Purging host %s ...', hostname)
+        purge_r = sudo.compile(uninstall_ubuntu)
+        purge_r(purge=True)
+
+
+
+
 class StoreVersion(argparse.Action):
     """
     Like ``"store"`` but also remember which one of the exclusive
@@ -206,4 +282,36 @@ def make(parser):
         )
     parser.set_defaults(
         func=install,
+        )
+
+
+
+@priority(80)
+def make_uninstall(parser):
+    """
+    Remove Ceph packages from remote hosts.
+    """
+    parser.add_argument(
+        'host',
+        metavar='HOST',
+        nargs='+',
+        help='hosts to uninstall Ceph from',
+        )
+    parser.set_defaults(
+        func=uninstall,
+        )
+
+@priority(80)
+def make_purge(parser):
+    """
+    Remove Ceph packages from remote hosts and purge all data.
+    """
+    parser.add_argument(
+        'host',
+        metavar='HOST',
+        nargs='+',
+        help='hosts to purge Ceph from',
+        )
+    parser.set_defaults(
+        func=purge,
         )
