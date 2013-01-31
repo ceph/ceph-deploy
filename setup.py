@@ -45,6 +45,7 @@ setup(
 
         'ceph_deploy.cli': [
             'new = ceph_deploy.new:make',
+            'discover = ceph_deploy.discover:make',
             'install = ceph_deploy.install:make',
             'uninstall = ceph_deploy.install:make_uninstall',
             'purge = ceph_deploy.install:make_purge',
