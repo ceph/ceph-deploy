@@ -18,8 +18,13 @@ def parse_args(args=None, namespace=None):
         )
     parser.add_argument(
         '-v', '--verbose',
-        action='store_true', default=None,
+        action='store_true', dest='verbose', default=True,
         help='be more verbose',
+        )
+    parser.add_argument(
+        '-q', '--quiet',
+        action='store_false', dest='verbose',
+        help='be less verbose',
         )
     parser.add_argument(
         '--cluster',
