@@ -245,7 +245,8 @@ def make(parser):
         const='argonaut',
         choices=[
             'argonaut',
-            # 'bobtail',
+            'bobtail',
+            'cuttlefish',
             ],
         metavar='CODENAME',
         help='install a release known as CODENAME (done by default) (default: %(default)s)',
