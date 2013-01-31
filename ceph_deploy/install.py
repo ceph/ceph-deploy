@@ -36,7 +36,7 @@ def lsb_release():
     return (distro, codename)
 
 
-def uninstall_ubuntu(purge=False):
+def uninstall_debian(purge=False):
     import subprocess
 
     packages = [
@@ -59,7 +59,7 @@ def uninstall_ubuntu(purge=False):
     args.extend(packages)
     subprocess.check_call(args=args)
 
-def install_ubuntu(codename, version_kind, version):
+def install_debian(codename, version_kind, version):
     import platform
     import subprocess
 
@@ -153,7 +153,7 @@ def install(args):
             raise exc.UnsupportedPlatform(distro=distro, codename=codename)
 
         log.debug('Installing for Ubuntu 12.04 on host %s ...', hostname)
-        install_r = sudo.compile(install_ubuntu)
+        install_r = sudo.compile(install_debian)
         install_r(
             codename=codename,
             version_kind=args.version_kind,
@@ -183,7 +183,7 @@ def uninstall(args):
             raise exc.UnsupportedPlatform(distro=distro, codename=codename)
 
         log.debug('Uninstalling on host %s ...', hostname)
-        uninstall_r = sudo.compile(uninstall_ubuntu)
+        uninstall_r = sudo.compile(uninstall_debian)
         uninstall_r()
 
 
@@ -208,7 +208,7 @@ def purge(args):
             raise exc.UnsupportedPlatform(distro=distro, codename=codename)
 
         log.debug('Purging host %s ...', hostname)
-        purge_r = sudo.compile(uninstall_ubuntu)
+        purge_r = sudo.compile(uninstall_debian)
         purge_r(purge=True)
 
 
