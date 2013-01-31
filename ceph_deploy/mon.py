@@ -75,7 +75,7 @@ def create_mon(cluster, monitor_keyring):
         )
 
 
-def mon(args):
+def mon_create(args):
     cfg = conf.load(args)
     if not args.mon:
         try:
@@ -124,12 +124,24 @@ def mon(args):
 
         # TODO add_bootstrap_peer_hint
 
+def mon(args):
+    if args.subcommand == 'create':
+        mon_create(args)
+    else:
+        log.error('subcommand %s not implemented', args.subcommand)
 
 @priority(30)
 def make(parser):
     """
     Deploy ceph monitor on remote hosts.
     """
+    parser.add_argument(
+        'subcommand',
+        metavar='SUBCOMMAND',
+        choices=[
+            'create',
+            ],
+        )
     parser.add_argument(
         'mon',
         metavar='HOST',
