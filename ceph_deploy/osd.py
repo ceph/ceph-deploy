@@ -124,7 +124,7 @@ def activate_disk(cluster, disk, init):
             '--mark-init',
             init,
             '--mount',
-            disk
+            disk,
             ])
 
 
@@ -225,12 +225,10 @@ def colon_separated(s):
     else:
         raise argparse.ArgumentTypeError('must be in form HOST:DISK[:JOURNAL]')
 
-    if journal is None:
-        journal = disk
-
     # allow just "sdb" to mean /dev/sdb
     disk = os.path.join('/dev', disk)
-    journal = os.path.join('/dev', journal)
+    if journal is not None:
+        journal = os.path.join('/dev', journal)
 
     return (host, disk, journal)
 
