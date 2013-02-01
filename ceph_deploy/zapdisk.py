@@ -14,6 +14,8 @@ from .memoize import memoize
 
 log = logging.getLogger(__name__)
 
+
+# NOTE: this mirrors ceph-disk-prepare --zap-disk DEV
 def zap(dev):
     import subprocess
 
