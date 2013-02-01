@@ -8,6 +8,10 @@ class DeployError(Exception):
         return ': '.join([doc] + [str(a) for a in self.args])
 
 
+class UnableToResolveError(DeployError):
+    """
+    Unable to resolve host
+    """
 class ClusterExistsError(DeployError):
     """
     Cluster config exists already

@@ -44,7 +44,12 @@ def new(args):
             host = m
             if name.count('.') > 0:
                 name = name.split('.')[0]
-        ip = socket.gethostbyname(host)
+        log.debug('Resolving host %s', host)
+        ip = None
+        try:
+            ip = socket.gethostbyname(host)
+        except:
+            raise exc.UnableToResolveError(host)
         log.debug('Monitor %s at %s', name, ip)
         mon_initial_members.append(name)
         mon_host.append(ip)
