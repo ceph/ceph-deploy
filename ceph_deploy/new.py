@@ -72,10 +72,6 @@ def new(args):
     # http://tracker.newdream.net/issues/3138
     cfg.set('global', 'filestore xattr use omap', 'true')
 
-    tmp = '{name}.{pid}.tmp'.format(
-        name=args.cluster,
-        pid=os.getpid(),
-        )
     path = '{name}.conf'.format(
         name=args.cluster,
         )
@@ -88,35 +84,31 @@ def new(args):
         name=args.cluster,
         )
 
-    try:
-        log.debug('Writing initial config to %s...', path)
+    log.debug('Writing initial config to %s...', path)
+    if not args.dry_run:
+        tmp = '%s.tmp' % path
         with file(tmp, 'w') as f:
             cfg.write(f)
         try:
-            os.link(tmp, path)
+            os.rename(tmp, path)
         except OSError as e:
             if e.errno == errno.EEXIST:
                 raise exc.ClusterExistsError(path)
             else:
                 raise
-        os.unlink(tmp)
 
-        log.debug('Writing monitor keyring to %s...', path)
+    log.debug('Writing monitor keyring to %s...', path)
+    if not args.dry_run:
+        tmp = '%s.tmp' % keypath
         with file(tmp, 'w') as f:
             f.write(mon_keyring)
         try:
-            os.link(tmp, keypath)
+            os.rename(tmp, keypath)
         except OSError as e:
             if e.errno == errno.EEXIST:
                 raise exc.ClusterExistsError(keypath)
             else:
                 raise
-
-    finally:
-        try:
-            os.unlink(tmp)
-        except OSError:
-            pass
 
 
 @priority(10)
