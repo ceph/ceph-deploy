@@ -92,14 +92,14 @@ def prepare_disk(cluster, disk, journal, activate):
     """
     import subprocess
 
-    subprocess.check_call(
-        args=[
-            'ceph-disk-prepare',
-            '--',
-            disk,
-            journal,
-            ],
-        )
+    args=[
+        'ceph-disk-prepare',
+        '--',
+        disk,
+        ]
+    if journal is not None:
+        args.push_back(journal)
+    subprocess.check_call(args=args)
 
     if activate:
         subprocess.check_call(
@@ -132,7 +132,7 @@ def prepare(args, cfg, activate):
     log.debug(
         'Preparing cluster %s disks %s',
         args.cluster,
-        ' '.join(':'.join(t) for t in args.disk),
+        ' '.join(':'.join(x or '' for x in t) for t in args.disk),
         )
 
     key = get_bootstrap_osd_key(cluster=args.cluster)
@@ -166,8 +166,8 @@ def prepare(args, cfg, activate):
                 raise exc.GenericError(error)
             log.debug('Host %s is now ready for osd use.', hostname)
 
-        log.debug('Preparing host %s disk %s journal %s', hostname, disk,
-                  journal)
+        log.debug('Preparing host %s disk %s journal %s activate %s',
+                  hostname, disk, journal, activate)
 
         prepare_disk_r = sudo.compile(prepare_disk)
         prepare_disk_r(
