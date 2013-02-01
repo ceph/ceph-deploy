@@ -27,6 +27,11 @@ def parse_args(args=None, namespace=None):
         help='be less verbose',
         )
     parser.add_argument(
+        '-n', '--dry-run',
+        action='store_true', dest='dry_run',
+        help='do not perform any action, but report what would be done',
+        )
+    parser.add_argument(
         '--cluster',
         metavar='NAME',
         help='name of the cluster',
