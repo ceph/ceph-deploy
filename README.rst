@@ -26,8 +26,30 @@ convenient (like ``~/bin``), or add the current directory to ``PATH``,
 or just always type the full path to ``ceph-deploy``.
 
 
+Managing an existing cluster
+============================
+
+You can use ceph-deploy to provision nodes for an existing cluster.
+To grab a copy of the cluster configuration file (normally
+``ceph.conf``)::
+
+ ceph-deploy discover HOST
+
+You will usually also want to gather the encryption keys used for that
+cluster:
+
+ ceph-deploy gatherkeys MONHOST
+
+At this point you can skip the steps below that create a new cluster
+(you already have one) and optionally skip instalation and/or monitor
+creation, depending on what you are trying to accomplish.
+
+
 Creating a new cluster
 ======================
+
+Creating a new configuration
+----------------------------
 
 To create a new Ceph cluster, you need some servers. You should be
 able to SSH to them without passwords (use SSH keys and an agent),
@@ -53,8 +75,9 @@ listing the hostnames of the monitors.  Each ``MON`` can be
 The above will create a ``ceph.conf`` and ``ceph.mon.keyring'' in your
 current directory.
 
+
 Edit initial cluster configuration
-==================================
+----------------------------------
 
 You want to review the generated ``ceph.conf`` file and make sure that
 the ``mon_host`` setting contains the IP addresses you would like the
@@ -85,7 +108,7 @@ Deploying monitors
 
 To actually deploy ``ceph-mon`` to the hosts you chose, run::
 
-  ceph-deploy mon HOST [HOST..]
+  ceph-deploy mon create HOST [HOST..]
 
 Without explicit hosts listed, hosts in ``mon_initial_members`` in the
 config file are deployed. That is, the hosts you passed to
@@ -109,9 +132,20 @@ Deploying OSDs
 
 To prepare a node for running OSDs, run::
 
-  ceph-deploy osd HOST:DISK[:JOURNAL] [HOST:DISK[:JOURNAL] ...]
+  ceph-deploy osd create HOST:DISK[:JOURNAL] [HOST:DISK[:JOURNAL] ...]
 
 After that, the hosts will be running OSDs for the given data disks.
+If you specify a raw disk (e.g., ``/dev/sdb``), partitions will be created
+and GPT labels will be used to mark and automatically activate OSD volumes.
+If an existing partition is specified, the partition table will not be
+modified.
+
+If there is already a prepared disk or directory that is ready to become an
+OSD, you can also do:
+
+ ceph-deploy osd activate HOST:DIR[:JOURNAL] [...]
+
+This is useful when you are managing the mounting of volumes yourself.
 
 
 Admin hosts
