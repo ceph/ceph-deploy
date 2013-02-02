@@ -69,9 +69,7 @@ def install_debian(codename, version_kind, version):
         key = 'autobuild'
 
     subprocess.check_call(
-        args='wget -q -O- https://raw.github.com/ceph/ceph/master/keys/{key}.asc | apt-key add -'.format(
-            key=key,
-            ),
+        args='wget -q -O- https://raw.github.com/ceph/ceph/master/keys/{key}.asc | apt-key add -'.format(key=key),
         shell=True,
         )
 
@@ -146,21 +144,19 @@ def install(args):
         sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
         lsb_release_r = sudo.compile(lsb_release)
         (distro, codename) = lsb_release_r()
+        log.debug('Distro %s codename %s', distro, codename)
 
-        # TODO only ubuntu 12.04 is supported right now
-        if (distro != 'Ubuntu'
-            or codename != 'precise'):
+        if (distro == 'Debian' or distro == 'Ubuntu'):
+            log.debug('Installing on host %s ...', hostname)
+            install_r = sudo.compile(install_debian)
+        else:
             raise exc.UnsupportedPlatform(distro=distro, codename=codename)
 
-        log.debug('Installing for Ubuntu 12.04 on host %s ...', hostname)
-        install_r = sudo.compile(install_debian)
         install_r(
             codename=codename,
             version_kind=args.version_kind,
             version=version,
             )
-
-
 
 def uninstall(args):
     log.debug(
@@ -176,14 +172,14 @@ def uninstall(args):
         sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
         lsb_release_r = sudo.compile(lsb_release)
         (distro, codename) = lsb_release_r()
+        log.debug('Distro %s codename %s', distro, codename)
 
-        # TODO only ubuntu 12.04 is supported right now
-        if (distro != 'Ubuntu'
-            or codename != 'precise'):
+        if (distro == 'Debian' or distro == 'Ubuntu'):
+            log.debug('Uninstalling on host %s ...', hostname)
+            uninstall_r = sudo.compile(uninstall_debian)
+        else:
             raise exc.UnsupportedPlatform(distro=distro, codename=codename)
 
-        log.debug('Uninstalling on host %s ...', hostname)
-        uninstall_r = sudo.compile(uninstall_debian)
         uninstall_r()
 
 
@@ -201,16 +197,15 @@ def purge(args):
         sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
         lsb_release_r = sudo.compile(lsb_release)
         (distro, codename) = lsb_release_r()
+        log.debug('Distro %s codename %s', distro, codename)
 
-        # TODO only ubuntu 12.04 is supported right now
-        if (distro != 'Ubuntu'
-            or codename != 'precise'):
+        if (distro == 'Debian' or distro == 'Ubuntu'):
+            log.debug('Purging host %s ...', hostname)
+            purge_r = sudo.compile(uninstall_debian)
+        else:
             raise exc.UnsupportedPlatform(distro=distro, codename=codename)
 
-        log.debug('Purging host %s ...', hostname)
-        purge_r = sudo.compile(uninstall_debian)
         purge_r(purge=True)
-
 
 
 
