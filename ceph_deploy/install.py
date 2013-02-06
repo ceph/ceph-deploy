@@ -237,7 +237,6 @@ def make(parser):
         '--stable',
         nargs='?',
         action=StoreVersion,
-        const='argonaut',
         choices=[
             'argonaut',
             'bobtail',
@@ -265,7 +264,7 @@ def make(parser):
 
     version.set_defaults(
         func=install,
-        stable='argonaut',
+        stable='bobtail',
         dev='master',
         version_kind='stable',
         )
