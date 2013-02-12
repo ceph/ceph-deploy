@@ -69,7 +69,7 @@ def install_debian(codename, version_kind, version):
         key = 'autobuild'
 
     subprocess.check_call(
-        args='wget -q -O- https://raw.github.com/ceph/ceph/master/keys/{key}.asc | apt-key add -'.format(key=key),
+        args='wget -q -O- \'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc\' | apt-key add -'.format(key=key),
         shell=True,
         )
 
