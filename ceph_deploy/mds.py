@@ -1,0 +1,218 @@
+import ConfigParser
+import logging
+import re
+
+from cStringIO import StringIO
+
+from . import conf
+from . import exc
+from .cliutil import priority
+
+
+log = logging.getLogger(__name__)
+
+
+def get_bootstrap_mds_key(cluster):
+    """
+    Read the bootstrap-mds key for `cluster`.
+    """
+    path = '{cluster}.bootstrap-mds.keyring'.format(cluster=cluster)
+    try:
+        with file(path, 'rb') as f:
+            return f.read()
+    except IOError:
+        raise RuntimeError('bootstrap-mds keyring not found; run \'gatherkeys\'')
+
+
+def write_conf(cluster, conf):
+    import os
+
+    path = '/etc/ceph/{cluster}.conf'.format(cluster=cluster)
+    tmp = '{path}.{pid}.tmp'.format(path=path, pid=os.getpid())
+
+    with file(tmp, 'w') as f:
+        f.write(conf)
+        f.flush()
+        os.fsync(f)
+    os.rename(tmp, path)
+
+
+def create_mds_bootstrap(cluster, key):
+    """
+    Run on mds node, writes the bootstrap key if not there yet.
+
+    Returns None on success, error message on error exceptions. pushy
+    mangles exceptions to all be of type ExceptionProxy, so we can't
+    tell between bug and correctly handled failure, so avoid using
+    exceptions for non-exceptional runs.
+    """
+    import os
+    import subprocess
+
+    path = '/var/lib/ceph/bootstrap-mds/{cluster}.keyring'.format(
+        cluster=cluster,
+        )
+    if not os.path.exists(path):
+        tmp = '{path}.{pid}.tmp'.format(
+            path=path,
+            pid=os.getpid(),
+            )
+        # file() doesn't let us control access mode from the
+        # beginning, and thus would have a race where attacker can
+        # open before we chmod the file, so play games with os.open
+        fd = os.open(
+            tmp,
+            (os.O_WRONLY|os.O_CREAT|os.O_EXCL
+             |os.O_NOCTTY|os.O_NOFOLLOW),
+            0600,
+            )
+        with os.fdopen(fd, 'wb') as f:
+            f.write(key)
+            f.flush()
+            os.fsync(f)
+        os.rename(tmp, path)
+
+
+def create_mds(
+    name,
+    cluster,
+    init,
+    ):
+    import os
+    import subprocess
+    import errno
+
+    path = '/var/lib/ceph/mds/{cluster}-{name}'.format(
+        cluster=cluster,
+        name=name
+        )
+
+    try:
+        os.mkdir(path)
+    except OSError, e:
+        if e.errno == errno.EEXIST:
+            pass
+        else:
+            raise
+
+    bootstrap_keyring = '/var/lib/ceph/bootstrap-mds/{cluster}.keyring'.format(
+        cluster=cluster
+        )
+
+    keypath = os.path.join(path, 'keyring')
+
+    subprocess.check_call(
+        args=[
+            'ceph',
+            '--cluster', cluster,
+            '--name', 'client.bootstrap-mds',
+            '--keyring', bootstrap_keyring,
+            'auth', 'get-or-create', 'mds.{name}'.format(name=name),
+            'osd', 'allow *',
+            'mds', 'allow',
+            'mon', 'allow rwx',
+            '-o',
+            os.path.join(keypath),
+            ],
+        )
+
+    with file(os.path.join(path, 'done'), 'wb') as f:
+        pass
+
+    if init == 'upstart':
+        with file(os.path.join(path, 'upstart'), 'wb') as f:
+            pass
+        subprocess.check_call(
+            args=[
+                'start',
+                'ceph-mds',
+                'cluster={cluster}'.format(cluster=cluster),
+                'id={name}'.format(name=name),
+                ])
+
+def mds_create(args):
+    cfg = conf.load(args)
+    log.debug(
+        'Deploying mds, cluster %s hosts %s',
+        args.cluster,
+        ' '.join(':'.join(x or '' for x in t) for t in args.mds),
+        )
+
+    if not args.mds:
+        raise exc.NeedHostError()
+
+    key = get_bootstrap_mds_key(cluster=args.cluster)
+
+    bootstrapped = set()
+    for hostname, name in args.mds:
+
+        # TODO username
+        sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
+
+        if hostname not in bootstrapped:
+            bootstrapped.add(hostname)
+            log.debug('Deploying mds bootstrap to %s', hostname)
+
+            write_conf_r = sudo.compile(write_conf)
+            conf_data = StringIO()
+            cfg.write(conf_data)
+            write_conf_r(
+                cluster=args.cluster,
+                conf=conf_data.getvalue(),
+                )
+
+            create_mds_bootstrap_r = sudo.compile(create_mds_bootstrap)
+            error = create_mds_bootstrap_r(
+                cluster=args.cluster,
+                key=key,
+                )
+            if error is not None:
+                raise exc.GenericError(error)
+            log.debug('Host %s is now ready for MDS use.', hostname)
+
+        # create an mds
+        log.debug('Deploying mds.%s to %s', name, hostname)
+        create_mds_r = sudo.compile(create_mds)
+        create_mds_r(
+            name=name,
+            cluster=args.cluster,
+            init='upstart',
+            )
+
+
+def mds(args):
+    if args.subcommand == 'create':
+        mds_create(args)
+    else:
+        log.error('subcommand %s not implemented', args.subcommand)
+
+
+def colon_separated(s):
+    host = s
+    name = s
+    if s.count(':') == 1:
+        (host, name) = s.split(':')
+    return (host, name)
+
+@priority(30)
+def make(parser):
+    """
+    Deploy ceph MDS on remote hosts.
+    """
+    parser.add_argument(
+        'subcommand',
+        metavar='SUBCOMMAND',
+        choices=[
+            'create',
+            ],
+        )
+    parser.add_argument(
+        'mds',
+        metavar='HOST[:NAME]',
+        nargs='*',
+        type=colon_separated,
+        help='host (and optionally the daemon name) to deploy on',
+        )
+    parser.set_defaults(
+        func=mds,
+        )

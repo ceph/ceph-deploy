@@ -116,6 +116,7 @@ def install_debian(codename, version_kind, version):
             '--assume-yes',
             '--',
             'ceph',
+            'ceph-mds',
             'ceph-common',
             'ceph-fs-common',
             # ceph only recommends gdisk, make sure we actually have

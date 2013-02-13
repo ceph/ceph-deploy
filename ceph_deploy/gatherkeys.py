@@ -67,7 +67,7 @@ def gatherkeys(args):
           ret = 1
 
      # bootstrap
-     for what in ['osd']:
+     for what in ['osd', 'mds']:
           r = fetch_file(
                args=args,
                frompath='/var/lib/ceph/bootstrap-{what}/{cluster}.keyring'.format(
@@ -78,10 +78,8 @@ def gatherkeys(args):
                     what=what),
                hosts=args.mon,
                )
-          if r:
-               break
-     if not r:
-          ret = 1
+          if not r:
+               ret = 1
 
      return ret
 
