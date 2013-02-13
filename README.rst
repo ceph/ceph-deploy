@@ -135,10 +135,12 @@ To prepare a node for running OSDs, run::
   ceph-deploy osd create HOST:DISK[:JOURNAL] [HOST:DISK[:JOURNAL] ...]
 
 After that, the hosts will be running OSDs for the given data disks.
-If you specify a raw disk (e.g., ``/dev/sdb``), partitions will be created
-and GPT labels will be used to mark and automatically activate OSD volumes.
-If an existing partition is specified, the partition table will not be
-modified.
+If you specify a raw disk (e.g., ``/dev/sdb``), partitions will be
+created and GPT labels will be used to mark and automatically activate
+OSD volumes.  If an existing partition is specified, the partition
+table will not be modified.  If you want to destroy the existing
+partition table on DISK first, you can include the ``--zap-disk``
+option.
 
 If there is already a prepared disk or directory that is ready to become an
 OSD, you can also do:
