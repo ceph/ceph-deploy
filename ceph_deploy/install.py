@@ -7,34 +7,84 @@ from .cliutil import priority
 
 log = logging.getLogger(__name__)
 
-
 def lsb_release():
-    import subprocess
-
-    args = [
-        'lsb_release',
-        '-s',
-        '-i',
-        '-c',
-        ]
-    p = subprocess.Popen(
-        args=args,
-        stdout=subprocess.PIPE,
-        )
-    out = p.stdout.read()
-    ret = p.wait()
-    if ret != 0:
-        raise subprocess.CalledProcessError(ret, args, output=out)
+    import platform
+    out = platform.dist()
 
     try:
-        (distro, codename, empty) = out.split('\n', 2)
+        (distro, release, codename) = out
     except ValueError:
-        raise RuntimeError('lsb_release gave invalid output')
-    if empty != '':
-        raise RuntimeError('lsb_release gave invalid output')
+        raise RuntimeError('platform.dist() gave invalid output')
+    if distro == '':
+        raise RuntimeError('platform.dist() gave invalid output')
 
-    return (distro, codename)
+    return (distro, release, codename)
 
+def install_centos(release, codename, version_kind, version):
+    import subprocess
+
+    if version_kind in ['stable', 'testing']:
+        key = 'release'
+    else:
+        key = 'autobuild'
+
+    subprocess.check_call(
+        args='su -c \'rpm --import https://raw.github.com/ceph/ceph/master/keys/{key}.asc\''.format(key=key),
+        shell=True,
+        )
+
+    if version_kind == 'stable':
+        url = 'http://ceph.com/rpm-{version}/'.format(
+        version=version,
+        )
+    elif version_kind == 'testing':
+        url = 'http://ceph.com/rpm-testing/'
+    elif version_kind == 'dev':
+        url = 'http://gitbuilder.ceph.com/ceph-rpm-centos{release}-{machine}-basic/ref/{version}/'.format(
+            release=release.split(".",1)[0],
+            machine=platform.machine(),
+            version=version,
+            )
+
+    subprocess.call(
+        args=['rpm', '-Uvh','--quiet', '{url}el6/x86_64/ceph-release-1-0.el6.noarch.rpm'.format(
+            url=url
+            )]
+        )
+    
+    subprocess.check_call(
+        args=[
+            'yum',
+            '-y',
+            '-q',
+            'install',
+            'ceph',
+            'ceph-common',
+            'ceph-fs-common',
+            # ceph only recommends gdisk, make sure we actually have
+            # it; only really needed for osds, but minimal collateral
+            'gdisk',
+            ],
+        )
+    
+def uninstall_centos():
+    import subprocess
+
+    packages = [
+        'ceph',
+        'ceph-mds',
+        'ceph-common',
+        'ceph-fs-common',
+        ]
+    args = [
+        'yum',
+        '-q',
+        '-y',
+        'remove',
+        ]
+
+    args.extend(packages)
+    subprocess.check_call(args=args)
 
 def uninstall_debian(purge=False):
     import subprocess
@@ -59,7 +109,7 @@ def uninstall_debian(purge=False):
     args.extend(packages)
     subprocess.check_call(args=args)
 
-def install_debian(codename, version_kind, version):
+def install_debian(release, codename, version_kind, version):
     import platform
     import subprocess
 
@@ -125,7 +175,6 @@ def install_debian(codename, version_kind, version):
             ],
         )
 
-
 def install(args):
     version = getattr(args, args.version_kind)
     version_str = args.version_kind
@@ -144,16 +193,20 @@ def install(args):
         # TODO username
         sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
         lsb_release_r = sudo.compile(lsb_release)
-        (distro, codename) = lsb_release_r()
+        (distro, release, codename) = lsb_release_r()
         log.debug('Distro %s codename %s', distro, codename)
 
         if (distro == 'Debian' or distro == 'Ubuntu'):
             log.debug('Installing on host %s ...', hostname)
             install_r = sudo.compile(install_debian)
+        elif (distro == 'centos'):
+            log.debug('Installing on host %s ...', hostname)
+            install_r = sudo.compile(install_centos)
         else:
             raise exc.UnsupportedPlatform(distro=distro, codename=codename)
 
         install_r(
+            release=release,
             codename=codename,
             version_kind=args.version_kind,
             version=version,
@@ -172,17 +225,19 @@ def uninstall(args):
         # TODO username
         sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
         lsb_release_r = sudo.compile(lsb_release)
-        (distro, codename) = lsb_release_r()
+        (distro, release, codename) = lsb_release_r()
         log.debug('Distro %s codename %s', distro, codename)
 
         if (distro == 'Debian' or distro == 'Ubuntu'):
             log.debug('Uninstalling on host %s ...', hostname)
             uninstall_r = sudo.compile(uninstall_debian)
+        elif (distro == 'centos'):
+            log.debug('Uninstalling on host %s ...', hostname)
+            uninstall_r = sudo.compile(uninstall_centos)
         else:
             raise exc.UnsupportedPlatform(distro=distro, codename=codename)
 
         uninstall_r()
-
 
 def purge(args):
     log.debug(
@@ -207,8 +262,6 @@ def purge(args):
             raise exc.UnsupportedPlatform(distro=distro, codename=codename)
 
         purge_r(purge=True)
-
-
 
 class StoreVersion(argparse.Action):
     """
