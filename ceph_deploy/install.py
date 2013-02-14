@@ -29,7 +29,7 @@ def install_centos(release, codename, version_kind, version):
         key = 'autobuild'
 
     subprocess.check_call(
-        args='su -c \'rpm --import https://raw.github.com/ceph/ceph/master/keys/{key}.asc\''.format(key=key),
+        args='su -c \'rpm --import "https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc"\''.format(key=key),
         shell=True,
         )
 
