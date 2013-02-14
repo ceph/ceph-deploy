@@ -2,23 +2,10 @@ import argparse
 import logging
 
 from . import exc
+from . import lsb
 from .cliutil import priority
 
-
 log = logging.getLogger(__name__)
-
-def lsb_release():
-    import platform
-    out = platform.dist()
-
-    try:
-        (distro, release, codename) = out
-    except ValueError:
-        raise RuntimeError('platform.dist() gave invalid output')
-    if distro == '':
-        raise RuntimeError('platform.dist() gave invalid output')
-
-    return (distro, release, codename)
 
 def install_centos(release, codename, version_kind, version):
     import subprocess
@@ -192,7 +179,7 @@ def install(args):
 
         # TODO username
         sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
-        lsb_release_r = sudo.compile(lsb_release)
+        lsb_release_r = sudo.compile(lsb.lsb_release)
         (distro, release, codename) = lsb_release_r()
         log.debug('Distro %s codename %s', distro, codename)
 
@@ -224,7 +211,7 @@ def uninstall(args):
 
         # TODO username
         sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
-        lsb_release_r = sudo.compile(lsb_release)
+        lsb_release_r = sudo.compile(lsb.lsb_release)
         (distro, release, codename) = lsb_release_r()
         log.debug('Distro %s codename %s', distro, codename)
 
@@ -251,7 +238,7 @@ def purge(args):
 
         # TODO username
         sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
-        lsb_release_r = sudo.compile(lsb_release)
+        lsb_release_r = sudo.compile(lsb.lsb_release)
         (distro, release, codename) = lsb_release_r()
         log.debug('Distro %s codename %s', distro, codename)
 
