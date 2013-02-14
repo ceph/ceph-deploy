@@ -252,7 +252,7 @@ def purge(args):
         # TODO username
         sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
         lsb_release_r = sudo.compile(lsb_release)
-        (distro, codename) = lsb_release_r()
+        (distro, release, codename) = lsb_release_r()
         log.debug('Distro %s codename %s', distro, codename)
 
         if (distro == 'Debian' or distro == 'Ubuntu'):
