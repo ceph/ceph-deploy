@@ -6,6 +6,7 @@ from cStringIO import StringIO
 
 from . import conf
 from . import exc
+from . import lsb
 from .cliutil import priority
 
 
@@ -119,15 +120,24 @@ def create_mds(
     with file(os.path.join(path, 'done'), 'wb') as f:
         pass
 
+    with file(os.path.join(path, init), 'wb') as f:
+        pass
+
     if init == 'upstart':
-        with file(os.path.join(path, 'upstart'), 'wb') as f:
-            pass
         subprocess.check_call(
             args=[
                 'start',
                 'ceph-mds',
                 'cluster={cluster}'.format(cluster=cluster),
                 'id={name}'.format(name=name),
+                ])
+    elif init == 'sysvinit':
+        subprocess.check_call(
+            args=[
+                'service',
+                'ceph',
+                'start',
+                'mds.{name}'.format(name=name),
                 ])
 
 def mds_create(args):
@@ -148,6 +158,12 @@ def mds_create(args):
 
         # TODO username
         sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
+
+        lsb_release_r = sudo.compile(lsb.lsb_release)
+        (distro, release, codename) = lsb_release_r()
+        init = lsb.choose_init(distro, codename)
+        log.debug('Distro %s codename %s, will use %s',
+                  distro, codename, init)
 
         if hostname not in bootstrapped:
             bootstrapped.add(hostname)
@@ -176,7 +192,7 @@ def mds_create(args):
         create_mds_r(
             name=name,
             cluster=args.cluster,
-            init='upstart',
+            init=init,
             )
 
 
