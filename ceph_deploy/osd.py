@@ -192,13 +192,19 @@ def activate(args, cfg):
                 hostname=hostname,
                 ))
 
-        log.debug('Preparing host %s disk %s', hostname, disk)
+        log.debug('Activating host %s disk %s', hostname, disk)
+
+        lsb_release_r = sudo.compile(lsb.lsb_release)
+        (distro, release, codename) = lsb_release_r()
+        init = lsb.choose_init(distro, codename)
+        log.debug('Distro %s codename %s, will use %s',
+                  distro, codename, init)
 
         activate_disk_r = sudo.compile(activate_disk)
         activate_disk_r(
             cluster=args.cluster,
             disk=disk,
-            init='upstart',
+            init=init,
             )
 
 
