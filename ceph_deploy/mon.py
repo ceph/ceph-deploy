@@ -6,6 +6,7 @@ from cStringIO import StringIO
 
 from . import conf
 from . import exc
+from . import lsb
 from .cliutil import priority
 
 
@@ -25,7 +26,7 @@ def write_conf(cluster, conf):
     os.rename(tmp, path)
 
 
-def create_mon(cluster, monitor_keyring):
+def create_mon(cluster, monitor_keyring, init):
     import os
     import socket
     import subprocess
@@ -34,8 +35,9 @@ def create_mon(cluster, monitor_keyring):
     done_path = '/var/lib/ceph/mon/ceph-{hostname}/done'.format(
         hostname=hostname,
         )
-    upstart_path = '/var/lib/ceph/mon/ceph-{hostname}/upstart'.format(
+    init_path = '/var/lib/ceph/mon/ceph-{hostname}/{init}'.format(
         hostname=hostname,
+        init=init,
         )
 
     if not os.path.exists(done_path):
@@ -60,19 +62,29 @@ def create_mon(cluster, monitor_keyring):
         with file(done_path, 'w'):
             pass
 
-    if not os.path.exists(upstart_path):
-        with file(upstart_path, 'w'):
+    if not os.path.exists(init_path):
+        with file(init_path, 'w'):
             pass
 
-    subprocess.check_call(
-        args=[
-            'initctl',
-            'emit',
-            'ceph-mon',
-            'cluster={cluster}'.format(cluster=cluster),
-            'id={hostname}'.format(hostname=hostname),
-            ],
-        )
+    if init == 'upstart':
+        subprocess.check_call(
+            args=[
+                'initctl',
+                'emit',
+                'ceph-mon',
+                'cluster={cluster}'.format(cluster=cluster),
+                'id={hostname}'.format(hostname=hostname),
+                ],
+            )
+    elif init == 'sysvinit':
+        subprocess.check_call(
+            args=[
+                'service',
+                'ceph',
+                'start',
+                'mon.{hostname}'.format(hostname=hostname),
+                ],
+            )
 
 
 def mon_create(args):
@@ -108,6 +120,12 @@ def mon_create(args):
         # TODO username
         sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
 
+        lsb_release_r = sudo.compile(lsb.lsb_release)
+        (distro, release, codename) = lsb_release_r()
+        init = lsb.choose_init(distro, codename)
+        log.debug('Distro %s codename %s, will use %s',
+                  distro, codename, init)
+
         write_conf_r = sudo.compile(write_conf)
         conf_data = StringIO()
         cfg.write(conf_data)
@@ -120,6 +138,7 @@ def mon_create(args):
         create_mon_r(
             cluster=args.cluster,
             monitor_keyring=monitor_keyring,
+            init=init,
             )
 
         # TODO add_bootstrap_peer_hint
