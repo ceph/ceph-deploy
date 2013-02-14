@@ -86,7 +86,7 @@ def create_osd(cluster, key):
         )
 
 
-def prepare_disk(cluster, disk, journal, activate):
+def prepare_disk(cluster, disk, journal, activate, zap):
     """
     Run on osd node, prepares a data disk for use.
     """
@@ -94,11 +94,15 @@ def prepare_disk(cluster, disk, journal, activate):
 
     args=[
         'ceph-disk-prepare',
-        '--',
-        disk,
         ]
+    if zap:
+        args.append('--zap-disk')
+    args.extend([
+            '--',
+            disk,
+            ])
     if journal is not None:
-        args.push_back(journal)
+        args.append(journal)
     subprocess.check_call(args=args)
 
     if activate:
@@ -175,6 +179,7 @@ def prepare(args, cfg, activate):
             disk=disk,
             journal=journal,
             activate=activate,
+            zap=args.zap_disk,
             )
 
 
@@ -260,6 +265,11 @@ def make(parser):
         metavar='HOST:DISK[:JOURNAL]',
         type=colon_separated,
         help='host and disk to prepare',
+        )
+    parser.add_argument(
+        '--zap-disk',
+        action='store_true', default=None,
+        help='destroy existing partition table and content for DISK',
         )
     parser.set_defaults(
         func=osd,
