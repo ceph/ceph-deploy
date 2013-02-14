@@ -38,7 +38,7 @@ def zap(dev):
                 ],
             )
     except subprocess.CalledProcessError as e:
-        raise PrepareError(e)
+        raise RuntimeError(e)
 
 def zapdisk(args):
     cfg = conf.load(args)
