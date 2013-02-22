@@ -32,6 +32,9 @@ def create_mon(cluster, monitor_keyring, init):
     import subprocess
 
     hostname = socket.gethostname()
+    path = '/var/lib/ceph/mon/ceph-{hostname}'.format(
+        hostname=hostname,
+        )
     done_path = '/var/lib/ceph/mon/ceph-{hostname}/done'.format(
         hostname=hostname,
         )
@@ -39,6 +42,9 @@ def create_mon(cluster, monitor_keyring, init):
         hostname=hostname,
         init=init,
         )
+
+    if not os.path.exists(path):
+        os.mkdir(path)
 
     if not os.path.exists(done_path):
         keyring = '/var/lib/ceph/tmp/{cluster}-{hostname}.mon.keyring'.format(
