@@ -126,7 +126,8 @@ def create_mds(
     if init == 'upstart':
         subprocess.check_call(
             args=[
-                'start',
+                'initctl',
+                'emit',
                 'ceph-mds',
                 'cluster={cluster}'.format(cluster=cluster),
                 'id={name}'.format(name=name),
