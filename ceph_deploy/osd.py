@@ -86,7 +86,7 @@ def create_osd(cluster, key):
         )
 
 
-def prepare_disk(cluster, disk, journal, activate, zap):
+def prepare_disk(cluster, disk, journal, activate, zap, dmcrypt, dmcrypt_dir):
     """
     Run on osd node, prepares a data disk for use.
     """
@@ -97,6 +97,11 @@ def prepare_disk(cluster, disk, journal, activate, zap):
         ]
     if zap:
         args.append('--zap-disk')
+    if dmcrypt:
+        args.append('--dmcrypt')
+    if dmcrypt_dir is not None:
+        args.append('--dmcrypt-key-dir')
+        args.append(dmcrypt_dir)
     args.extend([
             '--',
             disk,
@@ -180,6 +185,8 @@ def prepare(args, cfg, activate):
             journal=journal,
             activate=activate,
             zap=args.zap_disk,
+            dmcrypt=args.dmcrypt,
+            dmcrypt_dir=args.dmcrypt_key_dir,
             )
 
 
@@ -270,6 +277,17 @@ def make(parser):
         '--zap-disk',
         action='store_true', default=None,
         help='destroy existing partition table and content for DISK',
+        )
+    parser.add_argument(
+        '--dmcrypt',
+        action='store_true', default=None,
+        help='use dm-crypt on DISK',
+        )
+    parser.add_argument(
+        '--dmcrypt-key-dir',
+        metavar='KEYDIR',
+        default='/etc/ceph/dmcrypt-keys',
+        help='directory where dm-crypt keys are stored',
         )
     parser.set_defaults(
         func=osd,
