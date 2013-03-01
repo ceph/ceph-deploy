@@ -25,6 +25,18 @@ def generate_auth_key():
                 )
     return base64.b64encode(header + key)
 
+"""
+Search result of getaddrinfo() for a non-localhost-net address
+"""
+def get_nonlocal_ip(host):
+    ailist = socket.getaddrinfo(host, None)
+    for ai in ailist:
+        # an ai is a 5-tuple; the last element is (ip, port)
+        ip = ai[4][0];
+        if not ip.startswith('127.'):
+            return ip
+    raise exc.UnableToResolveError(host)
+
 def new(args):
     log.debug('Creating new cluster named %s', args.cluster)
     cfg = ConfigParser.RawConfigParser()
@@ -46,10 +58,7 @@ def new(args):
                 name = name.split('.')[0]
         log.debug('Resolving host %s', host)
         ip = None
-        try:
-            ip = socket.gethostbyname(host)
-        except:
-            raise exc.UnableToResolveError(host)
+        ip = get_nonlocal_ip(host)
         log.debug('Monitor %s at %s', name, ip)
         mon_initial_members.append(name)
         mon_host.append(ip)
