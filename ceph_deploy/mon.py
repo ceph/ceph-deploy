@@ -165,7 +165,9 @@ def make(parser):
         metavar='SUBCOMMAND',
         choices=[
             'create',
+            'destroy',
             ],
+        help='create or destroy',
         )
     parser.add_argument(
         'mon',
