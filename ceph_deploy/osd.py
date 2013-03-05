@@ -260,11 +260,12 @@ def make(parser):
         'subcommand',
         metavar='SUBCOMMAND',
         choices=[
-            'prepare',
             'create',
+            'prepare',
             'activate',
             'destroy',
             ],
+        help='create (prepare+activate), prepare, activate, or destroy',
         )
     parser.add_argument(
         'disk',
