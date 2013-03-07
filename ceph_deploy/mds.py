@@ -25,19 +25,6 @@ def get_bootstrap_mds_key(cluster):
         raise RuntimeError('bootstrap-mds keyring not found; run \'gatherkeys\'')
 
 
-def write_conf(cluster, conf):
-    import os
-
-    path = '/etc/ceph/{cluster}.conf'.format(cluster=cluster)
-    tmp = '{path}.{pid}.tmp'.format(path=path, pid=os.getpid())
-
-    with file(tmp, 'w') as f:
-        f.write(conf)
-        f.flush()
-        os.fsync(f)
-    os.rename(tmp, path)
-
-
 def create_mds_bootstrap(cluster, key):
     """
     Run on mds node, writes the bootstrap key if not there yet.
@@ -155,46 +142,54 @@ def mds_create(args):
     key = get_bootstrap_mds_key(cluster=args.cluster)
 
     bootstrapped = set()
+    errors = 0
     for hostname, name in args.mds:
+        try:
+            # TODO username
+            sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
 
-        # TODO username
-        sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
+            lsb_release_r = sudo.compile(lsb.lsb_release)
+            (distro, release, codename) = lsb_release_r()
+            init = lsb.choose_init(distro, codename)
+            log.debug('Distro %s codename %s, will use %s',
+                      distro, codename, init)
 
-        lsb_release_r = sudo.compile(lsb.lsb_release)
-        (distro, release, codename) = lsb_release_r()
-        init = lsb.choose_init(distro, codename)
-        log.debug('Distro %s codename %s, will use %s',
-                  distro, codename, init)
+            if hostname not in bootstrapped:
+                bootstrapped.add(hostname)
+                log.debug('Deploying mds bootstrap to %s', hostname)
 
-        if hostname not in bootstrapped:
-            bootstrapped.add(hostname)
-            log.debug('Deploying mds bootstrap to %s', hostname)
+                write_conf_r = sudo.compile(conf.write_conf)
+                conf_data = StringIO()
+                cfg.write(conf_data)
+                write_conf_r(
+                    cluster=args.cluster,
+                    conf=conf_data.getvalue(),
+                    overwrite=args.overwrite_conf,
+                    )
 
-            write_conf_r = sudo.compile(write_conf)
-            conf_data = StringIO()
-            cfg.write(conf_data)
-            write_conf_r(
+                create_mds_bootstrap_r = sudo.compile(create_mds_bootstrap)
+                error = create_mds_bootstrap_r(
+                    cluster=args.cluster,
+                    key=key,
+                    )
+                if error is not None:
+                    raise exc.GenericError(error)
+                log.debug('Host %s is now ready for MDS use.', hostname)
+
+            # create an mds
+            log.debug('Deploying mds.%s to %s', name, hostname)
+            create_mds_r = sudo.compile(create_mds)
+            create_mds_r(
+                name=name,
                 cluster=args.cluster,
-                conf=conf_data.getvalue(),
+                init=init,
                 )
+        except RuntimeError as e:
+            log.error(e)
+            errors += 1
 
-            create_mds_bootstrap_r = sudo.compile(create_mds_bootstrap)
-            error = create_mds_bootstrap_r(
-                cluster=args.cluster,
-                key=key,
-                )
-            if error is not None:
-                raise exc.GenericError(error)
-            log.debug('Host %s is now ready for MDS use.', hostname)
-
-        # create an mds
-        log.debug('Deploying mds.%s to %s', name, hostname)
-        create_mds_r = sudo.compile(create_mds)
-        create_mds_r(
-            name=name,
-            cluster=args.cluster,
-            init=init,
-            )
+    if errors:
+        raise exc.GenericError('Failed to create %d MDSs' % errors)
 
 
 def mds(args):

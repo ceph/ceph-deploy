@@ -36,3 +36,21 @@ def load(args):
     else:
         with contextlib.closing(f):
             return parse(f)
+
+
+def write_conf(cluster, conf, overwrite):
+    import os
+
+    path = '/etc/ceph/{cluster}.conf'.format(cluster=cluster)
+    tmp = '{path}.{pid}.tmp'.format(path=path, pid=os.getpid())
+
+    if os.path.exists(path):
+        with file(path, 'rb') as f:
+            old = f.read()
+            if old != conf and not overwrite:
+                raise RuntimeError('config file %s exists with different content; use --overwrite-conf to overwrite' % path)
+    with file(tmp, 'w') as f:
+        f.write(conf)
+        f.flush()
+        os.fsync(f)
+    os.rename(tmp, path)

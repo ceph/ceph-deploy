@@ -13,19 +13,6 @@ from .cliutil import priority
 log = logging.getLogger(__name__)
 
 
-def write_conf(cluster, conf):
-    import os
-
-    path = '/etc/ceph/{cluster}.conf'.format(cluster=cluster)
-    tmp = '{path}.{pid}.tmp'.format(path=path, pid=os.getpid())
-
-    with file(tmp, 'w') as f:
-        f.write(conf)
-        f.flush()
-        os.fsync(f)
-    os.rename(tmp, path)
-
-
 def create_mon(cluster, monitor_keyring, init):
     import os
     import socket
@@ -120,34 +107,44 @@ def mon_create(args):
         ' '.join(args.mon),
         )
 
+    errors = 0
     for hostname in args.mon:
-        log.debug('Deploying mon to %s', hostname)
+        try:
+            log.debug('Deploying mon to %s', hostname)
 
-        # TODO username
-        sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
+            # TODO username
+            sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
 
-        lsb_release_r = sudo.compile(lsb.lsb_release)
-        (distro, release, codename) = lsb_release_r()
-        init = lsb.choose_init(distro, codename)
-        log.debug('Distro %s codename %s, will use %s',
-                  distro, codename, init)
+            lsb_release_r = sudo.compile(lsb.lsb_release)
+            (distro, release, codename) = lsb_release_r()
+            init = lsb.choose_init(distro, codename)
+            log.debug('Distro %s codename %s, will use %s',
+                      distro, codename, init)
 
-        write_conf_r = sudo.compile(write_conf)
-        conf_data = StringIO()
-        cfg.write(conf_data)
-        write_conf_r(
-            cluster=args.cluster,
-            conf=conf_data.getvalue(),
-            )
+            write_conf_r = sudo.compile(conf.write_conf)
+            conf_data = StringIO()
+            cfg.write(conf_data)
+            write_conf_r(
+                cluster=args.cluster,
+                conf=conf_data.getvalue(),
+                overwrite=args.overwrite_conf,
+                )
 
-        create_mon_r = sudo.compile(create_mon)
-        create_mon_r(
-            cluster=args.cluster,
-            monitor_keyring=monitor_keyring,
-            init=init,
-            )
+            create_mon_r = sudo.compile(create_mon)
+            create_mon_r(
+                cluster=args.cluster,
+                monitor_keyring=monitor_keyring,
+                init=init,
+                )
 
-        # TODO add_bootstrap_peer_hint
+            # TODO add_bootstrap_peer_hint
+
+        except RuntimeError as e:
+            log.error(e)
+            errors += 1
+
+    if errors:
+        raise exc.GenericError('Failed to create %d monitors' % errors)
 
 def mon(args):
     if args.subcommand == 'create':

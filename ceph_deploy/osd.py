@@ -26,19 +26,6 @@ def get_bootstrap_osd_key(cluster):
     except IOError:
         raise RuntimeError('bootstrap-osd keyring not found; run \'gatherkeys\'')
 
-def write_conf(cluster, conf):
-    import os
-
-    path = '/etc/ceph/{cluster}.conf'.format(cluster=cluster)
-    tmp = '{path}.{pid}.tmp'.format(path=path, pid=os.getpid())
-
-    with file(tmp, 'w') as f:
-        f.write(conf)
-        f.flush()
-        os.fsync(f)
-    os.rename(tmp, path)
-
-
 def create_osd(cluster, key):
     """
     Run on osd node, writes the bootstrap key if not there yet.
@@ -147,48 +134,56 @@ def prepare(args, cfg, activate):
     key = get_bootstrap_osd_key(cluster=args.cluster)
 
     bootstrapped = set()
+    errors = 0
     for hostname, disk, journal in args.disk:
+        try:
+            # TODO username
+            sudo = args.pushy('ssh+sudo:{hostname}'.format(
+                    hostname=hostname,
+                    ))
 
-        # TODO username
-        sudo = args.pushy('ssh+sudo:{hostname}'.format(
-                hostname=hostname,
-                ))
+            if hostname not in bootstrapped:
+                bootstrapped.add(hostname)
+                log.debug('Deploying osd to %s', hostname)
 
-        if hostname not in bootstrapped:
-            bootstrapped.add(hostname)
-            log.debug('Deploying osd to %s', hostname)
+                write_conf_r = sudo.compile(conf.write_conf)
+                conf_data = StringIO()
+                cfg.write(conf_data)
+                write_conf_r(
+                    cluster=args.cluster,
+                    conf=conf_data.getvalue(),
+                    overwrite=args.overwrite_conf,
+                    )
 
-            write_conf_r = sudo.compile(write_conf)
-            conf_data = StringIO()
-            cfg.write(conf_data)
-            write_conf_r(
+                create_osd_r = sudo.compile(create_osd)
+                error = create_osd_r(
+                    cluster=args.cluster,
+                    key=key,
+                    )
+                if error is not None:
+                    raise exc.GenericError(error)
+                log.debug('Host %s is now ready for osd use.', hostname)
+
+            log.debug('Preparing host %s disk %s journal %s activate %s',
+                      hostname, disk, journal, activate)
+
+            prepare_disk_r = sudo.compile(prepare_disk)
+            prepare_disk_r(
                 cluster=args.cluster,
-                conf=conf_data.getvalue(),
+                disk=disk,
+                journal=journal,
+                activate=activate,
+                zap=args.zap_disk,
+                dmcrypt=args.dmcrypt,
+                dmcrypt_dir=args.dmcrypt_key_dir,
                 )
 
-            create_osd_r = sudo.compile(create_osd)
-            error = create_osd_r(
-                cluster=args.cluster,
-                key=key,
-                )
-            if error is not None:
-                raise exc.GenericError(error)
-            log.debug('Host %s is now ready for osd use.', hostname)
+        except RuntimeError as e:
+            log.error(e)
+            errors += 1
 
-        log.debug('Preparing host %s disk %s journal %s activate %s',
-                  hostname, disk, journal, activate)
-
-        prepare_disk_r = sudo.compile(prepare_disk)
-        prepare_disk_r(
-            cluster=args.cluster,
-            disk=disk,
-            journal=journal,
-            activate=activate,
-            zap=args.zap_disk,
-            dmcrypt=args.dmcrypt,
-            dmcrypt_dir=args.dmcrypt_key_dir,
-            )
-
+    if errors:
+        raise exc.GenericError('Failed to create %d OSDs' % errors)
 
 def activate(args, cfg):
     log.debug(

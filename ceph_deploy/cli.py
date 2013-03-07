@@ -32,6 +32,11 @@ def parse_args(args=None, namespace=None):
         help='do not perform any action, but report what would be done',
         )
     parser.add_argument(
+        '--overwrite-conf',
+        action='store_true',
+        help='overwrite an existing conf file on remote host (if present)',
+        )
+    parser.add_argument(
         '--cluster',
         metavar='NAME',
         help='name of the cluster',
