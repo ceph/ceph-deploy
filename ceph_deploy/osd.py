@@ -99,9 +99,9 @@ def prepare_disk(cluster, disk, journal, activate, zap, dmcrypt, dmcrypt_dir):
         args.append('--zap-disk')
     if dmcrypt:
         args.append('--dmcrypt')
-    if dmcrypt_dir is not None:
-        args.append('--dmcrypt-key-dir')
-        args.append(dmcrypt_dir)
+        if dmcrypt_dir is not None:
+            args.append('--dmcrypt-key-dir')
+            args.append(dmcrypt_dir)
     args.extend([
             '--',
             disk,
