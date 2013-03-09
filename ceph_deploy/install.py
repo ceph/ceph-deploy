@@ -34,7 +34,7 @@ def install_centos(release, codename, version_kind, version):
             )
 
     subprocess.call(
-        args=['rpm', '-Uvh','--quiet', '{url}el6/x86_64/ceph-release-1-0.el6.noarch.rpm'.format(
+        args=['rpm', '-Uvh','--quiet', '{url}noarch/ceph-release-1-0.el6.noarch.rpm'.format(
             url=url
             )]
         )
@@ -48,9 +48,6 @@ def install_centos(release, codename, version_kind, version):
             'ceph',
             'ceph-common',
             'ceph-fs-common',
-            # ceph only recommends gdisk, make sure we actually have
-            # it; only really needed for osds, but minimal collateral
-            'gdisk',
             ],
         )
     
@@ -181,12 +178,12 @@ def install(args):
         sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
         lsb_release_r = sudo.compile(lsb.lsb_release)
         (distro, release, codename) = lsb_release_r()
-        log.debug('Distro %s codename %s', distro, codename)
+        log.debug('Distro %s release %s codename %s', distro, release, codename)
 
         if (distro == 'Debian' or distro == 'Ubuntu'):
             log.debug('Installing on host %s ...', hostname)
             install_r = sudo.compile(install_debian)
-        elif (distro == 'centos'):
+        elif (distro == 'CentOS'):
             log.debug('Installing on host %s ...', hostname)
             install_r = sudo.compile(install_centos)
         else:
