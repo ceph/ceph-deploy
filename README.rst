@@ -5,14 +5,17 @@
 ``ceph-deploy`` is a way to deploy Ceph relying on just SSH access to
 the servers, ``sudo``, and some Python. It runs fully on your
 workstation, requiring no servers, databases, or anything like that.
-It is not a generic deployment system, it is only for Ceph.
-
-If you never wanted to install and learn Chef, Puppet or Juju, this is
-for you.
 
 If you set up and tear down Ceph clusters a lot, and want minimal
 extra bureaucracy, this is for you.
 
+It is not a generic deployment system, it is only for Ceph, and is designed
+for users who want to quickly get Ceph running with sensible initial settings
+without the overhead of installing Chef, Puppet or Juju.
+
+It does not handle client configuration beyond pushing the Ceph config file
+and users who want fine-control over security settings, partitions or directory 
+locations should use a tool such as Chef or Puppet.
 
 Setup
 =====
@@ -25,7 +28,22 @@ You can symlink the ``ceph-deploy`` script in this somewhere
 convenient (like ``~/bin``), or add the current directory to ``PATH``,
 or just always type the full path to ``ceph-deploy``.
 
+ceph-deploy at a minimum requires that the machine from which the script is
+being run can ssh as root without password into each Ceph node. 
 
+To enable this generate a new ssh keypair for the root user with no passphrase
+and place the public key (``id_rsa.pub`` or ``id_dsa.pub``) in:
+
+ /root/.ssh/authorized_keys
+
+and ensure that the following lines are in the sshd config:
+
+ PermitRootLogin yes
+ PermitEmptyPasswords yes
+
+The machine running ceph-deploy does not need to have the Ceph packages installed
+unless it needs to admin the cluster directly using the ``ceph`` command line tool.
+ 
 Managing an existing cluster
 ============================
 
@@ -50,10 +68,6 @@ Creating a new cluster
 
 Creating a new configuration
 ----------------------------
-
-To create a new Ceph cluster, you need some servers. You should be
-able to SSH to them without passwords (use SSH keys and an agent),
-and you should have passwordless ``sudo`` set up on the servers.
 
 To create a new configuration file and secret key, decide what hosts
 will run ``ceph-mon``, and run::
