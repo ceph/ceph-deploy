@@ -146,9 +146,90 @@ def mon_create(args):
     if errors:
         raise exc.GenericError('Failed to create %d monitors' % errors)
 
+
+def destroy_mon(cluster):
+    import os
+    import subprocess
+    import socket
+
+    hostname = socket.gethostname()
+    path = '/var/lib/ceph/mon/ceph-{hostname}'.format(
+        hostname=hostname,
+        )
+
+    if os.path.exists(path):
+        # stop
+        if os.path.exists(os.path.join(path, 'upstart')):
+            subprocess.call(   # ignore initctl error when job not running
+                args=[
+                    'initctl',
+                    'stop',
+                    'ceph-mon',
+                    'cluster={cluster}'.format(cluster=cluster),
+                    'id={hostname}'.format(hostname=hostname),
+                ],
+            )
+        elif os.path.exists(os.path.join(path, 'sysvinit')):
+            subprocess.check_call(
+                args=[
+                    'service',
+                    'ceph',
+                    'stop',
+                    'mon.{hostname}'.format(hostname=hostname),
+                ],
+            )
+
+        # remove from cluster
+        subprocess.check_call(
+            args=[
+                'sudo',
+                'ceph',
+                '--cluster={cluster}'.format(cluster=cluster),
+                '-n', 'mon.',
+                '-k', '{path}/keyring'.format(path=path),
+                'mon',
+                'remove',
+                hostname,
+                ],
+            )
+
+        # delete monitor directory
+        subprocess.check_call(
+            args=[
+                'rm',
+                '-rf',
+                path,
+                ],
+            )
+
+
+def mon_destroy(args):
+    errors = 0
+    for hostname in args.mon:
+        try:
+            log.debug('Removing mon from %s', hostname)
+
+            # TODO username
+            sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
+
+            destroy_mon_r = sudo.compile(destroy_mon)
+            destroy_mon_r(
+                cluster=args.cluster,
+                )
+
+        except RuntimeError as e:
+            log.error(e)
+            errors += 1
+
+    if errors:
+        raise exc.GenericError('Failed to create %d monitors' % errors)
+
+
 def mon(args):
     if args.subcommand == 'create':
         mon_create(args)
+    elif args.subcommand == 'destroy':
+        mon_destroy(args)
     else:
         log.error('subcommand %s not implemented', args.subcommand)
 
