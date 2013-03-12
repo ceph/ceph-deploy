@@ -1,0 +1,5 @@
+ceph-deploy (0.0.1-1) unstable; urgency=low
+
+  * Initial release.
+
+ -- Gary Lowell <gary.lowell@inktank.com>  Mon, 10 Mar 2013 18:38:40 +0800
