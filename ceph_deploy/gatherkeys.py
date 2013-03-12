@@ -79,7 +79,7 @@ def make(parser):
     parser.add_argument(
         'mon',
         metavar='HOST',
-        nargs='*',
+        nargs='+',
         help='monitor host to pull keys from',
         )
     parser.set_defaults(
