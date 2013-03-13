@@ -54,7 +54,6 @@ def zapdisk(args):
         zap_r(disk)
 
 def colon_separated(s):
-    journal = None
     if s.count(':') == 1:
         (host, disk) = s.split(':')
     else:
