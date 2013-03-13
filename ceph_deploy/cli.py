@@ -1,6 +1,6 @@
+import pkg_resources
 import argparse
 import logging
-import pkg_resources
 import pushy
 import sys
 

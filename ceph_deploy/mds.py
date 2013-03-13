@@ -35,7 +35,6 @@ def create_mds_bootstrap(cluster, key):
     exceptions for non-exceptional runs.
     """
     import os
-    import subprocess
 
     path = '/var/lib/ceph/bootstrap-mds/{cluster}.keyring'.format(
         cluster=cluster,
