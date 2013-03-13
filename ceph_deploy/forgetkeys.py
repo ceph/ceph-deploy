@@ -1,10 +1,8 @@
 import argparse
 import logging
-import os.path
 
 from cStringIO import StringIO
 
-from . import exc
 from .cliutil import priority
 
 
@@ -12,6 +10,7 @@ log = logging.getLogger(__name__)
 
 
 def forgetkeys(args):
+    import os
     for f in [
         'mon',
         'client.admin',
