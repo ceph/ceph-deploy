@@ -158,6 +158,20 @@ def destroy_mon(cluster):
         )
 
     if os.path.exists(path):
+        # remove from cluster
+        subprocess.check_call(
+            args=[
+                'sudo',
+                'ceph',
+                '--cluster={cluster}'.format(cluster=cluster),
+                '-n', 'mon.',
+                '-k', '{path}/keyring'.format(path=path),
+                'mon',
+                'remove',
+                hostname,
+                ],
+            )
+
         # stop
         if os.path.exists(os.path.join(path, 'upstart')):
             subprocess.call(   # ignore initctl error when job not running
@@ -176,20 +190,6 @@ def destroy_mon(cluster):
                     'ceph',
                     'stop',
                     'mon.{hostname}'.format(hostname=hostname),
-                ],
-            )
-
-        # remove from cluster
-        subprocess.check_call(
-            args=[
-                'sudo',
-                'ceph',
-                '--cluster={cluster}'.format(cluster=cluster),
-                '-n', 'mon.',
-                '-k', '{path}/keyring'.format(path=path),
-                'mon',
-                'remove',
-                hostname,
                 ],
             )
 
