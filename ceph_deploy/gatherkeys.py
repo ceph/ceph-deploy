@@ -4,7 +4,6 @@ import os.path
 
 from cStringIO import StringIO
 
-from . import exc
 from .cliutil import priority
 
 
