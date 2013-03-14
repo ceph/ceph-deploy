@@ -1,43 +1,32 @@
+import os.path
 import argparse
 import logging
-import os.path
 
 from cStringIO import StringIO
 
 from .cliutil import priority
-
+from . import misc
 
 log = logging.getLogger(__name__)
 
-
-def get_file(path):
-     """
-     Run on mon node, grab a file.
-     """
-     try:
-          with file(path, 'rb') as f:
-               return f.read()
-     except IOError:
-          pass
-
 def fetch_file(args, frompath, topath, hosts):
-     # mon.
-     if os.path.exists(topath):
-          log.debug('Have %s', topath)
-          return True
-     else:
-          for hostname in hosts:
-               log.debug('Checking %s for %s', hostname, frompath)
-               sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
-               get_file_r = sudo.compile(get_file)
-               key = get_file_r(path=frompath.format(hostname=hostname))
-               if key is not None:
-                    log.debug('Got %s key from %s.', topath, hostname)
-                    with file(topath, 'w') as f:
-                         f.write(key)
-                         return True
-     log.warning('Unable to find %s on %s', frompath, hosts)
-     return False
+    # mon.
+    if os.path.exists(topath):
+        log.debug('Have %s', topath)
+        return True
+    else:
+        for hostname in hosts:
+            log.debug('Checking %s for %s', hostname, frompath)
+            sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
+            get_file_r = sudo.compile(misc.get_file)
+            key = get_file_r(path=frompath.format(hostname=hostname))
+            if key is not None:
+                log.debug('Got %s key from %s.', topath, hostname)
+                with file(topath, 'w') as f:
+                    f.write(key)
+                    return True
+    log.warning('Unable to find %s on %s', frompath, hosts)
+    return False
 
 def gatherkeys(args):
      ret = 0
