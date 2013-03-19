@@ -18,7 +18,7 @@ def create_mon(cluster, monitor_keyring, init):
     import socket
     import subprocess
 
-    hostname = socket.gethostname()
+    hostname = socket.gethostname().split('.')[0]
     path = '/var/lib/ceph/mon/ceph-{hostname}'.format(
         hostname=hostname,
         )
@@ -152,7 +152,7 @@ def destroy_mon(cluster):
     import subprocess
     import socket
 
-    hostname = socket.gethostname()
+    hostname = socket.gethostname().split('.')[0]
     path = '/var/lib/ceph/mon/ceph-{hostname}'.format(
         hostname=hostname,
         )
