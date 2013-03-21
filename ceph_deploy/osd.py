@@ -170,7 +170,7 @@ def prepare(args, cfg, activate_prepared_disk):
                 cluster=args.cluster,
                 disk=disk,
                 journal=journal,
-                activate=activate_prepared_disk,
+                activate_prepared_disk=activate_prepared_disk,
                 zap=args.zap_disk,
                 dmcrypt=args.dmcrypt,
                 dmcrypt_dir=args.dmcrypt_key_dir,
