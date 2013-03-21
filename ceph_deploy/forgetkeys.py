@@ -3,7 +3,7 @@ import logging
 from .cliutil import priority
 
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 def forgetkeys(args):

@@ -8,7 +8,7 @@ from . import lsb
 from .cliutil import priority
 
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 def get_bootstrap_mds_key(cluster):
@@ -127,7 +127,7 @@ def create_mds(
 
 def mds_create(args):
     cfg = conf.load(args)
-    log.debug(
+    LOG.debug(
         'Deploying mds, cluster %s hosts %s',
         args.cluster,
         ' '.join(':'.join(x or '' for x in t) for t in args.mds),
@@ -148,12 +148,12 @@ def mds_create(args):
             lsb_release_r = sudo.compile(lsb.lsb_release)
             (distro, release, codename) = lsb_release_r()
             init = lsb.choose_init(distro, codename)
-            log.debug('Distro %s codename %s, will use %s',
+            LOG.debug('Distro %s codename %s, will use %s',
                       distro, codename, init)
 
             if hostname not in bootstrapped:
                 bootstrapped.add(hostname)
-                log.debug('Deploying mds bootstrap to %s', hostname)
+                LOG.debug('Deploying mds bootstrap to %s', hostname)
 
                 write_conf_r = sudo.compile(conf.write_conf)
                 conf_data = StringIO()
@@ -171,10 +171,10 @@ def mds_create(args):
                     )
                 if error is not None:
                     raise exc.GenericError(error)
-                log.debug('Host %s is now ready for MDS use.', hostname)
+                LOG.debug('Host %s is now ready for MDS use.', hostname)
 
             # create an mds
-            log.debug('Deploying mds.%s to %s', name, hostname)
+            LOG.debug('Deploying mds.%s to %s', name, hostname)
             create_mds_r = sudo.compile(create_mds)
             create_mds_r(
                 name=name,
@@ -182,7 +182,7 @@ def mds_create(args):
                 init=init,
                 )
         except RuntimeError as e:
-            log.error(e)
+            LOG.error(e)
             errors += 1
 
     if errors:
@@ -193,7 +193,7 @@ def mds(args):
     if args.subcommand == 'create':
         mds_create(args)
     else:
-        log.error('subcommand %s not implemented', args.subcommand)
+        LOG.error('subcommand %s not implemented', args.subcommand)
 
 
 def colon_separated(s):

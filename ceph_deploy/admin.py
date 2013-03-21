@@ -7,7 +7,7 @@ from . import conf
 from .cliutil import priority
 
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 def write_file(path, content):
     try:
@@ -30,7 +30,7 @@ def admin(args):
 
     errors = 0
     for hostname in args.client:
-        log.debug('Pushing admin keys and conf to %s', hostname)
+        LOG.debug('Pushing admin keys and conf to %s', hostname)
         try:
             sudo = args.pushy('ssh+sudo:{hostname}'.format(
                     hostname=hostname,
@@ -55,7 +55,7 @@ def admin(args):
                 raise exc.GenericError(error)
 
         except RuntimeError as e:
-            log.error(e)
+            LOG.error(e)
             errors += 1
 
     if errors:

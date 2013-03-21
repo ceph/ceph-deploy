@@ -9,7 +9,7 @@ from . import validate
 from . import sudo_pushy
 
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 def parse_args(args=None, namespace=None):

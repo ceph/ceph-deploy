@@ -4,7 +4,7 @@ import os.path
 from .cliutil import priority
 
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 def get_file(path):
@@ -20,21 +20,21 @@ def get_file(path):
 def fetch_file(args, frompath, topath, hosts):
     # mon.
     if os.path.exists(topath):
-        log.debug('Have %s', topath)
+        LOG.debug('Have %s', topath)
         return True
     else:
         for hostname in hosts:
-            log.debug('Checking %s for %s', hostname, frompath)
+            LOG.debug('Checking %s for %s', hostname, frompath)
             sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
             get_file_r = sudo.compile(get_file)
             key = get_file_r(path=frompath.format(hostname=hostname))
             if key is not None:
-                log.debug('Got %s from %s, writing locally', topath, hostname)
+                LOG.debug('Got %s from %s, writing locally', topath, hostname)
                 if not args.dry_run:
                     with file(topath, 'w') as f:
                         f.write(key)
                 return True
-    log.warning('Unable to find %s on %s', frompath, hosts)
+    LOG.warning('Unable to find %s on %s', frompath, hosts)
     return False
 
 def discover(args):
