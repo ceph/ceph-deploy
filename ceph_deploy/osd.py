@@ -1,6 +1,6 @@
 import argparse
 import logging
-import os.path
+import os
 import sys
 
 from cStringIO import StringIO
@@ -34,7 +34,6 @@ def create_osd(cluster, key):
     tell between bug and correctly handled failure, so avoid using
     exceptions for non-exceptional runs.
     """
-    import os
     import subprocess
 
     path = '/var/lib/ceph/bootstrap-osd/{cluster}.keyring'.format(
