@@ -1,4 +1,3 @@
-import argparse
 import logging
 
 from cStringIO import StringIO
@@ -6,7 +5,6 @@ from cStringIO import StringIO
 from . import exc
 from . import conf
 from .cliutil import priority
-from . import misc
 
 log = logging.getLogger(__name__)
 
