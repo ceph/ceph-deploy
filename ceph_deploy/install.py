@@ -8,6 +8,7 @@ from .cliutil import priority
 log = logging.getLogger(__name__)
 
 def install_centos(release, codename, version_kind, version):
+    import platform
     import subprocess
 
     if version_kind in ['stable', 'testing']:
