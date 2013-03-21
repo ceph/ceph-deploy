@@ -1,16 +1,9 @@
-import ConfigParser
 import argparse
 import logging
 import os
-import subprocess
-
-from cStringIO import StringIO
 
 from . import conf
-from . import exc
 from .cliutil import priority
-from .memoize import memoize
-
 
 log = logging.getLogger(__name__)
 
