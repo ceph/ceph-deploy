@@ -4,6 +4,7 @@ from cStringIO import StringIO
 
 from . import exc
 from . import conf
+from . import misc
 from .cliutil import priority
 
 LOG = logging.getLogger(__name__)
@@ -36,16 +37,6 @@ def config_push(args):
         raise exc.GenericError('Failed to config %d hosts' % errors)
 
 
-def get_file(path):
-    """
-    Run on mon node, grab a file.
-    """
-    try:
-        with file(path, 'rb') as f:
-            return f.read()
-    except IOError:
-        pass
-
 def config_pull(args):
     import os.path
 
@@ -57,7 +48,7 @@ def config_pull(args):
         try:
             LOG.debug('Checking %s for %s', hostname, frompath)
             sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
-            get_file_r = sudo.compile(get_file)
+            get_file_r = sudo.compile(misc.get_file)
             conf_file = get_file_r(path=frompath)
             if conf_file is not None:
                 LOG.debug('Got %s from %s', frompath, hostname)
