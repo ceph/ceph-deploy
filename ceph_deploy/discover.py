@@ -1,21 +1,12 @@
 import logging
 import os.path
 
+from . import misc
 from .cliutil import priority
 
 
 LOG = logging.getLogger(__name__)
 
-
-def get_file(path):
-    """
-    Run on remote node, grab a file.
-    """
-    try:
-        with file(path, 'rb') as f:
-            return f.read()
-    except IOError:
-        pass
 
 def fetch_file(args, frompath, topath, hosts):
     # mon.
@@ -26,7 +17,7 @@ def fetch_file(args, frompath, topath, hosts):
         for hostname in hosts:
             LOG.debug('Checking %s for %s', hostname, frompath)
             sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
-            get_file_r = sudo.compile(get_file)
+            get_file_r = sudo.compile(misc.get_file)
             key = get_file_r(path=frompath.format(hostname=hostname))
             if key is not None:
                 LOG.debug('Got %s from %s, writing locally', topath, hostname)
