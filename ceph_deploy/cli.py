@@ -94,7 +94,7 @@ def main(args=None, namespace=None):
     try:
         return args.func(args)
     except exc.DeployError as e:
-        print >>sys.stderr, '{prog}: {msg}'.format(
+        print >> sys.stderr, '{prog}: {msg}'.format(
             prog=args.prog,
             msg=e,
             )
