@@ -56,18 +56,18 @@ def config_pull(args):
             LOG.debug('Checking %s for %s', hostname, frompath)
             sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
             get_file_r = sudo.compile(get_file)
-            conf = get_file_r(path=frompath)
-            if conf is not None:
+            conf_file = get_file_r(path=frompath)
+            if conf_file is not None:
                 LOG.debug('Got %s from %s', frompath, hostname)
                 if os.path.exists(topath):
                     with file(topath, 'rb') as f:
                         existing = f.read()
-                        if existing != conf and not args.overwrite_conf:
+                        if existing != conf_file and not args.overwrite_conf:
                             LOG.error('local config file %s exists with different content; use --overwrite-conf to overwrite' % topath)
                             raise
 
                 with file(topath, 'w') as f:
-                    f.write(conf)
+                    f.write(conf_file)
                 return
             LOG.debug('Empty or missing %s on %s', frompath, hostname)
         except:
