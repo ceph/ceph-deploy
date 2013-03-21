@@ -25,10 +25,10 @@ def generate_auth_key():
                 )
     return base64.b64encode(header + key)
 
-"""
-Search result of getaddrinfo() for a non-localhost-net address
-"""
 def get_nonlocal_ip(host):
+    """
+    Search result of getaddrinfo() for a non-localhost-net address
+    """
     ailist = socket.getaddrinfo(host, None)
     for ai in ailist:
         # an ai is a 5-tuple; the last element is (ip, port)
