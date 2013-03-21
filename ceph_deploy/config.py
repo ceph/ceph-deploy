@@ -1,14 +1,13 @@
-import argparse
 import logging
 
 from cStringIO import StringIO
 
 from . import exc
 from . import conf
-from .cliutil import priority
 from . import misc
+from .cliutil import priority
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 def config_push(args):
     cfg = conf.load(args)
@@ -17,7 +16,7 @@ def config_push(args):
 
     errors = 0
     for hostname in args.client:
-        log.debug('Pushing config to %s', hostname)
+        LOG.debug('Pushing config to %s', hostname)
         try:
             sudo = args.pushy('ssh+sudo:{hostname}'.format(
                     hostname=hostname,
@@ -31,49 +30,41 @@ def config_push(args):
                 )
 
         except RuntimeError as e:
-            log.error(e)
+            LOG.error(e)
             errors += 1
 
     if errors:
         raise exc.GenericError('Failed to config %d hosts' % errors)
 
 
-def get_file(path):
-     """
-     Run on mon node, grab a file.
-     """
-     try:
-          with file(path, 'rb') as f:
-               return f.read()
-     except IOError:
-          pass
-
 def config_pull(args):
+    import os.path
+
     topath = '{cluster}.conf'.format(cluster=args.cluster)
     frompath = '/etc/ceph/{cluster}.conf'.format(cluster=args.cluster)
 
     errors = 0
     for hostname in args.client:
         try:
-            log.debug('Checking %s for %s', hostname, frompath)
+            LOG.debug('Checking %s for %s', hostname, frompath)
             sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
-            get_file_r = sudo.compile(get_file)
-            conf = get_file_r(path=frompath)
-            if conf is not None:
-                log.debug('Got %s from %s', frompath, hostname)
+            get_file_r = sudo.compile(misc.get_file)
+            conf_file = get_file_r(path=frompath)
+            if conf_file is not None:
+                LOG.debug('Got %s from %s', frompath, hostname)
                 if os.path.exists(topath):
                     with file(topath, 'rb') as f:
                         existing = f.read()
-                        if existing != conf and not args.overwrite_conf:
-                            log.error('local config file %s exists with different content; use --overwrite-conf to overwrite' % topath)
+                        if existing != conf_file and not args.overwrite_conf:
+                            LOG.error('local config file %s exists with different content; use --overwrite-conf to overwrite' % topath)
                             raise
 
                 with file(topath, 'w') as f:
-                    f.write(conf)
+                    f.write(conf_file)
                 return
-            log.debug('Empty or missing %s on %s', frompath, hostname)
+            LOG.debug('Empty or missing %s on %s', frompath, hostname)
         except:
-            log.error('Unable to pull %s from %s', frompath, hostname)
+            LOG.error('Unable to pull %s from %s', frompath, hostname)
         finally:
             errors += 1
 
@@ -86,7 +77,7 @@ def config(args):
     elif args.subcommand == 'pull':
         config_pull(args)
     else:
-        log.error('subcommand %s not implemented', args.subcommand)
+        LOG.error('subcommand %s not implemented', args.subcommand)
 
 @priority(70)
 def make(parser):

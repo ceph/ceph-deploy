@@ -1,12 +1,9 @@
-import argparse
 import logging
-
-from cStringIO import StringIO
 
 from .cliutil import priority
 
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 def forgetkeys(args):

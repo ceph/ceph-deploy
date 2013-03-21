@@ -9,7 +9,7 @@ from . import validate
 from . import sudo_pushy
 
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 def parse_args(args=None, namespace=None):
@@ -94,7 +94,7 @@ def main(args=None, namespace=None):
     try:
         return args.func(args)
     except exc.DeployError as e:
-        print >>sys.stderr, '{prog}: {msg}'.format(
+        print >> sys.stderr, '{prog}: {msg}'.format(
             prog=args.prog,
             msg=e,
             )

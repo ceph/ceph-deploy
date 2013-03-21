@@ -1,8 +1,6 @@
-import ConfigParser
 import argparse
 import logging
-import os.path
-import re
+import os
 import sys
 
 from cStringIO import StringIO
@@ -11,10 +9,9 @@ from . import conf
 from . import exc
 from . import lsb
 from .cliutil import priority
-from .memoize import memoize
 
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 def get_bootstrap_osd_key(cluster):
@@ -37,7 +34,6 @@ def create_osd(cluster, key):
     tell between bug and correctly handled failure, so avoid using
     exceptions for non-exceptional runs.
     """
-    import os
     import subprocess
 
     path = '/var/lib/ceph/bootstrap-osd/{cluster}.keyring'.format(
@@ -75,13 +71,13 @@ def create_osd(cluster, key):
         )
 
 
-def prepare_disk(cluster, disk, journal, activate, zap, dmcrypt, dmcrypt_dir):
+def prepare_disk(cluster, disk, journal, activate_prepared_disk, zap, dmcrypt, dmcrypt_dir):
     """
     Run on osd node, prepares a data disk for use.
     """
     import subprocess
 
-    args=[
+    args = [
         'ceph-disk-prepare',
         ]
     if zap:
@@ -99,7 +95,7 @@ def prepare_disk(cluster, disk, journal, activate, zap, dmcrypt, dmcrypt_dir):
         args.append(journal)
     subprocess.check_call(args=args)
 
-    if activate:
+    if activate_prepared_disk:
         subprocess.check_call(
             args=[
                 'udevadm',
@@ -126,8 +122,8 @@ def activate_disk(cluster, disk, init):
             ])
 
 
-def prepare(args, cfg, activate):
-    log.debug(
+def prepare(args, cfg, activate_prepared_disk):
+    LOG.debug(
         'Preparing cluster %s disks %s',
         args.cluster,
         ' '.join(':'.join(x or '' for x in t) for t in args.disk),
@@ -146,7 +142,7 @@ def prepare(args, cfg, activate):
 
             if hostname not in bootstrapped:
                 bootstrapped.add(hostname)
-                log.debug('Deploying osd to %s', hostname)
+                LOG.debug('Deploying osd to %s', hostname)
 
                 write_conf_r = sudo.compile(conf.write_conf)
                 conf_data = StringIO()
@@ -164,9 +160,9 @@ def prepare(args, cfg, activate):
                     )
                 if error is not None:
                     raise exc.GenericError(error)
-                log.debug('Host %s is now ready for osd use.', hostname)
+                LOG.debug('Host %s is now ready for osd use.', hostname)
 
-            log.debug('Preparing host %s disk %s journal %s activate %s',
+            LOG.debug('Preparing host %s disk %s journal %s activate %s',
                       hostname, disk, journal, activate)
 
             prepare_disk_r = sudo.compile(prepare_disk)
@@ -174,21 +170,21 @@ def prepare(args, cfg, activate):
                 cluster=args.cluster,
                 disk=disk,
                 journal=journal,
-                activate=activate,
+                activate=activate_prepared_disk,
                 zap=args.zap_disk,
                 dmcrypt=args.dmcrypt,
                 dmcrypt_dir=args.dmcrypt_key_dir,
                 )
 
         except RuntimeError as e:
-            log.error(e)
+            LOG.error(e)
             errors += 1
 
     if errors:
         raise exc.GenericError('Failed to create %d OSDs' % errors)
 
 def activate(args, cfg):
-    log.debug(
+    LOG.debug(
         'Activating cluster %s disks %s',
         args.cluster,
         ' '.join(':'.join(t) for t in args.disk),
@@ -201,12 +197,12 @@ def activate(args, cfg):
                 hostname=hostname,
                 ))
 
-        log.debug('Activating host %s disk %s', hostname, disk)
+        LOG.debug('Activating host %s disk %s', hostname, disk)
 
         lsb_release_r = sudo.compile(lsb.lsb_release)
         (distro, release, codename) = lsb_release_r()
         init = lsb.choose_init(distro, codename)
-        log.debug('Distro %s codename %s, will use %s',
+        LOG.debug('Distro %s codename %s, will use %s',
                   distro, codename, init)
 
         activate_disk_r = sudo.compile(activate_disk)
@@ -221,13 +217,13 @@ def osd(args):
     cfg = conf.load(args)
 
     if args.subcommand == 'prepare':
-        prepare(args, cfg, activate=False)
+        prepare(args, cfg, activate_prepared_disk=False)
     if args.subcommand == 'create':
-        prepare(args, cfg, activate=True)
+        prepare(args, cfg, activate_prepared_disk=True)
     elif args.subcommand == 'activate':
         activate(args, cfg)
     else:
-        log.error('subcommand %s not implemented', args.subcommand)
+        LOG.error('subcommand %s not implemented', args.subcommand)
         sys.exit(1)
 
 
