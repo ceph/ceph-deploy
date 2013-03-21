@@ -1,8 +1,6 @@
-import ConfigParser
 import argparse
 import logging
 import os.path
-import re
 import sys
 
 from cStringIO import StringIO
@@ -11,7 +9,6 @@ from . import conf
 from . import exc
 from . import lsb
 from .cliutil import priority
-from .memoize import memoize
 
 
 log = logging.getLogger(__name__)
