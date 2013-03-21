@@ -70,7 +70,7 @@ def uninstall_centos():
     args.extend(packages)
     subprocess.check_call(args=args)
 
-def uninstall_debian(purge=False):
+def uninstall_debian(arg_purge=False):
     import subprocess
 
     packages = [
@@ -87,7 +87,7 @@ def uninstall_debian(purge=False):
         '-y',
         '--force-yes',
         ]
-    if purge:
+    if arg_purge:
         args.append('--purge')
     args.append('--')
     args.extend(packages)
