@@ -47,6 +47,8 @@ def get_file(path):
         pass
 
 def config_pull(args):
+    import os.path
+
     topath = '{cluster}.conf'.format(cluster=args.cluster)
     frompath = '/etc/ceph/{cluster}.conf'.format(cluster=args.cluster)
 
