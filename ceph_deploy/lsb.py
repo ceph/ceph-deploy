@@ -1,5 +1,12 @@
 
 def lsb_release():
+    """
+    Get LSB release information from lsb_release.
+
+    Returns truple with distro, release and codename. Otherwise
+    the function raises an error (subprocess.CalledProcessError or
+    RuntimeError).
+    """
     import subprocess
 
     args = [ 'which', 'lsb_release', ]
@@ -52,6 +59,11 @@ def lsb_release():
 
 
 def choose_init(distro, codename):
+    """
+    Select a init system for a given distribution.
+
+    Returns the name of a init system (upstart, sysvinit ...).
+    """
     if distro == 'Ubuntu':
         return 'upstart'
     return 'sysvinit'
