@@ -1,6 +1,4 @@
-import ConfigParser
 import logging
-import re
 
 from cStringIO import StringIO
 
