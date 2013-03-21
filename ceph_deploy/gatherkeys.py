@@ -1,8 +1,5 @@
 import os.path
-import argparse
 import logging
-
-from cStringIO import StringIO
 
 from .cliutil import priority
 from . import misc
