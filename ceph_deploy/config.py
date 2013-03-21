@@ -39,14 +39,14 @@ def config_push(args):
 
 
 def get_file(path):
-     """
-     Run on mon node, grab a file.
-     """
-     try:
-          with file(path, 'rb') as f:
-               return f.read()
-     except IOError:
-          pass
+    """
+    Run on mon node, grab a file.
+    """
+    try:
+        with file(path, 'rb') as f:
+            return f.read()
+    except IOError:
+        pass
 
 def config_pull(args):
     topath = '{cluster}.conf'.format(cluster=args.cluster)
