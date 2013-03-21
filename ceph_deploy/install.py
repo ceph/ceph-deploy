@@ -5,9 +5,10 @@ from . import exc
 from . import lsb
 from .cliutil import priority
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 def install_centos(release, codename, version_kind, version):
+    import platform
     import subprocess
 
     if version_kind in ['stable', 'testing']:
@@ -70,7 +71,7 @@ def uninstall_centos():
     args.extend(packages)
     subprocess.check_call(args=args)
 
-def uninstall_debian(purge=False):
+def uninstall_debian(arg_purge=False):
     import subprocess
 
     packages = [
@@ -87,7 +88,7 @@ def uninstall_debian(purge=False):
         '-y',
         '--force-yes',
         ]
-    if purge:
+    if arg_purge:
         args.append('--purge')
     args.append('--')
     args.extend(packages)
@@ -164,7 +165,7 @@ def install(args):
     version_str = args.version_kind
     if version:
         version_str += ' version {version}'.format(version=version)
-    log.debug(
+    LOG.debug(
         'Installing %s on cluster %s hosts %s',
         version_str,
         args.cluster,
@@ -172,19 +173,19 @@ def install(args):
         )
 
     for hostname in args.host:
-        log.debug('Detecting platform for host %s ...', hostname)
+        LOG.debug('Detecting platform for host %s ...', hostname)
 
         # TODO username
         sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
         lsb_release_r = sudo.compile(lsb.lsb_release)
         (distro, release, codename) = lsb_release_r()
-        log.debug('Distro %s release %s codename %s', distro, release, codename)
+        LOG.debug('Distro %s release %s codename %s', distro, release, codename)
 
         if (distro == 'Debian' or distro == 'Ubuntu'):
-            log.debug('Installing on host %s ...', hostname)
+            LOG.debug('Installing on host %s ...', hostname)
             install_r = sudo.compile(install_debian)
         elif (distro == 'CentOS'):
-            log.debug('Installing on host %s ...', hostname)
+            LOG.debug('Installing on host %s ...', hostname)
             install_r = sudo.compile(install_centos)
         else:
             raise exc.UnsupportedPlatform(distro=distro, codename=codename)
@@ -197,26 +198,26 @@ def install(args):
             )
 
 def uninstall(args):
-    log.debug(
+    LOG.debug(
         'Uninstalling on cluster %s hosts %s',
         args.cluster,
         ' '.join(args.host),
         )
 
     for hostname in args.host:
-        log.debug('Detecting platform for host %s ...', hostname)
+        LOG.debug('Detecting platform for host %s ...', hostname)
 
         # TODO username
         sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
         lsb_release_r = sudo.compile(lsb.lsb_release)
         (distro, release, codename) = lsb_release_r()
-        log.debug('Distro %s codename %s', distro, codename)
+        LOG.debug('Distro %s codename %s', distro, codename)
 
         if (distro == 'Debian' or distro == 'Ubuntu'):
-            log.debug('Uninstalling on host %s ...', hostname)
+            LOG.debug('Uninstalling on host %s ...', hostname)
             uninstall_r = sudo.compile(uninstall_debian)
         elif (distro == 'centos'):
-            log.debug('Uninstalling on host %s ...', hostname)
+            LOG.debug('Uninstalling on host %s ...', hostname)
             uninstall_r = sudo.compile(uninstall_centos)
         else:
             raise exc.UnsupportedPlatform(distro=distro, codename=codename)
@@ -224,23 +225,23 @@ def uninstall(args):
         uninstall_r()
 
 def purge(args):
-    log.debug(
+    LOG.debug(
         'Purging from cluster %s hosts %s',
         args.cluster,
         ' '.join(args.host),
         )
 
     for hostname in args.host:
-        log.debug('Detecting platform for host %s ...', hostname)
+        LOG.debug('Detecting platform for host %s ...', hostname)
 
         # TODO username
         sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
         lsb_release_r = sudo.compile(lsb.lsb_release)
         (distro, release, codename) = lsb_release_r()
-        log.debug('Distro %s codename %s', distro, codename)
+        LOG.debug('Distro %s codename %s', distro, codename)
 
         if (distro == 'Debian' or distro == 'Ubuntu'):
-            log.debug('Purging host %s ...', hostname)
+            LOG.debug('Purging host %s ...', hostname)
             purge_r = sudo.compile(uninstall_debian)
         else:
             raise exc.UnsupportedPlatform(distro=distro, codename=codename)

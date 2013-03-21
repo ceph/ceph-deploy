@@ -10,7 +10,7 @@ from . import lsb
 from .cliutil import priority
 
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 def create_mon(cluster, monitor_keyring, init):
@@ -101,7 +101,7 @@ def mon_create(args):
     except IOError:
         raise RuntimeError('mon keyring not found; run \'new\' to create a new cluster')
 
-    log.debug(
+    LOG.debug(
         'Deploying mon, cluster %s hosts %s',
         args.cluster,
         ' '.join(args.mon),
@@ -110,7 +110,7 @@ def mon_create(args):
     errors = 0
     for hostname in args.mon:
         try:
-            log.debug('Deploying mon to %s', hostname)
+            LOG.debug('Deploying mon to %s', hostname)
 
             # TODO username
             sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
@@ -118,7 +118,7 @@ def mon_create(args):
             lsb_release_r = sudo.compile(lsb.lsb_release)
             (distro, release, codename) = lsb_release_r()
             init = lsb.choose_init(distro, codename)
-            log.debug('Distro %s codename %s, will use %s',
+            LOG.debug('Distro %s codename %s, will use %s',
                       distro, codename, init)
 
             write_conf_r = sudo.compile(conf.write_conf)
@@ -140,7 +140,7 @@ def mon_create(args):
             # TODO add_bootstrap_peer_hint
 
         except RuntimeError as e:
-            log.error(e)
+            LOG.error(e)
             errors += 1
 
     if errors:
@@ -207,7 +207,7 @@ def mon_destroy(args):
     errors = 0
     for hostname in args.mon:
         try:
-            log.debug('Removing mon from %s', hostname)
+            LOG.debug('Removing mon from %s', hostname)
 
             # TODO username
             sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
@@ -218,7 +218,7 @@ def mon_destroy(args):
                 )
 
         except RuntimeError as e:
-            log.error(e)
+            LOG.error(e)
             errors += 1
 
     if errors:
@@ -231,7 +231,7 @@ def mon(args):
     elif args.subcommand == 'destroy':
         mon_destroy(args)
     else:
-        log.error('subcommand %s not implemented', args.subcommand)
+        LOG.error('subcommand %s not implemented', args.subcommand)
 
 @priority(30)
 def make(parser):

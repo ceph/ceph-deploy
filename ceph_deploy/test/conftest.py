@@ -4,7 +4,7 @@ import subprocess
 import sys
 
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 def _prepend_path(env):
@@ -67,7 +67,7 @@ class CLIProcess(object):
                 # something else failed, we'll just log
                 raise err
             else:
-                log.error(str(err))
+                LOG.error(str(err))
 
 
 class CLITester(object):

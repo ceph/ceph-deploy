@@ -1,18 +1,11 @@
-import ConfigParser
 import argparse
 import logging
 import os
-import subprocess
-
-from cStringIO import StringIO
 
 from . import conf
-from . import exc
 from .cliutil import priority
-from .memoize import memoize
 
-
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 # NOTE: this mirrors ceph-disk-prepare --zap-disk DEV
@@ -44,7 +37,7 @@ def zapdisk(args):
     cfg = conf.load(args)
 
     for hostname, disk in args.disk:
-        log.debug('zapping %s on %s', disk, hostname)
+        LOG.debug('zapping %s on %s', disk, hostname)
 
         # TODO username
         sudo = args.pushy('ssh+sudo:{hostname}'.format(

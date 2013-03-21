@@ -12,7 +12,7 @@ from . import exc
 from .cliutil import priority
 
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 def generate_auth_key():
@@ -25,20 +25,20 @@ def generate_auth_key():
                 )
     return base64.b64encode(header + key)
 
-"""
-Search result of getaddrinfo() for a non-localhost-net address
-"""
 def get_nonlocal_ip(host):
+    """
+    Search result of getaddrinfo() for a non-localhost-net address
+    """
     ailist = socket.getaddrinfo(host, None)
     for ai in ailist:
         # an ai is a 5-tuple; the last element is (ip, port)
-        ip = ai[4][0];
+        ip = ai[4][0]
         if not ip.startswith('127.'):
             return ip
     raise exc.UnableToResolveError(host)
 
 def new(args):
-    log.debug('Creating new cluster named %s', args.cluster)
+    LOG.debug('Creating new cluster named %s', args.cluster)
     cfg = ConfigParser.RawConfigParser()
     cfg.add_section('global')
 
@@ -56,15 +56,15 @@ def new(args):
             host = m
             if name.count('.') > 0:
                 name = name.split('.')[0]
-        log.debug('Resolving host %s', host)
+        LOG.debug('Resolving host %s', host)
         ip = None
         ip = get_nonlocal_ip(host)
-        log.debug('Monitor %s at %s', name, ip)
+        LOG.debug('Monitor %s at %s', name, ip)
         mon_initial_members.append(name)
         mon_host.append(ip)
 
-    log.debug('Monitor initial members are %s', mon_initial_members)
-    log.debug('Monitor addrs are %s', mon_host)
+    LOG.debug('Monitor initial members are %s', mon_initial_members)
+    LOG.debug('Monitor addrs are %s', mon_host)
 
     cfg.set('global', 'mon initial members', ', '.join(mon_initial_members))
     # no spaces here, see http://tracker.newdream.net/issues/3145
@@ -86,14 +86,14 @@ def new(args):
         )
 
     # FIXME: create a random key
-    log.debug('Creating a random mon key...')
+    LOG.debug('Creating a random mon key...')
     mon_keyring = '[mon.]\nkey = %s\ncaps mon = allow *\n' % generate_auth_key()
 
     keypath = '{name}.mon.keyring'.format(
         name=args.cluster,
         )
 
-    log.debug('Writing initial config to %s...', path)
+    LOG.debug('Writing initial config to %s...', path)
     if not args.dry_run:
         tmp = '%s.tmp' % path
         with file(tmp, 'w') as f:
@@ -106,7 +106,7 @@ def new(args):
             else:
                 raise
 
-    log.debug('Writing monitor keyring to %s...', path)
+    LOG.debug('Writing monitor keyring to %s...', path)
     if not args.dry_run:
         tmp = '%s.tmp' % keypath
         with file(tmp, 'w') as f:
