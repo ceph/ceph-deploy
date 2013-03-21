@@ -32,7 +32,7 @@ def get_nonlocal_ip(host):
     ailist = socket.getaddrinfo(host, None)
     for ai in ailist:
         # an ai is a 5-tuple; the last element is (ip, port)
-        ip = ai[4][0];
+        ip = ai[4][0]
         if not ip.startswith('127.'):
             return ip
     raise exc.UnableToResolveError(host)
