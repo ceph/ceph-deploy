@@ -81,7 +81,7 @@ def prepare_disk(cluster, disk, journal, activate, zap, dmcrypt, dmcrypt_dir):
     """
     import subprocess
 
-    args=[
+    args = [
         'ceph-disk-prepare',
         ]
     if zap:
