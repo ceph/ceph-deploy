@@ -72,7 +72,7 @@ def create_osd(cluster, key):
         )
 
 
-def prepare_disk(cluster, disk, journal, activate, zap, dmcrypt, dmcrypt_dir):
+def prepare_disk(cluster, disk, journal, activate_prepared_disk, zap, dmcrypt, dmcrypt_dir):
     """
     Run on osd node, prepares a data disk for use.
     """
@@ -96,7 +96,7 @@ def prepare_disk(cluster, disk, journal, activate, zap, dmcrypt, dmcrypt_dir):
         args.append(journal)
     subprocess.check_call(args=args)
 
-    if activate:
+    if activate_prepared_disk:
         subprocess.check_call(
             args=[
                 'udevadm',
@@ -123,7 +123,7 @@ def activate_disk(cluster, disk, init):
             ])
 
 
-def prepare(args, cfg, activate):
+def prepare(args, cfg, activate_prepared_disk):
     LOG.debug(
         'Preparing cluster %s disks %s',
         args.cluster,
@@ -171,7 +171,7 @@ def prepare(args, cfg, activate):
                 cluster=args.cluster,
                 disk=disk,
                 journal=journal,
-                activate=activate,
+                activate=activate_prepared_disk,
                 zap=args.zap_disk,
                 dmcrypt=args.dmcrypt,
                 dmcrypt_dir=args.dmcrypt_key_dir,
@@ -218,9 +218,9 @@ def osd(args):
     cfg = conf.load(args)
 
     if args.subcommand == 'prepare':
-        prepare(args, cfg, activate=False)
+        prepare(args, cfg, activate_prepared_disk=False)
     if args.subcommand == 'create':
-        prepare(args, cfg, activate=True)
+        prepare(args, cfg, activate_prepared_disk=True)
     elif args.subcommand == 'activate':
         activate(args, cfg)
     else:
