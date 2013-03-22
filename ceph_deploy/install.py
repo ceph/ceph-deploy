@@ -160,6 +160,24 @@ def install_debian(release, codename, version_kind, version):
             ],
         )
 
+def purge_data_any():
+    import subprocess
+
+    subprocess.call(args=[
+            'rm', '-rf', '--one-file-system', '--', '/var/lib/ceph',
+            ])
+    if os.path.exists('/var/lib/ceph'):
+        subprocess.check_call(args=[
+                'find', '/var/lib/ceph',
+                '-mindepth', '1',
+                '-maxdepth', '2',
+                '-type', 'd',
+                '-exec', 'umount', '{}',
+                ])
+        subprocess.check_call(args=[
+                'rm', '-rf', '--one-file-system', '--', '/var/lib/ceph',
+                ])
+
 def install(args):
     version = getattr(args, args.version_kind)
     version_str = args.version_kind
@@ -247,6 +265,21 @@ def purge(args):
             raise exc.UnsupportedPlatform(distro=distro, codename=codename)
 
         purge_r(arg_purge=True)
+
+def purge_data(args):
+    LOG.debug(
+        'Purging data from cluster %s hosts %s',
+        args.cluster,
+        ' '.join(args.host),
+        )
+
+    for hostname in args.host:
+        # TODO username
+        sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
+
+        LOG.debug('Purging data from host %s ...', hostname)
+        purge_data_any_r = sudo.compile(purge_data_any)
+        purge_data_any_r()
 
 class StoreVersion(argparse.Action):
     """
@@ -348,4 +381,20 @@ def make_purge(parser):
         )
     parser.set_defaults(
         func=purge,
+        )
+
+
+@priority(80)
+def make_purge_data(parser):
+    """
+    Purge (delete, destroy, discard, shred) any Ceph data from /var/lib/ceph
+    """
+    parser.add_argument(
+        'host',
+        metavar='HOST',
+        nargs='+',
+        help='hosts to purge Ceph data from',
+        )
+    parser.set_defaults(
+        func=purge_data,
         )
