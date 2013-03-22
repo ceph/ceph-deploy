@@ -52,7 +52,7 @@ def install_centos(release, codename, version_kind, version):
             ],
         )
     
-def uninstall_centos():
+def uninstall_centos(arg_purge=False):
     import subprocess
 
     packages = [
@@ -246,7 +246,7 @@ def purge(args):
         else:
             raise exc.UnsupportedPlatform(distro=distro, codename=codename)
 
-        purge_r(purge=True)
+        purge_r(arg_purge=True)
 
 class StoreVersion(argparse.Action):
     """
