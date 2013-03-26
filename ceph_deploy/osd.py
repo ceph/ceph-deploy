@@ -163,7 +163,7 @@ def prepare(args, cfg, activate_prepared_disk):
                 LOG.debug('Host %s is now ready for osd use.', hostname)
 
             LOG.debug('Preparing host %s disk %s journal %s activate %s',
-                      hostname, disk, journal, activate)
+                      hostname, disk, journal, activate_prepared_disk)
 
             prepare_disk_r = sudo.compile(prepare_disk)
             prepare_disk_r(
