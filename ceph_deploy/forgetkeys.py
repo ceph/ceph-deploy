@@ -1,13 +1,20 @@
 import logging
 
+from . import misc
 from .cliutil import priority
 
 
-LOG = logging.getLogger(__name__)
+LOG = None
 
 
 def forgetkeys(args):
     import os
+
+    global LOG
+    LOG = misc.get_logger(args)
+
+    LOG.info('Forgetting local keys...')
+
     for f in [
         'mon',
         'client.admin',

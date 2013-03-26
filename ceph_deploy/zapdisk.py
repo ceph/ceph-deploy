@@ -3,9 +3,10 @@ import logging
 import os
 
 from . import conf
+from . import misc
 from .cliutil import priority
 
-LOG = logging.getLogger(__name__)
+LOG = None
 
 
 # NOTE: this mirrors ceph-disk-prepare --zap-disk DEV
@@ -34,6 +35,9 @@ def zap(dev):
         raise RuntimeError(e)
 
 def zapdisk(args):
+    global LOG
+    LOG = misc.get_logger(args)
+
     cfg = conf.load(args)
 
     for hostname, disk in args.disk:

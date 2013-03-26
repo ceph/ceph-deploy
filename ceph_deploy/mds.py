@@ -5,10 +5,11 @@ from cStringIO import StringIO
 from . import conf
 from . import exc
 from . import lsb
+from . import misc
 from .cliutil import priority
 
 
-LOG = logging.getLogger(__name__)
+LOG = None
 
 
 def get_bootstrap_mds_key(cluster):
@@ -190,6 +191,9 @@ def mds_create(args):
 
 
 def mds(args):
+    global LOG
+    LOG = misc.get_logger(args)
+
     if args.subcommand == 'create':
         mds_create(args)
     else:

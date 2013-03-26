@@ -7,7 +7,7 @@ from . import conf
 from . import misc
 from .cliutil import priority
 
-LOG = logging.getLogger(__name__)
+LOG = None
 
 def config_push(args):
     cfg = conf.load(args)
@@ -72,6 +72,9 @@ def config_pull(args):
 
 
 def config(args):
+    global LOG
+    LOG = misc.get_logger(args)
+
     if args.subcommand == 'push':
         config_push(args)
     elif args.subcommand == 'pull':

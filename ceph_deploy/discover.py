@@ -5,7 +5,7 @@ from . import misc
 from .cliutil import priority
 
 
-LOG = logging.getLogger(__name__)
+LOG = None
 
 
 def fetch_file(args, frompath, topath, hosts):
@@ -29,6 +29,9 @@ def fetch_file(args, frompath, topath, hosts):
     return False
 
 def discover(args):
+    global LOG
+    LOG = misc.get_logger(args)
+
     ret = 0
 
     # ceph.conf
