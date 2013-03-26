@@ -172,7 +172,7 @@ def purge_data_any():
                 '-mindepth', '1',
                 '-maxdepth', '2',
                 '-type', 'd',
-                '-exec', 'umount', '{}',
+                '-exec', 'umount', '{}', ';',
                 ])
         subprocess.check_call(args=[
                 'rm', '-rf', '--one-file-system', '--', '/var/lib/ceph',
