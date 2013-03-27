@@ -9,10 +9,11 @@ import base64
 import socket
 
 from . import exc
+from . import misc
 from .cliutil import priority
 
 
-LOG = logging.getLogger(__name__)
+LOG = None
 
 
 def generate_auth_key():
@@ -38,6 +39,9 @@ def get_nonlocal_ip(host):
     raise exc.UnableToResolveError(host)
 
 def new(args):
+    global LOG
+    LOG = misc.get_logger(args)
+
     LOG.debug('Creating new cluster named %s', args.cluster)
     cfg = ConfigParser.RawConfigParser()
     cfg.add_section('global')

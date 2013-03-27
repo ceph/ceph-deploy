@@ -3,9 +3,10 @@ import logging
 
 from . import exc
 from . import lsb
+from . import misc
 from .cliutil import priority
 
-LOG = logging.getLogger(__name__)
+LOG = None
 
 def install_centos(release, codename, version_kind, version):
     import platform
@@ -179,6 +180,9 @@ def purge_data_any():
                 ])
 
 def install(args):
+    global LOG
+    LOG = misc.get_logger(args)
+
     version = getattr(args, args.version_kind)
     version_str = args.version_kind
     if version:
@@ -216,6 +220,9 @@ def install(args):
             )
 
 def uninstall(args):
+    global LOG
+    LOG = misc.get_logger(args)
+
     LOG.debug(
         'Uninstalling on cluster %s hosts %s',
         args.cluster,
@@ -243,6 +250,9 @@ def uninstall(args):
         uninstall_r()
 
 def purge(args):
+    global LOG
+    LOG = misc.get_logger(args)
+
     LOG.debug(
         'Purging from cluster %s hosts %s',
         args.cluster,
@@ -267,6 +277,9 @@ def purge(args):
         purge_r(arg_purge=True)
 
 def purge_data(args):
+    global LOG
+    LOG = misc.get_logger(args)
+
     LOG.debug(
         'Purging data from cluster %s hosts %s',
         args.cluster,

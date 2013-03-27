@@ -4,10 +4,11 @@ from cStringIO import StringIO
 
 from . import exc
 from . import conf
+from . import misc
 from .cliutil import priority
 
 
-LOG = logging.getLogger(__name__)
+LOG = None
 
 def write_file(path, content):
     try:
@@ -17,6 +18,9 @@ def write_file(path, content):
         pass        
 
 def admin(args):
+    global LOG
+    LOG = misc.get_logger(args)
+
     cfg = conf.load(args)
     conf_data = StringIO()
     cfg.write(conf_data)

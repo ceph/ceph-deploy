@@ -8,11 +8,10 @@ from cStringIO import StringIO
 from . import conf
 from . import exc
 from . import lsb
+from . import misc
 from .cliutil import priority
 
-
-LOG = logging.getLogger(__name__)
-
+LOG = None
 
 def get_bootstrap_osd_key(cluster):
     """
@@ -214,6 +213,9 @@ def activate(args, cfg):
 
 
 def osd(args):
+    global LOG
+    LOG = misc.get_logger(args)
+
     cfg = conf.load(args)
 
     if args.subcommand == 'prepare':

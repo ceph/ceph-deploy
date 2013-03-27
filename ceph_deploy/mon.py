@@ -7,10 +7,11 @@ from cStringIO import StringIO
 from . import conf
 from . import exc
 from . import lsb
+from . import misc
 from .cliutil import priority
 
 
-LOG = logging.getLogger(__name__)
+LOG = None
 
 
 def create_mon(cluster, monitor_keyring, init):
@@ -226,6 +227,9 @@ def mon_destroy(args):
 
 
 def mon(args):
+    global LOG
+    LOG = misc.get_logger(args)
+
     if args.subcommand == 'create':
         mon_create(args)
     elif args.subcommand == 'destroy':

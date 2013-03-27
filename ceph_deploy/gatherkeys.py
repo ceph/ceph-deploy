@@ -1,10 +1,10 @@
 import os.path
 import logging
 
-from .cliutil import priority
 from . import misc
+from .cliutil import priority
 
-LOG = logging.getLogger(__name__)
+LOG = None
 
 def fetch_file(args, frompath, topath, hosts):
     # mon.
@@ -26,6 +26,9 @@ def fetch_file(args, frompath, topath, hosts):
     return False
 
 def gatherkeys(args):
+    global LOG
+    LOG = misc.get_logger(args)
+
     ret = 0
 
     # client.admin

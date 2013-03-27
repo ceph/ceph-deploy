@@ -5,11 +5,9 @@ import pushy
 import sys
 
 from . import exc
+from . import misc
 from . import validate
 from . import sudo_pushy
-
-
-LOG = logging.getLogger(__name__)
 
 
 def parse_args(args=None, namespace=None):
@@ -80,14 +78,6 @@ def parse_args(args=None, namespace=None):
 
 def main(args=None, namespace=None):
     args = parse_args(args=args, namespace=namespace)
-
-    loglevel = logging.INFO
-    if args.verbose:
-        loglevel = logging.DEBUG
-
-    logging.basicConfig(
-        level=loglevel,
-        )
 
     sudo_pushy.patch()
 
