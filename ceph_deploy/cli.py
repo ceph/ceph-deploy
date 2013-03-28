@@ -18,7 +18,7 @@ def parse_args(args=None, namespace=None):
         )
     parser.add_argument(
         '-v', '--verbose',
-        action='store_true', dest='verbose', default=True,
+        action='store_true', dest='verbose', default=False,
         help='be more verbose',
         )
     parser.add_argument(
