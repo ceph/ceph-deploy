@@ -81,13 +81,27 @@ def parse_args(args=None, namespace=None):
 def main(args=None, namespace=None):
     args = parse_args(args=args, namespace=namespace)
 
-    loglevel = logging.INFO
+    console_loglevel = logging.INFO
     if args.verbose:
-        loglevel = logging.DEBUG
+        console_loglevel = logging.DEBUG
+    sh = logging.StreamHandler()
+    sh.setLevel(console_loglevel)
 
-    logging.basicConfig(
-        level=loglevel,
-        )
+    fh = logging.FileHandler('{cluster}.log'.format(cluster=args.cluster))
+    fh.setLevel(logging.DEBUG)
+    formatter = logging.Formatter(
+        '%(asctime)s %(name)s %(levelname)s %(message)s')
+    fh.setFormatter(formatter)
+
+    # because we're in a module already, __name__ is not the ancestor of
+    # the rest of the package; use the root as the logger for everyone
+    root_logger = logging.getLogger()
+
+    # allow all levels at root_logger, handlers control individual levels
+    root_logger.setLevel(logging.DEBUG)
+
+    root_logger.addHandler(sh)
+    root_logger.addHandler(fh)
 
     sudo_pushy.patch()
 
