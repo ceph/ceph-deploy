@@ -213,12 +213,83 @@ def activate(args, cfg):
             )
 
 
+# NOTE: this mirrors ceph-disk-prepare --zap-disk DEV
+def zap(dev):
+    import subprocess
+
+    try:
+        # this kills the crab
+        #
+        # sgdisk will wipe out the main copy of the GPT partition
+        # table (sorry), but it doesn't remove the backup copies, and
+        # subsequent commands will continue to complain and fail when
+        # they see those.  zeroing the last few blocks of the device
+        # appears to do the trick.
+        lba_size = 4096
+        size = 33 * lba_size
+        with file(dev, 'wb') as f:
+            f.seek(-size, os.SEEK_END)
+            f.write(size*'\0')
+
+        subprocess.check_call(
+            args=[
+                'sgdisk',
+                '--zap-all',
+                '--clear',
+                '--mbrtogpt',
+                '--',
+                dev,
+                ],
+            )
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError(e)
+
+def disk_zap(args):
+    cfg = conf.load(args)
+
+    for hostname, disk in args.disk:
+        LOG.debug('zapping %s on %s', disk, hostname)
+
+        # TODO username
+        sudo = args.pushy('ssh+sudo:{hostname}'.format(
+                hostname=hostname,
+                ))
+        zap_r = sudo.compile(zap)
+        zap_r(disk)
+
+
+def list_disk():
+    import subprocess
+    proc = subprocess.Popen(
+        args=[
+            'ceph-disk',
+            'list',
+            ],
+        stdout=subprocess.PIPE,
+        )
+    return proc.stdout.read()
+
+def disk_list(args, cfg):
+    for hostname, disk, journal in args.disk:
+
+        # TODO username
+        sudo = args.pushy('ssh+sudo:{hostname}'.format(
+                hostname=hostname,
+                ))
+        LOG.debug('Listing disks on {hostname}...'.format(hostname=hostname))
+
+        list_disk_r = sudo.compile(list_disk)
+        print list_disk_r(),
+
+
 def osd(args):
     cfg = conf.load(args)
 
-    if args.subcommand == 'prepare':
+    if args.subcommand == 'list':
+        do_list(args, cfg)
+    elif args.subcommand == 'prepare':
         prepare(args, cfg, activate_prepared_disk=False)
-    if args.subcommand == 'create':
+    elif args.subcommand == 'create':
         prepare(args, cfg, activate_prepared_disk=True)
     elif args.subcommand == 'activate':
         activate(args, cfg)
@@ -227,19 +298,41 @@ def osd(args):
         sys.exit(1)
 
 
+
+def disk(args):
+    cfg = conf.load(args)
+
+    if args.subcommand == 'list':
+        disk_list(args, cfg)
+    elif args.subcommand == 'prepare':
+        prepare(args, cfg, activate_prepared_disk=False)
+    elif args.subcommand == 'activate':
+        activate(args, cfg)
+    elif args.subcommand == 'zap':
+        disk_zap(args, cfg)
+    else:
+        LOG.error('subcommand %s not implemented', args.subcommand)
+        sys.exit(1)
+
+
 def colon_separated(s):
     journal = None
+    disk = None
+    host = None
     if s.count(':') == 2:
         (host, disk, journal) = s.split(':')
     elif s.count(':') == 1:
         (host, disk) = s.split(':')
+    elif s.count(':') == 0:
+        (host) = s
     else:
         raise argparse.ArgumentTypeError('must be in form HOST:DISK[:JOURNAL]')
 
-    # allow just "sdb" to mean /dev/sdb
-    disk = os.path.join('/dev', disk)
-    if journal is not None:
-        journal = os.path.join('/dev', journal)
+    if disk:
+        # allow just "sdb" to mean /dev/sdb
+        disk = os.path.join('/dev', disk)
+        if journal is not None:
+            journal = os.path.join('/dev', journal)
 
     return (host, disk, journal)
 
@@ -253,12 +346,13 @@ def make(parser):
         'subcommand',
         metavar='SUBCOMMAND',
         choices=[
+            'list',
             'create',
             'prepare',
             'activate',
             'destroy',
             ],
-        help='create (prepare+activate), prepare, activate, or destroy',
+        help='list, create (prepare+activate), prepare, activate, or destroy',
         )
     parser.add_argument(
         'disk',
@@ -285,4 +379,48 @@ def make(parser):
         )
     parser.set_defaults(
         func=osd,
+        )
+
+
+@priority(50)
+def make_disk(parser):
+    """
+    Manage disks on a remote host.
+    """
+    parser.add_argument(
+        'subcommand',
+        metavar='SUBCOMMAND',
+        choices=[
+            'list',
+            'prepare',
+            'activate',
+            'zap',
+            ],
+        help='list, prepare, activate, zap',
+        )
+    parser.add_argument(
+        'disk',
+        nargs='+',
+        metavar='HOST[:DISK]',
+        type=colon_separated,
+        help='host (and optionally disk)',
+        )
+    parser.add_argument(
+        '--zap-disk',
+        action='store_true', default=None,
+        help='destroy existing partition table and content for DISK',
+        )
+    parser.add_argument(
+        '--dmcrypt',
+        action='store_true', default=None,
+        help='use dm-crypt on DISK',
+        )
+    parser.add_argument(
+        '--dmcrypt-key-dir',
+        metavar='KEYDIR',
+        default='/etc/ceph/dmcrypt-keys',
+        help='directory where dm-crypt keys are stored',
+        )
+    parser.set_defaults(
+        func=disk,
         )
