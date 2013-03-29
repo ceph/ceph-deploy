@@ -16,14 +16,15 @@ def parse_args(args=None, namespace=None):
     parser = argparse.ArgumentParser(
         description='Deploy Ceph',
         )
-    parser.add_argument(
+    verbosity = parser.add_mutually_exclusive_group(required=False)
+    verbosity.add_argument(
         '-v', '--verbose',
         action='store_true', dest='verbose', default=False,
         help='be more verbose',
         )
-    parser.add_argument(
+    verbosity.add_argument(
         '-q', '--quiet',
-        action='store_false', dest='verbose',
+        action='store_true', dest='quiet',
         help='be less verbose',
         )
     parser.add_argument(
@@ -82,6 +83,8 @@ def main(args=None, namespace=None):
     args = parse_args(args=args, namespace=namespace)
 
     console_loglevel = logging.INFO
+    if args.quiet:
+        console_loglevel = logging.WARNING
     if args.verbose:
         console_loglevel = logging.DEBUG
     sh = logging.StreamHandler()
