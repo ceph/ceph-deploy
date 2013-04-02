@@ -9,6 +9,7 @@ from . import conf
 from . import exc
 from . import lsb
 from .cliutil import priority
+from .sudo_pushy import get_transport
 
 
 LOG = logging.getLogger(__name__)
@@ -136,9 +137,7 @@ def prepare(args, cfg, activate_prepared_disk):
     for hostname, disk, journal in args.disk:
         try:
             # TODO username
-            sudo = args.pushy('ssh+sudo:{hostname}'.format(
-                    hostname=hostname,
-                    ))
+            sudo = args.pushy(get_transport(hostname))
 
             if hostname not in bootstrapped:
                 bootstrapped.add(hostname)
@@ -193,9 +192,7 @@ def activate(args, cfg):
     for hostname, disk, journal in args.disk:
 
         # TODO username
-        sudo = args.pushy('ssh+sudo:{hostname}'.format(
-                hostname=hostname,
-                ))
+        sudo = args.pushy(get_transport(hostname))
 
         LOG.debug('Activating host %s disk %s', hostname, disk)
 
@@ -250,9 +247,7 @@ def disk_zap(args):
         LOG.debug('zapping %s on %s', disk, hostname)
 
         # TODO username
-        sudo = args.pushy('ssh+sudo:{hostname}'.format(
-                hostname=hostname,
-                ))
+        sudo = args.pushy(get_transport(hostname))
         zap_r = sudo.compile(zap)
         zap_r(disk)
 
@@ -272,9 +267,8 @@ def disk_list(args, cfg):
     for hostname, disk, journal in args.disk:
 
         # TODO username
-        sudo = args.pushy('ssh+sudo:{hostname}'.format(
-                hostname=hostname,
-                ))
+        sudo = args.pushy(get_transport(hostname))
+
         LOG.debug('Listing disks on {hostname}...'.format(hostname=hostname))
 
         list_disk_r = sudo.compile(list_disk)

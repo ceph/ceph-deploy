@@ -5,7 +5,7 @@ from cStringIO import StringIO
 from . import exc
 from . import conf
 from .cliutil import priority
-
+from .sudo_pushy import get_transport
 
 LOG = logging.getLogger(__name__)
 
@@ -32,10 +32,7 @@ def admin(args):
     for hostname in args.client:
         LOG.debug('Pushing admin keys and conf to %s', hostname)
         try:
-            sudo = args.pushy('ssh+sudo:{hostname}'.format(
-                    hostname=hostname,
-                    ))
-
+            sudo = args.pushy(get_transport(hostname))
             write_conf_r = sudo.compile(conf.write_conf)
             write_conf_r(
                 cluster=args.cluster,
@@ -43,9 +40,7 @@ def admin(args):
                 overwrite=args.overwrite_conf,
                 )
 
-            sudo = args.pushy('ssh+sudo:{hostname}'.format(
-                    hostname=hostname,
-                    ))
+            sudo = args.pushy(get_transport(hostname))
             write_file_r = sudo.compile(write_file)
             error = write_file_r(
                 '/etc/ceph/%s.client.admin.keyring' % args.cluster,

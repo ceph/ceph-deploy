@@ -6,6 +6,7 @@ from . import exc
 from . import conf
 from . import misc
 from .cliutil import priority
+from .sudo_pushy import get_transport
 
 LOG = logging.getLogger(__name__)
 
@@ -18,10 +19,7 @@ def config_push(args):
     for hostname in args.client:
         LOG.debug('Pushing config to %s', hostname)
         try:
-            sudo = args.pushy('ssh+sudo:{hostname}'.format(
-                    hostname=hostname,
-                    ))
-
+            sudo = args.pushy(get_transport(hostname))
             write_conf_r = sudo.compile(conf.write_conf)
             write_conf_r(
                 cluster=args.cluster,
@@ -47,7 +45,7 @@ def config_pull(args):
     for hostname in args.client:
         try:
             LOG.debug('Checking %s for %s', hostname, frompath)
-            sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
+            sudo = args.pushy(get_transport(hostname))
             get_file_r = sudo.compile(misc.get_file)
             conf_file = get_file_r(path=frompath)
             if conf_file is not None:

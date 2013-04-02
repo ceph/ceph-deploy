@@ -3,6 +3,7 @@ import logging
 
 from .cliutil import priority
 from . import misc
+from .sudo_pushy import get_transport
 
 LOG = logging.getLogger(__name__)
 
@@ -14,7 +15,7 @@ def fetch_file(args, frompath, topath, hosts):
     else:
         for hostname in hosts:
             LOG.debug('Checking %s for %s', hostname, frompath)
-            sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
+            sudo = args.pushy(get_transport(hostname))
             get_file_r = sudo.compile(misc.get_file)
             key = get_file_r(path=frompath.format(hostname=hostname))
             if key is not None:

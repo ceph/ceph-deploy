@@ -4,6 +4,7 @@ import logging
 from . import exc
 from . import lsb
 from .cliutil import priority
+from .sudo_pushy import get_transport
 
 LOG = logging.getLogger(__name__)
 
@@ -194,7 +195,7 @@ def install(args):
         LOG.debug('Detecting platform for host %s ...', hostname)
 
         # TODO username
-        sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
+        sudo = args.pushy(get_transport(hostname))
         (distro, release, codename) = lsb.get_lsb_release(sudo)
         LOG.debug('Distro %s release %s codename %s', distro, release, codename)
 
@@ -225,7 +226,7 @@ def uninstall(args):
         LOG.debug('Detecting platform for host %s ...', hostname)
 
         # TODO username
-        sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
+        sudo = args.pushy(get_transport(hostname))
         (distro, release, codename) = lsb.get_lsb_release(sudo)
         LOG.debug('Distro %s codename %s', distro, codename)
 
@@ -251,7 +252,7 @@ def purge(args):
         LOG.debug('Detecting platform for host %s ...', hostname)
 
         # TODO username
-        sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
+        sudo = args.pushy(get_transport(hostname))
         (distro, release, codename) = lsb.get_lsb_release(sudo)
         LOG.debug('Distro %s codename %s', distro, codename)
 
@@ -272,7 +273,7 @@ def purge_data(args):
 
     for hostname in args.host:
         # TODO username
-        sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
+        sudo = args.pushy(get_transport(hostname))
 
         LOG.debug('Purging data from host %s ...', hostname)
         purge_data_any_r = sudo.compile(purge_data_any)

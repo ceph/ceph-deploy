@@ -6,6 +6,7 @@ from . import conf
 from . import exc
 from . import lsb
 from .cliutil import priority
+from .sudo_pushy import get_transport
 
 
 LOG = logging.getLogger(__name__)
@@ -143,7 +144,7 @@ def mds_create(args):
     for hostname, name in args.mds:
         try:
             # TODO username
-            sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
+            sudo = args.pushy(get_transport(hostname))
 
             (distro, release, codename) = lsb.get_lsb_release(sudo)
             init = lsb.choose_init(distro, codename)

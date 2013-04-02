@@ -8,6 +8,7 @@ from . import conf
 from . import exc
 from . import lsb
 from .cliutil import priority
+from .sudo_pushy import get_transport
 
 
 LOG = logging.getLogger(__name__)
@@ -81,6 +82,7 @@ def create_mon(cluster, monitor_keyring, init):
 
 
 def mon_create(args):
+
     cfg = conf.load(args)
     if not args.mon:
         try:
@@ -113,7 +115,7 @@ def mon_create(args):
             LOG.debug('Deploying mon to %s', hostname)
 
             # TODO username
-            sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
+            sudo = args.pushy(get_transport(hostname))
 
             (distro, release, codename) = lsb.get_lsb_release(sudo)
             init = lsb.choose_init(distro, codename)
@@ -209,7 +211,7 @@ def mon_destroy(args):
             LOG.debug('Removing mon from %s', hostname)
 
             # TODO username
-            sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
+            sudo = args.pushy(get_transport(hostname))
 
             destroy_mon_r = sudo.compile(destroy_mon)
             destroy_mon_r(
