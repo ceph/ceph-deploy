@@ -247,7 +247,7 @@ def zap(dev):
 def disk_zap(args):
     cfg = conf.load(args)
 
-    for hostname, disk in args.disk:
+    for hostname, disk, journal in args.disk:
         LOG.debug('zapping %s on %s', disk, hostname)
 
         # TODO username
@@ -309,7 +309,7 @@ def disk(args):
     elif args.subcommand == 'activate':
         activate(args, cfg)
     elif args.subcommand == 'zap':
-        disk_zap(args, cfg)
+        disk_zap(args)
     else:
         LOG.error('subcommand %s not implemented', args.subcommand)
         sys.exit(1)
