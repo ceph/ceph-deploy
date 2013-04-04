@@ -86,7 +86,7 @@ listing the hostnames of the monitors.  Each ``MON`` can be
    ``foo:1.2.3.4`` are all valid.  Note, however, that the hostname
    should match that configured on the host ``foo``.
 
-The above will create a ``ceph.conf`` and ``ceph.mon.keyring'' in your
+The above will create a ``ceph.conf`` and ``ceph.mon.keyring`` in your
 current directory.
 
 
@@ -136,7 +136,7 @@ bootstrapping new nodes) to the local directory, run::
 
   ceph-deploy gatherkeys HOST [HOST...]
 
-where ``HOST'' is one of the monitor hosts.
+where ``HOST`` is one of the monitor hosts.
 
 Once these keys are in the local directory, you can provision new OSDs etc.
 
