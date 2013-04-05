@@ -51,7 +51,7 @@ You can use ceph-deploy to provision nodes for an existing cluster.
 To grab a copy of the cluster configuration file (normally
 ``ceph.conf``)::
 
- ceph-deploy discover HOST
+ ceph-deploy config pull HOST
 
 You will usually also want to gather the encryption keys used for that
 cluster:
