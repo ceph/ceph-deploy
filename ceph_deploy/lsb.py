@@ -1,3 +1,20 @@
+from . import exc
+
+def check_lsb_release():
+    """
+    Verify if lsb_release command is available
+    """
+    import subprocess
+
+    args = [ 'which', 'lsb_release', ]
+    process = subprocess.Popen(
+        args=args,
+        stdout=subprocess.PIPE,
+        )
+    lsb_release_path, _ = process.communicate()
+    ret = process.wait()
+    if ret != 0:
+        raise RuntimeError('The lsb_release command was not found on remote host.  Please install the lsb-release package.')
 
 def lsb_release():
     """
@@ -8,16 +25,6 @@ def lsb_release():
     RuntimeError).
     """
     import subprocess
-
-    args = [ 'which', 'lsb_release', ]
-    process = subprocess.Popen(
-        args=args,
-        stdout=subprocess.PIPE,
-        )
-    distro, _ = process.communicate()
-    ret = process.wait()
-    if ret != 0:
-        raise RuntimeError('lsb_release not found on host')
 
     args = [ 'lsb_release', '-s', '-i' ]
     process = subprocess.Popen(
@@ -56,6 +63,27 @@ def lsb_release():
         raise RuntimeError('lsb_release gave invalid output for codename')
 
     return (str(distro).rstrip(), str(release).rstrip(), str(codename).rstrip())
+
+
+def get_lsb_release(sudo):
+    """
+    Get LSB release information from lsb_release.
+
+    Check if lsb_release is installed on the remote host and issue
+    a message if not.  
+
+    Returns truple with distro, release and codename. Otherwise
+    the function raises an error (subprocess.CalledProcessError or
+    RuntimeError).
+    """
+    try:
+        check_lsb_release_r = sudo.compile(check_lsb_release)
+        status = check_lsb_release_r()
+    except RuntimeError as e:
+        raise exc.MissingPackageError(e.message)
+
+    lsb_release_r = sudo.compile(lsb_release)
+    return lsb_release_r()
 
 
 def choose_init(distro, codename):

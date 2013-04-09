@@ -51,6 +51,16 @@ class UnsupportedPlatform(DeployError):
             codename=self.codename,
             )
 
+class MissingPackageError(DeployError):
+    """
+    A required package or command is missing
+    """
+    def __init__(self, message):
+        self.message = message
+
+    def __str__(self):
+        return self.message
+
 
 class GenericError(DeployError):
     def __init__(self, message):

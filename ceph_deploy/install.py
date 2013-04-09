@@ -195,8 +195,7 @@ def install(args):
 
         # TODO username
         sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
-        lsb_release_r = sudo.compile(lsb.lsb_release)
-        (distro, release, codename) = lsb_release_r()
+        (distro, release, codename) = lsb.get_lsb_release(sudo)
         LOG.debug('Distro %s release %s codename %s', distro, release, codename)
 
         if (distro == 'Debian' or distro == 'Ubuntu'):
@@ -227,8 +226,7 @@ def uninstall(args):
 
         # TODO username
         sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
-        lsb_release_r = sudo.compile(lsb.lsb_release)
-        (distro, release, codename) = lsb_release_r()
+        (distro, release, codename) = lsb.get_lsb_release(sudo)
         LOG.debug('Distro %s codename %s', distro, codename)
 
         if (distro == 'Debian' or distro == 'Ubuntu'):
@@ -254,8 +252,7 @@ def purge(args):
 
         # TODO username
         sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
-        lsb_release_r = sudo.compile(lsb.lsb_release)
-        (distro, release, codename) = lsb_release_r()
+        (distro, release, codename) = lsb.get_lsb_release(sudo)
         LOG.debug('Distro %s codename %s', distro, codename)
 
         if (distro == 'Debian' or distro == 'Ubuntu'):

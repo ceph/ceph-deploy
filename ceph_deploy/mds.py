@@ -145,8 +145,7 @@ def mds_create(args):
             # TODO username
             sudo = args.pushy('ssh+sudo:{hostname}'.format(hostname=hostname))
 
-            lsb_release_r = sudo.compile(lsb.lsb_release)
-            (distro, release, codename) = lsb_release_r()
+            (distro, release, codename) = lsb.get_lsb_release(sudo)
             init = lsb.choose_init(distro, codename)
             LOG.debug('Distro %s codename %s, will use %s',
                       distro, codename, init)

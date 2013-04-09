@@ -199,8 +199,7 @@ def activate(args, cfg):
 
         LOG.debug('Activating host %s disk %s', hostname, disk)
 
-        lsb_release_r = sudo.compile(lsb.lsb_release)
-        (distro, release, codename) = lsb_release_r()
+        (distro, release, codename) = lsb.get_lsb_release(sudo)
         init = lsb.choose_init(distro, codename)
         LOG.debug('Distro %s codename %s, will use %s',
                   distro, codename, init)
