@@ -337,7 +337,7 @@ def make(parser):
 
     version.set_defaults(
         func=install,
-        stable='bobtail',
+        stable='cuttlefish',
         dev='master',
         version_kind='stable',
         )
