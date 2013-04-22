@@ -57,6 +57,7 @@ setup(
             'forgetkeys = ceph_deploy.forgetkeys:make',
             'config = ceph_deploy.config:make',
             'admin = ceph_deploy.admin:make',
+            'update = ceph_deploy.update:make',
             ],
 
         },
