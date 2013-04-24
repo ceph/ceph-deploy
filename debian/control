@@ -12,7 +12,11 @@ Vcs-Browser: https://github.com/ceph/ceph-deploy
 
 Package: ceph-deploy
 Architecture: all
-Depends: ${misc:Depends}, ${python:Depends}
+Depends: python,
+         python-argparse,
+         ${misc:Depends},
+         ${python:Depends}
+
 Description:  Ceph-deploy is an easy to use configuration tool
  for the Ceph distributed storage system.
  .

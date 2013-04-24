@@ -9,6 +9,8 @@ URL:     http://ceph.com/
 Source: %{name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-root
 BuildArchitectures: noarch
+Requires:       python
+Requires:       python-argparse
 
 %if 0%{?rhel}
 BuildRequires: python >= %{pyver}
