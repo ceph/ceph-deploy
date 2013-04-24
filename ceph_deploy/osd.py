@@ -186,7 +186,9 @@ def activate(args, cfg):
     LOG.debug(
         'Activating cluster %s disks %s',
         args.cluster,
-        ' '.join(':'.join(t) for t in args.disk),
+        # join elements of t with ':', t's with ' '
+        # allow None in elements of t; print as empty
+        ' '.join(':'.join((s or '') for s in t) for t in args.disk),
         )
 
     for hostname, disk, journal in args.disk:
