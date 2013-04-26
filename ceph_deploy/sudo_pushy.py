@@ -1,6 +1,6 @@
 import pushy.transport.ssh
 import pushy.transport.local
-import os, shutil, subprocess, sys
+import subprocess 
 
 def __init__(self, command, address, **kwargs):
     pushy.transport.BaseTransport.__init__(self, address)
