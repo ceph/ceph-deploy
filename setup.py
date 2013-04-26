@@ -16,7 +16,7 @@ if pyversion < (2, 7) or (3, 0) <= pyversion <= (3, 1):
 
 setup(
     name='ceph-deploy',
-    version='0.0.1',
+    version='0.1',
     packages=find_packages(),
 
     author='Tommi Virtanen',
