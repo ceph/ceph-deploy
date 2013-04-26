@@ -202,7 +202,7 @@ def install(args):
         if (distro == 'Debian' or distro == 'Ubuntu'):
             LOG.debug('Installing on host %s ...', hostname)
             install_r = sudo.compile(install_debian)
-        elif (distro == 'CentOS'):
+        elif (distro == 'CentOS') or distro.startswith('RedHat'):
             LOG.debug('Installing on host %s ...', hostname)
             install_r = sudo.compile(install_centos)
         else:
