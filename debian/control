@@ -1,12 +1,12 @@
 Source: ceph-deploy
+Maintainer: Sage Weil <sage@newdream.net>
+Uploaders: Sage Weil <sage@newdream.net>
 Section: admin
 Priority: optional
-Uploaders: Sage Weil <sage@newdream.net>
-Maintainer: Sage Weil <sage@newdream.net>
-Homepage: http://ceph.com/
 Build-Depends: debhelper (>= 7)
 X-Python-Version: >= 2.4
 Standards-Version: 3.9.2
+Homepage: http://ceph.com/
 Vcs-Git: git://github.com/ceph/ceph-deploy.git
 Vcs-Browser: https://github.com/ceph/ceph-deploy
 
@@ -16,7 +16,6 @@ Depends: python,
          python-argparse,
          ${misc:Depends},
          ${python:Depends}
-
 Description:  Ceph-deploy is an easy to use configuration tool
  for the Ceph distributed storage system.
  .
