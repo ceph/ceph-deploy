@@ -233,7 +233,7 @@ def uninstall(args):
         if (distro == 'Debian' or distro == 'Ubuntu'):
             LOG.debug('Uninstalling on host %s ...', hostname)
             uninstall_r = sudo.compile(uninstall_debian)
-        elif (distro == 'centos'):
+        elif (distro == 'CentOS') or distro.startswith('RedHat'):
             LOG.debug('Uninstalling on host %s ...', hostname)
             uninstall_r = sudo.compile(uninstall_centos)
         else:
