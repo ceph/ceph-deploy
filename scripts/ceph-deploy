@@ -6,7 +6,9 @@ import sys
 ceph-deploy - admin tool for ceph
 """
 
-if os.path.exists('/usr/share/ceph-deploy'):
+if os.path.exists('/usr/share/pyshared/ceph_deploy'):
+    sys.path.insert(0,'/usr/share/pyshared/ceph_deploy')
+elif os.path.exists('/usr/share/ceph-deploy'):
     sys.path.insert(0,'/usr/share/ceph-deploy')
 elif os.path.exists('/usr/share/pyshared/ceph-deploy'):
     sys.path.insert(0,'/usr/share/pyshared/ceph-deploy')
