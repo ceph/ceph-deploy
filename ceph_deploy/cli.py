@@ -75,6 +75,9 @@ def parse_args(args=None, namespace=None):
 
         cluster='ceph',
         )
+    dist = pkg_resources.get_distribution('ceph-deploy')
+    parser.add_argument('--version', action='version',
+                        version=dist.version)
     args = parser.parse_args(args=args, namespace=namespace)
     return args
 

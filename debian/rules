@@ -2,7 +2,8 @@
 
 # Uncomment this to turn on verbose mode.
 export DH_VERBOSE=1
-export DEB_PYTHON_INSTALL_ARGS_ALL += --install-lib=/usr/share/ceph-deploy
+
+export CEPH_DEPLOY_VERSION_FOR_PYTHON=$(shell /usr/bin/dpkg-parsechangelog | /bin/grep Version: | /usr/bin/awk '{print $$NF}')
 
 %:
 	dh $@ 

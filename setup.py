@@ -2,12 +2,22 @@
 from setuptools import setup, find_packages
 import os
 import sys
+import subprocess
 
 
 def read(fname):
     path = os.path.join(os.path.dirname(__file__), fname)
     f = open(path)
     return f.read()
+
+def get_version():
+    try:
+        ver = os.environ['CEPH_DEPLOY_VERSION_FOR_PYTHON']
+    except:
+        ver = subprocess.check_output(['/usr/bin/git', 'describe']).rstrip()
+        if ver.startswith('v'):
+            ver = ver[1:]
+    return ver
 
 install_requires = []
 pyversion = sys.version_info[:2]
@@ -16,7 +26,7 @@ if pyversion < (2, 7) or (3, 0) <= pyversion <= (3, 1):
 
 setup(
     name='ceph-deploy',
-    version='0.1',
+    version=get_version(),
     packages=find_packages(),
 
     author='Tommi Virtanen',
