@@ -261,7 +261,7 @@ def purge(args):
             purge_r = sudo.compile(uninstall_debian)
         elif (distro == 'CentOS') or distro.startswith('RedHat'):
             LOG.debug('Uninstalling on host %s ...', hostname)
-            uninstall_r = sudo.compile(uninstall_centos)
+            purge_r = sudo.compile(uninstall_centos)
         else:
             raise exc.UnsupportedPlatform(distro=distro, codename=codename)
 
