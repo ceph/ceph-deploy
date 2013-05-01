@@ -7,17 +7,35 @@
 %{!?python_sitearch: %global python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib(1))")}
 %endif
 
+%define builddir ./rpmbuild
+
+#
+# it seems that rpmbuild expands all these definitions twice during 
+# a -bp run at least; I don't know why.  %global makes no difference,
+# nor does %{expand}.
+#
+
+# this macro exists only for its side-effects. 
+%define source_buildtar %{expand:%(%{__python} setup.py clean -a >/dev/null; %{__python} setup.py sdist --formats=bztar --dist-dir=%{builddir}/SOURCES >/dev/null)}
+# apparently expand doesn't force evaluation.  Attempt to force with use
+%{echo:%{source_buildtar}}
+
+%define gitdesc %{expand:%(git describe --always)}
+%define gitver %{expand:%(echo %{gitdesc} | sed 's/^v//')}
+%define myver %{expand:%(echo %{gitver} | sed -e 's/-.*//')}
+%define myrel %{expand:%(echo %{gitver} | sed -e s/%{myver}-// -e 's/-/./')}
+
 #################################################################################
 # common
 #################################################################################
 Name:		ceph-deploy
-Version: 	0.1
-Release: 	0
+Version: 	%{myver}
+Release: 	%{myrel}
 Summary: 	Admin and deploy tool for Ceph
 License: 	MIT
 Group:   	System/Filesystems
 URL:     	http://ceph.com/
-Source0: 	%{name}-%{version}.tar.bz2
+Source0: 	%{name}-%{gitver}.tar.bz2
 #Source0: 	https://github.com/ceph/ceph-deploy/archive/v0.1.tar.gz
 #BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 BuildRequires:  python-devel
@@ -68,7 +86,7 @@ An easy to use admin tool for deploy ceph storage clusters.
 #python setup.py build
 
 %install
-python setup.py install --prefix=%{_prefix} --root=%{buildroot}
+CEPH_DEPLOY_VERSION_FOR_PYTHON=%{gitver} python setup.py install --prefix=%{_prefix} --root=%{buildroot}
 install -m 0755 -D scripts/ceph-deploy $RPM_BUILD_ROOT/usr/bin
 
 %clean

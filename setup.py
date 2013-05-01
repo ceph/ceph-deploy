@@ -13,6 +13,9 @@ def read(fname):
 def get_version():
     try:
         ver = os.environ['CEPH_DEPLOY_VERSION_FOR_PYTHON']
+        # spec might pass trailing '-'; handle it
+        if ver[-1:] == '-':
+            ver = ver[:-1]
     except:
         ver = subprocess.check_output(['/usr/bin/git', 'describe']).rstrip()
         if ver.startswith('v'):
