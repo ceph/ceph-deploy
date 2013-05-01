@@ -18,7 +18,7 @@ if gpg --list-keys 2>/dev/null | grep -q ${KEYID} ; then
     echo "Signing packages and repo with ${KEYID}"
 else
     echo "Package signing key (${KEYID}) not found"
-    echo "Have you set $GNUPGHOME ? "
+    echo "Have you set \$GNUPGHOME ? "
     exit 3
 fi
 
