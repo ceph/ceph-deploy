@@ -17,20 +17,20 @@ Summary: 	Admin and deploy tool for Ceph
 License: 	MIT
 Group:   	System/Filesystems
 URL:     	http://ceph.com/
-Source0: 	%{name}.tar.bz2
+Source0: 	%{name}-%{version}.tar.bz2
 #Source0: 	https://github.com/ceph/ceph-deploy/archive/v0.1.tar.gz
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
+#BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 BuildRequires:  python-devel
 BuildRequires:  python-distribute
 BuildRequires:	python-setuptools
 BuildRequires:	python-virtualenv
-BuildRequires:	python-pytest
+BuildRequires:	pytest
 BuildRequires:  python-mock
 BuildRequires:  python-tox
 Requires:       python-argparse
-Requires:	python-pushy
+#Requires:	python-pushy
 Requires:       python-distribute
-Requires:	lsb-release
+#Requires:	lsb-release
 Requires:	ceph
 %if 0%{?suse_version} && 0%{?suse_version} <= 1110
 %{!?python_sitelib: %global python_sitelib %(python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
@@ -61,10 +61,11 @@ Requires: 	python >= %{pyver}
 An easy to use admin tool for deploy ceph storage clusters.
 
 %prep
-%setup -q -n %{name}
+#%setup -q -n %{name}
+%setup -q
 
 %build
-python setup.py build
+#python setup.py build
 
 %install
 python setup.py install --prefix=%{_prefix} --root=%{buildroot}
