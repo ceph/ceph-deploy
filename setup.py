@@ -17,9 +17,17 @@ def get_version():
         if ver[-1:] == '-':
             ver = ver[:-1]
     except:
-        ver = subprocess.check_output(['/usr/bin/git', 'describe']).rstrip()
+        # simulate check_output for Python 2.6 on Centos
+        p = subprocess.Popen(['/usr/bin/git', 'describe'],
+                             stdout=subprocess.PIPE)
+        out, _ = p.communicate()
+        ret = p.poll()
+        if ret:
+            raise subprocess.CalledProcessError(ret, 'git describe', output=out)
+        ver = out.rstrip()
         if ver.startswith('v'):
             ver = ver[1:]
+
     return ver
 
 install_requires = []
