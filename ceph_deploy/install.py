@@ -314,7 +314,6 @@ def make(parser):
         nargs='?',
         action=StoreVersion,
         choices=[
-            'argonaut',
             'bobtail',
             'cuttlefish',
             ],
