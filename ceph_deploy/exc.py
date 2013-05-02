@@ -35,6 +35,10 @@ class NeedMonError(DeployError):
     Cannot find nodes with ceph-mon.
     """
 
+class NeedDiskError(DeployError):
+    """
+    Must supply disk/path argument
+    """
 
 class UnsupportedPlatform(DeployError):
     """

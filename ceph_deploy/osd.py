@@ -136,6 +136,8 @@ def prepare(args, cfg, activate_prepared_disk):
     errors = 0
     for hostname, disk, journal in args.disk:
         try:
+            if disk is None:
+                raise exc.NeedDiskError(hostname)
             # TODO username
             sudo = args.pushy(get_transport(hostname))
 
