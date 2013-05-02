@@ -178,6 +178,9 @@ def purge_data_any():
         subprocess.check_call(args=[
                 'rm', '-rf', '--one-file-system', '--', '/var/lib/ceph',
                 ])
+    subprocess.check_call(args=[
+            'rm', '-rf', '--one-file-system', '--', '/etc/ceph',
+            ])
 
 def install(args):
     version = getattr(args, args.version_kind)
