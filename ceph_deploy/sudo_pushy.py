@@ -2,18 +2,24 @@ import pushy.transport.ssh
 import pushy.transport.local
 import os, shutil, subprocess, sys
 
-def __init__(self, command, address, **kwargs):
-    pushy.transport.BaseTransport.__init__(self, address)
 
-    self.__proc = subprocess.Popen(command, stdin=subprocess.PIPE,
-                                   stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE,
-                                   bufsize=65535)
+class Local_Popen(pushy.transport.local.Popen):
+    def __init__(self, command, address, **kwargs):
+        pushy.transport.BaseTransport.__init__(self, address)
+    
+        self.__proc = subprocess.Popen(command, stdin=subprocess.PIPE,
+                                       stdout=subprocess.PIPE,
+                                       stderr=subprocess.PIPE,
+                                       bufsize=65535)
+    
+        self.stdout = self.__proc.stdout
+        self.stderr = self.__proc.stderr
+        self.stdin  = self.__proc.stdin
 
-    self.stdout = self.__proc.stdout
-    self.stderr = self.__proc.stderr
-    self.stdin  = self.__proc.stdin
-
+    def close(self):
+        self.stdin.close()
+        self.__proc.wait()
+    
 class SshSudoTransport(object):
     @staticmethod
     def Popen(command, *a, **kw):
@@ -24,9 +30,7 @@ class LocalSudoTransport(object):
     @staticmethod
     def Popen(command, *a, **kw):
         command = ['sudo'] + command
-        # Overide the original initializer
-        pushy.transport.local.Popen.__init__ = __init__
-        return pushy.transport.local.Popen(command, *a, **kw)
+        return Local_Popen(command, *a, **kw)
 
 def get_transport(hostname):
     import socket

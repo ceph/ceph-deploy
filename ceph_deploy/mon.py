@@ -140,6 +140,8 @@ def mon_create(args):
 
             # TODO add_bootstrap_peer_hint
 
+            sudo.close()
+
         except RuntimeError as e:
             LOG.error(e)
             errors += 1
@@ -217,6 +219,7 @@ def mon_destroy(args):
             destroy_mon_r(
                 cluster=args.cluster,
                 )
+            sudo.close()
 
         except RuntimeError as e:
             LOG.error(e)

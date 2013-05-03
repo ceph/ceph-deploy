@@ -181,6 +181,7 @@ def mds_create(args):
                 cluster=args.cluster,
                 init=init,
                 )
+            sudo.close()
         except RuntimeError as e:
             LOG.error(e)
             errors += 1

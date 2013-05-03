@@ -48,6 +48,7 @@ def admin(args):
                 )
             if error is not None:
                 raise exc.GenericError(error)
+            sudo.close()
 
         except RuntimeError as e:
             LOG.error(e)

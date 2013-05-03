@@ -23,6 +23,7 @@ def fetch_file(args, frompath, topath, hosts):
                 with file(topath, 'w') as f:
                     f.write(key)
                     return True
+            sudo.close()
     LOG.warning('Unable to find %s on %s', frompath, hosts)
     return False
 

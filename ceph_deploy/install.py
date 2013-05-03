@@ -218,6 +218,8 @@ def install(args):
             version=version,
             )
 
+        sudo.close()
+
 def uninstall(args):
     LOG.debug(
         'Uninstalling on cluster %s hosts %s',
@@ -243,6 +245,7 @@ def uninstall(args):
             raise exc.UnsupportedPlatform(distro=distro, codename=codename)
 
         uninstall_r()
+        sudo.close()
 
 def purge(args):
     LOG.debug(
@@ -269,6 +272,7 @@ def purge(args):
             raise exc.UnsupportedPlatform(distro=distro, codename=codename)
 
         purge_r(arg_purge=True)
+        sudo.close()
 
 def purge_data(args):
     LOG.debug(
@@ -284,6 +288,7 @@ def purge_data(args):
         LOG.debug('Purging data from host %s ...', hostname)
         purge_data_any_r = sudo.compile(purge_data_any)
         purge_data_any_r()
+        sudo.close()
 
 class StoreVersion(argparse.Action):
     """

@@ -176,7 +176,7 @@ def prepare(args, cfg, activate_prepared_disk):
                 dmcrypt=args.dmcrypt,
                 dmcrypt_dir=args.dmcrypt_key_dir,
                 )
-
+            sudo.close()
         except RuntimeError as e:
             LOG.error(e)
             errors += 1
@@ -211,6 +211,7 @@ def activate(args, cfg):
             disk=disk,
             init=init,
             )
+        sudo.close()
 
 
 # NOTE: this mirrors ceph-disk-prepare --zap-disk DEV
@@ -254,6 +255,7 @@ def disk_zap(args):
         sudo = args.pushy(get_transport(hostname))
         zap_r = sudo.compile(zap)
         zap_r(disk)
+        sudo.close()
 
 
 def list_disk():
@@ -277,6 +279,7 @@ def disk_list(args, cfg):
 
         list_disk_r = sudo.compile(list_disk)
         print list_disk_r(),
+        sudo.close()
 
 
 def osd(args):

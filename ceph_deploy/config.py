@@ -26,6 +26,7 @@ def config_push(args):
                 conf=conf_data.getvalue(),
                 overwrite=args.overwrite_conf,
                 )
+            sudo.close()
 
         except RuntimeError as e:
             LOG.error(e)
@@ -60,6 +61,7 @@ def config_pull(args):
                 with file(topath, 'w') as f:
                     f.write(conf_file)
                 return
+            sudo.close()
             LOG.debug('Empty or missing %s on %s', frompath, hostname)
         except:
             LOG.error('Unable to pull %s from %s', frompath, hostname)
