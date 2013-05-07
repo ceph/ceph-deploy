@@ -23,7 +23,7 @@ def install_centos(release, codename, version_kind, version):
         )
 
     if version_kind == 'stable':
-        url = 'http://ceph.com/rpm-{version}/'.format(
+        url = 'http://ceph.com/rpm-{version}/el6/'.format(
         version=version,
         )
     elif version_kind == 'testing':
