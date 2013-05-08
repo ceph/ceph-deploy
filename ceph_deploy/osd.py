@@ -286,7 +286,7 @@ def osd(args):
     cfg = conf.load(args)
 
     if args.subcommand == 'list':
-        do_list(args, cfg)
+        disk_list(args, cfg)
     elif args.subcommand == 'prepare':
         prepare(args, cfg, activate_prepared_disk=False)
     elif args.subcommand == 'create':

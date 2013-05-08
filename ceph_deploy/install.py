@@ -163,6 +163,7 @@ def install_debian(release, codename, version_kind, version):
 
 def purge_data_any():
     import subprocess
+    import os.path
 
     subprocess.call(args=[
             'rm', '-rf', '--one-file-system', '--', '/var/lib/ceph',

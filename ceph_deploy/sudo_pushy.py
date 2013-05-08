@@ -1,6 +1,6 @@
 import pushy.transport.ssh
 import pushy.transport.local
-import os, shutil, subprocess, sys
+import subprocess 
 
 
 class Local_Popen(pushy.transport.local.Popen):
