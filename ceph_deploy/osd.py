@@ -2,12 +2,14 @@ import argparse
 import logging
 import os
 import sys
+import tempfile
 
 from cStringIO import StringIO
 
 from . import conf
 from . import exc
 from . import lsb
+from . import misc
 from .cliutil import priority
 from .sudo_pushy import get_transport
 
@@ -35,8 +37,6 @@ def create_osd(cluster, key):
     tell between bug and correctly handled failure, so avoid using
     exceptions for non-exceptional runs.
     """
-    import subprocess
-
     path = '/var/lib/ceph/bootstrap-osd/{cluster}.keyring'.format(
         cluster=cluster,
         )
@@ -60,9 +60,39 @@ def create_osd(cluster, key):
             os.fsync(f)
         os.rename(tmp, path)
 
+    def subproc_call(*args, **kwargs):
+        """
+        call subproc that might fail, collect returncode and stderr/stdout
+        to be used in pushy.compile()d functions.  Returns 4-tuple of
+        (process exit code, command, stdout contents, stderr contents)
+        """
+        import subprocess
+        import tempfile
+
+        otmp = tempfile.TemporaryFile()
+        etmp = tempfile.TemporaryFile()
+        cmd = ' '.join(kwargs['args'])
+        ret = 0
+        errtxt = ''
+        kwargs.update(dict(stdout=otmp, stderr=etmp))
+        try:
+            subprocess.check_call(*args, **kwargs)
+        except subprocess.CalledProcessError as e:
+            ret = e.returncode
+            cmd = e.cmd
+        except Exception as e:
+            ret = -1
+            # OSError has errno
+            if hasattr(e, 'errno'):
+                ret = e.errno
+            errtxt = str(e)
+        otmp.seek(0)
+        etmp.seek(0)
+        return (ret, cmd, otmp.read(), errtxt + etmp.read())
+
     # in case disks have been prepared before we do this, activate
-    # them now
-    subprocess.check_call(
+    # them now.
+    return subproc_call(
         args=[
             'udevadm',
             'trigger',
@@ -71,13 +101,10 @@ def create_osd(cluster, key):
             ],
         )
 
-
 def prepare_disk(cluster, disk, journal, activate_prepared_disk, zap, dmcrypt, dmcrypt_dir):
     """
     Run on osd node, prepares a data disk for use.
     """
-    import subprocess
-
     args = [
         'ceph-disk-prepare',
         ]
@@ -94,10 +121,42 @@ def prepare_disk(cluster, disk, journal, activate_prepared_disk, zap, dmcrypt, d
             ])
     if journal is not None:
         args.append(journal)
-    subprocess.check_call(args=args)
 
+    def subproc_call(*args, **kwargs):
+        """
+        call subproc that might fail, collect returncode and stderr/stdout
+        to be used in pushy.compile()d functions.  Returns 4-tuple of
+        (process exit code, command, stdout contents, stderr contents)
+        """
+        import subprocess
+        import tempfile
+
+        otmp = tempfile.TemporaryFile()
+        etmp = tempfile.TemporaryFile()
+        cmd = ' '.join(kwargs['args'])
+        ret = 0
+        errtxt = ''
+        kwargs.update(dict(stdout=otmp, stderr=etmp))
+        try:
+            subprocess.check_call(*args, **kwargs)
+        except subprocess.CalledProcessError as e:
+            ret = e.returncode
+            cmd = e.cmd
+        except Exception as e:
+            ret = -1
+            # OSError has errno
+            if hasattr(e, 'errno'):
+                ret = e.errno
+            errtxt = str(e)
+        otmp.seek(0)
+        etmp.seek(0)
+        return (ret, cmd, otmp.read(), errtxt + etmp.read())
+
+    ret = subproc_call(args=args)
+    if ret[0]:
+        return ret
     if activate_prepared_disk:
-        subprocess.check_call(
+        ret = subproc_call(
             args=[
                 'udevadm',
                 'trigger',
@@ -105,15 +164,46 @@ def prepare_disk(cluster, disk, journal, activate_prepared_disk, zap, dmcrypt, d
                 '--action=add',
                 ],
             )
+        if ret[0]:
+            return ret
+    return (0, '', '')
 
 
 def activate_disk(cluster, disk, init):
     """
     Run on the osd node, activates a disk.
     """
-    import subprocess
+    def subproc_call(*args, **kwargs):
+        """
+        call subproc that might fail, collect returncode and stderr/stdout
+        to be used in pushy.compile()d functions.  Returns 4-tuple of
+        (process exit code, command, stdout contents, stderr contents)
+        """
+        import subprocess
+        import tempfile
 
-    subprocess.check_call(
+        otmp = tempfile.TemporaryFile()
+        etmp = tempfile.TemporaryFile()
+        cmd = ' '.join(kwargs['args'])
+        ret = 0
+        errtxt = ''
+        kwargs.update(dict(stdout=otmp, stderr=etmp))
+        try:
+            subprocess.check_call(*args, **kwargs)
+        except subprocess.CalledProcessError as e:
+            ret = e.returncode
+            cmd = e.cmd
+        except Exception as e:
+            ret = -1
+            # OSError has errno
+            if hasattr(e, 'errno'):
+                ret = e.errno
+            errtxt = str(e)
+        otmp.seek(0)
+        etmp.seek(0)
+        return (ret, cmd, otmp.read(), errtxt + etmp.read())
+
+    return subproc_call(
         args=[
             'ceph-disk-activate',
             '--mark-init',
@@ -121,7 +211,6 @@ def activate_disk(cluster, disk, init):
             '--mount',
             disk,
             ])
-
 
 def prepare(args, cfg, activate_prepared_disk):
     LOG.debug(
@@ -155,19 +244,22 @@ def prepare(args, cfg, activate_prepared_disk):
                     )
 
                 create_osd_r = sudo.compile(create_osd)
-                error = create_osd_r(
+                ret, cmd, out, err = create_osd_r(
                     cluster=args.cluster,
                     key=key,
                     )
-                if error is not None:
-                    raise exc.GenericError(error)
-                LOG.debug('Host %s is now ready for osd use.', hostname)
+                if ret:
+                    s = '{} returned {}\n{}\n{}'.format(cmd, ret, out, err)
+                    LOG.debug('Failed preparing host %s: %s', hostname, s)
+                    raise RuntimeError(s)
+                else:
+                    LOG.debug('Host %s is now ready for osd use.', hostname)
 
             LOG.debug('Preparing host %s disk %s journal %s activate %s',
                       hostname, disk, journal, activate_prepared_disk)
 
             prepare_disk_r = sudo.compile(prepare_disk)
-            prepare_disk_r(
+            ret, cmd, out, err = prepare_disk_r(
                 cluster=args.cluster,
                 disk=disk,
                 journal=journal,
@@ -177,6 +269,9 @@ def prepare(args, cfg, activate_prepared_disk):
                 dmcrypt_dir=args.dmcrypt_key_dir,
                 )
             sudo.close()
+            if ret:
+                s = '{} returned {}\n{}\n{}'.format(cmd, ret, out, err)
+                raise RuntimeError(s)
         except RuntimeError as e:
             LOG.error(e)
             errors += 1
@@ -206,13 +301,15 @@ def activate(args, cfg):
                   distro, codename, init)
 
         activate_disk_r = sudo.compile(activate_disk)
-        activate_disk_r(
+        err, cmd, stdout, stderr = activate_disk_r(
             cluster=args.cluster,
             disk=disk,
             init=init,
             )
         sudo.close()
-
+        if err:
+            s = '{} returned {}\n{}\n{}'.format(cmd, err, stdout, stderr)
+            raise RuntimeError(s)
 
 # NOTE: this mirrors ceph-disk-prepare --zap-disk DEV
 def zap(dev):
@@ -259,15 +356,45 @@ def disk_zap(args):
 
 
 def list_disk():
-    import subprocess
-    proc = subprocess.Popen(
+
+    def subproc_call(*args, **kwargs):
+        """
+        call subproc that might fail, collect returncode and stderr/stdout
+        to be used in pushy.compile()d functions.  Returns 4-tuple of
+        (process exit code, command, stdout contents, stderr contents)
+        """
+        import subprocess
+        import tempfile
+
+        otmp = tempfile.TemporaryFile()
+        etmp = tempfile.TemporaryFile()
+        cmd = ' '.join(kwargs['args'])
+        errtxt = ''
+        ret = 0
+        kwargs.update(dict(stdout=otmp, stderr=etmp))
+        try:
+            subprocess.check_call(*args, **kwargs)
+        except subprocess.CalledProcessError as e:
+            ret = e.returncode
+            cmd = e.cmd
+        except Exception as e:
+            ret = -1
+            # OSError has errno
+            if hasattr(e, 'errno'):
+                ret = e.errno
+            errtxt = str(e)
+        otmp.seek(0)
+        etmp.seek(0)
+        return (ret, cmd, otmp.read(), errtxt + etmp.read())
+
+    ret, cmd, out, err = subproc_call(
         args=[
             'ceph-disk',
             'list',
             ],
-        stdout=subprocess.PIPE,
         )
-    return proc.stdout.read()
+
+    return ret, cmd, out, err
 
 def disk_list(args, cfg):
     for hostname, disk, journal in args.disk:
@@ -278,7 +405,12 @@ def disk_list(args, cfg):
         LOG.debug('Listing disks on {hostname}...'.format(hostname=hostname))
 
         list_disk_r = sudo.compile(list_disk)
-        print list_disk_r(),
+        ret, cmd, out, err = list_disk_r()
+        if ret:
+            LOG.error("disk list failed: %s", err)
+        else:
+            print out,
+
         sudo.close()
 
 def osd_list(args, cfg):
