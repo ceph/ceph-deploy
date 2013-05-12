@@ -15,6 +15,7 @@ Architecture: all
 Depends: python,
          python-argparse,
          python-pushy,
+         python-setuptools,
          ${misc:Depends},
          ${python:Depends}
 Description:  Ceph-deploy is an easy to use configuration tool
