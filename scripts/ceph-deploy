@@ -12,9 +12,6 @@ elif os.path.exists('/usr/share/ceph-deploy'):
     sys.path.insert(0,'/usr/share/ceph-deploy')
 elif os.path.exists('/usr/share/pyshared/ceph-deploy'):
     sys.path.insert(0,'/usr/share/pyshared/ceph-deploy')
-else:
-    print >> sys.stderr, '\nceph-deploy modules not installed.'
-    sys.exit(1)
 
 from ceph_deploy.cli import main
 
