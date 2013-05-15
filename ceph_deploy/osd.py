@@ -281,12 +281,15 @@ def disk_list(args, cfg):
         print list_disk_r(),
         sudo.close()
 
+def osd_list(args, cfg):
+    LOG.error('Not yet implemented; see http://tracker.ceph.com/issues/5071')
+    sys.exit(1)
 
 def osd(args):
     cfg = conf.load(args)
 
     if args.subcommand == 'list':
-        disk_list(args, cfg)
+        osd_list(args, cfg)
     elif args.subcommand == 'prepare':
         prepare(args, cfg, activate_prepared_disk=False)
     elif args.subcommand == 'create':
