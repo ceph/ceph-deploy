@@ -166,7 +166,7 @@ def prepare_disk(cluster, disk, journal, activate_prepared_disk, zap, dmcrypt, d
             )
         if ret[0]:
             return ret
-    return (0, '', '')
+    return (0, '', '', '')
 
 
 def activate_disk(cluster, disk, init):
