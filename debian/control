@@ -3,7 +3,7 @@ Maintainer: Sage Weil <sage@newdream.net>
 Uploaders: Sage Weil <sage@newdream.net>
 Section: admin
 Priority: optional
-Build-Depends: debhelper (>= 7)
+Build-Depends: debhelper (>= 7), python-setuptools
 X-Python-Version: >= 2.4
 Standards-Version: 3.9.2
 Homepage: http://ceph.com/
@@ -14,6 +14,8 @@ Package: ceph-deploy
 Architecture: all
 Depends: python,
          python-argparse,
+         python-pushy,
+         python-setuptools,
          ${misc:Depends},
          ${python:Depends}
 Description:  Ceph-deploy is an easy to use configuration tool
