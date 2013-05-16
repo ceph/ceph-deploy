@@ -246,7 +246,8 @@ def prepare(args, cfg, activate_prepared_disk):
                     key=key,
                     )
                 if ret:
-                    s = '{} returned {}\n{}\n{}'.format(cmd, ret, out, err)
+                    s = '{cmd} returned {ret}\n{out}\n{err}'.format(
+                        cmd=cmd, ret=ret, out=out, err=err)
                     LOG.debug('Failed preparing host %s: %s', hostname, s)
                     raise RuntimeError(s)
                 else:
@@ -267,7 +268,8 @@ def prepare(args, cfg, activate_prepared_disk):
                 )
             sudo.close()
             if ret:
-                s = '{} returned {}\n{}\n{}'.format(cmd, ret, out, err)
+                s = '{cmd} returned {ret}\n{out}\n{err}'.format(
+                    cmd=cmd, ret=ret, out=out, err=err)
                 raise RuntimeError(s)
         except RuntimeError as e:
             LOG.error(e)
@@ -305,7 +307,8 @@ def activate(args, cfg):
             )
         sudo.close()
         if err:
-            s = '{} returned {}\n{}\n{}'.format(cmd, err, stdout, stderr)
+            s = '{cmd} returned {ret}\n{out}\n{err}'.format(
+                cmd=cmd, ret=ret, out=out, err=err)
             raise RuntimeError(s)
 
 # NOTE: this mirrors ceph-disk-prepare --zap-disk DEV
