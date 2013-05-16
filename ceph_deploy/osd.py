@@ -2,14 +2,12 @@ import argparse
 import logging
 import os
 import sys
-import tempfile
 
 from cStringIO import StringIO
 
 from . import conf
 from . import exc
 from . import lsb
-from . import misc
 from .cliutil import priority
 from .sudo_pushy import get_transport
 
