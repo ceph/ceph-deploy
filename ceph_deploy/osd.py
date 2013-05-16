@@ -79,7 +79,6 @@ def create_osd(cluster, key):
             subprocess.check_call(*args, **kwargs)
         except subprocess.CalledProcessError as e:
             ret = e.returncode
-            cmd = e.cmd
         except Exception as e:
             ret = -1
             # OSError has errno
@@ -141,7 +140,6 @@ def prepare_disk(cluster, disk, journal, activate_prepared_disk, zap, dmcrypt, d
             subprocess.check_call(*args, **kwargs)
         except subprocess.CalledProcessError as e:
             ret = e.returncode
-            cmd = e.cmd
         except Exception as e:
             ret = -1
             # OSError has errno
@@ -192,7 +190,6 @@ def activate_disk(cluster, disk, init):
             subprocess.check_call(*args, **kwargs)
         except subprocess.CalledProcessError as e:
             ret = e.returncode
-            cmd = e.cmd
         except Exception as e:
             ret = -1
             # OSError has errno
@@ -376,7 +373,6 @@ def list_disk():
             subprocess.check_call(*args, **kwargs)
         except subprocess.CalledProcessError as e:
             ret = e.returncode
-            cmd = e.cmd
         except Exception as e:
             ret = -1
             # OSError has errno
