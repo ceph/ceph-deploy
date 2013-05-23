@@ -209,6 +209,8 @@ def install(args):
         elif (distro == 'CentOS') or distro.startswith('RedHat') or (distro == 'Fedora'):
             LOG.debug('Installing on host %s ...', hostname)
             install_r = sudo.compile(install_centos)
+        elif (distro == 'SUSE LINUX'):
+            install_r = sudo.compile(install_suse)
         else:
             raise exc.UnsupportedPlatform(distro=distro, codename=codename)
 
