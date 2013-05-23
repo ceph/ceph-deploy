@@ -8,6 +8,168 @@ from .sudo_pushy import get_transport
 
 LOG = logging.getLogger(__name__)
 
+def install_suse(release, codename, version_kind, version):
+    import platform
+    import subprocess
+
+    if version_kind in ['stable', 'testing']:
+        key = 'release'
+    else:
+        key = 'autobuild'
+
+    if codename == 'Mantis':
+        distro='opensuse12'
+    else:
+        distro='sles-11sp2'
+
+    subprocess.check_call(
+        args='su -c \'rpm --import "https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc"\''.format(key=key),
+        shell=True,
+        )
+
+    if version_kind == 'stable':
+        url = 'http://ceph.com/rpm-{version}/{distro}/'.format(
+        version=version,
+        distro=distro,
+        )
+    elif version_kind == 'testing':
+        url = 'http://ceph.com/rpm-testing/{distro}'.format(distro=distro)
+    elif version_kind == 'dev':
+        url = 'http://gitbuilder.ceph.com/ceph-rpm-{distro}{release}-{machine}-basic/ref/{version}/'.format(
+            distro=distro,
+            release=release.split(".",1)[0],
+            machine=platform.machine(),
+            version=version,
+            )
+
+    subprocess.call(
+        args=['rpm', '-Uvh','--quiet', '{url}noarch/ceph-release-1-0.noarch.rpm'.format(
+            url=url
+            )]
+        )
+    
+    subprocess.check_call(
+        args=[
+            'zypper',
+            '--non-interactive',
+            '--quiet',
+            'install',
+            'ceph',
+            'ceph-common',
+            'ceph-fs-common',
+            ],
+        )
+    
+def uninstall_suse(arg_purge=False):
+    import subprocess
+
+    packages = [
+        'ceph',
+        'ceph-mds',
+        'ceph-common',
+        'ceph-fs-common',
+        ]
+    args = [
+        'zypper',
+        '--non-interactive',
+        '--quiet',
+        'remove',
+        ]
+
+    args.extend(packages)
+    subprocess.check_call(args=args)
+
+def uninstall_debian(arg_purge=False):
+    import subprocess
+
+    packages = [
+        'ceph',
+        'ceph-mds',
+        'ceph-common',
+        'ceph-fs-common',
+        ]
+    args = [
+        'apt-get',
+        '-q',
+        'remove',
+        '-f',
+        '-y',
+        '--force-yes',
+        ]
+    if arg_purge:
+        args.append('--purge')
+    args.append('--')
+    args.extend(packages)
+    subprocess.check_call(args=args)
+
+def install_fedora(release, codename, version_kind, version):
+    import platform
+    import subprocess
+
+    if version_kind in ['stable', 'testing']:
+        key = 'release'
+    else:
+        key = 'autobuild'
+
+    subprocess.check_call(
+        args='su -c \'rpm --import "https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc"\''.format(key=key),
+        shell=True,
+        )
+
+    if version_kind == 'stable':
+        url = 'http://ceph.com/rpm-{version}/fc{release}/'.format(
+        version=version,
+        release=release,
+        )
+    elif version_kind == 'testing':
+        url = 'http://ceph.com/rpm-testing/fc{release}'.format(
+        release=release,
+        )
+    elif version_kind == 'dev':
+        url = 'http://gitbuilder.ceph.com/ceph-rpm-fedora{release}-{machine}-basic/ref/{version}/'.format(
+            release=release.split(".",1)[0],
+            machine=platform.machine(),
+            version=version,
+            )
+
+    subprocess.call(
+        args=['rpm', '-Uvh','--quiet', '{url}noarch/ceph-release-1-0.fc{release}.noarch.rpm'.format(
+            url=url,
+            release=release,
+            )]
+        )
+    
+    subprocess.check_call(
+        args=[
+            'yum',
+            '-y',
+            '-q',
+            'install',
+            'ceph',
+            'ceph-common',
+            'ceph-fs-common',
+            ],
+        )
+    
+def uninstall_fedora(arg_purge=False):
+    import subprocess
+
+    packages = [
+        'ceph',
+        'ceph-mds',
+        'ceph-common',
+        'ceph-fs-common',
+        ]
+    args = [
+        'yum',
+        '-q',
+        '-y',
+        'remove',
+        ]
+
+    args.extend(packages)
+    subprocess.check_call(args=args)
+
 def install_centos(release, codename, version_kind, version):
     import platform
     import subprocess
@@ -204,16 +366,17 @@ def install(args):
         LOG.debug('Distro %s release %s codename %s', distro, release, codename)
 
         if (distro == 'Debian' or distro == 'Ubuntu'):
-            LOG.debug('Installing on host %s ...', hostname)
             install_r = sudo.compile(install_debian)
-        elif (distro == 'CentOS') or distro.startswith('RedHat') or (distro == 'Fedora'):
-            LOG.debug('Installing on host %s ...', hostname)
+        elif (distro == 'CentOS') or distro.startswith('RedHat'):
             install_r = sudo.compile(install_centos)
+        elif distro == 'Fedora':
+            install_r = sudo.compile(install_fedora)
         elif (distro == 'SUSE LINUX'):
             install_r = sudo.compile(install_suse)
         else:
             raise exc.UnsupportedPlatform(distro=distro, codename=codename)
 
+        LOG.debug('Installing on host %s ...', hostname)
         install_r(
             release=release,
             codename=codename,
