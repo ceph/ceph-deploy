@@ -1,3 +1,9 @@
+ceph-deploy (1.0-1) stable; urgency=low
+
+  * New upstream release
+
+ -- Gary Lowell <gary.lowell@inktank.com>  Fri, 24 May 2013 11:57:40 +0800
+
 ceph-deploy (0.0.1-1) unstable; urgency=low
 
   * Initial release.
