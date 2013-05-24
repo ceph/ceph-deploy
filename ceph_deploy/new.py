@@ -106,7 +106,7 @@ def new(args):
             else:
                 raise
 
-    LOG.debug('Writing monitor keyring to %s...', path)
+    LOG.debug('Writing monitor keyring to %s...', keypath)
     if not args.dry_run:
         tmp = '%s.tmp' % keypath
         with file(tmp, 'w') as f:
