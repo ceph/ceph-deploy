@@ -367,7 +367,7 @@ def install(args):
 
         if (distro == 'Debian' or distro == 'Ubuntu'):
             install_r = sudo.compile(install_debian)
-        elif (distro == 'CentOS') or distro.startswith('RedHat'):
+        elif (distro == 'CentOS' or distro == 'Scientific') or distro.startswith('RedHat'):
             install_r = sudo.compile(install_centos)
         elif distro == 'Fedora':
             install_r = sudo.compile(install_fedora)
@@ -404,7 +404,7 @@ def uninstall(args):
         if (distro == 'Debian' or distro == 'Ubuntu'):
             LOG.debug('Uninstalling on host %s ...', hostname)
             uninstall_r = sudo.compile(uninstall_debian)
-        elif (distro == 'CentOS') or distro.startswith('RedHat'):
+        elif (distro == 'CentOS' or distro == 'Scientific') or distro.startswith('RedHat'):
             LOG.debug('Uninstalling on host %s ...', hostname)
             uninstall_r = sudo.compile(uninstall_centos)
         else:
