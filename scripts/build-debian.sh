@@ -42,7 +42,7 @@ for DIST in  $DEB_DIST ; do
 Codename: $DIST
 Suite: stable
 Components: $COMPONENT
-Architectures: i386 amd64 source
+Architectures: amd64 armhf i386 source
 Origin: Inktank
 Description: Ceph distributed file system
 DebIndices: Packages Release . .gz .bz2
