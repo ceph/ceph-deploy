@@ -1,4 +1,5 @@
 import logging
+import errno
 
 from .cliutil import priority
 
@@ -14,10 +15,16 @@ def forgetkeys(args):
         'bootstrap-osd',
         'bootstrap-mds',
         ]:
-        os.unlink('{cluster}.{what}.keyring'.format(
-                cluster=args.cluster,
-                what=f,
-                ))
+        try:
+            os.unlink('{cluster}.{what}.keyring'.format(
+                    cluster=args.cluster,
+                    what=f,
+                    ))
+        except OSError, e:
+            if e.errno == errno.ENOENT:
+                pass
+            else:
+                raise
 
 @priority(100)
 def make(parser):
