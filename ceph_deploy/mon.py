@@ -35,6 +35,8 @@ def create_mon(cluster, monitor_keyring, init):
         os.makedirs(path)
 
     if not os.path.exists(done_path):
+        if not os.path.exists('/var/lib/ceph/tmp'):
+            os.makedirs('/var/lib/ceph/tmp')
         keyring = '/var/lib/ceph/tmp/{cluster}-{hostname}.mon.keyring'.format(
             cluster=cluster,
             hostname=hostname,
