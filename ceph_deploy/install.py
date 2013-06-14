@@ -47,6 +47,7 @@ def install_suse(release, codename, version_kind, version):
             'rpm',
             '-Uvh',
             '--replacepkgs',
+            '--force',
             '--quiet',
             '{url}noarch/ceph-release-1-0.noarch.rpm'.format(
                 url=url,
@@ -143,6 +144,7 @@ def install_fedora(release, codename, version_kind, version):
             'rpm',
             '-Uvh',
             '--replacepkgs',
+            '--force',
             '--quiet',
             '{url}noarch/ceph-release-1-0.fc{release}.noarch.rpm'.format(
                 url=url,
@@ -214,6 +216,7 @@ def install_centos(release, codename, version_kind, version):
             'rpm',
             '-Uvh',
             '--replacepkgs',
+            '--force',
             '--quiet',
             '{url}noarch/ceph-release-1-0.el6.noarch.rpm'.format(
                 url=url,
