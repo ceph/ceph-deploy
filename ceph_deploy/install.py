@@ -126,7 +126,7 @@ def install_fedora(release, codename, version_kind, version):
         release=release,
         )
     elif version_kind == 'dev':
-        url = 'http://gitbuilder.ceph.com/ceph-rpm-fedora{release}-{machine}-basic/ref/{version}/'.format(
+        url = 'http://gitbuilder.ceph.com/ceph-rpm-fc{release}-{machine}-basic/ref/{version}/'.format(
             release=release.split(".",1)[0],
             machine=platform.machine(),
             version=version,
