@@ -43,9 +43,15 @@ def install_suse(release, codename, version_kind, version):
             )
 
     subprocess.check_call(
-        args=['rpm', '-Uvh','--quiet', '{url}noarch/ceph-release-1-0.noarch.rpm'.format(
-            url=url
-            )]
+        args=[
+            'rpm',
+            '-Uvh',
+            '--replacepkgs',
+            '--quiet',
+            '{url}noarch/ceph-release-1-0.noarch.rpm'.format(
+                url=url,
+                ),
+            ]
         )
     
     subprocess.check_call(
@@ -133,10 +139,16 @@ def install_fedora(release, codename, version_kind, version):
             )
 
     subprocess.check_call(
-        args=['rpm', '-Uvh','--quiet', '{url}noarch/ceph-release-1-0.fc{release}.noarch.rpm'.format(
-            url=url,
-            release=release,
-            )]
+        args=[
+            'rpm',
+            '-Uvh',
+            '--replacepkgs',
+            '--quiet',
+            '{url}noarch/ceph-release-1-0.fc{release}.noarch.rpm'.format(
+                url=url,
+                release=release,
+                ),
+            ]
         )
     
     subprocess.check_call(
@@ -198,9 +210,15 @@ def install_centos(release, codename, version_kind, version):
             )
 
     subprocess.check_call(
-        args=['rpm', '-Uvh','--quiet', '{url}noarch/ceph-release-1-0.el6.noarch.rpm'.format(
-            url=url
-            )]
+        args=[
+            'rpm',
+            '-Uvh',
+            '--replacepkgs',
+            '--quiet',
+            '{url}noarch/ceph-release-1-0.el6.noarch.rpm'.format(
+                url=url,
+                ),
+            ]
         )
     
     subprocess.check_call(
