@@ -423,14 +423,17 @@ def uninstall(args):
         LOG.debug('Distro %s codename %s', distro, codename)
 
         if (distro == 'Debian' or distro == 'Ubuntu'):
-            LOG.debug('Uninstalling on host %s ...', hostname)
             uninstall_r = sudo.compile(uninstall_debian)
         elif (distro == 'CentOS' or distro == 'Scientific') or distro.startswith('RedHat'):
-            LOG.debug('Uninstalling on host %s ...', hostname)
             uninstall_r = sudo.compile(uninstall_centos)
+        elif distro == 'Fedora':
+            uninstall_r = sudo.compile(uninstall_fedora)
+        elif (distro == 'SUSE LINUX'):
+            uninstall_r = sudo.compile(uninstall_suse)
         else:
             raise exc.UnsupportedPlatform(distro=distro, codename=codename)
 
+        LOG.debug('Uninstalling on host %s ...', hostname)
         uninstall_r()
         sudo.close()
 
