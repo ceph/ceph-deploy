@@ -1,3 +1,4 @@
 include *.rst
 include LICENSE
+include scripts/ceph-deploy
 prune ceph_deploy/test
