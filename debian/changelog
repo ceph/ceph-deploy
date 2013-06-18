@@ -1,3 +1,9 @@
+ceph-deploy (1.1-1) precise; urgency=low
+
+  * New upstream release 
+
+ -- Gary Lowell <gary.lowell@inktank.com>  Tue, 18 Jun 2013 11:07:00 -0700
+
 ceph-deploy (1.0-1) stable; urgency=low
 
   * New upstream release
