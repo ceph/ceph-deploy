@@ -48,7 +48,7 @@ rpm_list=`find ${REPO} -name "*.rpm" -print`
 rpm --addsign --define "_gpg_name ${KEYID}" $rpm_list
 
 # Construct repodata
-for dir in ${DEST}/*
+for dir in ${DEST}/SRPMS ${DEST}/RPMS/*
 do
     if [ -d $dir ] ; then
         createrepo $dir
