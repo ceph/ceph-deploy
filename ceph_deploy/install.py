@@ -424,7 +424,7 @@ def uninstall(args):
 
         if (distro == 'Debian' or distro == 'Ubuntu'):
             uninstall_r = sudo.compile(uninstall_debian)
-        elif (distro == 'CentOS' or distro == 'Scientific') or distro.startswith('RedHat'):
+        elif distro == 'CentOS' or distro == 'Scientific' or distro.startswith('RedHat'):
             uninstall_r = sudo.compile(uninstall_centos)
         elif distro == 'Fedora':
             uninstall_r = sudo.compile(uninstall_fedora)
@@ -452,15 +452,18 @@ def purge(args):
         (distro, release, codename) = lsb.get_lsb_release(sudo)
         LOG.debug('Distro %s codename %s', distro, codename)
 
-        if (distro == 'Debian' or distro == 'Ubuntu'):
-            LOG.debug('Purging host %s ...', hostname)
+        if distro == 'Debian' or distro == 'Ubuntu':
             purge_r = sudo.compile(uninstall_debian)
-        elif (distro == 'CentOS') or distro.startswith('RedHat'):
-            LOG.debug('Uninstalling on host %s ...', hostname)
+        elif distro == 'CentOS' or distro == 'Scientific' or distro.startswith('RedHat'):
             purge_r = sudo.compile(uninstall_centos)
+        elif distro == 'Fedora':
+            purge_r = sudo.compile(uninstall_fedora)
+        elif (distro == 'SUSE LINUX'):
+            purge_r = sudo.compile(uninstall_suse)
         else:
             raise exc.UnsupportedPlatform(distro=distro, codename=codename)
 
+        LOG.debug('Purging host %s ...', hostname)
         purge_r(arg_purge=True)
         sudo.close()
 
