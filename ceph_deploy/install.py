@@ -221,8 +221,6 @@ def install_centos(release, codename, version_kind, version):
             '-q',
             'install',
             'ceph',
-            'ceph-common',
-            'ceph-fs-common',
             ],
         )
     
@@ -231,9 +229,6 @@ def uninstall_centos(arg_purge=False):
 
     packages = [
         'ceph',
-        'ceph-mds',
-        'ceph-common',
-        'ceph-fs-common',
         ]
     args = [
         'yum',
