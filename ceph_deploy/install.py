@@ -155,8 +155,6 @@ def install_fedora(release, codename, version_kind, version):
             '-q',
             'install',
             'ceph',
-            'ceph-common',
-            'ceph-fs-common',
             ],
         )
     
@@ -165,9 +163,6 @@ def uninstall_fedora(arg_purge=False):
 
     packages = [
         'ceph',
-        'ceph-mds',
-        'ceph-common',
-        'ceph-fs-common',
         ]
     args = [
         'yum',
