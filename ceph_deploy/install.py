@@ -70,6 +70,9 @@ def uninstall_suse(arg_purge=False):
 
     packages = [
         'ceph',
+        'libcephfs1',
+        'librados2',
+        'librbd1',
         ]
     args = [
         'zypper',
