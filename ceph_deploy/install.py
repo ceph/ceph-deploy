@@ -166,6 +166,9 @@ def uninstall_fedora(arg_purge=False):
 
     packages = [
         'ceph',
+        'libcephfs1',
+        'librados2',
+        'librbd1',
         ]
     args = [
         'yum',
@@ -232,6 +235,9 @@ def uninstall_centos(arg_purge=False):
 
     packages = [
         'ceph',
+        'libcephfs1',
+        'librados2',
+        'librbd1',
         ]
     args = [
         'yum',
