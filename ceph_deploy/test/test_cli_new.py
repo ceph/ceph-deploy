@@ -1,9 +1,13 @@
 import pytest
+from mock import patch
 import re
 import subprocess
 import uuid
 
 from .. import conf
+from ..cli import main
+from .directory import directory
+from .fakes import fake_getaddrinfo
 
 
 def test_help(tmpdir, cli):
@@ -11,37 +15,19 @@ def test_help(tmpdir, cli):
         args=['ceph-deploy', 'new', '--help'],
         stdout=subprocess.PIPE,
         ) as p:
-        got = p.stdout.read()
-        assert got == """\
-usage: ceph-deploy new [-h] [MON [MON ...]]
-
-Start deploying a new cluster, and write a CLUSTER.conf for it.
-
-positional arguments:
-  MON         initial monitor hosts
-
-optional arguments:
-  -h, --help  show this help message and exit
-"""
+        result = p.stdout.read()
+    assert 'usage: ceph-deploy new' in result
+    assert 'positional arguments' in result
+    assert 'optional arguments' in result
 
 
-def test_simple(tmpdir, cli):
-    with cli(
-        args=['ceph-deploy', 'new'],
-        ):
-        pass
-    assert {p.basename for p in tmpdir.listdir()} == {'ceph.conf'}
+def test_write_global_conf_section(tmpdir, cli):
+    with patch('ceph_deploy.new.socket.getaddrinfo', fake_getaddrinfo):
+        with directory(str(tmpdir)):
+            main(args=['new', 'host1'])
     with tmpdir.join('ceph.conf').open() as f:
         cfg = conf.parse(f)
     assert cfg.sections() == ['global']
-
-
-def test_named(tmpdir, cli):
-    with cli(
-        args=['ceph-deploy', '--cluster=foo', 'new'],
-        ):
-        pass
-    assert {p.basename for p in tmpdir.listdir()} == {'foo.conf'}
 
 
 def test_exists(tmpdir, cli):
