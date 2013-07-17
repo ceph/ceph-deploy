@@ -9,6 +9,8 @@ from .. import mon
 
 from .directory import directory
 
+def fake_getaddrinfo(*a, **kw):
+    return [[0,0,0,0,'host1']]
 
 def test_help(tmpdir, cli):
     with cli(
@@ -42,15 +44,13 @@ def test_bad_no_mon(tmpdir, cli):
             args=['ceph-deploy', 'mon'],
             stderr=subprocess.PIPE,
             ) as p:
-            got = p.stderr.read()
-            assert got == """\
-ceph-deploy: No hosts specified to deploy to.
-"""
-
-    assert err.value.status == 1
+            result = p.stderr.read()
+    assert 'usage: ceph-deploy mon' in result
+    assert 'too few arguments' in result
+    assert err.value.status == 2
 
 
-def test_simple(tmpdir):
+def test_simple(tmpdir, capsys):
     with tmpdir.join('ceph.conf').open('w') as f:
         f.write("""\
 [global]
@@ -75,29 +75,22 @@ mon initial members = host1
     mock_compiled[mon.create_mon].side_effect = _create_mon
 
     try:
-        with directory(str(tmpdir)):
-            main(
-                args=['-v', 'mon'],
-                namespace=ns,
-                )
+        with mock.patch('socket.getaddrinfo', fake_getaddrinfo):
+            with directory(str(tmpdir)):
+                main(
+                    args=['-v', 'new', 'host1'],
+                    namespace=ns,
+                    )
+                main(
+                    args=['-v', 'mon', 'create', 'host1'],
+                    namespace=ns,
+                    )
     except SystemExit as e:
         raise AssertionError('Unexpected exit: %s', e)
-
-    ns.pushy.assert_called_once_with('ssh+sudo:host1')
-
-    mock_compiled.pop(mon.write_conf).assert_called_once_with(
-        cluster='ceph',
-        conf="""\
-[global]
-fsid = 6ede5564-3cf1-44b5-aa96-1c77b0c3e1d0
-mon_initial_members = host1
-
-""",
-        )
-
-    mock_compiled.pop(mon.create_mon).assert_called_once_with(
-        cluster='ceph',
-        get_monitor_secret=mock.ANY,
-        )
-
-    assert mock_compiled == {}
+    out, err = capsys.readouterr()
+    err = err.lower()
+    assert 'creating new cluster named ceph' in err
+    assert 'monitor host1 at h' in err
+    assert 'resolving host host1' in err
+    assert "monitor initial members are ['host1']" in err
+    assert "monitor addrs are ['h']" in err
