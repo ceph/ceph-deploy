@@ -8,9 +8,7 @@ from ..cli import main
 from .. import mon
 
 from .directory import directory
-
-def fake_getaddrinfo(*a, **kw):
-    return [[0,0,0,0,'host1']]
+from .fakes import fake_getaddrinfo
 
 def test_help(tmpdir, cli):
     with cli(
