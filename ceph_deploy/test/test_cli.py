@@ -7,25 +7,11 @@ def test_help(tmpdir, cli):
         args=['ceph-deploy', '--help'],
         stdout=subprocess.PIPE,
         ) as p:
-        got = p.stdout.read()
-        assert got == """\
-usage: ceph-deploy [-h] [-v] [--cluster NAME] COMMAND ...
-
-Deploy Ceph
-
-optional arguments:
-  -h, --help      show this help message and exit
-  -v, --verbose   be more verbose
-  --cluster NAME  name of the cluster
-
-commands:
-  COMMAND         description
-    new           Start deploying a new cluster, and write a CLUSTER.conf for
-                  it.
-    install       Install Ceph packages on remote hosts.
-    mon           Deploy ceph monitor on remote hosts.
-    osd           Prepare a data disk on remote host.
-"""
+        result = p.stdout.read()
+        assert 'usage: ceph-deploy' in result
+        assert 'Deploy Ceph' in result
+        assert 'optional arguments:' in result
+        assert 'commands:' in result
 
 
 def test_bad_command(tmpdir, cli):
