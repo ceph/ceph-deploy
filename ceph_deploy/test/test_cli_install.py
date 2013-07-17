@@ -15,26 +15,10 @@ def test_help(tmpdir, cli):
         args=['ceph-deploy', 'install', '--help'],
         stdout=subprocess.PIPE,
         ) as p:
-        got = p.stdout.read()
-        assert got == """\
-usage: ceph-deploy install [-h] [--stable [CODENAME] | --testing | --dev
-                           [BRANCH_OR_TAG]]
-                           HOST [HOST ...]
-
-Install Ceph packages on remote hosts.
-
-positional arguments:
-  HOST                  hosts to install on
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --stable [CODENAME]   install a release known as CODENAME (done by default)
-                        (default: argonaut)
-  --testing             install the latest development release
-  --dev [BRANCH_OR_TAG]
-                        install a bleeding edge build from Git branch or tag
-                        (default: master)
-"""
+        result = p.stdout.read()
+    assert 'usage: ceph-deploy' in result
+    assert 'positional arguments:' in result
+    assert 'optional arguments:' in result
 
 
 def test_bad_no_host(tmpdir, cli):
@@ -43,14 +27,9 @@ def test_bad_no_host(tmpdir, cli):
             args=['ceph-deploy', 'install'],
             stderr=subprocess.PIPE,
             ) as p:
-            got = p.stderr.read()
-            assert got == """\
-usage: ceph-deploy install [-h] [--stable [CODENAME] | --testing | --dev
-                           [BRANCH_OR_TAG]]
-                           HOST [HOST ...]
-ceph-deploy install: error: too few arguments
-"""
-
+            result = p.stderr.read()
+    assert 'usage: ceph-deploy install' in result
+    assert 'too few arguments' in result
     assert err.value.status == 2
 
 
@@ -61,9 +40,8 @@ def test_simple(tmpdir):
     ns.pushy.return_value = conn
 
     mock_compiled = collections.defaultdict(mock.Mock)
-    conn.compile.side_effect = mock_compiled.__getitem__
+    conn.compile.return_value = mock.Mock(return_value = ('Ubuntu', 'precise','cuttlefish'))
 
-    mock_compiled[install.lsb_release].return_value = ('Ubuntu', 'precise')
 
     try:
         with directory(str(tmpdir)):
@@ -78,12 +56,8 @@ def test_simple(tmpdir):
             mock.call('ssh+sudo:storehost1'),
         ])
 
-    mock_compiled.pop(install.lsb_release).assert_called_once_with()
-
-    mock_compiled.pop(install.install_ubuntu).assert_called_once_with(
-        version_kind='stable',
-        codename='precise',
-        version='argonaut',
-        )
-
-    assert mock_compiled == {}
+    call_list = conn.compile.call_args_list
+    mock.call(install.lsb.check_lsb_release) == call_list[0]
+    mock.call(install.lsb.lsb_release) == call_list[1]
+    mock.call(install.install_debian) == call_list[2]
+    assert len(call_list) == 3
