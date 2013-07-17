@@ -54,7 +54,7 @@ def install_suse(release, codename, version_kind, version):
                 ),
             ]
         )
-    
+
     subprocess.check_call(
         args=[
             'zypper',
@@ -64,7 +64,7 @@ def install_suse(release, codename, version_kind, version):
             'ceph',
             ],
         )
-    
+
 def uninstall_suse(arg_purge=False):
     import subprocess
 
@@ -150,7 +150,7 @@ def install_fedora(release, codename, version_kind, version):
                 ),
             ]
         )
-    
+
     subprocess.check_call(
         args=[
             'yum',
@@ -160,7 +160,7 @@ def install_fedora(release, codename, version_kind, version):
             'ceph',
             ],
         )
-    
+
 def uninstall_fedora(arg_purge=False):
     import subprocess
 
@@ -216,7 +216,7 @@ def install_centos(release, codename, version_kind, version):
                 ),
             ]
         )
-    
+
     subprocess.check_call(
         args=[
             'yum',
@@ -226,7 +226,7 @@ def install_centos(release, codename, version_kind, version):
             'ceph',
             ],
         )
-    
+
 def uninstall_centos(arg_purge=False):
     import subprocess
 
