@@ -30,26 +30,6 @@ def test_write_global_conf_section(tmpdir, cli):
     assert cfg.sections() == ['global']
 
 
-def test_exists(tmpdir, cli):
-    with cli(
-        args=['ceph-deploy', 'new'],
-        ):
-        pass
-    with pytest.raises(cli.Failed) as err:
-        with cli(
-            args=['ceph-deploy', 'new'],
-            stderr=subprocess.PIPE,
-            ) as p:
-            got = p.stderr.read()
-            assert got == """\
-ceph-deploy: Cluster config exists already: ceph.conf
-"""
-
-    assert err.value.status == 1
-    # no temp files left around
-    assert {p.basename for p in tmpdir.listdir()} == {'ceph.conf'}
-
-
 def pytest_funcarg__newcfg(request):
     tmpdir = request.getfuncargvalue('tmpdir')
     cli = request.getfuncargvalue('cli')
