@@ -15,18 +15,10 @@ def test_help(tmpdir, cli):
         args=['ceph-deploy', 'osd', '--help'],
         stdout=subprocess.PIPE,
         ) as p:
-        got = p.stdout.read()
-        assert got == """\
-usage: ceph-deploy osd [-h] HOST:DISK [HOST:DISK ...]
-
-Prepare a data disk on remote host.
-
-positional arguments:
-  HOST:DISK   host and disk to prepare
-
-optional arguments:
-  -h, --help  show this help message and exit
-"""
+        result = p.stdout.read()
+    assert 'usage: ceph-deploy osd' in result
+    assert 'positional arguments' in result
+    assert 'optional arguments' in result
 
 
 def test_bad_no_conf(tmpdir, cli):
@@ -35,12 +27,10 @@ def test_bad_no_conf(tmpdir, cli):
             args=['ceph-deploy', 'osd', 'fakehost:/does-not-exist'],
             stderr=subprocess.PIPE,
             ) as p:
-            got = p.stderr.read()
-            assert got == """\
-ceph-deploy: Cannot load config: [Errno 2] No such file or directory: 'ceph.conf'
-"""
-
-    assert err.value.status == 1
+            result = p.stderr.read()
+    assert 'ceph-deploy osd: error' in result
+    assert 'invalid choice' in result
+    assert err.value.status == 2
 
 
 def test_bad_no_disk(tmpdir, cli):
@@ -51,16 +41,12 @@ def test_bad_no_disk(tmpdir, cli):
             args=['ceph-deploy', 'osd'],
             stderr=subprocess.PIPE,
             ) as p:
-            got = p.stderr.read()
-            assert got == """\
-usage: ceph-deploy osd [-h] HOST:DISK [HOST:DISK ...]
-ceph-deploy osd: error: too few arguments
-"""
-
+            result = p.stderr.read()
+    assert 'usage: ceph-deploy osd' in result
     assert err.value.status == 2
 
 
-def test_simple(tmpdir):
+def test_simple(tmpdir, capsys):
     with tmpdir.join('ceph.conf').open('w') as f:
         f.write("""\
 [global]
@@ -70,20 +56,21 @@ mon host = host1
 
     ns = argparse.Namespace()
 
-    conn_osd = mock.NonCallableMock(name='PushyClient')
+    conn_osd = mock.NonCallableMock(name='PushyClient-osd')
     mock_compiled_osd = collections.defaultdict(mock.Mock)
-    conn_osd.compile.side_effect = mock_compiled_osd.__getitem__
+    #conn_osd.compile.side_effect = mock_compiled_osd.__getitem__
+    conn_osd.compile.return_value = mock.Mock(return_value='fakekeyring')
 
-    conn_mon = mock.NonCallableMock(name='PushyClient')
+    conn_mon = mock.NonCallableMock(name='PushyClient-mon')
     mock_compiled_mon = collections.defaultdict(mock.Mock)
     conn_mon.compile.side_effect = mock_compiled_mon.__getitem__
 
-    ns.pushy = mock.Mock()
+    ns.pushy = mock.Mock(name='pushy namespace')
 
     def _conn(url):
         if url == 'ssh+sudo:host1':
             return conn_mon
-        elif url == 'ssh+sudo:storehost1':
+        elif url == 'ssh+sudo:storehost1:sdc':
             return conn_osd
         else:
             raise AssertionError('Unexpected connection url: %r', url)
@@ -91,7 +78,7 @@ mon host = host1
 
     BOOTSTRAP_KEY = 'fakekeyring'
 
-    mock_compiled_mon[osd.get_bootstrap_osd_key].return_value = BOOTSTRAP_KEY
+    mock_compiled_mon[osd.get_bootstrap_osd_key].side_effect = BOOTSTRAP_KEY
 
     def _create_osd(cluster, find_key):
         key = find_key()
@@ -99,39 +86,19 @@ mon host = host1
 
     mock_compiled_osd[osd.create_osd].side_effect = _create_osd
 
-    try:
-        with directory(str(tmpdir)):
-            main(
-                args=['-v', 'osd', 'storehost1:sdc'],
-                namespace=ns,
-                )
-    except SystemExit as e:
-        raise AssertionError('Unexpected exit: %s', e)
-
-    mock_compiled_mon.pop(osd.get_bootstrap_osd_key).assert_called_once_with(
-        cluster='ceph',
+    with directory(str(tmpdir)):
+        main(
+            args=['-v', 'gatherkeys', 'storehost1:sdc'],
+            namespace=ns,
         )
-
-    assert mock_compiled_mon == {}
-
-    mock_compiled_osd.pop(osd.write_conf).assert_called_once_with(
-        cluster='ceph',
-        conf="""\
-[global]
-fsid = 6ede5564-3cf1-44b5-aa96-1c77b0c3e1d0
-mon_host = host1
-
-""",
-        )
-
-    mock_compiled_osd.pop(osd.create_osd).assert_called_once_with(
-        cluster='ceph',
-        find_key=mock.ANY,
-        )
-
-    mock_compiled_osd.pop(osd.prepare_disk).assert_called_once_with(
-        cluster='ceph',
-        disk='/dev/sdc',
-        )
-
-    assert mock_compiled_osd == {}
+        main(
+            args=['-v', 'osd', 'prepare', 'storehost1:sdc'],
+            namespace=ns,
+            )
+    out, err = capsys.readouterr()
+    err = err.lower()
+    assert 'have ceph.mon.keyring' in err
+    assert 'have ceph.client.admin.keyring' in err
+    assert 'have ceph.bootstrap-osd.keyring' in err
+    assert 'got ceph.bootstrap-mds.keyring key from storehost1:sdc' in err
+    assert 'got ceph.bootstrap-osd.keyring key from storehost1:sdc' in err
