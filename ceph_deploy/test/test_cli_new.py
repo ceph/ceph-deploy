@@ -35,18 +35,17 @@ def pytest_funcarg__newcfg(request):
     cli = request.getfuncargvalue('cli')
 
     def new(*args):
-        with cli(
-            args=['ceph-deploy', 'new'] + list(args),
-            ):
-            pass
-        with tmpdir.join('ceph.conf').open() as f:
-            cfg = conf.parse(f)
-        return cfg
+        with patch('ceph_deploy.new.socket.getaddrinfo', fake_getaddrinfo):
+            with directory(str(tmpdir)):
+                main( args=['new'] + list(args))
+                with tmpdir.join('ceph.conf').open() as f:
+                    cfg = conf.parse(f)
+                return cfg
     return new
 
 
 def test_uuid(newcfg):
-    cfg = newcfg()
+    cfg = newcfg('host1')
     fsid = cfg.get('global', 'fsid')
     # make sure it's a valid uuid
     uuid.UUID(hex=fsid)
@@ -70,7 +69,7 @@ def test_mons(newcfg):
 
 
 def test_defaults(newcfg):
-    cfg = newcfg()
+    cfg = newcfg('host1')
     assert cfg.get('global', 'auth_supported') == 'cephx'
     assert cfg.get('global', 'osd_journal_size') == '1024'
     assert cfg.get('global', 'filestore_xattr_use_omap') == 'true'
