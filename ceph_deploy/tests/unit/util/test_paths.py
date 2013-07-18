@@ -4,7 +4,7 @@ from ceph_deploy.util import paths
 class TestMonPaths(object):
 
     def test_base_path(self):
-        result = paths.mon._base('mycluster')
+        result = paths.mon.base('mycluster')
         assert result.endswith('/mycluster-')
 
     def test_path(self):
