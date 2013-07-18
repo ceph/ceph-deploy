@@ -15,7 +15,7 @@ from .util import paths, constants
 LOG = logging.getLogger(__name__)
 
 
-def create_mon(cluster, monitor_keyring, init):
+def create_mon(cluster, monitor_keyring, init, paths, constants):
     import os
     import socket
     import subprocess
@@ -129,6 +129,8 @@ def mon_create(args):
                 cluster=args.cluster,
                 monitor_keyring=monitor_keyring,
                 init=init,
+                paths=paths,
+                constants=constants,
                 )
 
             # TODO add_bootstrap_peer_hint
@@ -143,7 +145,7 @@ def mon_create(args):
         raise exc.GenericError('Failed to create %d monitors' % errors)
 
 
-def destroy_mon(cluster):
+def destroy_mon(cluster, paths):
     import os
     import subprocess
     import socket
@@ -209,6 +211,7 @@ def mon_destroy(args):
             destroy_mon_r = sudo.compile(destroy_mon)
             destroy_mon_r(
                 cluster=args.cluster,
+                paths=paths,
                 )
             sudo.close()
 
