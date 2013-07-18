@@ -4,22 +4,23 @@ from ceph_deploy.util import paths
 class TestMonPaths(object):
 
     def test_base_path(self):
-        assert paths.mon._base.endswith('/ceph-')
+        result = paths.mon._base('mycluster')
+        assert result.endswith('/mycluster-')
 
     def test_path(self):
-        result = paths.mon.path('ceph', 'myhostname')
+        result = paths.mon.path('mycluster', 'myhostname')
         assert result.startswith('/')
-        assert result.endswith('/ceph-myhostname')
+        assert result.endswith('/mycluster-myhostname')
 
     def test_done(self):
-        result = paths.mon.done('ceph', 'myhostname')
+        result = paths.mon.done('mycluster', 'myhostname')
         assert result.startswith('/')
-        assert result.endswith('ceph-myhostname/done')
+        assert result.endswith('mycluster-myhostname/done')
 
     def test_init(self):
-        result = paths.mon.init('ceph', 'myhostname', 'init')
+        result = paths.mon.init('mycluster', 'myhostname', 'init')
         assert result.startswith('/')
-        assert result.endswith('ceph-myhostname/init')
+        assert result.endswith('mycluster-myhostname/init')
 
     def test_keyring(self):
         result = paths.mon.keyring('mycluster', 'myhostname')
