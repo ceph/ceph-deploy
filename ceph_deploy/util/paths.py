@@ -18,8 +18,8 @@ class mon(object):
         """
         Example usage::
 
-            >>> mon.path('hostname')
-            /var/lib/ceph/mon/ceph-myhostname
+            >>> mon.path('mycluster', 'hostname')
+            /var/lib/ceph/mon/mycluster-myhostname
         """
         return "%s%s" % (cls._base, hostname)
 
@@ -28,8 +28,8 @@ class mon(object):
         """
         Example usage::
 
-            >>> mon.done('hostname')
-            /var/lib/ceph/mon/ceph-myhostname/done
+            >>> mon.done('mycluster', 'hostname')
+            /var/lib/ceph/mon/mycluster-myhostname/done
         """
         return join(cls.path(cluster, hostname), 'done')
 
@@ -38,8 +38,8 @@ class mon(object):
         """
         Example usage::
 
-            >>> mon.init('hostname', 'init')
-            /var/lib/ceph/mon/ceph-myhostname/init
+            >>> mon.init('mycluster', 'hostname', 'init')
+            /var/lib/ceph/mon/mycluster-myhostname/init
         """
         return join(cls.path(cluster, hostname), init)
 
