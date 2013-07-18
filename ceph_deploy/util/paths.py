@@ -11,7 +11,10 @@ class mon(object):
     construction.
     """
 
-    _base = join(constants.mon_path, 'ceph-')
+    @classmethod
+    def _base(cls, cluster):
+        cluster = "%s-" % cluster
+        return join(constants.mon_path, cluster)
 
     @classmethod
     def path(cls, cluster, hostname):
@@ -21,7 +24,7 @@ class mon(object):
             >>> mon.path('mycluster', 'hostname')
             /var/lib/ceph/mon/mycluster-myhostname
         """
-        return "%s%s" % (cls._base, hostname)
+        return "%s%s" % (cls._base(cluster), hostname)
 
     @classmethod
     def done(cls, cluster, hostname):
