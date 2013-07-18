@@ -9,6 +9,7 @@ from . import exc
 from . import lsb
 from .cliutil import priority
 from .sudo_pushy import get_transport
+from .util import paths, constants
 
 
 LOG = logging.getLogger(__name__)
@@ -20,27 +21,17 @@ def create_mon(cluster, monitor_keyring, init):
     import subprocess
 
     hostname = socket.gethostname().split('.')[0]
-    path = '/var/lib/ceph/mon/ceph-{hostname}'.format(
-        hostname=hostname,
-        )
-    done_path = '/var/lib/ceph/mon/ceph-{hostname}/done'.format(
-        hostname=hostname,
-        )
-    init_path = '/var/lib/ceph/mon/ceph-{hostname}/{init}'.format(
-        hostname=hostname,
-        init=init,
-        )
+    path = paths.mon.path(cluster, hostname)
+    done_path = paths.mon.done(cluster, hostname)
+    init_path = paths.mon.init(cluster, hostname, init)
 
     if not os.path.exists(path):
         os.makedirs(path)
 
     if not os.path.exists(done_path):
-        if not os.path.exists('/var/lib/ceph/tmp'):
-            os.makedirs('/var/lib/ceph/tmp')
-        keyring = '/var/lib/ceph/tmp/{cluster}-{hostname}.mon.keyring'.format(
-            cluster=cluster,
-            hostname=hostname,
-            )
+        if not os.path.exists(constants.tnp_path):
+            os.makedirs(constants.tnp_path)
+        keyring = paths.mon.keyring(cluster, hostname)
 
         with file(keyring, 'w') as f:
             f.write(monitor_keyring)
@@ -158,9 +149,7 @@ def destroy_mon(cluster):
     import socket
 
     hostname = socket.gethostname().split('.')[0]
-    path = '/var/lib/ceph/mon/ceph-{hostname}'.format(
-        hostname=hostname,
-        )
+    path = paths.mon.path(cluster, hostname)
 
     if os.path.exists(path):
         # remove from cluster
