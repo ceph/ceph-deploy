@@ -31,7 +31,7 @@ class mon(object):
             >>> mon.done('hostname')
             /var/lib/ceph/mon/ceph-myhostname/done
         """
-        return join(cls.path(hostname), 'done')
+        return join(cls.path(cluster, hostname), 'done')
 
     @classmethod
     def init(cls, cluster, hostname, init):
@@ -41,7 +41,7 @@ class mon(object):
             >>> mon.init('hostname', 'init')
             /var/lib/ceph/mon/ceph-myhostname/init
         """
-        return join(cls.path(hostname), init)
+        return join(cls.path(cluster, hostname), init)
 
     @classmethod
     def keyring(cls, cluster, hostname):
