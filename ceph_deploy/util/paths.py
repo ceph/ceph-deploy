@@ -14,7 +14,7 @@ class mon(object):
     _base = join(constants.mon_path, 'ceph-')
 
     @classmethod
-    def path(cls, hostname):
+    def path(cls, cluster, hostname):
         """
         Example usage::
 
@@ -24,7 +24,7 @@ class mon(object):
         return "%s%s" % (cls._base, hostname)
 
     @classmethod
-    def done(cls, hostname):
+    def done(cls, cluster, hostname):
         """
         Example usage::
 
@@ -34,7 +34,7 @@ class mon(object):
         return join(cls.path(hostname), 'done')
 
     @classmethod
-    def init(cls, hostname, init):
+    def init(cls, cluster, hostname, init):
         """
         Example usage::
 
