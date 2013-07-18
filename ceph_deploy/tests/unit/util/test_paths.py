@@ -7,17 +7,17 @@ class TestMonPaths(object):
         assert paths.mon._base.endswith('/ceph-')
 
     def test_path(self):
-        result = paths.mon.path('myhostname')
+        result = paths.mon.path('ceph', 'myhostname')
         assert result.startswith('/')
         assert result.endswith('/ceph-myhostname')
 
     def test_done(self):
-        result = paths.mon.done('myhostname')
+        result = paths.mon.done('ceph', 'myhostname')
         assert result.startswith('/')
         assert result.endswith('ceph-myhostname/done')
 
     def test_init(self):
-        result = paths.mon.init('myhostname', 'init')
+        result = paths.mon.init('ceph', 'myhostname', 'init')
         assert result.startswith('/')
         assert result.endswith('ceph-myhostname/init')
 
