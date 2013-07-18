@@ -1,7 +1,7 @@
 """
 Common paths for mon, based on the constant file paths defined in
 ``ceph_deploy.util.constants``.
-All classmethods return a string representation of the absolute path
+All functions return a string representation of the absolute path
 construction.
 """
 from os.path import join

@@ -9,13 +9,13 @@ from . import exc
 from . import lsb
 from .cliutil import priority
 from .sudo_pushy import get_transport
-from .util import paths, constants
+from .util import paths
 
 
 LOG = logging.getLogger(__name__)
 
 
-def create_mon(cluster, monitor_keyring, init, paths, constants):
+def create_mon(cluster, monitor_keyring, init, paths):
     import os
     import socket
     import subprocess
@@ -29,8 +29,8 @@ def create_mon(cluster, monitor_keyring, init, paths, constants):
         os.makedirs(path)
 
     if not os.path.exists(done_path):
-        if not os.path.exists(constants.tnp_path):
-            os.makedirs(constants.tnp_path)
+        if not os.path.exists(path.mon.constants.tmp_path):
+            os.makedirs(path.mon.constants.tmp_path)
         keyring = paths.mon.keyring(cluster, hostname)
 
         with file(keyring, 'w') as f:
@@ -130,7 +130,6 @@ def mon_create(args):
                 monitor_keyring=monitor_keyring,
                 init=init,
                 paths=paths,
-                constants=constants,
                 )
 
             # TODO add_bootstrap_peer_hint
