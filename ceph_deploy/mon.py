@@ -9,38 +9,32 @@ from . import exc
 from . import lsb
 from .cliutil import priority
 from .sudo_pushy import get_transport
+from .util import paths
 
 
 LOG = logging.getLogger(__name__)
 
 
-def create_mon(cluster, monitor_keyring, init):
-    import os
-    import socket
-    import subprocess
+def create_mon(cluster, monitor_keyring, init, **kw):
+    # These modules are imported here because this is a function that gets
+    # compiled and sent over for remote execution
+    os = kw.get('os', __import__('os'))
+    socket = kw.get('socket', __import__('socket'))
+    subprocess = kw.get('subprocess', __import__('subprocess'))
+    paths = kw.get('paths')  # noqa
 
     hostname = socket.gethostname().split('.')[0]
-    path = '/var/lib/ceph/mon/ceph-{hostname}'.format(
-        hostname=hostname,
-        )
-    done_path = '/var/lib/ceph/mon/ceph-{hostname}/done'.format(
-        hostname=hostname,
-        )
-    init_path = '/var/lib/ceph/mon/ceph-{hostname}/{init}'.format(
-        hostname=hostname,
-        init=init,
-        )
+    path = paths.mon.path(cluster, hostname)
+    done_path = paths.mon.done(cluster, hostname)
+    init_path = paths.mon.init(cluster, hostname, init)
 
     if not os.path.exists(path):
         os.makedirs(path)
 
     if not os.path.exists(done_path):
-        if not os.path.exists('/var/lib/ceph/tmp'):
-            os.makedirs('/var/lib/ceph/tmp')
-        keyring = '/var/lib/ceph/tmp/{cluster}-{hostname}.mon.keyring'.format(
-            cluster=cluster,
-            hostname=hostname,
-            )
+        if not os.path.exists(paths.mon.constants.tmp_path):
+            os.makedirs(paths.mon.constants.tmp_path)
+        keyring = paths.mon.keyring(cluster, hostname)
 
         with file(keyring, 'w') as f:
             f.write(monitor_keyring)
@@ -138,6 +132,7 @@ def mon_create(args):
                 cluster=args.cluster,
                 monitor_keyring=monitor_keyring,
                 init=init,
+                paths=paths,
                 )
 
             # TODO add_bootstrap_peer_hint
@@ -152,15 +147,13 @@ def mon_create(args):
         raise exc.GenericError('Failed to create %d monitors' % errors)
 
 
-def destroy_mon(cluster):
+def destroy_mon(cluster, paths):
     import os
     import subprocess
     import socket
 
     hostname = socket.gethostname().split('.')[0]
-    path = '/var/lib/ceph/mon/ceph-{hostname}'.format(
-        hostname=hostname,
-        )
+    path = paths.mon.path(cluster, hostname)
 
     if os.path.exists(path):
         # remove from cluster
@@ -220,6 +213,7 @@ def mon_destroy(args):
             destroy_mon_r = sudo.compile(destroy_mon)
             destroy_mon_r(
                 cluster=args.cluster,
+                paths=paths,
                 )
             sudo.close()
 
