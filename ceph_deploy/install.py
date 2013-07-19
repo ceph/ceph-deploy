@@ -1,5 +1,6 @@
 import argparse
 import logging
+from distutils.util import strtobool
 
 from . import exc
 from . import lsb
@@ -7,6 +8,20 @@ from .cliutil import priority
 from .sudo_pushy import get_transport
 
 LOG = logging.getLogger(__name__)
+
+def check_ceph_installed():
+    """
+    Check if the ceph packages are installed by looking for the
+    presence of the ceph command.
+    """
+    import subprocess
+
+    args = [ 'which', 'ceph', ]
+    process = subprocess.Popen(
+        args=args,
+        )
+    lsb_release_path, _ = process.communicate()
+    return process.wait()
 
 def install_suse(release, codename, version_kind, version):
     import platform
@@ -461,6 +476,21 @@ def purge_data(args):
         args.cluster,
         ' '.join(args.host),
         )
+
+    installed_hosts=[]
+    for hostname in args.host:
+        sudo = args.pushy(get_transport(hostname))
+        check_ceph_installed_r  = sudo.compile(check_ceph_installed)
+        status = check_ceph_installed_r()
+        if status == 0:
+            installed_hosts.append(hostname)
+        sudo.close()
+
+    if installed_hosts:
+        print "ceph is still installed on: ", installed_hosts
+        answer=raw_input("Continue (y/n)")
+        if not strtobool(answer):
+            return
 
     for hostname in args.host:
         # TODO username
