@@ -29,8 +29,8 @@ def create_mon(cluster, monitor_keyring, init, paths):
         os.makedirs(path)
 
     if not os.path.exists(done_path):
-        if not os.path.exists(path.mon.constants.tmp_path):
-            os.makedirs(path.mon.constants.tmp_path)
+        if not os.path.exists(paths.mon.constants.tmp_path):
+            os.makedirs(paths.mon.constants.tmp_path)
         keyring = paths.mon.keyring(cluster, hostname)
 
         with file(keyring, 'w') as f:
