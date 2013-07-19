@@ -15,10 +15,13 @@ from .util import paths
 LOG = logging.getLogger(__name__)
 
 
-def create_mon(cluster, monitor_keyring, init, paths):
-    import os
-    import socket
-    import subprocess
+def create_mon(cluster, monitor_keyring, init, **kw):
+    # These modules are imported here because this is a function that gets
+    # compiled and sent over for remote execution
+    os = kw.get('os', __import__('os'))
+    socket = kw.get('socket', __import__('socket'))
+    subprocess = kw.get('subprocess', __import__('subprocess'))
+    paths = kw.get('paths')  # noqa
 
     hostname = socket.gethostname().split('.')[0]
     path = paths.mon.path(cluster, hostname)
