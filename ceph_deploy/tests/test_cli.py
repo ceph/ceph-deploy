@@ -23,7 +23,7 @@ def test_bad_command(tmpdir, cli):
             result = p.stderr.read()
     assert 'usage: ceph-deploy' in result
     assert err.value.status == 2
-    assert {p.basename for p in tmpdir.listdir()} == set()
+    assert [p.basename for p in tmpdir.listdir()] == []
 
 
 def test_bad_cluster(tmpdir, cli):
@@ -35,4 +35,4 @@ def test_bad_cluster(tmpdir, cli):
             result = p.stderr.read()
     assert 'usage: ceph-deploy' in result
     assert err.value.status == 2
-    assert {p.basename for p in tmpdir.listdir()} == set()
+    assert [p.basename for p in tmpdir.listdir()] == []
