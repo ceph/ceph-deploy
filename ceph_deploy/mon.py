@@ -1,6 +1,7 @@
 import ConfigParser
 import logging
 import re
+import subprocess
 
 from cStringIO import StringIO
 
@@ -147,39 +148,15 @@ def mon_create(args):
         raise exc.GenericError('Failed to create %d monitors' % errors)
 
 
-def destroy_mon(cluster, paths):
+def destroy_mon(cluster, paths, is_running):
     import os
-    import subprocess
+    import subprocess  # noqa
     import socket
     import time
     retries = 5
 
     hostname = socket.gethostname().split('.')[0]
     path = paths.mon.path(cluster, hostname)
-
-    def is_running(args):
-        """
-        Run a command to check the status of a mon, return a boolean.
-
-        We heavily depend on the format of the output, if that ever changes
-        we need to modify this.
-        Check daemon status for 3 times
-        output of the status should be similar to::
-
-            mon.mira094: running {"version":"0.61.5"}
-
-        or when it fails::
-
-            mon.mira094: dead {"version":"0.61.5"}
-            mon.mira094: not running {"version":"0.61.5"}
-        """
-        proc = subprocess.Popen(
-            args=args,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-        result = proc.communicate()
-        return ': running' in ' '.join(result)
 
     if os.path.exists(path):
         # remove from cluster
@@ -254,6 +231,7 @@ def mon_destroy(args):
             destroy_mon_r(
                 cluster=args.cluster,
                 paths=paths,
+                is_running=is_running,
                 )
             sudo.close()
 
@@ -272,6 +250,7 @@ def mon(args):
         mon_destroy(args)
     else:
         LOG.error('subcommand %s not implemented', args.subcommand)
+
 
 @priority(30)
 def make(parser):
@@ -296,3 +275,36 @@ def make(parser):
     parser.set_defaults(
         func=mon,
         )
+
+#
+# Helpers
+#
+
+
+def is_running(args):
+    """
+    Run a command to check the status of a mon, return a boolean.
+
+    We heavily depend on the format of the output, if that ever changes
+    we need to modify this.
+    Check daemon status for 3 times
+    output of the status should be similar to::
+
+        mon.mira094: running {"version":"0.61.5"}
+
+    or when it fails::
+
+        mon.mira094: dead {"version":"0.61.5"}
+        mon.mira094: not running {"version":"0.61.5"}
+    """
+    proc = subprocess.Popen(
+        args=args,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    result = proc.communicate()
+    result_string = ' '.join(result)
+    for run_check in [': running', ' start/running']:
+        if run_check in result_string:
+            return True
+    return False
