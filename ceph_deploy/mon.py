@@ -151,13 +151,39 @@ def destroy_mon(cluster, paths):
     import os
     import subprocess
     import socket
+    import time
+    retries = 5
 
     hostname = socket.gethostname().split('.')[0]
     path = paths.mon.path(cluster, hostname)
 
+    def is_running(args):
+        """
+        Run a command to check the status of a mon, return a boolean.
+
+        We heavily depend on the format of the output, if that ever changes
+        we need to modify this.
+        Check daemon status for 3 times
+        output of the status should be similar to::
+
+            mon.mira094: running {"version":"0.61.5"}
+
+        or when it fails::
+
+            mon.mira094: dead {"version":"0.61.5"}
+            mon.mira094: not running {"version":"0.61.5"}
+        """
+        proc = subprocess.Popen(
+            args=args,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        result = proc.communicate()
+        return ': running' in ' '.join(result)
+
     if os.path.exists(path):
         # remove from cluster
-        subprocess.check_call(
+        proc = subprocess.Popen(
             args=[
                 'sudo',
                 'ceph',
@@ -168,30 +194,44 @@ def destroy_mon(cluster, paths):
                 'remove',
                 hostname,
                 ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             )
+        out, err = proc.communicate()
+        return_status = proc.wait()
+        if return_status > 0:
+            raise RuntimeError(err.strip())
 
         # stop
         if os.path.exists(os.path.join(path, 'upstart')):
-            subprocess.call(   # ignore initctl error when job not running
-                args=[
-                    'initctl',
-                    'stop',
-                    'ceph-mon',
-                    'cluster={cluster}'.format(cluster=cluster),
-                    'id={hostname}'.format(hostname=hostname),
-                ],
-            )
+            status_args = [
+                'initctl',
+                'status',
+                'ceph-mon',
+                'cluster={cluster}'.format(cluster=cluster),
+                'id={hostname}'.format(hostname=hostname),
+            ]
+
         elif os.path.exists(os.path.join(path, 'sysvinit')):
-            subprocess.check_call(
-                args=[
-                    'service',
-                    'ceph',
-                    'stop',
-                    'mon.{hostname}'.format(hostname=hostname),
-                ],
-            )
+            status_args = [
+                'service',
+                'ceph',
+                'status',
+                'mon.{hostname}'.format(hostname=hostname),
+            ]
+
+        while retries:
+            if is_running(status_args):
+                time.sleep(5)
+                retries -= 1
+                if retries <= 0:
+                    raise RuntimeError('ceph-mon deamon did not stop')
+            else:
+                break
 
         # delete monitor directory
+        # XXX This should not remove the mon data
+        # but move it
         subprocess.check_call(
             args=[
                 'rm',
@@ -222,7 +262,7 @@ def mon_destroy(args):
             errors += 1
 
     if errors:
-        raise exc.GenericError('Failed to create %d monitors' % errors)
+        raise exc.GenericError('Failed to destroy %d monitors' % errors)
 
 
 def mon(args):
