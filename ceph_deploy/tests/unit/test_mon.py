@@ -110,3 +110,51 @@ class TestCreateMon(object):
         result = self.fake_file.call_args_list[2]
         assert result == call('/cluster-hostname/init', 'w')
 
+
+class TestIsRunning(object):
+
+    def setup(self):
+        self.fake_popen = Mock()
+        self.fake_popen.return_value = self.fake_popen
+
+    def test_is_running_centos(self):
+        centos_out = ['', "mon.mire094: running {'version': '0.6.15'}"]
+        self.fake_popen.communicate = Mock(return_value=centos_out)
+        with patch('ceph_deploy.mon.subprocess.Popen', self.fake_popen):
+            result = mon.is_running(['ceph', 'status'])
+        assert result is True
+
+    def test_is_not_running_centos(self):
+        centos_out = ['', "mon.mire094: not running {'version': '0.6.15'}"]
+        self.fake_popen.communicate = Mock(return_value=centos_out)
+        with patch('ceph_deploy.mon.subprocess.Popen', self.fake_popen):
+            result = mon.is_running(['ceph', 'status'])
+        assert result is False
+
+    def test_is_dead_centos(self):
+        centos_out = ['', "mon.mire094: dead {'version': '0.6.15'}"]
+        self.fake_popen.communicate = Mock(return_value=centos_out)
+        with patch('ceph_deploy.mon.subprocess.Popen', self.fake_popen):
+            result = mon.is_running(['ceph', 'status'])
+        assert result is False
+
+    def test_is_running_ubuntu(self):
+        ubuntu_out = ['', "ceph-mon (ceph/mira103) start/running, process 5866"]
+        self.fake_popen.communicate = Mock(return_value=ubuntu_out)
+        with patch('ceph_deploy.mon.subprocess.Popen', self.fake_popen):
+            result = mon.is_running(['ceph', 'status'])
+        assert result is True
+
+    def test_is_not_running_ubuntu(self):
+        ubuntu_out = ['', "ceph-mon (ceph/mira103) start/dead, process 5866"]
+        self.fake_popen.communicate = Mock(return_value=ubuntu_out)
+        with patch('ceph_deploy.mon.subprocess.Popen', self.fake_popen):
+            result = mon.is_running(['ceph', 'status'])
+        assert result is False
+
+    def test_is_dead_ubuntu(self):
+        ubuntu_out = ['', "ceph-mon (ceph/mira103) stop/not running, process 5866"]
+        self.fake_popen.communicate = Mock(return_value=ubuntu_out)
+        with patch('ceph_deploy.mon.subprocess.Popen', self.fake_popen):
+            result = mon.is_running(['ceph', 'status'])
+        assert result is False
