@@ -14,7 +14,7 @@ for users who want to quickly get Ceph running with sensible initial settings
 without the overhead of installing Chef, Puppet or Juju.
 
 It does not handle client configuration beyond pushing the Ceph config file
-and users who want fine-control over security settings, partitions or directory 
+and users who want fine-control over security settings, partitions or directory
 locations should use a tool such as Chef or Puppet.
 
 Setup
@@ -29,21 +29,21 @@ convenient (like ``~/bin``), or add the current directory to ``PATH``,
 or just always type the full path to ``ceph-deploy``.
 
 ceph-deploy at a minimum requires that the machine from which the script is
-being run can ssh as root without password into each Ceph node. 
+being run can ssh as root without password into each Ceph node.
 
 To enable this generate a new ssh keypair for the root user with no passphrase
-and place the public key (``id_rsa.pub`` or ``id_dsa.pub``) in:
+and place the public key (``id_rsa.pub`` or ``id_dsa.pub``) in::
 
- /root/.ssh/authorized_keys
+    /root/.ssh/authorized_keys
 
-and ensure that the following lines are in the sshd config:
+and ensure that the following lines are in the sshd config::
 
- PermitRootLogin yes
- PermitEmptyPasswords yes
+    PermitRootLogin yes
+    PermitEmptyPasswords yes
 
 The machine running ceph-deploy does not need to have the Ceph packages installed
 unless it needs to admin the cluster directly using the ``ceph`` command line tool.
- 
+
 Managing an existing cluster
 ============================
 
@@ -54,9 +54,9 @@ To grab a copy of the cluster configuration file (normally
  ceph-deploy config pull HOST
 
 You will usually also want to gather the encryption keys used for that
-cluster:
+cluster::
 
- ceph-deploy gatherkeys MONHOST
+    ceph-deploy gatherkeys MONHOST
 
 At this point you can skip the steps below that create a new cluster
 (you already have one) and optionally skip instalation and/or monitor
@@ -110,11 +110,11 @@ This installs the current default *stable* release. You can choose a
 different release track with command line options, for example to use
 a release candidate::
 
-  ceph-deploy install --testing HOST 
+  ceph-deploy install --testing HOST
 
 Or to test a development branch::
 
-  ceph-deploy install --dev=wip-mds-now-works-no-kidding HOST [HOST..] 
+  ceph-deploy install --dev=wip-mds-now-works-no-kidding HOST [HOST..]
 
 
 Deploying monitors
@@ -157,9 +157,9 @@ partition table on DISK first, you can include the ``--zap-disk``
 option.
 
 If there is already a prepared disk or directory that is ready to become an
-OSD, you can also do:
+OSD, you can also do::
 
- ceph-deploy osd activate HOST:DIR[:JOURNAL] [...]
+    ceph-deploy osd activate HOST:DIR[:JOURNAL] [...]
 
 This is useful when you are managing the mounting of volumes yourself.
 
