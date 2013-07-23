@@ -532,6 +532,8 @@ def make(parser):
         choices=[
             'bobtail',
             'cuttlefish',
+            'dumpling',
+            'emperor',
             ],
         metavar='CODENAME',
         help='install a release known as CODENAME (done by default) (default: %(default)s)',
