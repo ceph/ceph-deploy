@@ -87,7 +87,7 @@ def create_mds(
 
     keypath = os.path.join(path, 'keyring')
 
-    subprocess.check_call(
+    proc = subprocess.Popen(
         args=[
             'ceph',
             '--cluster', cluster,
@@ -100,7 +100,13 @@ def create_mds(
             '-o',
             os.path.join(keypath),
             ],
-        )
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    out, err = proc.communicate()
+    return_status = proc.wait()
+    if return_status > 0:
+        raise RuntimeError(err.strip())
 
     with file(os.path.join(path, 'done'), 'wb') as f:
         pass
