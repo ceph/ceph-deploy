@@ -35,7 +35,7 @@ def _get_distro(distro):
     try:
         return distributions[distro]
     except KeyError:
-        raise exc.UnsupportedPlatform(distro=distro)
+        raise exc.UnsupportedPlatform(distro=distro, codename='')
 
 
 def _normalized_distro_name(distro):
