@@ -10,7 +10,7 @@ from ceph_deploy.sudo_pushy import get_transport
 from ceph_deploy.hosts import debian, centos, fedora, suse
 
 
-def get(hostname):
+def get(hostname, fallback=None):
     sudo_conn = pushy.connect(get_transport(hostname))
     (distro, release, codename) = lsb.get_lsb_release(sudo_conn)
 
@@ -21,7 +21,7 @@ def get(hostname):
     return module
 
 
-def _get_distro(distro):
+def _get_distro(distro, fallback=None):
     distro = _normalized_distro_name(distro)
     distributions = {
         'debian': debian,
@@ -35,6 +35,8 @@ def _get_distro(distro):
     try:
         return distributions[distro]
     except KeyError:
+        if fallback:
+            return _get_distro(fallback)
         raise exc.UnsupportedPlatform(distro=distro, codename='')
 
 
