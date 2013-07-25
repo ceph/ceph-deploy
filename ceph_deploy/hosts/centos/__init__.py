@@ -1,6 +1,8 @@
+from install import install
+
 # Allow to set some information about this distro
 #
 
-name = None
+distro = None
 release = None
 codename = None
