@@ -4,10 +4,15 @@ commands (e.g. using `yum` as opposed to `apt`) we can make a one time call to
 that remote host and set all the special cases for running commands depending
 on the type of distribution/version we are dealing with.
 """
-import pushy
+
 from ceph_deploy import lsb, exc
 from ceph_deploy.sudo_pushy import get_transport
 from ceph_deploy.hosts import debian, centos, fedora, suse
+
+# Import sudo_pushy and patch it
+import pushy
+from ceph_deploy import sudo_pushy
+sudo_pushy.patch()
 
 
 def get(hostname, fallback=None):
