@@ -11,6 +11,22 @@ from ceph_deploy.hosts import debian, centos, fedora, suse
 
 
 def get(hostname, fallback=None):
+    """
+    Retrieve the module that matches the distribution of a ``hostname``. This
+    function will connect to that host and retrieve the distribution
+    informaiton, then return the appropriate module and slap a few attributes
+    to that module defining the information it found from the hostname.
+
+    For example, if host ``node1.example.com`` is an Ubuntu server, the
+    ``debian`` module would be returned and the following would be set::
+
+        module.name = 'ubuntu'
+        module.release = '12.04'
+        module.codename = 'precise'
+
+    :param hostname: A hostname that is reachable/resolvable over the network
+    :param fallback: Optional fallback to use if no supported distro is found
+    """
     sudo_conn = pushy.connect(get_transport(hostname))
     (distro, release, codename) = lsb.get_lsb_release(sudo_conn)
 
