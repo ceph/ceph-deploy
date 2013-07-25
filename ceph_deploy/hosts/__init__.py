@@ -36,9 +36,10 @@ def get(hostname, fallback=None):
     (distro, release, codename) = lsb.get_lsb_release(sudo_conn)
 
     module = _get_distro(distro)
-    module.name = _normalized_distro_name(distro)
+    module.name = distro
     module.release = release
     module.codename = codename
+    module.sudo_conn = sudo_conn
     return module
 
 
