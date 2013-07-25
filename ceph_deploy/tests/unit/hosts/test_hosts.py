@@ -49,3 +49,7 @@ class TestGetDistro(object):
     def test_get_uknown(self):
         with raises(exc.UnsupportedPlatform):
             hosts._get_distro('Solaris')
+
+    def test_get_fallback(self):
+        result = hosts._get_distro('Solaris', 'Debian')
+        assert result.__name__.endswith('debian')
