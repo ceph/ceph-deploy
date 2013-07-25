@@ -3,7 +3,7 @@ import logging
 from distutils.util import strtobool
 
 from . import exc
-from . import lsb
+from . import lsb, hosts
 from .cliutil import priority
 from .sudo_pushy import get_transport
 
@@ -369,6 +369,7 @@ def purge_data_any():
             'rm', '-rf', '--one-file-system', '--', '/etc/ceph',
             ])
 
+
 def install(args):
     version = getattr(args, args.version_kind)
     version_str = args.version_kind
@@ -380,35 +381,21 @@ def install(args):
         args.cluster,
         ' '.join(args.host),
         )
-
     for hostname in args.host:
-        LOG.debug('Detecting platform for host %s ...', hostname)
-
         # TODO username
-        sudo = args.pushy(get_transport(hostname))
-        (distro, release, codename) = lsb.get_lsb_release(sudo)
-        LOG.debug('Distro %s release %s codename %s', distro, release, codename)
-
-        if (distro == 'Debian' or distro == 'Ubuntu'):
-            install_r = sudo.compile(install_debian)
-        elif (distro == 'CentOS' or distro == 'Scientific') or distro.startswith('RedHat'):
-            install_r = sudo.compile(install_centos)
-        elif distro == 'Fedora':
-            install_r = sudo.compile(install_fedora)
-        elif (distro == 'SUSE LINUX'):
-            install_r = sudo.compile(install_suse)
-        else:
-            raise exc.UnsupportedPlatform(distro=distro, codename=codename)
-
-        LOG.debug('Installing on host %s ...', hostname)
-        install_r(
-            release=release,
-            codename=codename,
+        LOG.debug('Detecting platform for host %s ...', hostname)
+        distro = hosts.get(hostname)
+        LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
+        remote_install = distro.sudo_conn.compile(distro.install)
+        remote_install(
+            release=distro.release,
+            codename=distro.codename,
             version_kind=args.version_kind,
             version=version,
-            )
+        )
 
-        sudo.close()
+        distro.sudo_conn.close()
+
 
 def uninstall(args):
     LOG.debug(
