@@ -175,7 +175,6 @@ def install(args):
                 version=version,
             )
         except Exception as err:
-            distro.sudo_conn.close()
             if getattr(err, 'remote_traceback'):
                 for line in err.remote_traceback:
                     rlogger.error(line)
