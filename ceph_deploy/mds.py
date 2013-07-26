@@ -86,53 +86,37 @@ def create_mds(
         )
 
     keypath = os.path.join(path, 'keyring')
-    current_version_args = [
-        'ceph',
-        '--cluster', cluster,
-        '--name', 'client.bootstrap-mds',
-        '--keyring', bootstrap_keyring,
-        'auth', 'get-or-create', 'mds.{name}'.format(name=name),
-        'osd', 'allow rwx',
-        'mds', 'allow',
-        'mon', 'allow profile mds',
-        '-o',
-        os.path.join(keypath),
-    ]
-
-    previous_version_args = [
-        'ceph',
-        '--cluster', cluster,
-        '--name', 'client.bootstrap-mds',
-        '--keyring', bootstrap_keyring,
-        'auth', 'get-or-create', 'mds.{name}'.format(name=name),
-        'osd', 'allow *',
-        'mds', 'allow',
-        'mon', 'allow rwx',
-        '-o',
-        os.path.join(keypath),
-    ]
-
-    def run_command(args):
-        """
-        Attempt to run a command while capturing an error return code.  Raise
-        RuntimeError only if `EACCES` is present in the return code, otherwise
-        raise a regular exception.
-        """
-        try:
-            subprocess.check_call(
-                args=args,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                )
-        except subprocess.CalledProcessError as err:
-            if err.errno == errno.EACCES:
-                raise RuntimeError(err.strerror)
-            raise Exception(err.strerror)
 
     try:
-        run_command(current_version_args)
-    except RuntimeError:
-        run_command(previous_version_args)
+        subprocess.check_call(
+            args = [
+                'ceph',
+                '--cluster', cluster,
+                '--name', 'client.bootstrap-mds',
+                '--keyring', bootstrap_keyring,
+                'auth', 'get-or-create', 'mds.{name}'.format(name=name),
+                'osd', 'allow rwx',
+                'mds', 'allow',
+                'mon', 'allow profile mds',
+                '-o',
+                os.path.join(keypath),
+                ])
+    except subprocess.CalledProcessError as err:
+        if err.returncode != errno.EACCES:
+            raise
+        subprocess.check_call(
+            args = [
+                'ceph',
+                '--cluster', cluster,
+                '--name', 'client.bootstrap-mds',
+                '--keyring', bootstrap_keyring,
+                'auth', 'get-or-create', 'mds.{name}'.format(name=name),
+                'osd', 'allow *',
+                'mds', 'allow',
+                'mon', 'allow rwx',
+                '-o',
+                os.path.join(keypath),
+                ])
 
     with file(os.path.join(path, 'done'), 'wb') as f:
         pass
