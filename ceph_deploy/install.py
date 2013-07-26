@@ -178,7 +178,8 @@ def install(args):
             if getattr(err, 'remote_traceback'):
                 for line in err.remote_traceback:
                     rlogger.error(line)
-            raise
+            else:
+                raise
 
         distro.sudo_conn.close()
 
