@@ -6,6 +6,7 @@ from . import exc
 from . import lsb, hosts
 from .cliutil import priority
 from .sudo_pushy import get_transport
+from .util.decorators import remote_compile
 
 LOG = logging.getLogger(__name__)
 
@@ -163,13 +164,22 @@ def install(args):
         LOG.debug('Detecting platform for host %s ...', hostname)
         distro = hosts.get(hostname)
         LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
-        remote_install = distro.sudo_conn.compile(distro.install)
-        remote_install(
-            release=distro.release,
-            codename=distro.codename,
-            version_kind=args.version_kind,
-            version=version,
-        )
+        remote_install = remote_compile(distro.sudo_conn, distro.install, LOG)
+        rlogger = logging.getLogger(hostname)
+        rlogger.info('installing ceph on %s' % hostname)
+        try:
+            remote_install(
+                release=distro.release,
+                codename=distro.codename,
+                version_kind=args.version_kind,
+                version=version,
+            )
+        except Exception as err:
+            distro.sudo_conn.close()
+            if getattr(err, 'remote_traceback'):
+                for line in err.remote_traceback:
+                    rlogger.error(line)
+            raise
 
         distro.sudo_conn.close()
 
