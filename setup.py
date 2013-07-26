@@ -1,4 +1,3 @@
-#!/usr/bin/python
 from setuptools import setup, find_packages
 import os
 import sys
@@ -19,8 +18,8 @@ setup(
     version='1.1',
     packages=find_packages(),
 
-    author='Tommi Virtanen',
-    author_email='tommi.virtanen@inktank.com',
+    author='Inktank',
+    author_email='ceph-devel@vger.kernel.org',
     description='Deploy Ceph with minimal infrastructure',
     long_description=read('README.rst'),
     license='MIT',
