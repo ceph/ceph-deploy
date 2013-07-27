@@ -18,8 +18,7 @@ License: 	MIT
 Group:   	System/Filesystems
 URL:     	http://ceph.com/
 Source0: 	%{name}-%{version}.tar.bz2
-#Source0: 	https://github.com/ceph/ceph-deploy/archive/v0.1.tar.gz
-#BuildRoot:      %{_tmppath}/%{name}-%{version}-build
+BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 BuildRequires:  python-devel
 BuildRequires:  python-distribute
 BuildRequires:	python-setuptools
