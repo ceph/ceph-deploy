@@ -24,9 +24,13 @@ BuildRequires:  python-devel
 BuildRequires:  python-distribute
 BuildRequires:	python-setuptools
 BuildRequires:	python-virtualenv
-BuildRequires:	pytest
 BuildRequires:  python-mock
 BuildRequires:  python-tox
+%if 0%{?suse_version}
+BuildRequires:	python-pytest
+%else
+BuildRequires:	pytest
+%endif
 Requires:       python-argparse
 #Requires:	python-pushy
 Requires:       python-distribute
