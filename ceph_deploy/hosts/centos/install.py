@@ -1,4 +1,5 @@
 from ceph_deploy.util.wrappers import check_call
+from ceph_deploy.util.context import remote
 
 
 def install(distro, logger, version_kind, version):
@@ -10,10 +11,10 @@ def install(distro, logger, version_kind, version):
     else:
         key = 'autobuild'
 
-    check_call([
-        'su -c \'rpm --import "https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc"\''.format(key=key),],
-        logger,
+    check_call(
         distro.sudo_conn,
+        logger,
+        ['su -c \'rpm --import "https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc"\''.format(key=key),],
         shell=True)
 
     if version_kind == 'stable':
@@ -29,25 +30,27 @@ def install(distro, logger, version_kind, version):
             version=version,
             )
 
-    check_call([
-        'rpm',
-        '-Uvh',
-        '--replacepkgs',
-        '--force',
-        '--quiet',
-        '{url}noarch/ceph-release-1-0.el6.noarch.rpm'.format(url=url),
-        ],
+    check_call(
+        distro.sudo_conn,
         logger,
-        distro.sudo_conn
+        [
+            'rpm',
+            '-Uvh',
+            '--replacepkgs',
+            '--force',
+            '--quiet',
+            '{url}noarch/ceph-release-1-0.el6.noarch.rpm'.format(url=url),
+        ],
     )
 
-    check_call([
-        'yum',
-        '-y',
-        '-q',
-        'install',
-        'ceph',
-        ],
+    check_call(
+        distro.sudo_conn,
         logger,
-        distro.sudo_conn
+        [
+            'yum',
+            '-y',
+            '-q',
+            'install',
+            'ceph',
+        ],
     )
