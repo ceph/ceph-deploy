@@ -1,5 +1,4 @@
 from ceph_deploy.util.wrappers import check_call
-from ceph_deploy.util.context import remote
 
 
 def install(distro, logger, release, version_kind, version):
