@@ -1,18 +1,19 @@
+from ceph_deploy.util.wrappers import check_call
 
 
-def install(release, codename, version_kind, version):
-    import platform
-    import subprocess
+def install(distro, logger, version_kind, version):
+    release = distro.release
+    machine = distro.sudo_conn.modules.platform.machine()
 
     if version_kind in ['stable', 'testing']:
         key = 'release'
     else:
         key = 'autobuild'
 
-    subprocess.check_call(
-        args='su -c \'rpm --import "https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc"\''.format(key=key),
-        shell=True,
-        )
+    check_call(logger, [
+        'su -c \'rpm --import "https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc"\''.format(key=key),],
+        distro.sudo_conn,
+        shell=True)
 
     if version_kind == 'stable':
         url = 'http://ceph.com/rpm-{version}/el6/'.format(
@@ -23,29 +24,27 @@ def install(release, codename, version_kind, version):
     elif version_kind == 'dev':
         url = 'http://gitbuilder.ceph.com/ceph-rpm-centos{release}-{machine}-basic/ref/{version}/'.format(
             release=release.split(".",1)[0],
-            machine=platform.machine(),
+            machine=machine,
             version=version,
             )
 
-    subprocess.check_call(
-        args=[
-            'rpm',
-            '-Uvh',
-            '--replacepkgs',
-            '--force',
-            '--quiet',
-            '{url}noarch/ceph-release-1-0.el6.noarch.rpm'.format(
-                url=url,
-                ),
-            ]
-        )
+    check_call(logger, [
+        'rpm',
+        '-Uvh',
+        '--replacepkgs',
+        '--force',
+        '--quiet',
+        '{url}noarch/ceph-release-1-0.el6.noarch.rpm'.format(url=url),
+        ],
+        distro.sudo_conn
+    )
 
-    subprocess.check_call(
-        args=[
-            'yum',
-            '-y',
-            '-q',
-            'install',
-            'ceph',
-            ],
-        )
+    check_call(logger, [
+        'yum',
+        '-y',
+        '-q',
+        'install',
+        'ceph',
+        ],
+        distro.sudo_conn
+    )
