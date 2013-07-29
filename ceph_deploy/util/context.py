@@ -22,10 +22,11 @@ class remote(object):
     stderr) or info messages (from stdout).
     """
 
-    def __init__(self, client, logger, func):
+    def __init__(self, client, logger, func, mangle_exc=True):
         self.client = client
         self.logger = logger
         self.func = func
+        self.mangle_exc = mangle_exc
 
     def __enter__(self):
         self.stdout = self.client.modules.sys.stdout
@@ -44,6 +45,8 @@ class remote(object):
         # leave everything as it was
         self.client.modules.sys.stdout = self.stdout
         self.client.modules.sys.stdout = self.stderr
+        if not self.mangle_exc:
+            return False
 
         if e_type is not None:
             if hasattr(e_val, 'remote_traceback'):
@@ -52,7 +55,7 @@ class remote(object):
                         self.logger.error(line)
                 return True  # So that we eat up the traceback
             else:
-                raise e_type(e_val)
+                raise e_type
 
     def write_log(self, lines, log_level):
         logger = getattr(self.logger, log_level)

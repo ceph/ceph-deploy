@@ -14,6 +14,11 @@ def check_call(conn, logger, args, *a, **kw):
     Wraps ``subprocess.check_call`` for a remote call via ``pushy``
     doing all the capturing and logging nicely upon failure/success
 
+    The mangling of the traceback when an exception ocurrs, is because the
+    caller gets eating up by not being executed in the actual function of
+    a given module (e.g. ``centos/install.py``) but rather here, where the
+    stack trace is no longer relevant.
+
     :param args: The args to be passed onto ``check_call``
     """
     command = ' '.join(args)
@@ -27,5 +32,22 @@ def check_call(conn, logger, args, *a, **kw):
             **kw
         )
 
-    with context.remote(conn, logger, remote_call) as call:
-        return call(args, *a, **kw)
+    with context.remote(conn, logger, remote_call, mangle_exc=False) as call:
+        try:
+            return call(args, *a, **kw)
+        except Exception as err:
+            import inspect
+            stack = inspect.getframeinfo(inspect.currentframe().f_back)
+            if hasattr(err, 'remote_traceback'):
+                logger.error('Traceback (most recent call last):')
+                logger.error('  File "%s", line %s, in %s' % (
+                    stack[0],
+                    stack[1],
+                    stack[2])
+                )
+                err.remote_traceback.pop(0)
+                for line in err.remote_traceback:
+                    if line:
+                        logger.error(line)
+            else:
+                raise err
