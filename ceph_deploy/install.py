@@ -164,23 +164,9 @@ def install(args):
         LOG.debug('Detecting platform for host %s ...', hostname)
         distro = hosts.get(hostname)
         LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
-        remote_install = remote_compile(distro.sudo_conn, distro.install, LOG)
         rlogger = logging.getLogger(hostname)
         rlogger.info('installing ceph on %s' % hostname)
-        try:
-            remote_install(
-                release=distro.release,
-                codename=distro.codename,
-                version_kind=args.version_kind,
-                version=version,
-            )
-        except Exception as err:
-            if getattr(err, 'remote_traceback'):
-                for line in err.remote_traceback:
-                    rlogger.error(line)
-            else:
-                raise
-
+        distro.install(distro, rlogger, args.version_kind, version)
         distro.sudo_conn.close()
 
 
