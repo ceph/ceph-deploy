@@ -31,3 +31,23 @@ def check_call(args, logger, conn, *a, **kw):
                     logger.error(line)
             else:
                 raise
+
+
+def generic_remote(func, logger, conn, *a, **kw):
+    """
+    This generic remote wrapper will introspect the docstring from ``func`` to
+    log out the action about to be done. It better be succinct.
+    """
+    action = getattr(func, 'func_doc', func.func_name)
+    logger.info('Executing action: %s' % action)
+
+    compile_ = remote_compile(conn, func)
+    with context.capsys(conn, logger):
+        try:
+            return compile_(*a, **kw)
+        except Exception as err:
+            if getattr(err, 'remote_traceback'):
+                for line in err.remote_traceback:
+                    logger.error(line)
+            else:
+                raise
