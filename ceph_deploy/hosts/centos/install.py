@@ -10,8 +10,9 @@ def install(distro, logger, version_kind, version):
     else:
         key = 'autobuild'
 
-    check_call(logger, [
+    check_call([
         'su -c \'rpm --import "https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc"\''.format(key=key),],
+        logger,
         distro.sudo_conn,
         shell=True)
 
@@ -28,7 +29,7 @@ def install(distro, logger, version_kind, version):
             version=version,
             )
 
-    check_call(logger, [
+    check_call([
         'rpm',
         '-Uvh',
         '--replacepkgs',
@@ -36,15 +37,17 @@ def install(distro, logger, version_kind, version):
         '--quiet',
         '{url}noarch/ceph-release-1-0.el6.noarch.rpm'.format(url=url),
         ],
+        logger,
         distro.sudo_conn
     )
 
-    check_call(logger, [
+    check_call([
         'yum',
         '-y',
         '-q',
         'install',
         'ceph',
         ],
+        logger,
         distro.sudo_conn
     )
