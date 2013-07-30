@@ -1,18 +1,22 @@
+from ceph_deploy.util.wrappers import check_call
+from ceph_deploy.util.context import remote
 
 
-def install(release, codename, version_kind, version):
-    import platform
-    import subprocess
+def install(distro, logger, version_kind, version):
+    codename = distro.codename
+    machine = distro.sudo_conn.modules.platform.machine()
 
     if version_kind in ['stable', 'testing']:
         key = 'release'
     else:
         key = 'autobuild'
 
-    subprocess.check_call(
-        args='wget -q -O- \'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc\' | apt-key add -'.format(key=key),
+    check_call(
+        distro.sudo_conn,
+        logger,
+        ['wget -q -O- \'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc\' | apt-key add -'.format(key=key)],
         shell=True,
-        )
+    )
 
     if version_kind == 'stable':
         url = 'http://ceph.com/debian-{version}/'.format(
@@ -23,29 +27,34 @@ def install(release, codename, version_kind, version):
     elif version_kind == 'dev':
         url = 'http://gitbuilder.ceph.com/ceph-deb-{codename}-{machine}-basic/ref/{version}'.format(
             codename=codename,
-            machine=platform.machine(),
+            machine=machine,
             version=version,
             )
     else:
         raise RuntimeError('Unknown version kind: %r' % version_kind)
 
-    with file('/etc/apt/sources.list.d/ceph.list', 'w') as f:
-        f.write('deb {url} {codename} main\n'.format(
-                url=url,
-                codename=codename,
-                ))
+    def write_sources_list(url, codename):
+        """add ceph deb repo to sources.list"""
+        with file('/etc/apt/sources.list.d/ceph.list', 'w') as f:
+            f.write('deb {url} {codename} main\n'.format(
+                    url=url,
+                    codename=codename,
+                    ))
 
-    subprocess.check_call(
-        args=[
-            'apt-get',
-            '-q',
-            'update',
-            ],
+    with remote(distro.sudo_conn, logger, write_sources_list) as remote_func:
+        remote_func(url, codename)
+
+    check_call(
+        distro.sudo_conn,
+        logger,
+        ['apt-get', '-q', 'update'],
         )
 
     # TODO this does not downgrade -- should it?
-    subprocess.check_call(
-        args=[
+    check_call(
+        distro.sudo_conn,
+        logger,
+        [
             'env',
             'DEBIAN_FRONTEND=noninteractive',
             'DEBIAN_PRIORITY=critical',
