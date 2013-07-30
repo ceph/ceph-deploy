@@ -63,4 +63,3 @@ def test_simple(tmpdir):
     assert fake_distro.name == 'Ubuntu'
     assert fake_distro.release == 'precise'
     assert fake_distro.codename == 'cuttlefish'
-    assert fake_distro.sudo_conn.compile.call_count == 1
