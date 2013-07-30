@@ -1,8 +1,9 @@
+from ceph_deploy.util.wrappers import check_call
 
 
-def install(release, codename, version_kind, version):
-    import platform
-    import subprocess
+def install(distro, logger, release, codename, version_kind, version):
+    release = distro.release
+    machine = distro.sudo_conn.modules.platform.machine()
 
     if version_kind in ['stable', 'testing']:
         key = 'release'
@@ -14,8 +15,10 @@ def install(release, codename, version_kind, version):
     else:
         distro = 'sles-11sp2'
 
-    subprocess.check_call(
-        args='su -c \'rpm --import "https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc"\''.format(key=key),
+    check_call(
+        distro.sudo_conn,
+        logger,
+        ['su -c \'rpm --import "https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc"\''.format(key=key)],
         shell=True,
         )
 
@@ -30,12 +33,14 @@ def install(release, codename, version_kind, version):
         url = 'http://gitbuilder.ceph.com/ceph-rpm-{distro}{release}-{machine}-basic/ref/{version}/'.format(
             distro=distro,
             release=release.split(".", 1)[0],
-            machine=platform.machine(),
+            machine=machine,
             version=version,
             )
 
-    subprocess.check_call(
-        args=[
+    check_call(
+        distro.sudo_conn,
+        logger,
+        [
             'rpm',
             '-Uvh',
             '--replacepkgs',
@@ -47,8 +52,10 @@ def install(release, codename, version_kind, version):
             ]
         )
 
-    subprocess.check_call(
-        args=[
+    check_call(
+        distro.sudo_conn,
+        logger,
+        [
             'zypper',
             '--non-interactive',
             '--quiet',

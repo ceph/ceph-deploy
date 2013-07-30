@@ -7,7 +7,7 @@ import sys
 from . import exc
 from . import validate
 from . import sudo_pushy
-
+from .util import log
 
 LOG = logging.getLogger(__name__)
 
@@ -82,12 +82,13 @@ def parse_args(args=None, namespace=None):
 def main(args=None, namespace=None):
     args = parse_args(args=args, namespace=namespace)
 
-    console_loglevel = logging.INFO
+    console_loglevel = logging.DEBUG  # start at DEBUG for now
     if args.quiet:
         console_loglevel = logging.WARNING
     if args.verbose:
         console_loglevel = logging.DEBUG
     sh = logging.StreamHandler()
+    sh.setFormatter(log.color_format())
     sh.setLevel(console_loglevel)
 
     fh = logging.FileHandler('{cluster}.log'.format(cluster=args.cluster))
