@@ -53,14 +53,14 @@ SignWith: $KEYID
 EOF
 done
 
-echo "Adding package to repo, dist: $DEB_BUILD"
+echo "Adding package to repo, dist: $DEB_BUILD ($PKG)"
 reprepro --ask-passphrase -b $REPO -C $COMPONENT --ignore=undefinedtarget --ignore=wrongdistribution include $DEB_BUILD $PKG
 
-for DIST in $DEB_DIST
-do
-    [ "$DIST" = "$DEB_BUILD" ] && continue
-    echo "Copying package to dist: $DIST"
-    reprepro -b $REPO --ignore=undefinedtarget --ignore=wrongdistribution copy $DIST $DEB_BUILD ceph-deploy
-done
+#for DIST in $DEB_DIST
+#do
+#    [ "$DIST" = "$DEB_BUILD" ] && continue
+#    echo "Copying package to dist: $DIST"
+#    reprepro -b $REPO --ignore=undefinedtarget --ignore=wrongdistribution copy $DIST $DEB_BUILD ceph-deploy
+#done
 
 echo "Done"
