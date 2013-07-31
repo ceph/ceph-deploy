@@ -1,3 +1,4 @@
+import socket
 import argparse
 import re
 
@@ -20,4 +21,28 @@ class RegexMatch(object):
         match = self.pattern.search(string)
         if match:
             raise argparse.ArgumentError(None, self.statement)
+        return string
+
+
+class Hostname(object):
+    """
+    Checks wether a given hostname is resolvable in DNS, otherwise raising and
+    argparse error.
+    """
+
+    def __init__(self, _socket=None):
+        self.socket = _socket or socket  # just used for testing
+
+    def __call__(self, string):
+        host = string.split(':')[-1]  # we might have name:host
+        try:
+            resolved_addr = self.socket.gethostbyname(host)
+        except self.socket.gaierror:
+            msg = "hostname: %s is not resolvable" % host
+            raise argparse.ArgumentError(None, msg)
+
+        if resolved_addr == host:
+            msg = "IP: %s is not a resolvable hostname" % host
+            raise argparse.ArgumentError(None, msg)
+
         return string
