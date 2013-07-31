@@ -149,6 +149,8 @@ def mon_create(args):
 
 
 def destroy_mon(cluster, paths, is_running):
+    import datetime
+    import errno
     import os
     import subprocess  # noqa
     import socket
@@ -206,17 +208,25 @@ def destroy_mon(cluster, paths, is_running):
             else:
                 break
 
-        # delete monitor directory
-        # XXX This should not remove the mon data
-        # but move it
+        # archive old monitor directory
+        fn = '{cluster}-{hostname}-{stamp}'.format(
+            hostname=hostname,
+            cluster=cluster,
+            stamp=datetime.datetime.utcnow().strftime("%Y-%m-%dZ%H:%M:%S"),
+            )
         subprocess.check_call(
             args=[
-                'rm',
-                '-rf',
-                path,
+                'mkdir',
+                '-p',
+                '/var/lib/ceph/mon-removed',
                 ],
             )
-
+        try:
+            os.makedirs('/var/lib/ceph/mon-removed')
+        except OSError, e:
+            if e.errno != errno.EEXIST:
+                raise
+        os.rename(path, os.path.join('/var/lib/ceph/mon-removed/', fn))
 
 def mon_destroy(args):
     errors = 0
