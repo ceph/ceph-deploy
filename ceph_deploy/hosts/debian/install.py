@@ -1,5 +1,6 @@
 from ceph_deploy.util.wrappers import check_call
 from ceph_deploy.util.context import remote
+from ceph_deploy.hosts import common
 
 
 def install(distro, logger, version_kind, version):
@@ -74,3 +75,6 @@ def install(distro, logger, version_kind, version):
             'gdisk',
             ],
         )
+
+    # Check the ceph version
+    common.ceph_version(distro.sudo_conn, logger)

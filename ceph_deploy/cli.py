@@ -87,15 +87,16 @@ def main(args=None, namespace=None):
         console_loglevel = logging.WARNING
     if args.verbose:
         console_loglevel = logging.DEBUG
+
+    # Console Logger
     sh = logging.StreamHandler()
     sh.setFormatter(log.color_format())
     sh.setLevel(console_loglevel)
 
+    # File Logger
     fh = logging.FileHandler('{cluster}.log'.format(cluster=args.cluster))
     fh.setLevel(logging.DEBUG)
-    formatter = logging.Formatter(
-        '%(asctime)s %(name)s %(levelname)s %(message)s')
-    fh.setFormatter(formatter)
+    fh.setFormatter(logging.Formatter(log.BASE_FORMAT))
 
     # because we're in a module already, __name__ is not the ancestor of
     # the rest of the package; use the root as the logger for everyone

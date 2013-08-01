@@ -14,7 +14,8 @@ RESET_SEQ = "\033[0m"
 COLOR_SEQ = "\033[1;%dm"
 BOLD_SEQ = "\033[1m"
 
-BASE_FORMAT = "[$BOLD%(name)s$RESET][%(levelname)-17s] %(message)s"
+BASE_COLOR_FORMAT = "[$BOLD%(name)s$RESET][%(color_levelname)-17s] %(message)s"
+BASE_FORMAT = "%(asctime)s [%(name)s][%(levelname)-6s] %(message)s"
 
 
 def color_message(message):
@@ -34,10 +35,10 @@ class ColoredFormatter(logging.Formatter):
 
     def format(self, record):
         levelname = record.levelname
+        truncated_level = record.levelname[:6]
         if levelname in COLORS:
-            truncated_level = levelname[:6]  # truncate the level
             levelname_color = COLOR_SEQ % (30 + COLORS[levelname]) + truncated_level + RESET_SEQ
-            record.levelname = levelname_color
+            record.color_levelname = levelname_color
         return logging.Formatter.format(self, record)
 
 
@@ -46,5 +47,5 @@ def color_format():
     Main entry point to get a colored formatter, it will use the
     BASE_FORMAT by default.
     """
-    color_format = color_message(BASE_FORMAT)
+    color_format = color_message(BASE_COLOR_FORMAT)
     return ColoredFormatter(color_format)
