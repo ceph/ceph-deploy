@@ -73,16 +73,17 @@ mon initial members = host1
     mock_compiled[mon.create_mon].side_effect = _create_mon
 
     try:
-        with mock.patch('socket.getaddrinfo', fake_getaddrinfo):
-            with directory(str(tmpdir)):
-                main(
-                    args=['-v', 'new', 'host1'],
-                    namespace=ns,
-                    )
-                main(
-                    args=['-v', 'mon', 'create', 'host1'],
-                    namespace=ns,
-                    )
+        with mock.patch('ceph_deploy.new.socket.gethostbyname'):
+            with mock.patch('socket.getaddrinfo', fake_getaddrinfo):
+                with directory(str(tmpdir)):
+                    main(
+                        args=['-v', 'new', 'host1'],
+                        namespace=ns,
+                        )
+                    main(
+                        args=['-v', 'mon', 'create', 'host1'],
+                        namespace=ns,
+                        )
     except SystemExit as e:
         raise AssertionError('Unexpected exit: %s', e)
     out, err = capsys.readouterr()

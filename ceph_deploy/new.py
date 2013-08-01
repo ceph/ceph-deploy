@@ -10,6 +10,7 @@ import socket
 
 from . import exc
 from .cliutil import priority
+from .util import arg_validators
 
 
 LOG = logging.getLogger(__name__)
@@ -36,6 +37,7 @@ def get_nonlocal_ip(host):
         if not ip.startswith('127.'):
             return ip
     raise exc.UnableToResolveError(host)
+
 
 def new(args):
     LOG.debug('Creating new cluster named %s', args.cluster)
@@ -130,6 +132,7 @@ def make(parser):
         metavar='MON',
         nargs='+',
         help='initial monitor hostname, fqdn, or hostname:fqdn pair',
+        type=arg_validators.Hostname(),
         )
     parser.set_defaults(
         func=new,
