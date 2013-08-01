@@ -1,4 +1,5 @@
 from ceph_deploy.util.wrappers import check_call
+from ceph_deploy.hosts import common
 
 
 def install(distro, logger, release, version_kind, version):
@@ -60,3 +61,6 @@ def install(distro, logger, release, version_kind, version):
             'ceph',
             ],
         )
+
+    # Check the ceph version
+    common.ceph_version(distro.sudo_conn, logger)
