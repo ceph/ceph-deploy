@@ -26,6 +26,7 @@ class remote(object):
         self.client = client
         self.logger = logger
         self.func = func
+        self.description = getattr(func, 'func_doc')
         self.mangle_exc = mangle_exc
 
     def __enter__(self):
@@ -34,6 +35,8 @@ class remote(object):
 
         self.client.modules.sys.stdout = StringIO.StringIO()
         self.client.modules.sys.stderr = StringIO.StringIO()
+        if self.description:
+            self.logger.info(self.description)
         return remote_compile(self.client, self.func)
 
     def __exit__(self, e_type, e_val, e_traceback):
