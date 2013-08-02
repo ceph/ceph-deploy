@@ -11,71 +11,10 @@ from . import lsb
 from .cliutil import priority
 from .sudo_pushy import get_transport
 from .util import paths
+from . import hosts
 
 
 LOG = logging.getLogger(__name__)
-
-
-def create_mon(cluster, monitor_keyring, init, **kw):
-    # These modules are imported here because this is a function that gets
-    # compiled and sent over for remote execution
-    os = kw.get('os', __import__('os'))
-    socket = kw.get('socket', __import__('socket'))
-    subprocess = kw.get('subprocess', __import__('subprocess'))
-    paths = kw.get('paths')  # noqa
-
-    hostname = socket.gethostname().split('.')[0]
-    path = paths.mon.path(cluster, hostname)
-    done_path = paths.mon.done(cluster, hostname)
-    init_path = paths.mon.init(cluster, hostname, init)
-
-    if not os.path.exists(path):
-        os.makedirs(path)
-
-    if not os.path.exists(done_path):
-        if not os.path.exists(paths.mon.constants.tmp_path):
-            os.makedirs(paths.mon.constants.tmp_path)
-        keyring = paths.mon.keyring(cluster, hostname)
-
-        with file(keyring, 'w') as f:
-            f.write(monitor_keyring)
-
-        subprocess.check_call(
-            args=[
-                'ceph-mon',
-                '--cluster', cluster,
-                '--mkfs',
-                '-i', hostname,
-                '--keyring', keyring,
-                ],
-            )
-        os.unlink(keyring)
-        with file(done_path, 'w'):
-            pass
-
-    if not os.path.exists(init_path):
-        with file(init_path, 'w'):
-            pass
-
-    if init == 'upstart':
-        subprocess.check_call(
-            args=[
-                'initctl',
-                'emit',
-                'ceph-mon',
-                'cluster={cluster}'.format(cluster=cluster),
-                'id={hostname}'.format(hostname=hostname),
-                ],
-            )
-    elif init == 'sysvinit':
-        subprocess.check_call(
-            args=[
-                'service',
-                'ceph',
-                'start',
-                'mon.{hostname}'.format(hostname=hostname),
-                ],
-            )
 
 
 def mon_create(args):
@@ -109,37 +48,15 @@ def mon_create(args):
     errors = 0
     for hostname in args.mon:
         try:
-            LOG.debug('Deploying mon to %s', hostname)
-
             # TODO username
-            sudo = args.pushy(get_transport(hostname))
-
-            (distro, release, codename) = lsb.get_lsb_release(sudo)
-            init = lsb.choose_init(distro, codename)
-            LOG.debug('Distro %s codename %s, will use %s',
-                      distro, codename, init)
-
-            write_conf_r = sudo.compile(conf.write_conf)
-            conf_data = StringIO()
-            cfg.write(conf_data)
-            write_conf_r(
-                cluster=args.cluster,
-                conf=conf_data.getvalue(),
-                overwrite=args.overwrite_conf,
-                )
-
-            create_mon_r = sudo.compile(create_mon)
-            create_mon_r(
-                cluster=args.cluster,
-                monitor_keyring=monitor_keyring,
-                init=init,
-                paths=paths,
-                )
-
             # TODO add_bootstrap_peer_hint
-
-            sudo.close()
-
+            LOG.debug('detecting platform for host %s ...', hostname)
+            distro = hosts.get(hostname)
+            LOG.info('distro info: %s %s %s', distro.name, distro.release, distro.codename)
+            rlogger = logging.getLogger(hostname)
+            rlogger.debug('deploying mon to %s', hostname)
+            distro.mon.create(distro, rlogger, args, monitor_keyring)
+            distro.sudo_conn.close()
         except RuntimeError as e:
             LOG.error(e)
             errors += 1
