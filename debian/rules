@@ -2,8 +2,8 @@
 
 # Uncomment this to turn on verbose mode.
 export DH_VERBOSE=1
-export DEB_PYTHON_INSTALL_ARGS_ALL += --install-lib=/usr/share/ceph-deploy
+@export DEB_PYTHON_INSTALL_ARGS_ALL += --install-lib=/usr/share/ceph-deploy
 
 %:
-	dh $@ 
+	dh $@ --buildsystem python_distutils --with python2
 
