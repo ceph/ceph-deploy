@@ -10,6 +10,18 @@ def ceph_version(conn, logger):
     return check_call(conn, logger, ['ceph', '--version'])
 
 
+def which_service(conn, logger):
+    """
+    Attempt to find the right `service` executable location as it
+    might not be in the path for the user executing the remote
+    calls
+    """
+    locations = ['/sbin/service', '/usr/sbin/service']
+    for location in locations:
+        if conn.modules.os.path.exists(location):
+            return location
+
+
 def mon_create(distro, logger, args, monitor_keyring, hostname):
     logger.debug('remote hostname: %s' % hostname)
     path = paths.mon.path(args.cluster, hostname)
