@@ -20,11 +20,13 @@ def create(distro, logger, args, monitor_keyring):
         )
 
     else:  # Debian doesn't use initctl
+        service = common.which_service(distro.sudo_conn, logger)
+
         check_call(
             distro.sudo_conn,
             logger,
             [
-                '/sbin/service',
+                service,
                 'ceph',
                 'start',
                 'mon.{hostname}'.format(hostname=hostname)
