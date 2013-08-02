@@ -16,10 +16,13 @@ def which_service(conn, logger):
     might not be in the path for the user executing the remote
     calls
     """
+    logger.info('locating `service` executable...')
     locations = ['/sbin/service', '/usr/sbin/service']
     for location in locations:
         if conn.modules.os.path.exists(location):
+            logger.info('found `service` executable: %s' % location)
             return location
+    logger.error('could not find `service` executable')
 
 
 def mon_create(distro, logger, args, monitor_keyring, hostname):
