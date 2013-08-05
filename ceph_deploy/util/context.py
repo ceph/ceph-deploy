@@ -36,7 +36,7 @@ class remote(object):
         self.client.modules.sys.stdout = StringIO.StringIO()
         self.client.modules.sys.stderr = StringIO.StringIO()
         if self.description:
-            self.logger.info(self.description)
+            self.logger.info(self.description.strip())
         return remote_compile(self.client, self.func)
 
     def __exit__(self, e_type, e_val, e_traceback):
