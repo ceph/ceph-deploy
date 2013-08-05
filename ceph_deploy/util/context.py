@@ -36,7 +36,7 @@ class remote(object):
         self.client.modules.sys.stdout = StringIO.StringIO()
         self.client.modules.sys.stderr = StringIO.StringIO()
         if self.description:
-            self.logger.info(self.description)
+            self.logger.info(self.description.strip())
         return remote_compile(self.client, self.func)
 
     def __exit__(self, e_type, e_val, e_traceback):
@@ -57,8 +57,6 @@ class remote(object):
                     if line:
                         self.logger.error(line)
                 return True  # So that we eat up the traceback
-            else:
-                raise e_type
 
     def write_log(self, lines, log_level):
         logger = getattr(self.logger, log_level)

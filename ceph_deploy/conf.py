@@ -39,6 +39,7 @@ def load(args):
 
 
 def write_conf(cluster, conf, overwrite):
+    """ write cluster configuration to /etc/ceph/{cluster}.conf """
     import os
 
     path = '/etc/ceph/{cluster}.conf'.format(cluster=cluster)

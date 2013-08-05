@@ -1,6 +1,8 @@
 from ceph_deploy.util import paths
 from ceph_deploy.util.wrappers import check_call
 from ceph_deploy.util.context import remote
+from ceph_deploy import conf
+from StringIO import StringIO
 
 
 def ceph_version(conn, logger):
@@ -30,6 +32,13 @@ def mon_create(distro, logger, args, monitor_keyring, hostname):
     path = paths.mon.path(args.cluster, hostname)
     done_path = paths.mon.done(args.cluster, hostname)
     init_path = paths.mon.init(args.cluster, hostname, 'sysvinit')
+
+    configuration = conf.load(args)
+    conf_data = StringIO()
+    configuration.write(conf_data)
+
+    with remote(distro.sudo_conn, logger, conf.write_conf) as remote_func:
+        remote_func(args.cluster, conf_data.getvalue(), overwrite=args.overwrite_conf)
 
     if not distro.sudo_conn.modules.os.path.exists(path):
         logger.info('creating path: %s' % path)
