@@ -43,14 +43,14 @@ def mon_create(distro, logger, args, monitor_keyring, hostname):
             distro.sudo_conn.modules.os.makedirs(paths.mon.constants.tmp_path)
         keyring = paths.mon.keyring(args.cluster, hostname)
 
-        def write_monitor_keyring():
+        def write_monitor_keyring(keyring, monitor_keyring):
             """create the monitor keyring file"""
             with file(keyring, 'w') as f:
                 f.write(monitor_keyring)
 
         logger.info('creating keyring file: %s' % keyring)
         with remote(distro.sudo_conn, logger, write_monitor_keyring) as remote_func:
-            remote_func()
+            remote_func(keyring, monitor_keyring)
 
         check_call(
             distro.sudo_conn,
