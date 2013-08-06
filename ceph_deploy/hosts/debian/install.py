@@ -12,6 +12,21 @@ def install(distro, logger, version_kind, version):
     else:
         key = 'autobuild'
 
+    # Make sure ca-certificates is installed
+    check_call(
+        distro.sudo_conn,
+        logger,
+        [
+            'env',
+            'DEBIAN_FRONTEND=noninteractive',
+            'apt-get',
+            '-q',
+            'install',
+            '--assume-yes',
+            'ca-certificates',
+        ]
+    )
+
     check_call(
         distro.sudo_conn,
         logger,
