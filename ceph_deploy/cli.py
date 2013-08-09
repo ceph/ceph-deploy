@@ -8,6 +8,7 @@ from . import exc
 from . import validate
 from . import sudo_pushy
 from .util import log
+from .util.decorators import catches
 
 LOG = logging.getLogger(__name__)
 
@@ -79,6 +80,7 @@ def parse_args(args=None, namespace=None):
     return args
 
 
+@catches((KeyboardInterrupt, RuntimeError))
 def main(args=None, namespace=None):
     args = parse_args(args=args, namespace=namespace)
 
