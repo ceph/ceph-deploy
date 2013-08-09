@@ -55,6 +55,22 @@ def catches(catch=None, handler=None, exit=True):
         def bar():
             some_call()
             print "Success!"
+
+    If adding a handler, it should accept a single argument, which would be the
+    exception that was raised, it would look like::
+
+        def my_handler(exc):
+            print 'Handling exception %s' % str(exc)
+            raise SystemExit
+
+        @catches(KeyboardInterrupt, handler=my_handler)
+        def bar():
+            some_call()
+
+    Note that the handler needs to raise its SystemExit if it wants to halt
+    execution, otherwise the decorator would continue as a normal try/except
+    block.
+
     """
     catch = catch or Exception
     logger = logging.getLogger('ceph_deploy')
