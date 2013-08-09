@@ -117,6 +117,16 @@ Or to test a development branch::
   ceph-deploy install --dev=wip-mds-now-works-no-kidding HOST [HOST..]
 
 
+Proxy or Firewall Installs
+--------------------------
+If attempting to install behind a firewall or through a proxy you will need to
+set the `wget` env variables to point to the right hosts, for example::
+
+    http_proxy=http://host:port
+    ftp_proxy=http://host:port
+    https_proxy=http://host:port
+
+
 Deploying monitors
 ==================
 
