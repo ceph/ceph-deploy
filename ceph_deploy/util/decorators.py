@@ -28,10 +28,10 @@ def catches(catch=None, handler=None, exit=True):
     """
     Very simple decorator that tries any of the exception(s) passed in as
     a single exception class or tuple (containing multiple ones) returning the
-    exception message and optionally handling the problem if it rises with the
+    exception message and optionally handling the problem if it raises with the
     handler if it is provided.
 
-    So instead of douing something like this::
+    So instead of doing something like this::
 
         def bar():
             try:
