@@ -2,7 +2,7 @@ from ceph_deploy.util.wrappers import check_call
 from ceph_deploy.hosts import common
 
 
-def install(distro, logger, release, version_kind, version):
+def install(distro, logger, version_kind, version):
     release = distro.release
     machine = distro.sudo_conn.modules.platform.machine()
 

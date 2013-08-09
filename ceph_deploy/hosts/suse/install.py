@@ -2,7 +2,7 @@ from ceph_deploy.util.wrappers import check_call
 from ceph_deploy.hosts import common
 
 
-def install(distro, logger, release, codename, version_kind, version):
+def install(distro, logger, version_kind, version):
     release = distro.release
     machine = distro.sudo_conn.modules.platform.machine()
 
@@ -11,7 +11,7 @@ def install(distro, logger, release, codename, version_kind, version):
     else:
         key = 'autobuild'
 
-    if codename == 'Mantis':
+    if distro.codename == 'Mantis':
         distro = 'opensuse12'
     else:
         distro = 'sles-11sp2'
