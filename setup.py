@@ -15,7 +15,7 @@ if pyversion < (2, 7) or (3, 0) <= pyversion <= (3, 1):
 
 setup(
     name='ceph-deploy',
-    version='1.1',
+    version='1.2',
     packages=find_packages(),
 
     author='Inktank',
