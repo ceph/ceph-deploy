@@ -1,0 +1,10 @@
+
+1.2
+---
+* Better logging output
+* Remote logging for individual actions for ``install`` and ``mon create``
+* Install ``ca-certificates`` on all Debian-based distros
+* Honor the usage of ``--cluster``
+* Do not ``rm -rf`` monitor logs when destroying
+* Error out when ``ceph-deploy new [IP]`` is used
+* Log the ceph version when installing
