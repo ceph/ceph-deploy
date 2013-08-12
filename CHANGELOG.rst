@@ -1,4 +1,11 @@
 
+1.2.1
+-----
+* Print the help when no arguments are passed
+* Add a ``--version`` flag
+* Show the version in the help menu
+* Catch ``DeployError`` exceptions nicely with the logger
+
 1.2
 ---
 * Better logging output
