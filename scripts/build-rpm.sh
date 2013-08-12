@@ -4,7 +4,7 @@
 # in setup.py before building.
 
 REPO=rpm-repo
-KEYID=03C3951A  # Autobuild keyid
+KEYID=${KEYID:-03C3951A}  # Default is autobuild-key
 BUILDAREA=./rpmbuild
 DIST=el6
 RPM_BUILD=$(lsb_release -s -c)
