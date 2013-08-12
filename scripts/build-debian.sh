@@ -5,7 +5,7 @@
 
 REPO=debian-repo
 COMPONENT=main
-KEYID=03C3951A  # Autobuild keyid
+KEYID=${KEYID:-03C3951A}  # default is autobuild keyid
 DEB_DIST="sid wheezy squeeze quantal precise oneiric natty raring"
 DEB_BUILD=$(lsb_release -s -c)
 RELEASE=0
@@ -13,7 +13,6 @@ RELEASE=0
 if [ X"$1" = X"--release" ] ; then
     echo "Release Build"
     RELEASE=1
-    KEYID=17ED316D
 fi
 
 if [ ! -d debian ] ; then
