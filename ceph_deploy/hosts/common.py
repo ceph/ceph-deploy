@@ -31,12 +31,7 @@ def mon_create(distro, logger, args, monitor_keyring, hostname):
     logger.debug('remote hostname: %s' % hostname)
     path = paths.mon.path(args.cluster, hostname)
     done_path = paths.mon.done(args.cluster, hostname)
-    if distro.name.lower() == 'ubuntu':
-        init = 'upstart'
-    else:
-        init = 'sysvinit'
-
-    init_path = paths.mon.init(args.cluster, hostname, init)
+    init_path = paths.mon.init(args.cluster, hostname, distro.init)
 
     configuration = conf.load(args)
     conf_data = StringIO()

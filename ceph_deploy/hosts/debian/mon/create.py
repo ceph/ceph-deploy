@@ -6,7 +6,7 @@ def create(distro, logger, args, monitor_keyring):
     hostname = distro.sudo_conn.modules.socket.gethostname().split('.')[0]
     common.mon_create(distro, logger, args, monitor_keyring, hostname)
 
-    if distro.name.lower() == 'ubuntu':
+    if distro.init == 'upstart': # Ubuntu uses upstart
         check_call(
             distro.sudo_conn,
             logger,
@@ -19,7 +19,7 @@ def create(distro, logger, args, monitor_keyring):
             ],
         )
 
-    else:  # Debian doesn't use initctl
+    elif distro.init == 'sysvinit': # Debian uses sysvinit
         service = common.which_service(distro.sudo_conn, logger)
 
         check_call(
@@ -32,3 +32,5 @@ def create(distro, logger, args, monitor_keyring):
                 'mon.{hostname}'.format(hostname=hostname)
             ],
         )
+    else:
+        raise RuntimeError('create cannot use init %s' % distro.init)
