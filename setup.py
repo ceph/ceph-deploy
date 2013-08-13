@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import os
 import sys
-
+import ceph_deploy
 
 def read(fname):
     path = os.path.join(os.path.dirname(__file__), fname)
@@ -15,7 +15,7 @@ if pyversion < (2, 7) or (3, 0) <= pyversion <= (3, 1):
 
 setup(
     name='ceph-deploy',
-    version='1.2',
+    version=ceph_deploy.__version__,
     packages=find_packages(),
 
     author='Inktank',
