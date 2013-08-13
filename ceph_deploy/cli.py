@@ -2,8 +2,10 @@ import pkg_resources
 import argparse
 import logging
 import pushy
+import textwrap
 import sys
 
+import ceph_deploy
 from . import exc
 from . import validate
 from . import sudo_pushy
@@ -13,9 +15,21 @@ from .util.decorators import catches
 LOG = logging.getLogger(__name__)
 
 
-def parse_args(args=None, namespace=None):
+__header__ = textwrap.dedent("""
+    -^-
+   /   \\
+   |O o|  ceph-deploy v%s
+   ).-.(
+  '/|||\`
+  | '|` |
+    '|`
+""" % ceph_deploy.__version__)
+
+
+def get_parser():
     parser = argparse.ArgumentParser(
-        description='Deploy Ceph',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description='Easy Ceph deployment\n\n%s' % __header__,
         )
     verbosity = parser.add_mutually_exclusive_group(required=False)
     verbosity.add_argument(
@@ -32,6 +46,12 @@ def parse_args(args=None, namespace=None):
         '-n', '--dry-run',
         action='store_true', dest='dry_run',
         help='do not perform any action, but report what would be done',
+        )
+    parser.add_argument(
+        '--version',
+        action='version',
+        version='%s' % ceph_deploy.__version__,
+        help='the current installed version of ceph-deploy',
         )
     parser.add_argument(
         '--overwrite-conf',
@@ -76,13 +96,18 @@ def parse_args(args=None, namespace=None):
 
         cluster='ceph',
         )
-    args = parser.parse_args(args=args, namespace=namespace)
-    return args
+    return parser
 
 
-@catches((KeyboardInterrupt, RuntimeError))
+@catches((KeyboardInterrupt, RuntimeError, exc.DeployError))
 def main(args=None, namespace=None):
-    args = parse_args(args=args, namespace=namespace)
+    parser = get_parser()
+
+    if len(sys.argv) < 2:
+        parser.print_help()
+        sys.exit()
+    else:
+        args = parser.parse_args(args=args, namespace=namespace)
 
     console_loglevel = logging.DEBUG  # start at DEBUG for now
     if args.quiet:
@@ -112,11 +137,4 @@ def main(args=None, namespace=None):
 
     sudo_pushy.patch()
 
-    try:
-        return args.func(args)
-    except exc.DeployError as e:
-        print >> sys.stderr, '{prog}: {msg}'.format(
-            prog=args.prog,
-            msg=e,
-            )
-        sys.exit(1)
+    return args.func(args)
