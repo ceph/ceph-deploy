@@ -49,5 +49,6 @@ def check_call(conn, logger, args, *a, **kw):
                 for line in err.remote_traceback:
                     if line:
                         logger.error(line)
+                raise RuntimeError('Failed to execute command: %s' % ' '.join(args))
             else:
                 raise err
