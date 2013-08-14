@@ -40,6 +40,7 @@ def get(hostname, fallback=None):
     module.release = release
     module.codename = codename
     module.sudo_conn = sudo_conn
+    module.init = lsb.choose_init(distro, codename)
     return module
 
 
