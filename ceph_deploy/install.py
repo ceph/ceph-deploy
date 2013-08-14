@@ -317,7 +317,7 @@ def make(parser):
 
     version.set_defaults(
         func=install,
-        stable='cuttlefish',
+        stable='dumpling',
         dev='master',
         version_kind='stable',
         )
