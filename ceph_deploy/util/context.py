@@ -22,32 +22,35 @@ class remote(object):
     stderr) or info messages (from stdout).
     """
 
-    def __init__(self, client, logger, func, mangle_exc=True):
+    def __init__(self, client, logger, func, mangle_exc=True, patch=True):
         self.client = client
         self.logger = logger
         self.func = func
         self.description = getattr(func, 'func_doc')
         self.mangle_exc = mangle_exc
+        self.patch = patch
 
     def __enter__(self):
-        self.stdout = self.client.modules.sys.stdout
-        self.stderr = self.client.modules.sys.stderr
+        if self.patch:
+            self.stdout = self.client.modules.sys.stdout
+            self.stderr = self.client.modules.sys.stderr
 
-        self.client.modules.sys.stdout = StringIO.StringIO()
-        self.client.modules.sys.stderr = StringIO.StringIO()
+            self.client.modules.sys.stdout = StringIO.StringIO()
+            self.client.modules.sys.stderr = StringIO.StringIO()
         if self.description:
             self.logger.info(self.description.strip())
         return remote_compile(self.client, self.func)
 
     def __exit__(self, e_type, e_val, e_traceback):
-        stdout_lines = self.client.modules.sys.stdout.getvalue()
-        stderr_lines = self.client.modules.sys.stderr.getvalue()
-        self.write_log(stdout_lines, 'info')
-        self.write_log(stderr_lines, 'error')
+        if self.patch:
+            stdout_lines = self.client.modules.sys.stdout.getvalue()
+            stderr_lines = self.client.modules.sys.stderr.getvalue()
+            self.write_log(stdout_lines, 'info')
+            self.write_log(stderr_lines, 'error')
 
-        # leave everything as it was
-        self.client.modules.sys.stdout = self.stdout
-        self.client.modules.sys.stdout = self.stderr
+            # leave everything as it was
+            self.client.modules.sys.stdout = self.stdout
+            self.client.modules.sys.stdout = self.stderr
         if not self.mangle_exc:
             return False
 
