@@ -16,4 +16,5 @@ def create(distro, logger, args, monitor_keyring):
             'start',
             'mon.{hostname}'.format(hostname=hostname)
         ],
+        patch=False,
     )
