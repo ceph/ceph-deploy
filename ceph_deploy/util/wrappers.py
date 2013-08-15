@@ -22,6 +22,7 @@ def check_call(conn, logger, args, *a, **kw):
     :param args: The args to be passed onto ``check_call``
     """
     command = ' '.join(args)
+    patch = kw.pop('patch', True)  # Always patch unless explicitly told to
     logger.info('Running command: %s' % command)
 
     def remote_call(args, *a, **kw):
@@ -32,7 +33,7 @@ def check_call(conn, logger, args, *a, **kw):
             **kw
         )
 
-    with context.remote(conn, logger, remote_call, mangle_exc=False) as call:
+    with context.remote(conn, logger, remote_call, mangle_exc=False, patch=patch) as call:
         try:
             return call(args, *a, **kw)
         except Exception as err:
