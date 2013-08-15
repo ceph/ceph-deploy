@@ -5,6 +5,10 @@
 * Add a ``--version`` flag
 * Show the version in the help menu
 * Catch ``DeployError`` exceptions nicely with the logger
+* Fix blocked command when calling ``mon create``
+* default to ``dumpling`` for installs
+* halt execution on remote exceptions
+
 
 1.2
 ---
