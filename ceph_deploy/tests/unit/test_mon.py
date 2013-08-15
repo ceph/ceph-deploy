@@ -1,5 +1,7 @@
+import sys
 from mock import Mock, MagicMock, patch, call
 from ceph_deploy import mon
+from ceph_deploy.hosts.common import mon_create
 
 
 def path_exists(target_paths=None):
@@ -42,73 +44,78 @@ class TestCreateMon(object):
         self.socket.gethostname.return_value = 'hostname'
         self.fake_write = Mock(name='fake_write')
         self.fake_file = mock_open(data=self.fake_write)
-        self.os = Mock()
+        self.fake_file.readline.return_value = self.fake_file
+        self.fake_file.readline.lstrip.return_value = ''
+        self.distro = Mock()
         self.sprocess = Mock()
         self.paths = Mock()
         self.paths.mon.path = Mock(return_value='/cluster-hostname')
+        self.logger = Mock()
+        self.logger.info = self.logger.debug = lambda x: sys.stdout.write(str(x) + "\n")
 
     def test_create_mon_tmp_path_if_nonexistent(self):
-        self.os.path.exists = Mock(
+        self.distro.sudo_conn.modules.os.path.exists = Mock(
             side_effect=path_exists(['/cluster-hostname']))
         self.paths.mon.constants.tmp_path = '/var/lib/ceph/tmp'
-        with patch('__builtin__.file', self.fake_file):
-            mon.create_mon(
-                'cluster', '1234', 'initd',
-                paths=self.paths, os=self.os, subprocess=self.sprocess,
-                socket=self.socket)
+        args = Mock(return_value=['cluster', '1234', 'initd'])
+        args.cluster = 'cluster'
+        with patch('ceph_deploy.hosts.common.conf.load'):
+            mon_create(self.distro, self.logger, args, Mock(), 'hostname')
 
-        result = self.os.makedirs.call_args_list[0]
+        result = self.distro.sudo_conn.modules.os.makedirs.call_args_list[-1]
         assert result == call('/var/lib/ceph/tmp')
 
     def test_create_mon_path_if_nonexistent(self):
-        self.os.path.exists = Mock(
+        self.distro.sudo_conn.modules.os.path.exists = Mock(
             side_effect=path_exists(['/']))
-        with patch('__builtin__.file', self.fake_file):
-            mon.create_mon(
-                'cluster', '1234', 'initd',
-                paths=self.paths, os=self.os, subprocess=self.sprocess,
-                socket=self.socket)
+        args = Mock(return_value=['cluster', '1234', 'initd'])
+        args.cluster = 'cluster'
+        with patch('ceph_deploy.hosts.common.conf.load'):
+            mon_create(self.distro, self.logger, args, Mock(), 'hostname')
 
-        result = self.os.makedirs.call_args_list[0]
-        assert result == call('/cluster-hostname')
+        result = self.distro.sudo_conn.modules.os.makedirs.call_args_list[0]
+        assert result == call('/var/lib/ceph/mon/cluster-hostname')
 
     def test_write_keyring(self):
-        self.os.path.exists = Mock(
+        self.distro.sudo_conn.modules.os.path.exists = Mock(
             side_effect=path_exists(['/']))
-        with patch('__builtin__.file', self.fake_file):
-            mon.create_mon(
-                'cluster', '1234', 'initd',
-                paths=self.paths, os=self.os, subprocess=self.sprocess,
-                socket=self.socket)
+        args = Mock(return_value=['cluster', '1234', 'initd'])
+        args.cluster = 'cluster'
+        with patch('ceph_deploy.hosts.common.conf.load'):
+            with patch('ceph_deploy.hosts.common.remote') as fake_remote:
+                mon_create(self.distro, self.logger, args, Mock(), 'hostname')
 
-        result = self.fake_write.write.call_args_list[0]
-        assert result == call('1234')
+        # the second argument to `remote()` should be the write func
+        result = fake_remote.call_args_list[1][0][-1].__name__
+        assert result == 'write_monitor_keyring'
 
     def test_write_done_path(self):
-        self.paths.mon.done = Mock(return_value='/cluster-hostname/done')
-        self.os.path.exists = Mock(
+        self.distro.sudo_conn.modules.os.path.exists = Mock(
             side_effect=path_exists(['/']))
-        with patch('__builtin__.file', self.fake_file):
-            mon.create_mon(
-                'cluster', '1234', 'initd',
-                paths=self.paths, os=self.os, subprocess=self.sprocess,
-                socket=self.socket)
+        args = Mock(return_value=['cluster', '1234', 'initd'])
+        args.cluster = 'cluster'
 
-        result = self.fake_file.call_args_list[1]
-        assert result == call('/cluster-hostname/done', 'w')
+        with patch('ceph_deploy.hosts.common.conf.load'):
+            with patch('ceph_deploy.hosts.common.remote') as fake_remote:
+                mon_create(self.distro, self.logger, args, Mock(), 'hostname')
+
+        # the second to last argument to `remote()` should be the done path
+        # write
+        result = fake_remote.call_args_list[-2][0][-1].__name__
+        assert result == 'create_done_path'
 
     def test_write_init_path(self):
-        self.paths.mon.init = Mock(return_value='/cluster-hostname/init')
-        self.os.path.exists = Mock(
+        self.distro.sudo_conn.modules.os.path.exists = Mock(
             side_effect=path_exists(['/']))
-        with patch('__builtin__.file', self.fake_file):
-            mon.create_mon(
-                'cluster', '1234', 'initd',
-                paths=self.paths, os=self.os, subprocess=self.sprocess,
-                socket=self.socket)
+        args = Mock(return_value=['cluster', '1234', 'initd'])
+        args.cluster = 'cluster'
 
-        result = self.fake_file.call_args_list[2]
-        assert result == call('/cluster-hostname/init', 'w')
+        with patch('ceph_deploy.hosts.common.conf.load'):
+            with patch('ceph_deploy.hosts.common.remote') as fake_remote:
+                mon_create(self.distro, self.logger, args, Mock(), 'hostname')
+
+        result = fake_remote.call_args_list[-1][0][-1].__name__
+        assert result == 'create_init_path'
 
 
 class TestIsRunning(object):

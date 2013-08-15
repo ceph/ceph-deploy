@@ -9,7 +9,6 @@ def test_help(tmpdir, cli):
         ) as p:
         result = p.stdout.read()
         assert 'usage: ceph-deploy' in result
-        assert 'Deploy Ceph' in result
         assert 'optional arguments:' in result
         assert 'commands:' in result
 

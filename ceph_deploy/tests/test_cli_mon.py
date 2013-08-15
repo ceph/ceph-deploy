@@ -70,8 +70,6 @@ mon initial members = host1
         secret = get_monitor_secret()
         assert secret == MON_SECRET
 
-    mock_compiled[mon.create_mon].side_effect = _create_mon
-
     try:
         with mock.patch('ceph_deploy.new.socket.gethostbyname'):
             with mock.patch('socket.getaddrinfo', fake_getaddrinfo):
