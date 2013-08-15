@@ -17,9 +17,55 @@ It does not handle client configuration beyond pushing the Ceph config file
 and users who want fine-control over security settings, partitions or directory
 locations should use a tool such as Chef or Puppet.
 
-Setup
-=====
+Installation
+============
+Depending on what type of usage you are going to have with ``ceph-deploy`` you
+might want to look into the different ways to install it. For automation, you
+might want to ``bootstrap`` directly. Regular users of ``ceph-deploy`` would
+probably install from the OS packages or from the Python Package Index.
 
+Python Package Index
+--------------------
+If you are familiar with Python install tools (like ``pip`` and
+``easy_install``) you can easily install ``ceph-deploy`` like::
+
+    pip install ceph-deploy
+
+or::
+
+    easy_install ceph-deploy
+
+
+It should grab all the dependencies for you and install into the current user's
+environment.
+
+We highly recommend using ``virtualenv`` and installing dependencies in
+a contained way.
+
+
+DEB
+---
+The DEB repo can be found at http://ceph.com/packages/ceph-extras/debian/
+
+But they can also be found for ``ceph`` releases in the ``ceph`` repos like::
+
+     ceph.com/debian-{release}
+     ceph.com/debian-testing
+
+RPM
+---
+The RPM repos can be found at http://ceph.com/packages/ceph-extras/rpm/
+
+Make sure you add the proper one for your distribution.
+
+But they can also be found for ``ceph`` releases in the ``ceph`` repos like::
+
+     ceph.com/rpm-{release}
+     ceph.com/rpm-testing
+
+
+bootstraping
+------------
 To get the source tree ready for use, run this once::
 
   ./bootstrap
