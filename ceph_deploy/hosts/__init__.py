@@ -94,6 +94,7 @@ def detect_package_manager(distro):
         'debian': 'apt',
         'centos': 'yum',
         'scientific': 'yum',
+        'redhat': 'yum',
     }
     return pkg_managers.get(distro.lower())
 
