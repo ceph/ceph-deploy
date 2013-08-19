@@ -15,7 +15,7 @@ def remote_compile(client, fn):
                     self.remote_traceback = remote_traceback
 
             try:
-                fn(*args, **kwargs)
+                return fn(*args, **kwargs)
             except Exception as err:
                 import traceback
                 remote_trace = traceback.format_exc()
