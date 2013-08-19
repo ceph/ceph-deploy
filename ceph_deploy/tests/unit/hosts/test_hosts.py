@@ -53,3 +53,19 @@ class TestGetDistro(object):
     def test_get_fallback(self):
         result = hosts._get_distro('Solaris', 'Debian')
         assert result.__name__.endswith('debian')
+
+
+class TestDetectPackageManagers(object):
+
+    def test_centos_is_yum(self):
+        result = hosts.detect_package_manager('centos')
+        assert result is 'yum'
+
+    def test_scientific_is_yum(self):
+        result = hosts.detect_package_manager('scientific')
+        assert result is 'yum'
+
+    def test_redhat_is_yum(self):
+        result = hosts.detect_package_manager('redhat')
+        assert result is 'yum'
+
