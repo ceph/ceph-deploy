@@ -4,8 +4,9 @@ commands (e.g. using `yum` as opposed to `apt`) we can make a one time call to
 that remote host and set all the special cases for running commands depending
 on the type of distribution/version we are dealing with.
 """
-
+import logging
 from ceph_deploy import lsb, exc
+from ceph_deploy.util import wrappers
 from ceph_deploy.sudo_pushy import get_transport
 from ceph_deploy.hosts import debian, centos, fedora, suse
 
@@ -13,6 +14,7 @@ from ceph_deploy.hosts import debian, centos, fedora, suse
 import pushy
 from ceph_deploy import sudo_pushy
 sudo_pushy.patch()
+logger = logging.getLogger()
 
 
 def get(hostname, fallback=None):
@@ -33,7 +35,11 @@ def get(hostname, fallback=None):
     :param fallback: Optional fallback to use if no supported distro is found
     """
     sudo_conn = pushy.connect(get_transport(hostname))
-    (distro, release, codename) = lsb.get_lsb_release(sudo_conn)
+    if not has_lsb(sudo_conn):
+        logger.warning('lsb_release was not found - inferring OS details')
+        (distro, release, codename) = lsb_fallback(sudo_conn)
+    else:
+        (distro, release, codename) = lsb.get_lsb_release(sudo_conn)
 
     module = _get_distro(distro)
     module.name = distro
@@ -42,6 +48,27 @@ def get(hostname, fallback=None):
     module.sudo_conn = sudo_conn
     module.init = lsb.choose_init(distro, codename)
     return module
+
+
+def lsb_fallback(conn):
+    """
+    This fallback will attempt to detect the distro, release and codename for
+    a given remote host when lsb fails. It uses the
+    ``platform.linux_distribution`` module that should be fairly robust and
+    would prevent us from adding repositories and installing a package just to
+    detect a platform.
+    """
+    distro, release, codename = conn.modules.platform.linux_distribution()
+    return (
+        str(distro).rstrip(),
+        str(release).rstrip(),
+        str(codename).rstrip()
+    )
+
+
+def has_lsb(conn):
+    _, _, ret_code = wrappers.Popen(conn, logger, ['which', 'lsb_release'])
+    return ret_code == 0
 
 
 def _get_distro(distro, fallback=None):
