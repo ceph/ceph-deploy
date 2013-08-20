@@ -51,6 +51,7 @@ class remote(object):
             # leave everything as it was
             self.client.modules.sys.stdout = self.stdout
             self.client.modules.sys.stdout = self.stderr
+
         if not self.mangle_exc:
             return False
 
