@@ -6,7 +6,7 @@ on the type of distribution/version we are dealing with.
 """
 import logging
 from ceph_deploy import lsb, exc
-from ceph_deploy.util import wrappers, pkg_managers
+from ceph_deploy.util import wrappers
 from ceph_deploy.sudo_pushy import get_transport
 from ceph_deploy.hosts import debian, centos, fedora, suse
 
@@ -36,10 +36,10 @@ def get(hostname, fallback=None):
     """
     sudo_conn = pushy.connect(get_transport(hostname))
     if not has_lsb(sudo_conn):
-        logger.warning('lsb_release was not found - attempting to install')
-        install_lsb(sudo_conn)
-
-    (distro, release, codename) = lsb.get_lsb_release(sudo_conn)
+        logger.warning('lsb_release was not found - inferring OS details')
+        (distro, release, codename) = lsb_fallback(sudo_conn)
+    else:
+        (distro, release, codename) = lsb.get_lsb_release(sudo_conn)
 
     module = _get_distro(distro)
     module.name = distro
@@ -50,53 +50,25 @@ def get(hostname, fallback=None):
     return module
 
 
+def lsb_fallback(conn):
+    """
+    This fallback will attempt to detect the distro, release and codename for
+    a given remote host when lsb fails. It uses the
+    ``platform.linux_distribution`` module that should be fairly robust and
+    would prevent us from adding repositories and installing a package just to
+    detect a platform.
+    """
+    distro, release, codename = conn.modules.platform.linux_distribution()
+    return (
+        str(distro).rstrip(),
+        str(release).rstrip(),
+        str(codename).rstrip()
+    )
+
+
 def has_lsb(conn):
     stdout, stderr, _ = wrappers.Popen(conn, logger, ['which', 'lsb_release'])
     return stderr == ''
-
-
-def install_lsb(conn):
-    distro, release, codename = conn.modules.platform.linux_distribution()
-    package_manager = detect_package_manager(distro)
-
-    if package_manager == 'yum' and distro.lower() in ['centos', 'scientific']:
-        logger.info('adding EPEL repository')
-        if float(release) >= 6:
-            wrappers.check_call(conn, logger, [
-                'wget',
-                'http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm',],
-                stop_on_error=False,
-            )
-            pkg_managers.rpm(conn, logger,
-                ['epel-release-6*.rpm'],
-                stop_on_error=False,
-            )
-        else:
-            wrappers.check_call(conn, logger, [
-                'wget',
-                'wget http://dl.fedoraproject.org/pub/epel/5/x86_64/epel-release-5-4.noarch.rpm',],
-                stop_on_error=False,
-            )
-            pkg_managers.rpm(conn, logger,
-                ['epel-release-5*.rpm'],
-                stop_on_error=False,
-            )
-        pkg_managers.yum(conn, logger, 'redhat-lsb-core')
-    elif package_manager == 'apt':
-        pkg_managers.apt(conn, logger, 'lsb-release')
-    else:
-        raise RuntimeError('package lsb_release could not be installed')
-
-
-def detect_package_manager(distro):
-    pkg_managers = {
-        'ubuntu': 'apt',
-        'debian': 'apt',
-        'centos': 'yum',
-        'scientific': 'yum',
-        'redhat': 'yum',
-    }
-    return pkg_managers.get(distro.lower())
 
 
 def _get_distro(distro, fallback=None):
