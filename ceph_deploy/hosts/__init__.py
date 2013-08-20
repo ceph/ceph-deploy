@@ -67,8 +67,8 @@ def lsb_fallback(conn):
 
 
 def has_lsb(conn):
-    stdout, stderr, _ = wrappers.Popen(conn, logger, ['which', 'lsb_release'])
-    return stderr == ''
+    _, _, ret_code = wrappers.Popen(conn, logger, ['which', 'lsb_release'])
+    return ret_code == 0
 
 
 def _get_distro(distro, fallback=None):
