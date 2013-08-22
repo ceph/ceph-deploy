@@ -11,7 +11,7 @@
 # common
 #################################################################################
 Name:		ceph-deploy
-Version: 	1.2.1
+Version: 	1.2.2
 Release: 	0
 Summary: 	Admin and deploy tool for Ceph
 License: 	MIT
@@ -31,10 +31,10 @@ BuildRequires:	python-pytest
 BuildRequires:	pytest
 %endif
 Requires:       python-argparse
-#Requires:	python-pushy
+Requires:	python-pushy >= 0.5.3 or pushy >= 0.5.3
 Requires:       python-distribute
 #Requires:	lsb-release
-Requires:	ceph
+#Requires:	ceph
 %if 0%{?suse_version} && 0%{?suse_version} <= 1110
 %{!?python_sitelib: %global python_sitelib %(python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 %else
