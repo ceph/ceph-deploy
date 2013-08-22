@@ -1,3 +1,4 @@
+from . import hosts
 from . import exc
 
 def check_lsb_release():
@@ -10,6 +11,7 @@ def check_lsb_release():
     process = subprocess.Popen(
         args=args,
         stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
         )
     lsb_release_path, _ = process.communicate()
     ret = process.wait()
@@ -70,7 +72,7 @@ def get_lsb_release(sudo):
     Get LSB release information from lsb_release.
 
     Check if lsb_release is installed on the remote host and issue
-    a message if not.  
+    a message if not.
 
     Returns truple with distro, release and codename. Otherwise
     the function raises an error (subprocess.CalledProcessError or
@@ -80,7 +82,7 @@ def get_lsb_release(sudo):
         check_lsb_release_r = sudo.compile(check_lsb_release)
         status = check_lsb_release_r()
     except RuntimeError as e:
-        raise exc.MissingPackageError(e.message)
+        return hosts.lsb_fallback(sudo)
 
     lsb_release_r = sudo.compile(lsb_release)
     return lsb_release_r()
