@@ -5,7 +5,8 @@ that remote host and set all the special cases for running commands depending
 on the type of distribution/version we are dealing with.
 """
 import logging
-from ceph_deploy import lsb, exc
+import ceph_deploy
+from ceph_deploy import exc
 from ceph_deploy.util import wrappers
 from ceph_deploy.sudo_pushy import get_transport
 from ceph_deploy.hosts import debian, centos, fedora, suse
@@ -39,7 +40,7 @@ def get(hostname, fallback=None):
         logger.warning('lsb_release was not found - inferring OS details')
         (distro, release, codename) = lsb_fallback(sudo_conn)
     else:
-        (distro, release, codename) = lsb.get_lsb_release(sudo_conn)
+        (distro, release, codename) = ceph_deploy.lsb.get_lsb_release(sudo_conn)
 
     module = _get_distro(distro)
     module.name = distro
