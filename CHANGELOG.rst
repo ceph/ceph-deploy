@@ -7,6 +7,7 @@
   before attempting to install Ceph.
 * Graceful handling of pushy connection issues due to host
   address resolution
+* Honor the usage of ``--cluster`` when calling osd prepare.
 
 1.2.1
 -----
