@@ -98,6 +98,7 @@ def create_osd(cluster, key):
             ],
         )
 
+
 def prepare_disk(cluster, disk, journal, activate_prepared_disk, zap, dmcrypt, dmcrypt_dir):
     """
     Run on osd node, prepares a data disk for use.
@@ -113,9 +114,11 @@ def prepare_disk(cluster, disk, journal, activate_prepared_disk, zap, dmcrypt, d
             args.append('--dmcrypt-key-dir')
             args.append(dmcrypt_dir)
     args.extend([
-            '--',
-            disk,
-            ])
+        '--cluster',
+        cluster,
+        '--',
+        disk,
+    ])
     if journal is not None:
         args.append(journal)
 
