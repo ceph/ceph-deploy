@@ -1,4 +1,11 @@
 
+1.2.2
+-----
+* Do not force usage of lsb_release, fallback to
+  ``platform.linux_distribution()``
+* Ease installation in CentOS/Scientific by adding the EPEL repo
+  before attempting to install Ceph.
+
 1.2.1
 -----
 * Print the help when no arguments are passed
