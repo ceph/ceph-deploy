@@ -9,6 +9,7 @@ import ceph_deploy
 from . import exc
 from . import validate
 from . import sudo_pushy
+from pushy.client import ClientInitException
 from .util import log
 from .util.decorators import catches
 
@@ -99,7 +100,13 @@ def get_parser():
     return parser
 
 
-@catches((KeyboardInterrupt, RuntimeError, exc.DeployError))
+# TODO: Move the ClientInitException to hosts.get once all actions are using
+# hosts.get() to start the remote connection
+@catches((
+    KeyboardInterrupt,
+    RuntimeError,
+    exc.DeployError,
+    ClientInitException))
 def main(args=None, namespace=None):
     parser = get_parser()
 

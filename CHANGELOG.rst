@@ -5,6 +5,8 @@
   ``platform.linux_distribution()``
 * Ease installation in CentOS/Scientific by adding the EPEL repo
   before attempting to install Ceph.
+* Graceful handling of pushy connection issues due to host
+  address resolution
 
 1.2.1
 -----
