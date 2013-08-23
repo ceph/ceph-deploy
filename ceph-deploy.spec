@@ -31,7 +31,7 @@ BuildRequires:	python-pytest
 BuildRequires:	pytest
 %endif
 Requires:       python-argparse
-Requires:	python-pushy >= 0.5.3 or pushy >= 0.5.3
+Requires:	pushy >= 0.5.3
 Requires:       python-distribute
 #Requires:	lsb-release
 #Requires:	ceph
