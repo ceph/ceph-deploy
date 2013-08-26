@@ -343,10 +343,13 @@ def zap(dev):
     except subprocess.CalledProcessError as e:
         raise RuntimeError(e)
 
+
 def disk_zap(args):
     cfg = conf.load(args)
 
     for hostname, disk, journal in args.disk:
+        if not disk or not hostname:
+            raise RuntimeError('zap command needs both HOSTNAME and DISK but got "%s %s"' % (hostname, disk))
         LOG.debug('zapping %s on %s', disk, hostname)
 
         # TODO username
@@ -536,9 +539,9 @@ def make_disk(parser):
     parser.add_argument(
         'disk',
         nargs='+',
-        metavar='HOST[:DISK]',
+        metavar='HOST:DISK',
         type=colon_separated,
-        help='host (and optionally disk)',
+        help='host and disk to zap',
         )
     parser.add_argument(
         '--zap-disk',
