@@ -53,13 +53,11 @@ class TestHostName(object):
         message = error.value.message
         assert 'foo is not resolvable' in message
 
-    def test_ip_is_not_resolvable(self):
+    def test_ip_is_allowed_when_paired_with_host(self):
         self.fake_sock.gethostbyname = Mock(return_value='192.168.1.111')
         hostname = arg_validators.Hostname(self.fake_sock)
-        with raises(ArgumentError) as error:
-            hostname('name:192.168.1.111')
-        message = error.value.message
-        assert 'must be a hostname not an IP' in message
+        result = hostname('name:192.168.1.111')
+        assert result == 'name:192.168.1.111'
 
     def test_host_is_resolvable(self):
         self.fake_sock.gethostbyname = Mock()
