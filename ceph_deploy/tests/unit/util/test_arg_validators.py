@@ -59,6 +59,12 @@ class TestHostName(object):
         result = hostname('name:192.168.1.111')
         assert result == 'name:192.168.1.111'
 
+    def test_ipv6_is_allowed_when_paired_with_host(self):
+        self.fake_sock.gethostbyname = Mock(return_value='2001:0db8:85a3:0000:0000:8a2e:0370:7334')
+        hostname = arg_validators.Hostname(self.fake_sock)
+        result = hostname('name:2001:0db8:85a3:0000:0000:8a2e:0370:7334')
+        assert result == 'name:2001:0db8:85a3:0000:0000:8a2e:0370:7334'
+
     def test_host_is_resolvable(self):
         self.fake_sock.gethostbyname = Mock()
         hostname = arg_validators.Hostname(self.fake_sock)
