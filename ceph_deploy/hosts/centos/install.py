@@ -40,8 +40,6 @@ def install(distro, logger, version_kind, version):
             'rpm',
             '-Uvh',
             '--replacepkgs',
-            '--force',
-            '--quiet',
             '{url}noarch/ceph-release-1-0.el6.noarch.rpm'.format(url=url),
         ],
     )
@@ -79,7 +77,10 @@ def install_epel(distro, logger):
             pkg_managers.rpm(
                 distro.sudo_conn,
                 logger,
-                ['epel-release-6*.rpm'],
+                [
+                    '--replacepkgs',
+                    'epel-release-6*.rpm',
+                ],
                 stop_on_error=False,
             )
         else:
@@ -92,6 +93,9 @@ def install_epel(distro, logger):
             pkg_managers.rpm(
                 distro.sudo_conn,
                 logger,
-                ['epel-release-5*.rpm'],
+                [
+                    '--replacepkgs',
+                    'epel-release-5*.rpm'
+                ],
                 stop_on_error=False,
             )
