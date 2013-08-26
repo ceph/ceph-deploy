@@ -41,8 +41,4 @@ class Hostname(object):
             msg = "hostname: %s is not resolvable" % host
             raise argparse.ArgumentError(None, msg)
 
-        if resolved_addr == host:
-            msg = "%s must be a hostname not an IP" % host
-            raise argparse.ArgumentError(None, msg)
-
         return string
