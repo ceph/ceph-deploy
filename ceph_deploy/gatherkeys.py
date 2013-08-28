@@ -43,7 +43,7 @@ def gatherkeys(args):
         ret = 1
 
     # mon.
-    fetch_file(
+    r = fetch_file(
         args=args,
         frompath='/var/lib/ceph/mon/%s-{hostname}/keyring' % args.cluster,
         topath='{cluster}.mon.keyring'.format(

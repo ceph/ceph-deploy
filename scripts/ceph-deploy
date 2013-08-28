@@ -18,4 +18,4 @@ elif os.path.exists('/usr/lib/python2.6/site-packages/ceph_deploy'):
 from ceph_deploy.cli import main
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())
