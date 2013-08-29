@@ -25,6 +25,13 @@ def check_call(conn, logger, args, *a, **kw):
     mangle = kw.pop('mangle_exc', False)  # Default to not mangle exceptions
     stop_on_error = kw.pop('stop_on_error', True)  # Halt on remote exceptions
     logger.info('Running command: %s' % command)
+    kw.setdefault(
+        'env',
+        {
+            'PATH':
+            '/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin'
+        }
+    )
 
     def remote_call(args, *a, **kw):
         import subprocess
