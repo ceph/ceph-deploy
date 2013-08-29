@@ -1,4 +1,13 @@
 
+1.2.3
+-----
+* Fix non-working ``disk list``
+* ``check_call`` utility fixes ``$PATH`` issues.
+* Use proper exit codes from the ``main()`` CLI function
+* Do not error when attempting to add the EPEL repos.
+* Do not complain when using IP:HOST pairs
+* Report nicely when ``HOST:DISK`` is not used when zapping.
+
 1.2.2
 -----
 * Do not force usage of lsb_release, fallback to
