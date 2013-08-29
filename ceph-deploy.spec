@@ -46,13 +46,6 @@ BuildArch:      noarch
 #################################################################################
 %if 0%{defined suse_version}
 %py_requires
-%if 0%{?suse_version} > 1210
-Requires:       gptfdisk
-%else
-Requires:       scsirastools
-%endif
-%else
-Requires:       gdisk
 %endif
 
 %if 0%{?rhel}
