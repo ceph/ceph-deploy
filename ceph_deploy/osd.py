@@ -7,9 +7,10 @@ from cStringIO import StringIO
 
 from . import conf
 from . import exc
-from . import lsb
+from . import lsb, hosts
 from .cliutil import priority
 from .sudo_pushy import get_transport
+from .util.wrappers import check_call
 
 
 LOG = logging.getLogger(__name__)
@@ -25,6 +26,7 @@ def get_bootstrap_osd_key(cluster):
             return f.read()
     except IOError:
         raise RuntimeError('bootstrap-osd keyring not found; run \'gatherkeys\'')
+
 
 def create_osd(cluster, key):
     """
@@ -359,62 +361,34 @@ def disk_zap(args):
         sudo.close()
 
 
-def list_disk():
-
-    def subproc_call(*args, **kwargs):
-        """
-        call subproc that might fail, collect returncode and stderr/stdout
-        to be used in pushy.compile()d functions.  Returns 4-tuple of
-        (process exit code, command, stdout contents, stderr contents)
-        """
-        import subprocess
-        import tempfile
-
-        otmp = tempfile.TemporaryFile()
-        etmp = tempfile.TemporaryFile()
-        cmd = ' '.join(kwargs['args'])
-        errtxt = ''
-        ret = 0
-        kwargs.update(dict(stdout=otmp, stderr=etmp))
-        try:
-            subprocess.check_call(*args, **kwargs)
-        except subprocess.CalledProcessError as e:
-            ret = e.returncode
-        except Exception as e:
-            ret = -1
-            # OSError has errno
-            if hasattr(e, 'errno'):
-                ret = e.errno
-            errtxt = str(e)
-        otmp.seek(0)
-        etmp.seek(0)
-        return (ret, cmd, otmp.read(), errtxt + etmp.read())
-
-    ret, cmd, out, err = subproc_call(
-        args=[
+def list_disk(conn, logger):
+    check_call(
+        conn,
+        logger,
+        [
             'ceph-disk',
             'list',
-            ],
-        )
+        ],
+    )
 
-    return ret, cmd, out, err
 
 def disk_list(args, cfg):
     for hostname, disk, journal in args.disk:
+        distro = hosts.get(hostname)
+        LOG.info(
+            'Distro info: %s %s %s',
+            distro.name,
+            distro.release,
+            distro.codename
+        )
+        rlogger = logging.getLogger(hostname)
 
         # TODO username
-        sudo = args.pushy(get_transport(hostname))
-
         LOG.debug('Listing disks on {hostname}...'.format(hostname=hostname))
 
-        list_disk_r = sudo.compile(list_disk)
-        ret, cmd, out, err = list_disk_r()
-        if ret:
-            LOG.error("disk list failed: %s", err)
-        else:
-            print out,
+        list_disk(distro.sudo_conn, rlogger)
+        distro.sudo_conn.close()
 
-        sudo.close()
 
 def osd_list(args, cfg):
     LOG.error('Not yet implemented; see http://tracker.ceph.com/issues/5071')
