@@ -34,11 +34,21 @@ class Hostname(object):
         self.socket = _socket or socket  # just used for testing
 
     def __call__(self, string):
-        host = string.split(':')[-1]  # we might have name:host
+        parts = string.split(':')
+        name = parts[0]
+        host = parts[-1]
         try:
-            resolved_addr = self.socket.gethostbyname(host)
+            self.socket.gethostbyname(host)
         except self.socket.gaierror:
             msg = "hostname: %s is not resolvable" % host
+            raise argparse.ArgumentError(None, msg)
+
+        try:
+            self.socket.inet_aton(name)
+        except self.socket.error:
+            return string  # not an IP
+        else:
+            msg = '%s must be a hostname not an IP' % name
             raise argparse.ArgumentError(None, msg)
 
         return string

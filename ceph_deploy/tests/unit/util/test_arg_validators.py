@@ -37,7 +37,9 @@ class TestHostName(object):
     def setup(self):
         self.fake_sock = Mock()
         self.fake_sock.gaierror = socket.gaierror
+        self.fake_sock.error = socket.error
         self.fake_sock.gethostbyname.side_effect = socket.gaierror
+        self.fake_sock.inet_aton.side_effect = socket.error
 
     def test_hostname_is_not_resolvable(self):
         hostname = arg_validators.Hostname(self.fake_sock)
@@ -70,3 +72,12 @@ class TestHostName(object):
         hostname = arg_validators.Hostname(self.fake_sock)
         result = hostname('name:example.com')
         assert result == 'name:example.com'
+
+    def test_hostname_must_be_an_ip(self):
+        self.fake_sock.gethostbyname = Mock()
+        self.fake_sock.inet_aton = Mock()
+        hostname = arg_validators.Hostname(self.fake_sock)
+        with raises(ArgumentError) as error:
+            hostname('0')
+        message = error.value.message
+        assert '0 must be a hostname' in message
