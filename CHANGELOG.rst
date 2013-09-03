@@ -1,4 +1,8 @@
 
+1.2.4
+-----
+* Really discourage the use of ``ceph-deploy new [IP]``
+
 1.2.3
 -----
 * Fix non-working ``disk list``
