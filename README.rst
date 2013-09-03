@@ -9,6 +9,10 @@ workstation, requiring no servers, databases, or anything like that.
 If you set up and tear down Ceph clusters a lot, and want minimal
 extra bureaucracy, this is for you.
 
+.. _what_this_tool_is_not:
+
+What this tool is not
+---------------------
 It is not a generic deployment system, it is only for Ceph, and is designed
 for users who want to quickly get Ceph running with sensible initial settings
 without the overhead of installing Chef, Puppet or Juju.
@@ -16,6 +20,7 @@ without the overhead of installing Chef, Puppet or Juju.
 It does not handle client configuration beyond pushing the Ceph config file
 and users who want fine-control over security settings, partitions or directory
 locations should use a tool such as Chef or Puppet.
+
 
 Installation
 ============
@@ -254,3 +259,33 @@ For example::
   ceph-deploy --cluster=us-west new
   vi us-west.conf
   ceph-deploy --cluster=us-west mon
+
+FAQ
+===
+
+Before anything
+---------------
+Make sure you have the latest version of ``ceph-deploy``. It is actively
+developed and releases are coming weekly (on average). The most recent versions
+of ``ceph-deploy`` will have a ``--version`` flag you can use, otherwise check
+with your package manager and update if there is anything new.
+
+Why is feature X not implemented?
+---------------------------------
+Usually, features are added when/if it is sensible for someone that wants to
+get started with ceph and said feature would make sense in that context.  If
+you believe this is the case and you've read :ref:`what_this_tool_is_not` and
+still think feature ``X`` should exist in ceph-deploy, open a feature request
+in the ceph tracker: http://tracker.ceph.com/projects/devops/issues
+
+A command gave me an error, what is going on?
+---------------------------------------------
+Most of the commands for ``ceph-deploy`` are meant to be run remotely in a host
+that you have configured when creating the initial config. If a given command
+is not working as expected try to run the command that failed in the remote
+host and assert the behavior there.
+
+If the behavior in the remote host is the same, then it is probably not
+something wrong with ``ceph-deploy`` per-se. Make sure you capture the output
+of both the ``ceph-deploy`` output and the output of the command in the remote
+host.
