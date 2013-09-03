@@ -11,6 +11,7 @@ from . import lsb, hosts
 from .cliutil import priority
 from .sudo_pushy import get_transport
 from .util.wrappers import check_call
+from .util.context import remote
 
 
 LOG = logging.getLogger(__name__)
@@ -28,7 +29,7 @@ def get_bootstrap_osd_key(cluster):
         raise RuntimeError('bootstrap-osd keyring not found; run \'gatherkeys\'')
 
 
-def create_osd(cluster, key):
+def create_osd(conn, logger, cluster, key):
     """
     Run on osd node, writes the bootstrap key if not there yet.
 
@@ -40,58 +41,37 @@ def create_osd(cluster, key):
     path = '/var/lib/ceph/bootstrap-osd/{cluster}.keyring'.format(
         cluster=cluster,
         )
-    if not os.path.exists(path):
+    if not conn.modules.os.path.exists(path):
+        logger.info('keyring file does not exist, creating one at: %s' % path)
         tmp = '{path}.{pid}.tmp'.format(
             path=path,
-            pid=os.getpid(),
+            pid=conn.modules.os.getpid(),
             )
-        # file() doesn't let us control access mode from the
-        # beginning, and thus would have a race where attacker can
-        # open before we chmod the file, so play games with os.open
-        fd = os.open(
-            tmp,
-            (os.O_WRONLY|os.O_CREAT|os.O_EXCL
-             |os.O_NOCTTY|os.O_NOFOLLOW),
-            0600,
-            )
-        with os.fdopen(fd, 'wb') as f:
-            f.write(key)
-            f.flush()
-            os.fsync(f)
-        os.rename(tmp, path)
 
-    def subproc_call(*args, **kwargs):
-        """
-        call subproc that might fail, collect returncode and stderr/stdout
-        to be used in pushy.compile()d functions.  Returns 4-tuple of
-        (process exit code, command, stdout contents, stderr contents)
-        """
-        import subprocess
-        import tempfile
+        def write_keyring(tmp, path):
+            """ create mon keyring file """
+            # file() doesn't let us control access mode from the
+            # beginning, and thus would have a race where attacker can
+            # open before we chmod the file, so play games with os.open
+            import os
+            fd = os.open(
+                tmp,
+                (os.O_WRONLY | os.O_CREAT | os.O_EXCL
+                 | os.O_NOCTTY | os.O_NOFOLLOW),
+                0600,
+                )
+            with os.fdopen(fd, 'wb') as f:
+                f.write(key)
+                f.flush()
+                os.fsync(f)
+            os.rename(tmp, path)
 
-        otmp = tempfile.TemporaryFile()
-        etmp = tempfile.TemporaryFile()
-        cmd = ' '.join(kwargs['args'])
-        ret = 0
-        errtxt = ''
-        kwargs.update(dict(stdout=otmp, stderr=etmp))
-        try:
-            subprocess.check_call(*args, **kwargs)
-        except subprocess.CalledProcessError as e:
-            ret = e.returncode
-        except Exception as e:
-            ret = -1
-            # OSError has errno
-            if hasattr(e, 'errno'):
-                ret = e.errno
-            errtxt = str(e)
-        otmp.seek(0)
-        etmp.seek(0)
-        return (ret, cmd, otmp.read(), errtxt + etmp.read())
+        with remote(conn, logger, write_keyring) as remote_func:
+            remote_func(tmp, path)
 
-    # in case disks have been prepared before we do this, activate
-    # them now.
-    return subproc_call(
+    return check_call(
+        conn,
+        logger,
         args=[
             'udevadm',
             'trigger',
@@ -101,7 +81,16 @@ def create_osd(cluster, key):
         )
 
 
-def prepare_disk(cluster, disk, journal, activate_prepared_disk, zap, dmcrypt, dmcrypt_dir):
+def prepare_disk(
+        conn,
+        logger,
+        cluster,
+        disk,
+        journal,
+        activate_prepared_disk,
+        zap,
+        dmcrypt,
+        dmcrypt_dir):
     """
     Run on osd node, prepares a data disk for use.
     """
@@ -124,50 +113,23 @@ def prepare_disk(cluster, disk, journal, activate_prepared_disk, zap, dmcrypt, d
     if journal is not None:
         args.append(journal)
 
-    def subproc_call(*args, **kwargs):
-        """
-        call subproc that might fail, collect returncode and stderr/stdout
-        to be used in pushy.compile()d functions.  Returns 4-tuple of
-        (process exit code, command, stdout contents, stderr contents)
-        """
-        import subprocess
-        import tempfile
+    check_call(
+        conn,
+        logger,
+        args
+    )
 
-        otmp = tempfile.TemporaryFile()
-        etmp = tempfile.TemporaryFile()
-        cmd = ' '.join(kwargs['args'])
-        ret = 0
-        errtxt = ''
-        kwargs.update(dict(stdout=otmp, stderr=etmp))
-        try:
-            subprocess.check_call(*args, **kwargs)
-        except subprocess.CalledProcessError as e:
-            ret = e.returncode
-        except Exception as e:
-            ret = -1
-            # OSError has errno
-            if hasattr(e, 'errno'):
-                ret = e.errno
-            errtxt = str(e)
-        otmp.seek(0)
-        etmp.seek(0)
-        return (ret, cmd, otmp.read(), errtxt + etmp.read())
-
-    ret = subproc_call(args=args)
-    if ret[0]:
-        return ret
     if activate_prepared_disk:
-        ret = subproc_call(
+        return check_call(
+            conn,
+            logger,
             args=[
                 'udevadm',
                 'trigger',
                 '--subsystem-match=block',
                 '--action=add',
-                ],
-            )
-        if ret[0]:
-            return ret
-    return (0, '', '', '')
+            ],
+        )
 
 
 def activate_disk(cluster, disk, init):
@@ -212,6 +174,7 @@ def activate_disk(cluster, disk, init):
             disk,
             ])
 
+
 def prepare(args, cfg, activate_prepared_disk):
     LOG.debug(
         'Preparing cluster %s disks %s',
@@ -227,40 +190,34 @@ def prepare(args, cfg, activate_prepared_disk):
         try:
             if disk is None:
                 raise exc.NeedDiskError(hostname)
+
             # TODO username
-            sudo = args.pushy(get_transport(hostname))
+            distro = hosts.get(hostname)
+            LOG.info(
+                'Distro info: %s %s %s',
+                distro.name,
+                distro.release,
+                distro.codename
+            )
+            rlogger = logging.getLogger(hostname)
 
             if hostname not in bootstrapped:
                 bootstrapped.add(hostname)
                 LOG.debug('Deploying osd to %s', hostname)
 
-                write_conf_r = sudo.compile(conf.write_conf)
                 conf_data = StringIO()
                 cfg.write(conf_data)
-                write_conf_r(
-                    cluster=args.cluster,
-                    conf=conf_data.getvalue(),
-                    overwrite=args.overwrite_conf,
-                    )
+                with remote(distro.sudo_conn, rlogger, conf.write_conf) as remote_func:
+                    remote_func(args.cluster, conf_data.getvalue(), overwrite=args.overwrite_conf)
 
-                create_osd_r = sudo.compile(create_osd)
-                ret, cmd, out, err = create_osd_r(
-                    cluster=args.cluster,
-                    key=key,
-                    )
-                if ret:
-                    s = '{cmd} returned {ret}\n{out}\n{err}'.format(
-                        cmd=cmd, ret=ret, out=out, err=err)
-                    LOG.debug('Failed preparing host %s: %s', hostname, s)
-                    raise RuntimeError(s)
-                else:
-                    LOG.debug('Host %s is now ready for osd use.', hostname)
+                create_osd(distro.sudo_conn, rlogger, args.cluster, key)
 
             LOG.debug('Preparing host %s disk %s journal %s activate %s',
                       hostname, disk, journal, activate_prepared_disk)
 
-            prepare_disk_r = sudo.compile(prepare_disk)
-            ret, cmd, out, err = prepare_disk_r(
+            prepare_disk(
+                distro.sudo_conn,
+                rlogger,
                 cluster=args.cluster,
                 disk=disk,
                 journal=journal,
@@ -268,18 +225,17 @@ def prepare(args, cfg, activate_prepared_disk):
                 zap=args.zap_disk,
                 dmcrypt=args.dmcrypt,
                 dmcrypt_dir=args.dmcrypt_key_dir,
-                )
-            sudo.close()
-            if ret:
-                s = '{cmd} returned {ret}\n{out}\n{err}'.format(
-                    cmd=cmd, ret=ret, out=out, err=err)
-                raise RuntimeError(s)
+            )
+
+            LOG.debug('Host %s is now ready for osd use.', hostname)
+
         except RuntimeError as e:
             LOG.error(e)
             errors += 1
 
     if errors:
         raise exc.GenericError('Failed to create %d OSDs' % errors)
+
 
 def activate(args, cfg):
     LOG.debug(
