@@ -9,7 +9,7 @@ workstation, requiring no servers, databases, or anything like that.
 If you set up and tear down Ceph clusters a lot, and want minimal
 extra bureaucracy, this is for you.
 
-.. _what_this_tool_is_not:
+.. _what this tool is not:
 
 What this tool is not
 ---------------------
@@ -274,7 +274,7 @@ Why is feature X not implemented?
 ---------------------------------
 Usually, features are added when/if it is sensible for someone that wants to
 get started with ceph and said feature would make sense in that context.  If
-you believe this is the case and you've read `what_this_tool_is_not`_ and
+you believe this is the case and you've read "`what this tool is not`_" and
 still think feature ``X`` should exist in ceph-deploy, open a feature request
 in the ceph tracker: http://tracker.ceph.com/projects/devops/issues
 
