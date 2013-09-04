@@ -54,6 +54,8 @@ def mon_create(args):
             distro = hosts.get(hostname)
             LOG.info('distro info: %s %s %s', distro.name, distro.release, distro.codename)
             rlogger = logging.getLogger(hostname)
+            # ensure remote hostname is good to go
+            hostname_is_compatible(distro.sudo_conn, rlogger, hostname)
             rlogger.debug('deploying mon to %s', hostname)
             distro.mon.create(distro, rlogger, args, monitor_keyring)
             distro.sudo_conn.close()
@@ -63,6 +65,23 @@ def mon_create(args):
 
     if errors:
         raise exc.GenericError('Failed to create %d monitors' % errors)
+
+
+def hostname_is_compatible(conn, logger, provided_hostname):
+    """
+    Make sure that the host that we are connecting to has the same value as the
+    `hostname` in the remote host, otherwise mons can fail not reaching quorum.
+    """
+    logger.debug('determining if provided host has same hostname in remote')
+    remote_hostname = conn.modules.socket.gethostname()
+    if remote_hostname == provided_hostname:
+        return
+    logger.warning('*'*80)
+    logger.warning('provided hostname must match remote hostname')
+    logger.warning('provided hostname: %s' % provided_hostname)
+    logger.warning('remote hostname: %s' % remote_hostname)
+    logger.warning('monitors may not reach quorum and create-keys will not complete')
+    logger.warning('*'*80)
 
 
 def destroy_mon(cluster, paths, is_running):
