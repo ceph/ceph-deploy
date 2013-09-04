@@ -166,7 +166,7 @@ def install(args):
         LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
         rlogger = logging.getLogger(hostname)
         rlogger.info('installing ceph on %s' % hostname)
-        distro.install(distro, rlogger, args.version_kind, version)
+        distro.install(distro, rlogger, args.version_kind, version, args.pkgs_only)
         distro.sudo_conn.close()
 
 
@@ -313,6 +313,13 @@ def make(parser):
         const='master',
         metavar='BRANCH_OR_TAG',
         help='install a bleeding edge build from Git branch or tag (default: %(default)s)',
+        )
+
+    version.add_argument(
+        '--pkgs-only',
+        action='store_true',
+        default=False,
+        help='install packages only, skipping repo setup',
         )
 
     version.set_defaults(
