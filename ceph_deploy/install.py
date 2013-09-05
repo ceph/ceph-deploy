@@ -166,7 +166,7 @@ def install(args):
         LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
         rlogger = logging.getLogger(hostname)
         rlogger.info('installing ceph on %s' % hostname)
-        distro.install(distro, rlogger, args.version_kind, version, args.pkgs_only)
+        distro.install(distro, rlogger, args.version_kind, version, args.adjust_repos)
         distro.sudo_conn.close()
 
 
@@ -297,14 +297,14 @@ def make(parser):
             ],
         metavar='CODENAME',
         help='install a release known as CODENAME (done by default) (default: %(default)s)',
-        )
+    )
 
     version.add_argument(
         '--testing',
         nargs=0,
         action=StoreVersion,
         help='install the latest development release',
-        )
+    )
 
     version.add_argument(
         '--dev',
@@ -313,32 +313,40 @@ def make(parser):
         const='master',
         metavar='BRANCH_OR_TAG',
         help='install a bleeding edge build from Git branch or tag (default: %(default)s)',
-        )
+    )
 
     version.add_argument(
-        '--pkgs-only',
+        '--adjust-repos',
+        dest='adjust_repos',
         action='store_true',
-        default=False,
-        help='install packages only, skipping repo setup',
-        )
+        help='install packages modifying source repos',
+    )
+
+    version.add_argument(
+        '--no-adjust-repos',
+        dest='adjust_repos',
+        action='store_false',
+        help='install packages without modifying source repos',
+    )
 
     version.set_defaults(
         func=install,
         stable='dumpling',
         dev='master',
         version_kind='stable',
-        )
+        adjust_repos=True,
+    )
 
     parser.add_argument(
         'host',
         metavar='HOST',
         nargs='+',
         help='hosts to install on',
-        )
+    )
+
     parser.set_defaults(
         func=install,
-        )
-
+    )
 
 
 @priority(80)
