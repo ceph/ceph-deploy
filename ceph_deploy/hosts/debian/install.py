@@ -3,7 +3,7 @@ from ceph_deploy.util.context import remote
 from ceph_deploy.hosts import common
 
 
-def install(distro, logger, version_kind, version):
+def install(distro, logger, version_kind, version, adjust_repos):
     codename = distro.codename
     machine = distro.sudo_conn.modules.platform.machine()
 
@@ -27,38 +27,39 @@ def install(distro, logger, version_kind, version):
         ]
     )
 
-    check_call(
-        distro.sudo_conn,
-        logger,
-        ['wget -q -O- \'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc\' | apt-key add -'.format(key=key)],
-        shell=True,
-    )
+    if not adjust_repos:
+        check_call(
+            distro.sudo_conn,
+            logger,
+            ['wget -q -O- \'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc\' | apt-key add -'.format(key=key)],
+            shell=True,
+        )
 
-    if version_kind == 'stable':
-        url = 'http://ceph.com/debian-{version}/'.format(
-            version=version,
-            )
-    elif version_kind == 'testing':
-        url = 'http://ceph.com/debian-testing/'
-    elif version_kind == 'dev':
-        url = 'http://gitbuilder.ceph.com/ceph-deb-{codename}-{machine}-basic/ref/{version}'.format(
-            codename=codename,
-            machine=machine,
-            version=version,
-            )
-    else:
-        raise RuntimeError('Unknown version kind: %r' % version_kind)
+        if version_kind == 'stable':
+            url = 'http://ceph.com/debian-{version}/'.format(
+                version=version,
+                )
+        elif version_kind == 'testing':
+            url = 'http://ceph.com/debian-testing/'
+        elif version_kind == 'dev':
+            url = 'http://gitbuilder.ceph.com/ceph-deb-{codename}-{machine}-basic/ref/{version}'.format(
+                codename=codename,
+                machine=machine,
+                version=version,
+                )
+        else:
+            raise RuntimeError('Unknown version kind: %r' % version_kind)
 
-    def write_sources_list(url, codename):
-        """add ceph deb repo to sources.list"""
-        with file('/etc/apt/sources.list.d/ceph.list', 'w') as f:
-            f.write('deb {url} {codename} main\n'.format(
-                    url=url,
-                    codename=codename,
-                    ))
+        def write_sources_list(url, codename):
+            """add ceph deb repo to sources.list"""
+            with file('/etc/apt/sources.list.d/ceph.list', 'w') as f:
+                f.write('deb {url} {codename} main\n'.format(
+                        url=url,
+                        codename=codename,
+                        ))
 
-    with remote(distro.sudo_conn, logger, write_sources_list) as remote_func:
-        remote_func(url, codename)
+        with remote(distro.sudo_conn, logger, write_sources_list) as remote_func:
+            remote_func(url, codename)
 
     check_call(
         distro.sudo_conn,
