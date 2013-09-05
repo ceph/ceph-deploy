@@ -48,7 +48,7 @@ def create_osd(conn, logger, cluster, key):
             pid=conn.modules.os.getpid(),
             )
 
-        def write_keyring(tmp, path):
+        def write_keyring(tmp, path, key):
             """ create mon keyring file """
             # file() doesn't let us control access mode from the
             # beginning, and thus would have a race where attacker can
@@ -67,7 +67,7 @@ def create_osd(conn, logger, cluster, key):
             os.rename(tmp, path)
 
         with remote(conn, logger, write_keyring) as remote_func:
-            remote_func(tmp, path)
+            remote_func(tmp, path, key)
 
     return check_call(
         conn,
