@@ -8,14 +8,14 @@ def install(distro, logger, version_kind, version, adjust_repos):
     machine = distro.sudo_conn.modules.platform.machine()
 
     # Get EPEL installed before we continue:
-    if not adjust_repos:
+    if adjust_repos:
         install_epel(distro, logger)
     if version_kind in ['stable', 'testing']:
         key = 'release'
     else:
         key = 'autobuild'
 
-    if not adjust_repos:
+    if adjust_repos:
         check_call(
             distro.sudo_conn,
             logger,
