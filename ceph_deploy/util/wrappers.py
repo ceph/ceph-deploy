@@ -35,7 +35,7 @@ def check_call(conn, logger, args, *a, **kw):
 
     def remote_call(args, *a, **kw):
         import subprocess
-        subprocess.check_call(
+        return subprocess.check_call(
             args,
             *a,
             **kw
