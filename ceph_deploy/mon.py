@@ -1,20 +1,43 @@
 import ConfigParser
+import json
 import logging
 import re
 import subprocess
-
-from cStringIO import StringIO
+import time
 
 from . import conf
 from . import exc
-from . import lsb
 from .cliutil import priority
 from .sudo_pushy import get_transport
-from .util import paths
+from .util import paths, wrappers
 from . import hosts
 
 
 LOG = logging.getLogger(__name__)
+
+
+def mon_status(conn, logger, hostname):
+    """
+    run ``ceph daemon mon.`hostname` mon_status`` on the remote end and provide
+    not only the output, but be able to return a boolean status of what is
+    going on.
+    ``False`` represents a monitor that is not doing OK even if it is up and
+    running, while ``True`` would mean the monitor is up and running correctly.
+    """
+    mon = 'mon.%s' % hostname
+    try:
+        out, err, code = wrappers.Popen(
+            conn,
+            logger,
+            ['ceph', 'daemon', mon, 'mon_status']
+        )
+
+        mon_info = json.loads(out)
+        if mon_info['rank'] >= 0:
+            return True
+        return False
+    except RuntimeError:
+        return False
 
 
 def mon_create(args):
@@ -54,11 +77,17 @@ def mon_create(args):
             distro = hosts.get(hostname)
             LOG.info('distro info: %s %s %s', distro.name, distro.release, distro.codename)
             rlogger = logging.getLogger(hostname)
+
             # ensure remote hostname is good to go
             hostname_is_compatible(distro.sudo_conn, rlogger, hostname)
             rlogger.debug('deploying mon to %s', hostname)
             distro.mon.create(distro, rlogger, args, monitor_keyring)
+
+            # tell me the status of the deployed mon
+            time.sleep(2)  # give some room to start
+            mon_status(distro.sudo_conn, rlogger, hostname)
             distro.sudo_conn.close()
+
         except RuntimeError as e:
             LOG.error(e)
             errors += 1
