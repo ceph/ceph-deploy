@@ -11,7 +11,7 @@ def install(distro, logger, version_kind, version, adjust_repos):
     else:
         key = 'autobuild'
 
-    if not adjust_repos:
+    if adjust_repos:
         check_call(
             distro.sudo_conn,
             logger,

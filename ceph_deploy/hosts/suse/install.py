@@ -16,7 +16,7 @@ def install(distro, logger, version_kind, version, adjust_repos):
     else:
         distro = 'sles-11sp2'
 
-    if not adjust_repos:
+    if adjust_repos:
         check_call(
             distro.sudo_conn,
             logger,
