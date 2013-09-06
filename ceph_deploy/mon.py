@@ -16,7 +16,7 @@ from . import hosts
 LOG = logging.getLogger(__name__)
 
 
-def mon_status(conn, logger, hostname):
+def mon_status(conn, logger, hostname, silent=False):
     """
     run ``ceph daemon mon.`hostname` mon_status`` on the remote end and provide
     not only the output, but be able to return a boolean status of what is
@@ -33,6 +33,12 @@ def mon_status(conn, logger, hostname):
         )
 
         mon_info = json.loads(out)
+        if not silent:
+            logger.debug('*'*80)
+            logger.debug('status for monitor: %s' % mon)
+            for k, v in mon_info.items():
+                logger.debug('%s: %s' % (k, v))
+            logger.debug('*'*80)
         if mon_info['rank'] >= 0:
             return True
         return False
