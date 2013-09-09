@@ -32,7 +32,11 @@ def mon_status(conn, logger, hostname, silent=False):
             ['ceph', 'daemon', mon, 'mon_status']
         )
 
-        mon_info = json.loads(out)
+        try:
+            mon_info = json.loads(out)
+        except ValueError:
+            logger.warning('monitor: %s, might not be running yet' % mon)
+            return False
         if not silent:
             logger.debug('*'*80)
             logger.debug('status for monitor: %s' % mon)
