@@ -2,6 +2,7 @@ import sys
 from mock import Mock, MagicMock, patch, call
 from ceph_deploy import mon
 from ceph_deploy.hosts.common import mon_create
+from ceph_deploy.misc import mon_hosts
 
 
 def path_exists(target_paths=None):
@@ -117,6 +118,18 @@ class TestCreateMon(object):
         result = fake_remote.call_args_list[-1][0][-1].__name__
         assert result == 'create_init_path'
 
+    def test_mon_hosts(self):
+        hosts = Mock()
+        for (name, host) in mon_hosts(('name1', 'name2.localdomain',
+                    'name3:1.2.3.6', 'name4:localhost.localdomain')):
+            hosts.get(name, host)
+
+        expected = [call.get('name1', 'name1'),
+                    call.get('name2', 'name2.localdomain'),
+                    call.get('name3', '1.2.3.6'),
+                    call.get('name4', 'localhost.localdomain')]
+        result = hosts.mock_calls
+        assert result == expected
 
 class TestIsRunning(object):
 
