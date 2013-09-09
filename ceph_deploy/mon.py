@@ -11,6 +11,7 @@ from .cliutil import priority
 from .sudo_pushy import get_transport
 from .util import paths, wrappers
 from . import hosts
+from .misc import mon_hosts
 
 
 LOG = logging.getLogger(__name__)
