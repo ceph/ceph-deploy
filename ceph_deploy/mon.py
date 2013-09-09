@@ -79,23 +79,23 @@ def mon_create(args):
         )
 
     errors = 0
-    for hostname in args.mon:
+    for (name, host) in mon_hosts(args.mon):
         try:
             # TODO username
             # TODO add_bootstrap_peer_hint
-            LOG.debug('detecting platform for host %s ...', hostname)
-            distro = hosts.get(hostname)
+            LOG.debug('detecting platform for host %s ...', name)
+            distro = hosts.get(host)
             LOG.info('distro info: %s %s %s', distro.name, distro.release, distro.codename)
-            rlogger = logging.getLogger(hostname)
+            rlogger = logging.getLogger(name)
 
             # ensure remote hostname is good to go
-            hostname_is_compatible(distro.sudo_conn, rlogger, hostname)
-            rlogger.debug('deploying mon to %s', hostname)
+            hostname_is_compatible(distro.sudo_conn, rlogger, name)
+            rlogger.debug('deploying mon to %s', name)
             distro.mon.create(distro, rlogger, args, monitor_keyring)
 
             # tell me the status of the deployed mon
             time.sleep(2)  # give some room to start
-            mon_status(distro.sudo_conn, rlogger, hostname)
+            mon_status(distro.sudo_conn, rlogger, name)
             distro.sudo_conn.close()
 
         except RuntimeError as e:
@@ -205,12 +205,12 @@ def destroy_mon(cluster, paths, is_running):
 
 def mon_destroy(args):
     errors = 0
-    for hostname in args.mon:
+    for (name, host) in mon_hosts(args.mon):
         try:
-            LOG.debug('Removing mon from %s', hostname)
+            LOG.debug('Removing mon from %s', name)
 
             # TODO username
-            sudo = args.pushy(get_transport(hostname))
+            sudo = args.pushy(get_transport(host))
 
             destroy_mon_r = sudo.compile(destroy_mon)
             destroy_mon_r(

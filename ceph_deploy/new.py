@@ -50,14 +50,7 @@ def new(args):
     mon_initial_members = []
     mon_host = []
 
-    for m in args.mon:
-        if m.count(':'):
-            (name, host) = m.split(':')
-        else:
-            name = m
-            host = m
-            if name.count('.') > 0:
-                name = name.split('.')[0]
+    for (name, host) in mon_hosts(args.mon):
         LOG.debug('Resolving host %s', host)
         ip = None
         ip = get_nonlocal_ip(host)
