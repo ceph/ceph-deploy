@@ -11,6 +11,7 @@ import socket
 from . import exc
 from .cliutil import priority
 from .util import arg_validators
+from .misc import mon_hosts
 
 
 LOG = logging.getLogger(__name__)
