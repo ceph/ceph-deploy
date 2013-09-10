@@ -23,3 +23,10 @@ def mon_hosts(mons):
                 name = name.split('.')[0]
         yield (name, host)
 
+def remote_shortname(socket):
+    """
+    Obtains remote hostname of the socket and cuts off the domain part
+    if it's FQDN.
+    """
+    return socket.gethostname().split('.', 1)[0]
+
