@@ -131,11 +131,12 @@ class TestCreateMon(object):
         result = hosts.mock_calls
         assert result == expected
 
-    def test_remote_shortname(self):
+    def test_remote_shortname_fqdn(self):
         socket = Mock()
         socket.gethostname.return_value = 'host.f.q.d.n'
         assert remote_shortname(socket) == 'host'
 
+    def test_remote_shortname_host(self):
         socket = Mock()
         socket.gethostname.return_value = 'host'
         assert remote_shortname(socket) == 'host'

@@ -26,7 +26,7 @@ def mon_hosts(mons):
 def remote_shortname(socket):
     """
     Obtains remote hostname of the socket and cuts off the domain part
-    if it's FQDN.
+    of its FQDN.
     """
     return socket.gethostname().split('.', 1)[0]
 
