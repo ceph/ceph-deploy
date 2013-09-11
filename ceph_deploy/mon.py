@@ -27,12 +27,13 @@ def mon_status(conn, logger, hostname, silent=False):
     running, while ``True`` would mean the monitor is up and running correctly.
     """
     mon = 'mon.%s' % hostname
-    conn = Connection(hostname, logger=logger, sudo=True)
+    rconn = Connection(hostname, logger=logger, sudo=True)
 
     try:
         out, err, code = process.check(
-            conn,
-            ['ceph', 'daemon', mon, 'mon_status']
+            rconn,
+            ['ceph', 'daemon', mon, 'mon_status'],
+            exit=True
         )
 
         for line in err:
@@ -104,8 +105,8 @@ def mon_create(args):
 
             # tell me the status of the deployed mon
             time.sleep(2)  # give some room to start
-            mon_status(distro.sudo_conn, rlogger, name)
             distro.sudo_conn.close()
+            mon_status(None, rlogger, name)
 
         except RuntimeError as e:
             LOG.error(e)
