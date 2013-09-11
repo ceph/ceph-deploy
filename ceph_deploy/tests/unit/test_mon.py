@@ -2,7 +2,7 @@ import sys
 from mock import Mock, MagicMock, patch, call
 from ceph_deploy import mon
 from ceph_deploy.hosts.common import mon_create
-from ceph_deploy.misc import mon_hosts
+from ceph_deploy.misc import mon_hosts, remote_shortname
 
 
 def path_exists(target_paths=None):
@@ -130,6 +130,16 @@ class TestCreateMon(object):
                     call.get('name4', 'localhost.localdomain')]
         result = hosts.mock_calls
         assert result == expected
+
+    def test_remote_shortname_fqdn(self):
+        socket = Mock()
+        socket.gethostname.return_value = 'host.f.q.d.n'
+        assert remote_shortname(socket) == 'host'
+
+    def test_remote_shortname_host(self):
+        socket = Mock()
+        socket.gethostname.return_value = 'host'
+        assert remote_shortname(socket) == 'host'
 
 class TestIsRunning(object):
 
