@@ -293,8 +293,8 @@ host.
 Issues with monitors
 --------------------
 If your monitors are not starting, make sure that the ``{hostname}`` you used
-when you ran ``ceph-deploy mon create {hostname}`` match the actual ``hostname`` in
-the remote host.
+when you ran ``ceph-deploy mon create {hostname}`` match the actual ``hostname -s``
+in the remote host.
 
 Newer versions of ``ceph-deploy`` should warn you if the results are different
 but that might prevent the monitors from reaching quorum.
