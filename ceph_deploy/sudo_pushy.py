@@ -5,6 +5,8 @@ import pushy.transport.ssh
 import pushy.transport.local
 import subprocess
 
+from .misc import remote_shortname
+
 logger = logging.getLogger(__name__)
 
 
@@ -42,7 +44,7 @@ class LocalSudoTransport(object):
 
 def get_transport(hostname):
     use_sudo = needs_sudo()
-    myhostname = socket.gethostname().split('.')[0]
+    myhostname = remote_shortname(socket)
     if hostname == myhostname:
         if use_sudo:
             logger.debug('will use a local connection with sudo')

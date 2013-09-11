@@ -11,7 +11,7 @@ from .cliutil import priority
 from .sudo_pushy import get_transport
 from .util import paths, wrappers
 from . import hosts
-from .misc import mon_hosts
+from .misc import mon_hosts, remote_shortname
 
 
 LOG = logging.getLogger(__name__)
@@ -113,7 +113,7 @@ def hostname_is_compatible(conn, logger, provided_hostname):
     `hostname` in the remote host, otherwise mons can fail not reaching quorum.
     """
     logger.debug('determining if provided host has same hostname in remote')
-    remote_hostname = conn.modules.socket.gethostname()
+    remote_hostname = remote_shortname(conn.modules.socket)
     if remote_hostname == provided_hostname:
         return
     logger.warning('*'*80)
@@ -133,7 +133,7 @@ def destroy_mon(cluster, paths, is_running):
     import time
     retries = 5
 
-    hostname = socket.gethostname().split('.')[0]
+    hostname = remote_shortname(socket)
     path = paths.mon.path(cluster, hostname)
 
     if os.path.exists(path):
