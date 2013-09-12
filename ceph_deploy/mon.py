@@ -9,7 +9,8 @@ from . import conf
 from . import exc
 from .cliutil import priority
 from .sudo_pushy import get_transport
-from .util import paths, wrappers
+from .util import paths
+from .lib.remoto import Connection, process
 from . import hosts
 from .misc import mon_hosts, remote_shortname
 
@@ -26,28 +27,36 @@ def mon_status(conn, logger, hostname, silent=False):
     running, while ``True`` would mean the monitor is up and running correctly.
     """
     mon = 'mon.%s' % hostname
+    rconn = Connection(hostname, logger=logger, sudo=True)
+
     try:
-        out, err, code = wrappers.Popen(
-            conn,
-            logger,
-            ['ceph', 'daemon', mon, 'mon_status']
+        out, err, code = process.check(
+            rconn,
+            ['ceph', 'daemon', mon, 'mon_status'],
+            exit=True
         )
 
+        for line in err:
+            logger.error(line)
+
         try:
-            mon_info = json.loads(out)
+            mon_info = json.loads(''.join(out))
         except ValueError:
             logger.warning('monitor: %s, might not be running yet' % mon)
             return False
         if not silent:
             logger.debug('*'*80)
             logger.debug('status for monitor: %s' % mon)
-            for k, v in mon_info.items():
-                logger.debug('%s: %s' % (k, v))
+            for line in out:
+                logger.debug(line)
             logger.debug('*'*80)
         if mon_info['rank'] >= 0:
+            logger.info('monitor: %s is running' % mon)
             return True
+        logger.info('monitor: %s is not running' % mon)
         return False
     except RuntimeError:
+        logger.info('monitor: %s is not running' % mon)
         return False
 
 
@@ -96,8 +105,8 @@ def mon_create(args):
 
             # tell me the status of the deployed mon
             time.sleep(2)  # give some room to start
-            mon_status(distro.sudo_conn, rlogger, name)
             distro.sudo_conn.close()
+            mon_status(None, rlogger, name)
 
         except RuntimeError as e:
             LOG.error(e)

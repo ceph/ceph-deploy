@@ -1,16 +1,18 @@
-from ceph_deploy.util.wrappers import check_call
 from ceph_deploy.hosts import common
 from ceph_deploy.misc import remote_shortname
+from ceph_deploy.lib.remoto import Connection, process
 
 
 def create(distro, logger, args, monitor_keyring):
     hostname = remote_shortname(distro.sudo_conn.modules.socket)
     common.mon_create(distro, logger, args, monitor_keyring, hostname)
 
-    if distro.init == 'upstart': # Ubuntu uses upstart
-        check_call(
-            distro.sudo_conn,
-            logger,
+    # TODO transition this once pushy is out
+    rconn = Connection(hostname, logger, sudo=True)
+
+    if distro.init == 'upstart':  # Ubuntu uses upstart
+        process.run(
+            rconn,
             [
                 'initctl',
                 'emit',
@@ -18,22 +20,21 @@ def create(distro, logger, args, monitor_keyring):
                 'cluster={cluster}'.format(cluster=args.cluster),
                 'id={hostname}'.format(hostname=hostname),
             ],
-            patch=False,
+            exit=True,
         )
 
-    elif distro.init == 'sysvinit': # Debian uses sysvinit
+    elif distro.init == 'sysvinit':  # Debian uses sysvinit
         service = common.which_service(distro.sudo_conn, logger)
 
-        check_call(
-            distro.sudo_conn,
-            logger,
+        process.run(
+            rconn,
             [
                 service,
                 'ceph',
                 'start',
                 'mon.{hostname}'.format(hostname=hostname)
             ],
-            patch=False,
+            exit=True,
         )
     else:
         raise RuntimeError('create cannot use init %s' % distro.init)
