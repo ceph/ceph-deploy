@@ -2,6 +2,7 @@ import argparse
 import logging
 import os
 import sys
+from textwrap import dedent
 
 from cStringIO import StringIO
 
@@ -410,6 +411,21 @@ def make(parser):
     """
     Prepare a data disk on remote host.
     """
+    sub_command_help = dedent("""
+    Manage OSDs by preparing a data disk on remote host.
+
+    For paths, first prepare and then activate:
+
+        ceph-deploy osd prepare {osd-node-name}:/path/to/osd
+        ceph-deploy osd activate {osd-node-name}:/path/to/osd
+
+    For disks or journals the `create` command will do prepare and activate
+    for you.
+    """
+    )
+    parser.formatter_class  = argparse.RawDescriptionHelpFormatter
+    parser.description = sub_command_help
+
     parser.add_argument(
         'subcommand',
         metavar='SUBCOMMAND',
@@ -471,7 +487,7 @@ def make_disk(parser):
         nargs='+',
         metavar='HOST:DISK',
         type=colon_separated,
-        help='host and disk to zap',
+        help='host and disk (or path)',
         )
     parser.add_argument(
         '--zap-disk',
