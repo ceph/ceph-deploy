@@ -2,6 +2,8 @@ from setuptools import setup, find_packages
 import os
 import sys
 import ceph_deploy
+from vendor import vendorize
+
 
 def read(fname):
     path = os.path.join(os.path.dirname(__file__), fname)
@@ -12,6 +14,14 @@ install_requires = []
 pyversion = sys.version_info[:2]
 if pyversion < (2, 7) or (3, 0) <= pyversion <= (3, 1):
     install_requires.append('argparse')
+
+#
+# Add libraries that are not part of install_requires
+#
+vendorize([
+    ('remoto', '0.0.1'),
+])
+
 
 setup(
     name='ceph-deploy',

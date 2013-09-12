@@ -2,6 +2,8 @@
 1.2.4
 -----
 * Really discourage the use of ``ceph-deploy new [IP]``
+* Fix hanging remote requests
+* Add ``mon status`` output when creating monitors
 
 1.2.3
 -----
