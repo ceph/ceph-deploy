@@ -4,6 +4,18 @@
 * Really discourage the use of ``ceph-deploy new [IP]``
 * Fix hanging remote requests
 * Add ``mon status`` output when creating monitors
+* Fix Debian install issue (wrong parameter order) (Thanks Sayid Munawar)
+* ``osd`` commands will be more verbose when deploying them
+* Issue a warning when provided hosts do not match ``hostname -s`` remotely
+* Create two flags for altering/not-altering source repos at install time:
+  ``--adjust-repos`` and ``--no-adjust-repos``
+* Do not do any ``sudo`` commands if user is root
+* Use ``mon status`` for every ``mon`` deployment and detect problems with
+  monitors.
+* Allow to specify ``host:fqdn/ip`` for all mon commands (Thanks Dmitry
+  Borodaenko)
+* Be consistent for hostname detection (Thanks Dmitry Borodaenko)
+* Fix hanging problem on remote hosts
 
 1.2.3
 -----
