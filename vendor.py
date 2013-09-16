@@ -49,7 +49,10 @@ def vendor_library(name, version):
         run(['rm', '-rf', vendor_src])
 
     if not os.path.exists(vendor_dest):
-        run(['git', 'clone', 'git://ceph.com/%s' % name])
+        # XXX Uncomment once ceph.com starts mirroring again
+        #run(['git', 'clone', 'git://ceph.com/%s' % name])
+
+        run(['git', 'clone', 'https://github.com/ceph/%s' % name])
         os.chdir(vendor_src)
         run(['git', 'checkout', version])
         run(['mv', vendor_module, vendor_dest])
@@ -72,5 +75,3 @@ def vendorize(vendor_requirements):
     for library in vendor_requirements:
         name, version = library
         vendor_library(name, version)
-
-vendorize([('remoto', '0.0.1'),])
