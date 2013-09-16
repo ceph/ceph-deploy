@@ -21,6 +21,7 @@ def create(distro, logger, args, monitor_keyring):
                 'id={hostname}'.format(hostname=hostname),
             ],
             exit=True,
+            timeout=7,
         )
 
     elif distro.init == 'sysvinit':  # Debian uses sysvinit
@@ -35,6 +36,7 @@ def create(distro, logger, args, monitor_keyring):
                 'mon.{hostname}'.format(hostname=hostname)
             ],
             exit=True,
+            timeout=7,
         )
     else:
         raise RuntimeError('create cannot use init %s' % distro.init)
