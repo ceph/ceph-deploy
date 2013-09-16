@@ -37,7 +37,7 @@ if [ $RELEASE -eq 1 ] ; then
     DEB_VERSION=$(dpkg-parsechangelog | sed -rne 's,^Version: (.*),\1, p')
     BP_VERSION=${DEB_VERSION}${BPTAG}
     DEBEMAIL="gary.lowell@inktank.com" dch -D $DIST --force-distribution -b -v "$BP_VERSION" "$comment"
-    dpkd-source -b .
+    dpkg-source -b .
 fi
 
 # Build Package
