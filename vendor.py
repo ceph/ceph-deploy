@@ -72,5 +72,3 @@ def vendorize(vendor_requirements):
     for library in vendor_requirements:
         name, version = library
         vendor_library(name, version)
-
-vendorize([('remoto', '0.0.1'),])
