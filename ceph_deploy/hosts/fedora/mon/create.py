@@ -21,4 +21,5 @@ def create(distro, logger, args, monitor_keyring):
             'mon.{hostname}'.format(hostname=hostname)
         ],
         exit=True,
+        timeout=7,
     )
