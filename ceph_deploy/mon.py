@@ -10,9 +10,10 @@ from . import exc
 from .cliutil import priority
 from .sudo_pushy import get_transport
 from .util import paths
-from .lib.remoto import Connection, process
+from .lib.remoto import process
 from . import hosts
 from .misc import mon_hosts, remote_shortname
+from .connection import get_connection
 
 
 LOG = logging.getLogger(__name__)
@@ -27,7 +28,7 @@ def mon_status(conn, logger, hostname, silent=False):
     running, while ``True`` would mean the monitor is up and running correctly.
     """
     mon = 'mon.%s' % hostname
-    rconn = Connection(hostname, logger=logger, sudo=True)
+    rconn = get_connection(hostname, logger=logger)
 
     try:
         out, err, code = process.check(
