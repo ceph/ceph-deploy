@@ -30,11 +30,12 @@ BuildRequires:	python-pytest
 %else
 BuildRequires:	pytest
 %endif
+BuildRequires:  git
 Requires:       python-argparse
-Requires:	pushy >= 0.5.3
+Requires:       pushy >= 0.5.3
 Requires:       python-distribute
-#Requires:	lsb-release
-#Requires:	ceph
+#Requires:      lsb-release
+#Requires:      ceph
 %if 0%{?suse_version} && 0%{?suse_version} <= 1110
 %{!?python_sitelib: %global python_sitelib %(python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 %else
