@@ -1,6 +1,7 @@
 
 1.2.4
 -----
+* Improve ``osd help`` menu with path information
 * Really discourage the use of ``ceph-deploy new [IP]``
 * Fix hanging remote requests
 * Add ``mon status`` output when creating monitors
