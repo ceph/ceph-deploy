@@ -14,9 +14,32 @@ from .lib.remoto import process
 from . import hosts
 from .misc import mon_hosts, remote_shortname
 from .connection import get_connection
+from . import gatherkeys
 
 
 LOG = logging.getLogger(__name__)
+
+
+def mon_status_check(conn, logger, hostname, exit=False):
+    """
+    A direct check for JSON output on the monitor status.
+    WARNING: this function requires the new connection object
+    """
+    mon = 'mon.%s' % hostname
+
+    out, err, code = process.check(
+        conn,
+        ['ceph', 'daemon', mon, 'mon_status'],
+        exit=exit
+    )
+
+    for line in err:
+        logger.error(line)
+
+    try:
+        return json.loads(''.join(out))
+    except ValueError:
+        return {}
 
 
 def mon_status(conn, logger, hostname, silent=False):
@@ -31,27 +54,18 @@ def mon_status(conn, logger, hostname, silent=False):
     rconn = get_connection(hostname, logger=logger)
 
     try:
-        out, err, code = process.check(
-            rconn,
-            ['ceph', 'daemon', mon, 'mon_status'],
-            exit=True
-        )
-
-        for line in err:
-            logger.error(line)
-
-        try:
-            mon_info = json.loads(''.join(out))
-        except ValueError:
+        out = mon_status_check(rconn, logger, hostname, exit=True)
+        if not out:
             logger.warning('monitor: %s, might not be running yet' % mon)
             return False
+
         if not silent:
             logger.debug('*'*80)
             logger.debug('status for monitor: %s' % mon)
-            for line in out:
+            for line in json.dumps(out, indent=2, sort_keys=True).split('\n'):
                 logger.debug(line)
             logger.debug('*'*80)
-        if mon_info['rank'] >= 0:
+        if out['rank'] >= 0:
             logger.info('monitor: %s is running' % mon)
             return True
         logger.info('monitor: %s is not running' % mon)
@@ -241,11 +255,60 @@ def mon_destroy(args):
         raise exc.GenericError('Failed to destroy %d monitors' % errors)
 
 
+def mon_create_initial(args):
+    try:
+        cfg = conf.load(args)
+        cfg_initial_members = cfg.get('global', 'mon_initial_members')
+        mon_initial_members = re.split(r'[,\s]+', cfg_initial_members)
+    except (ConfigParser.NoSectionError,
+            ConfigParser.NoOptionError):
+        raise RuntimeError('No `mon initial members` defined in config')
+
+    # create them normally through mon_create
+    mon_create(args)
+
+    # make the sets to be able to compare late
+    mon_in_quorum = set([])
+    mon_members = set([host for host in mon_initial_members])
+
+    for host in mon_initial_members:
+        mon_name = 'mon.%s' % host
+        LOG.info('processing monitor %s', mon_name)
+        sleeps = [20, 20, 15, 10, 10, 5]
+        tries = 5
+        rlogger = logging.getLogger(host)
+        rconn = get_connection(host, logger=rlogger)
+        while tries:
+            status = mon_status_check(rconn, rlogger, host)
+            has_reached_quorum = status.get('state', '') in ['peon', 'leader']
+            if not has_reached_quorum:
+                LOG.warning('%s monitor is not yet in quorum, tries left: %s' % (mon_name, tries))
+                tries -= 1
+                sleep_seconds = sleeps.pop()
+                LOG.warning('waiting %s seconds before retrying', sleep_seconds)
+                time.sleep(sleep_seconds)  # Magic number
+            else:
+                mon_in_quorum.add(host)
+                LOG.info('%s monitor has reached quorum!', mon_name)
+                break
+
+    if mon_in_quorum == mon_members:
+        LOG.info('all initial monitors are running and have formed quorum')
+        LOG.info('Running gatherkeys...')
+        gatherkeys.gatherkeys(args)
+    else:
+        LOG.error('Some monitors have still not reached quorum:')
+        for host in mon_members - mon_in_quorum:
+            LOG.error('%s', host)
+
+
 def mon(args):
     if args.subcommand == 'create':
         mon_create(args)
     elif args.subcommand == 'destroy':
         mon_destroy(args)
+    elif args.subcommand == 'create-initial':
+        mon_create_initial(args)
     else:
         LOG.error('subcommand %s not implemented', args.subcommand)
 
@@ -260,6 +323,7 @@ def make(parser):
         metavar='SUBCOMMAND',
         choices=[
             'create',
+            'create-initial',
             'destroy',
             ],
         help='create or destroy',
