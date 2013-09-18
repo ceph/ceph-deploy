@@ -8,6 +8,7 @@ def create(distro, logger, args, monitor_keyring):
     hostname = remote_shortname(distro.sudo_conn.modules.socket)
     common.mon_create(distro, logger, args, monitor_keyring, hostname)
 
+    distro.sudo_conn.close()
     # TODO transition this once pushy is out
     rconn = get_connection(hostname, logger)
 
