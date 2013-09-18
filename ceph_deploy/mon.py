@@ -1,8 +1,10 @@
+import argparse
 import ConfigParser
 import json
 import logging
 import re
 import subprocess
+from textwrap import dedent
 import time
 
 from . import conf
@@ -318,21 +320,41 @@ def make(parser):
     """
     Deploy ceph monitor on remote hosts.
     """
+    sub_command_help = dedent("""
+    Subcommands:
+
+    create-initial
+      Will deploy for monitors defined in `mon initial members`, wait until
+      they form quorum and then gatherkeys, reporting the monitor status along
+      the process. If monitors don't form quorum the command will eventually
+      time out.
+
+    create
+      Deploy monitors by specifying them like:
+
+        ceph-deploy mon create node1 node2 node3
+
+      If no hosts are passed it will default to use the `mon initial members`
+      defined in the configuration.
+
+    destroy
+      Completely remove monitors on a remote host. Requires hostname(s) as
+      arguments.
+    """)
+    parser.formatter_class = argparse.RawDescriptionHelpFormatter
+    parser.description = sub_command_help
+
     parser.add_argument(
         'subcommand',
-        metavar='SUBCOMMAND',
         choices=[
             'create',
             'create-initial',
             'destroy',
             ],
-        help='create or destroy',
         )
     parser.add_argument(
         'mon',
-        metavar='HOST',
         nargs='*',
-        help='host to deploy on',
         )
     parser.set_defaults(
         func=mon,
