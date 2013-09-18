@@ -17,9 +17,8 @@ def test_help(tmpdir, cli):
         ) as p:
         result = p.stdout.read()
     assert 'usage: ceph-deploy' in result
-    assert 'Deploy ceph monitor on remote hosts.' in result
-    assert 'positional arguments:'
-    assert 'optional arguments:'
+    assert 'positional arguments:' in result
+    assert 'optional arguments:' in result
 
 
 def test_bad_no_conf(tmpdir, cli):
