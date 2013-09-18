@@ -9,6 +9,8 @@ def create(distro, logger, args, monitor_keyring):
     common.mon_create(distro, logger, args, monitor_keyring, hostname)
     service = common.which_service(distro.sudo_conn, logger)
 
+    distro.sudo_conn.close()
+
     # TODO transition this once pushy is out
     rconn = get_connection(hostname, logger)
 

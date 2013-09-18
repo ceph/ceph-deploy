@@ -1,4 +1,9 @@
 
+1.2.5
+-----
+* Fix yet another hanging problem when starting monitors. Closing the
+  connection now before we even start them.
+
 1.2.4
 -----
 * Improve ``osd help`` menu with path information

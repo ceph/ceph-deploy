@@ -106,7 +106,9 @@ def mon_create(args):
 
             # tell me the status of the deployed mon
             time.sleep(2)  # give some room to start
-            distro.sudo_conn.close()
+            # distro.sudo_conn.close() used to happen here but it made some connections
+            # hang. This is terrible, and we should move on to stop using pushy ASAP.
+            # Connections are closed individually now before starting the monitors
             mon_status(None, rlogger, name)
 
         except RuntimeError as e:
