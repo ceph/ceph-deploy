@@ -7,6 +7,7 @@ from ceph_deploy.connection import get_connection
 def create(distro, logger, args, monitor_keyring):
     hostname = remote_shortname(distro.sudo_conn.modules.socket)
     common.mon_create(distro, logger, args, monitor_keyring, hostname)
+    service = common.which_service(distro.sudo_conn, logger)
 
     distro.sudo_conn.close()
     # TODO transition this once pushy is out
@@ -27,7 +28,6 @@ def create(distro, logger, args, monitor_keyring):
         )
 
     elif distro.init == 'sysvinit':  # Debian uses sysvinit
-        service = common.which_service(distro.sudo_conn, logger)
 
         process.run(
             rconn,

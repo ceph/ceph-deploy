@@ -1,4 +1,9 @@
 
+1.2.6
+-----
+* Fixes a problem witha closed connection for Debian distros when creating
+  a mon.
+
 1.2.5
 -----
 * Fix yet another hanging problem when starting monitors. Closing the
