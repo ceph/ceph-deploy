@@ -7,6 +7,7 @@ from .sudo_pushy import get_transport
 
 LOG = logging.getLogger(__name__)
 
+
 def fetch_file(args, frompath, topath, hosts):
     # mon.
     if os.path.exists(topath):
@@ -27,6 +28,7 @@ def fetch_file(args, frompath, topath, hosts):
     LOG.warning('Unable to find %s on %s', frompath, hosts)
     return False
 
+
 def gatherkeys(args):
     ret = 0
 
@@ -46,8 +48,7 @@ def gatherkeys(args):
     r = fetch_file(
         args=args,
         frompath='/var/lib/ceph/mon/%s-{hostname}/keyring' % args.cluster,
-        topath='{cluster}.mon.keyring'.format(
-             cluster=args.cluster),
+        topath='{cluster}.mon.keyring'.format(cluster=args.cluster),
         hosts=args.mon,
         )
     if not r:
@@ -69,6 +70,7 @@ def gatherkeys(args):
             ret = 1
 
     return ret
+
 
 @priority(40)
 def make(parser):
