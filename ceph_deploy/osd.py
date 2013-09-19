@@ -90,6 +90,7 @@ def prepare_disk(
         journal,
         activate_prepared_disk,
         zap,
+        fs_type,
         dmcrypt,
         dmcrypt_dir):
     """
@@ -100,6 +101,11 @@ def prepare_disk(
         ]
     if zap:
         args.append('--zap-disk')
+    if fs_type:
+        if fs_type not in ('btrfs', 'ext4', 'xfs'):
+            raise argparse.ArgumentTypeError(
+                    "FS_TYPE must be one of 'btrfs', 'ext4' or 'xfs'")
+        args.extend(['--fs-type', fs_type])
     if dmcrypt:
         args.append('--dmcrypt')
         if dmcrypt_dir is not None:
@@ -224,6 +230,7 @@ def prepare(args, cfg, activate_prepared_disk):
                 journal=journal,
                 activate_prepared_disk=activate_prepared_disk,
                 zap=args.zap_disk,
+                fs_type=args.fs_type,
                 dmcrypt=args.dmcrypt,
                 dmcrypt_dir=args.dmcrypt_key_dir,
             )
@@ -451,6 +458,12 @@ def make(parser):
         help='destroy existing partition table and content for DISK',
         )
     parser.add_argument(
+        '--fs-type',
+        metavar='FS_TYPE',
+        default='xfs',
+        help='filesystem to use to format DISK (xfs, btrfs or ext4)',
+        )
+    parser.add_argument(
         '--dmcrypt',
         action='store_true', default=None,
         help='use dm-crypt on DISK',
@@ -493,6 +506,12 @@ def make_disk(parser):
         '--zap-disk',
         action='store_true', default=None,
         help='destroy existing partition table and content for DISK',
+        )
+    parser.add_argument(
+        '--fs-type',
+        metavar='FS_TYPE',
+        default='xfs',
+        help='filesystem to use to format DISK (xfs, btrfs or ext4)'
         )
     parser.add_argument(
         '--dmcrypt',
