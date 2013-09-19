@@ -19,6 +19,8 @@ def create(distro, logger, args, monitor_keyring):
         [
             service,
             'ceph',
+            '-c',
+            '/etc/ceph/{cluster}.conf'.format(cluster=args.cluster),
             'start',
             'mon.{hostname}'.format(hostname=hostname)
         ],
