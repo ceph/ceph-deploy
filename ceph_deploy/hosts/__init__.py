@@ -54,6 +54,7 @@ def _get_distro(distro, fallback=None):
         'ubuntu': debian,
         'centos': centos,
         'scientific': centos,
+        'oracleserver': centos,
         'redhat': centos,
         'fedora': fedora,
         'suse': suse,
