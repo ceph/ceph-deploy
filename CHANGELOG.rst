@@ -1,4 +1,8 @@
 
+1.2.7
+-----
+* Ensure local calls to ceph-deploy do not attempt to ssh.
+
 1.2.6
 -----
 * Fixes a problem witha closed connection for Debian distros when creating
