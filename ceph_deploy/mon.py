@@ -4,6 +4,7 @@ import json
 import logging
 import re
 import subprocess
+import socket
 from textwrap import dedent
 import time
 
@@ -152,16 +153,14 @@ def hostname_is_compatible(conn, logger, provided_hostname):
     logger.warning('*'*80)
 
 
-def destroy_mon(cluster, paths, is_running):
+def destroy_mon(cluster, paths, is_running, hostname):
     import datetime
     import errno
     import os
     import subprocess  # noqa
-    import socket
     import time
     retries = 5
 
-    hostname = remote_shortname(socket)
     path = paths.mon.path(cluster, hostname)
 
     if os.path.exists(path):
@@ -232,6 +231,7 @@ def destroy_mon(cluster, paths, is_running):
                 raise
         os.rename(path, os.path.join('/var/lib/ceph/mon-removed/', fn))
 
+
 def mon_destroy(args):
     errors = 0
     for (name, host) in mon_hosts(args.mon):
@@ -240,12 +240,14 @@ def mon_destroy(args):
 
             # TODO username
             sudo = args.pushy(get_transport(host))
+            hostname = remote_shortname(socket)
 
             destroy_mon_r = sudo.compile(destroy_mon)
             destroy_mon_r(
                 cluster=args.cluster,
                 paths=paths,
                 is_running=is_running,
+                hostname=hostname,
                 )
             sudo.close()
 
