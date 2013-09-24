@@ -8,8 +8,7 @@ import socket
 from textwrap import dedent
 import time
 
-from . import conf
-from . import exc
+from . import conf, config, exc
 from .cliutil import priority
 from .sudo_pushy import get_transport
 from .util import paths
@@ -43,6 +42,32 @@ def mon_status_check(conn, logger, hostname, exit=False):
         return json.loads(''.join(out))
     except ValueError:
         return {}
+
+
+def catch_mon_errors(conn, logger, hostname, cfg):
+    """
+    Make sure we are able to catch up common mishaps with monitors
+    and use that state of a monitor to determine what is missing
+    and warn apropriately about it.
+    """
+    conn = conn or get_connection(hostname, logger=logger)
+    monmap = mon_status_check(conn, logger, hostname).get('monmap', {})
+    mon_initial_members = config.safe_get(cfg, 'global', 'mon_initial_members')
+    public_addr = config.safe_get(cfg, 'global', 'public_addr')
+    public_network = config.safe_get(cfg, 'global', 'public_network')
+    mon_in_monmap = [
+        mon.get('name')
+        for mon in monmap.get('mons', [{}])
+        if mon.get('name') == hostname
+    ]
+    if mon_initial_members:
+        if not hostname in mon_initial_members:
+            logger.warning('%s is not defined in `mon initial members`', hostname)
+    if not mon_in_monmap:
+        logger.warning('monitor %s does not exist in monmap', hostname)
+        if not public_addr and not public_network:
+            logger.warning('neither `public_addr` nor `public_network` keys are defined for monitors')
+            logger.warning('monitors may not be able to form quorum')
 
 
 def mon_status(conn, logger, hostname, silent=False):
@@ -123,10 +148,12 @@ def mon_create(args):
 
             # tell me the status of the deployed mon
             time.sleep(2)  # give some room to start
-            # distro.sudo_conn.close() used to happen here but it made some connections
-            # hang. This is terrible, and we should move on to stop using pushy ASAP.
-            # Connections are closed individually now before starting the monitors
+            # distro.sudo_conn.close() used to happen here but it made some
+            # connections hang. This is terrible, and we should move on to stop
+            # using pushy ASAP.  Connections are closed individually now before
+            # starting the monitors
             mon_status(None, rlogger, name)
+            catch_mon_errors(None, rlogger, name, cfg)
 
         except RuntimeError as e:
             LOG.error(e)
