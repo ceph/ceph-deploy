@@ -57,3 +57,12 @@ bar__ thud   quux = baz
     cfg = conf.parse(f)
     assert cfg.get('foo', 'bar_thud_quux') == 'baz'
     assert cfg.get('foo', 'bar thud quux') == 'baz'
+
+def test_write_words_underscore():
+    cfg = conf.CephConf()
+    cfg.add_section('foo')
+    cfg.set('foo', 'bar thud quux', 'baz')
+    f = StringIO()
+    cfg.write(f)
+    f.reset()
+    assert f.readlines() == ['[foo]\n', 'bar_thud_quux = baz\n','\n']
