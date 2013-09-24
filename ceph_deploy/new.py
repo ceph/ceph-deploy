@@ -10,6 +10,7 @@ import socket
 
 from . import exc
 from .cliutil import priority
+from .conf import CephConf
 from .util import arg_validators
 from .misc import mon_hosts
 
@@ -42,7 +43,7 @@ def get_nonlocal_ip(host):
 
 def new(args):
     LOG.debug('Creating new cluster named %s', args.cluster)
-    cfg = ConfigParser.RawConfigParser()
+    cfg = CephConf()
     cfg.add_section('global')
 
     fsid = uuid.uuid4()

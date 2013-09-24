@@ -13,15 +13,15 @@ class _TrimIndentFile(object):
         return line.lstrip(' \t')
 
 
-def _optionxform(s):
-    s = s.replace('_', ' ')
-    s = '_'.join(s.split())
-    return s
+class CephConf(ConfigParser.RawConfigParser):
+    def optionxform(self, s):
+        s = s.replace('_', ' ')
+        s = '_'.join(s.split())
+        return s
 
 
 def parse(fp):
-    cfg = ConfigParser.RawConfigParser()
-    cfg.optionxform = _optionxform
+    cfg = CephConf()
     ifp = _TrimIndentFile(fp)
     cfg.readfp(ifp)
     return cfg
