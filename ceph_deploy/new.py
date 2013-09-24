@@ -1,4 +1,3 @@
-import ConfigParser
 import errno
 import logging
 import os

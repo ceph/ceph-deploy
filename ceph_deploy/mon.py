@@ -1,5 +1,4 @@
 import argparse
-import ConfigParser
 import json
 import logging
 import re
@@ -8,7 +7,7 @@ import socket
 from textwrap import dedent
 import time
 
-from . import conf, config, exc
+from . import conf, exc
 from .cliutil import priority
 from .sudo_pushy import get_transport
 from .util import paths
@@ -52,9 +51,9 @@ def catch_mon_errors(conn, logger, hostname, cfg):
     """
     conn = conn or get_connection(hostname, logger=logger)
     monmap = mon_status_check(conn, logger, hostname).get('monmap', {})
-    mon_initial_members = config.safe_get(cfg, 'global', 'mon_initial_members')
-    public_addr = config.safe_get(cfg, 'global', 'public_addr')
-    public_network = config.safe_get(cfg, 'global', 'public_network')
+    mon_initial_members = cfg.safe_get('global', 'mon_initial_members')
+    public_addr = cfg.safe_get('global', 'public_addr')
+    public_network = cfg.safe_get('global', 'public_network')
     mon_in_monmap = [
         mon.get('name')
         for mon in monmap.get('mons', [{}])
@@ -107,13 +106,8 @@ def mon_create(args):
 
     cfg = conf.load(args)
     if not args.mon:
-        try:
-            mon_initial_members = cfg.get('global', 'mon_initial_members')
-        except (ConfigParser.NoSectionError,
-                ConfigParser.NoOptionError):
-            pass
-        else:
-            args.mon = re.split(r'[,\s]+', mon_initial_members)
+        mon_initial_members = cfg.safe_get('global', 'mon_initial_members')
+        args.mon = re.split(r'[,\s]+', mon_initial_members)
 
     if not args.mon:
         raise exc.NeedHostError()
@@ -287,13 +281,11 @@ def mon_destroy(args):
 
 
 def mon_create_initial(args):
-    try:
-        cfg = conf.load(args)
-        cfg_initial_members = cfg.get('global', 'mon_initial_members')
-        mon_initial_members = re.split(r'[,\s]+', cfg_initial_members)
-    except (ConfigParser.NoSectionError,
-            ConfigParser.NoOptionError):
+    cfg = conf.load(args)
+    cfg_initial_members = cfg.safe_get('global', 'mon_initial_members')
+    if cfg_initial_members is None:
         raise RuntimeError('No `mon initial members` defined in config')
+    mon_initial_members = re.split(r'[,\s]+', cfg_initial_members)
 
     # create them normally through mon_create
     mon_create(args)
