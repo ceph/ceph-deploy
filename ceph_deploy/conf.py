@@ -19,6 +19,20 @@ class CephConf(ConfigParser.RawConfigParser):
         s = '_'.join(s.split())
         return s
 
+    def safe_get(self, section, key):
+        """
+        Attempt to get a configuration value from a certain section
+        in a ``cfg`` object but returning None if not found. Avoids the need
+        to be doing try/except {ConfigParser Exceptions} every time.
+        """
+        try:
+            #Use full parent function so we can replace it in the class 
+            # if desired
+            return ConfigParser.RawConfigParser.get(self, section, key)
+        except (ConfigParser.NoSectionError,
+                ConfigParser.NoOptionError):
+            return None
+
 
 def parse(fp):
     cfg = CephConf()

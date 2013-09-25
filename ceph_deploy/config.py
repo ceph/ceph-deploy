@@ -1,5 +1,4 @@
 import logging
-import ConfigParser
 
 from cStringIO import StringIO
 
@@ -10,19 +9,6 @@ from .cliutil import priority
 from .sudo_pushy import get_transport
 
 LOG = logging.getLogger(__name__)
-
-
-def safe_get(cfg, section, key):
-    """
-    Attempt to get a configuration value from a certain section
-    in a ``cfg`` object but returning None if not found. Avoids the need
-    to be doing try/except {ConfigParser Exceptions} every time.
-    """
-    try:
-        return cfg.get(section, key)
-    except (ConfigParser.NoSectionError,
-            ConfigParser.NoOptionError):
-        return None
 
 
 def config_push(args):
