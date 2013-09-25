@@ -38,6 +38,16 @@ class TestCatchCommonErrors(object):
         expected_msg = 'is not defined in `mon initial members`'
         self.assert_logger_message(self.logger.warning, expected_msg)
 
+    def test_warn_if_host_not_in_intial_members(self):
+        fake_conn = make_fake_conn()
+        cfg = make_fake_conf()
+        cfg.add_section('global')
+        cfg.set('global', 'mon initial members', 'AAAA')
+        mon.catch_mon_errors(fake_conn, self.logger, 'host', cfg)
+        expected_msg = 'is not defined in `mon initial members`'
+        self.assert_logger_message(self.logger.warning, expected_msg)
+
+
     def test_warn_if_not_mon_in_monmap(self):
         fake_conn = make_fake_conn()
         cfg = make_fake_conf()

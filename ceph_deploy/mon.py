@@ -59,8 +59,7 @@ def catch_mon_errors(conn, logger, hostname, cfg):
         for mon in monmap.get('mons', [{}])
         if mon.get('name') == hostname
     ]
-    if mon_initial_members:
-        if not hostname in mon_initial_members:
+    if mon_initial_members is None or not hostname in mon_initial_members:
             logger.warning('%s is not defined in `mon initial members`', hostname)
     if not mon_in_monmap:
         logger.warning('monitor %s does not exist in monmap', hostname)
