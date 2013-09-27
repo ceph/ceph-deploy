@@ -24,13 +24,23 @@ LOG = logging.getLogger(__name__)
 def mon_status_check(conn, logger, hostname, exit=False):
     """
     A direct check for JSON output on the monitor status.
+
+    For newer versions of Ceph (dumpling and newer) a new mon_status command
+    was added ( `ceph daemon mon mon_status` ) and should be revisited if the
+    output changes as this check depends on that availability.
+
     WARNING: this function requires the new connection object
     """
     mon = 'mon.%s' % hostname
 
     out, err, code = process.check(
         conn,
-        ['ceph', 'daemon', mon, 'mon_status'],
+        [
+            'ceph',
+            '--admin-daemon',
+            '/var/run/ceph/ceph-%s.asok' % mon,
+            'mon_status',
+        ],
         exit=exit
     )
 
