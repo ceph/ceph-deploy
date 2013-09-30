@@ -139,47 +139,21 @@ def prepare_disk(
         )
 
 
-def activate_disk(cluster, disk, init):
+def activate_disk(conn, logger, cluster, disk, init):
     """
     Run on the osd node, activates a disk.
     """
-    def subproc_call(*args, **kwargs):
-        """
-        call subproc that might fail, collect returncode and stderr/stdout
-        to be used in pushy.compile()d functions.  Returns 4-tuple of
-        (process exit code, command, stdout contents, stderr contents)
-        """
-        import subprocess
-        import tempfile
-
-        otmp = tempfile.TemporaryFile()
-        etmp = tempfile.TemporaryFile()
-        cmd = ' '.join(kwargs['args'])
-        ret = 0
-        errtxt = ''
-        kwargs.update(dict(stdout=otmp, stderr=etmp))
-        try:
-            subprocess.check_call(*args, **kwargs)
-        except subprocess.CalledProcessError as e:
-            ret = e.returncode
-        except Exception as e:
-            ret = -1
-            # OSError has errno
-            if hasattr(e, 'errno'):
-                ret = e.errno
-            errtxt = str(e)
-        otmp.seek(0)
-        etmp.seek(0)
-        return (ret, cmd, otmp.read(), errtxt + etmp.read())
-
-    return subproc_call(
+    return check_call(
+        conn,
+        logger,
         args=[
             'ceph-disk-activate',
             '--mark-init',
             init,
             '--mount',
             disk,
-            ])
+        ],
+    )
 
 
 def prepare(args, cfg, activate_prepared_disk):
@@ -236,6 +210,7 @@ def prepare(args, cfg, activate_prepared_disk):
             )
 
             LOG.debug('Host %s is now ready for osd use.', hostname)
+            distro.sudo_conn.close()
 
         except RuntimeError as e:
             LOG.error(e)
@@ -257,26 +232,28 @@ def activate(args, cfg):
     for hostname, disk, journal in args.disk:
 
         # TODO username
-        sudo = args.pushy(get_transport(hostname))
+        distro = hosts.get(hostname)
+        LOG.info(
+            'Distro info: %s %s %s',
+            distro.name,
+            distro.release,
+            distro.codename
+        )
+        rlogger = logging.getLogger(hostname)
 
-        LOG.debug('Activating host %s disk %s', hostname, disk)
+        LOG.debug('activating host %s disk %s', hostname, disk)
+        LOG.debug('will use init type: %s', distro.init)
 
-        (distro, release, codename) = lsb.get_lsb_release(sudo)
-        init = lsb.choose_init(distro, codename)
-        LOG.debug('Distro %s codename %s, will use %s',
-                  distro, codename, init)
-
-        activate_disk_r = sudo.compile(activate_disk)
-        err, cmd, stdout, stderr = activate_disk_r(
+        activate_disk(
+            distro.sudo_conn,
+            rlogger,
             cluster=args.cluster,
             disk=disk,
-            init=init,
-            )
-        sudo.close()
-        if err:
-            s = '{cmd} returned {ret}\n{out}\n{err}'.format(
-                cmd=cmd, ret=ret, out=out, err=err)
-            raise RuntimeError(s)
+            init=distro.init,
+        )
+
+        distro.sudo_conn.close()
+
 
 # NOTE: this mirrors ceph-disk-prepare --zap-disk DEV
 def zap(dev):
@@ -358,6 +335,7 @@ def osd_list(args, cfg):
     LOG.error('Not yet implemented; see http://tracker.ceph.com/issues/5071')
     sys.exit(1)
 
+
 def osd(args):
     cfg = conf.load(args)
 
@@ -372,7 +350,6 @@ def osd(args):
     else:
         LOG.error('subcommand %s not implemented', args.subcommand)
         sys.exit(1)
-
 
 
 def disk(args):
