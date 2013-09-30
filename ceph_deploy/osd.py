@@ -256,10 +256,10 @@ def activate(args, cfg):
 
 
 # NOTE: this mirrors ceph-disk-prepare --zap-disk DEV
-def zap(dev):
-    import subprocess
+def zap(conn, logger, dev):
 
-    try:
+    def zeroing(dev):
+        """ zeroing last few blocks of device """
         # this kills the crab
         #
         # sgdisk will wipe out the main copy of the GPT partition
@@ -267,24 +267,28 @@ def zap(dev):
         # subsequent commands will continue to complain and fail when
         # they see those.  zeroing the last few blocks of the device
         # appears to do the trick.
+        import os
         lba_size = 4096
         size = 33 * lba_size
         with file(dev, 'wb') as f:
             f.seek(-size, os.SEEK_END)
             f.write(size*'\0')
 
-        subprocess.check_call(
-            args=[
-                'sgdisk',
-                '--zap-all',
-                '--clear',
-                '--mbrtogpt',
-                '--',
-                dev,
-                ],
-            )
-    except subprocess.CalledProcessError as e:
-        raise RuntimeError(e)
+    with remote(conn, logger, zeroing) as remote_func:
+        remote_func(dev)
+
+    return check_call(
+        conn,
+        logger,
+        args=[
+           'sgdisk',
+           '--zap-all',
+           '--clear',
+           '--mbrtogpt',
+           '--',
+           dev,
+        ]
+    )
 
 
 def disk_zap(args):
@@ -294,12 +298,16 @@ def disk_zap(args):
         if not disk or not hostname:
             raise RuntimeError('zap command needs both HOSTNAME and DISK but got "%s %s"' % (hostname, disk))
         LOG.debug('zapping %s on %s', disk, hostname)
-
-        # TODO username
-        sudo = args.pushy(get_transport(hostname))
-        zap_r = sudo.compile(zap)
-        zap_r(disk)
-        sudo.close()
+        distro = hosts.get(hostname)
+        LOG.info(
+            'Distro info: %s %s %s',
+            distro.name,
+            distro.release,
+            distro.codename
+        )
+        rlogger = logging.getLogger(hostname)
+        zap(distro.sudo_conn, rlogger, disk)
+        distro.sudo_conn.close()
 
 
 def list_disk(conn, logger):
