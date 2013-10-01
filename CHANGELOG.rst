@@ -2,6 +2,21 @@
 1.2.7
 -----
 * Ensure local calls to ceph-deploy do not attempt to ssh.
+* ``mon create-initial`` command to deploy all defined mons, wait for them to
+  form quorum and finally to gatherkeys.
+* Improve help menu for mon commands.
+* Add ``--fs-type`` option to ``disk`` and ``osd`` commands (Thanks Benoit
+  Knecht)
+* Make sure we are using ``--cluster`` for remote configs when starting ceph
+* Fix broken ``mon destroy`` calls using the new hostname resolution helper
+* Add a helper to catch common monitor errors (reporting the status of a mon)
+* Normalize all configuration options in ceph-deploy (Thanks Andrew Woodward)
+* Use a ``cuttlefish`` compatible ``mon_status`` command
+* Make ``osd activate`` use the new remote connection libraries for improved
+  readability.
+* Make ``disk zap`` also use the new remote connection libraries.
+* Handle any connection errors that may came up when attempting to get into
+  remote hosts.
 
 1.2.6
 -----
