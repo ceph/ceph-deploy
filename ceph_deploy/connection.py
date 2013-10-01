@@ -7,8 +7,14 @@ def get_connection(hostname, logger):
     A very simple helper, meant to return a connection
     that will know about the need to use sudo.
     """
-    return Connection(
-        hostname,
-        logger=logger,
-        sudo=needs_sudo(),
-    )
+    try:
+        return Connection(
+            hostname,
+            logger=logger,
+            sudo=needs_sudo(),
+        )
+
+    except Exception as error:
+        msg = "connecting to host: %s " % hostname
+        errors = "resulted in errors: %s %s" % (error.__class__.__name__, error)
+        raise RuntimeError(msg + errors)
