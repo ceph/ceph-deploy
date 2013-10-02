@@ -4,6 +4,7 @@ import logging
 import pushy
 import textwrap
 import sys
+from string import join
 
 import ceph_deploy
 from . import exc
@@ -143,5 +144,7 @@ def main(args=None, namespace=None):
     root_logger.addHandler(fh)
 
     sudo_pushy.patch()
-
+    
+    LOG.info("Invoked (%s): %s" %(ceph_deploy.__version__, 
+                                  join(sys.argv, " ")))
     return args.func(args)
