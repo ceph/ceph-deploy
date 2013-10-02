@@ -270,7 +270,7 @@ def mon_destroy(args):
 
             # TODO username
             sudo = args.pushy(get_transport(host))
-            hostname = remote_shortname(socket)
+            hostname = remote_shortname(sudo.modules.socket)
 
             destroy_mon_r = sudo.compile(destroy_mon)
             destroy_mon_r(
