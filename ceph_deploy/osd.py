@@ -8,11 +8,16 @@ from cStringIO import StringIO
 
 from . import conf
 from . import exc
-from . import lsb, hosts
+from . import hosts
 from .cliutil import priority
-from .sudo_pushy import get_transport
 from .util.wrappers import check_call
 from .util.context import remote
+from .lib.remoto import process
+from .connection import get_connection
+
+# remote execution modules
+from .remote import osd as rosd
+from .remote import host as rhost
 
 
 LOG = logging.getLogger(__name__)
@@ -256,38 +261,21 @@ def activate(args, cfg):
 
 
 # NOTE: this mirrors ceph-disk-prepare --zap-disk DEV
-def zap(conn, logger, dev):
+def zap(conn, dev):
+    remote_osd = conn.import_module(rosd)
+    remote_osd.zeroing(dev)
 
-    def zeroing(dev):
-        """ zeroing last few blocks of device """
-        # this kills the crab
-        #
-        # sgdisk will wipe out the main copy of the GPT partition
-        # table (sorry), but it doesn't remove the backup copies, and
-        # subsequent commands will continue to complain and fail when
-        # they see those.  zeroing the last few blocks of the device
-        # appears to do the trick.
-        import os
-        lba_size = 4096
-        size = 33 * lba_size
-        with file(dev, 'wb') as f:
-            f.seek(-size, os.SEEK_END)
-            f.write(size*'\0')
-
-    with remote(conn, logger, zeroing) as remote_func:
-        remote_func(dev)
-
-    return check_call(
+    process.run(
         conn,
-        logger,
-        args=[
-           'sgdisk',
-           '--zap-all',
-           '--clear',
-           '--mbrtogpt',
-           '--',
-           dev,
-        ]
+        [
+            'sgdisk',
+            '--zap-all',
+            '--clear',
+            '--mbrtogpt',
+            '--',
+            dev,
+        ],
+        timeout=7,
     )
 
 
@@ -298,16 +286,19 @@ def disk_zap(args):
         if not disk or not hostname:
             raise RuntimeError('zap command needs both HOSTNAME and DISK but got "%s %s"' % (hostname, disk))
         LOG.debug('zapping %s on %s', disk, hostname)
-        distro = hosts.get(hostname)
+        rlogger = logging.getLogger(hostname)
+        conn = get_connection(hostname, logger=rlogger)
+        remote_host = conn.import_module(rhost)
+        distro_name, release, codename = remote_host.platform_information()
+
         LOG.info(
             'Distro info: %s %s %s',
-            distro.name,
-            distro.release,
-            distro.codename
+            distro_name,
+            release,
+            codename
         )
-        rlogger = logging.getLogger(hostname)
-        zap(distro.sudo_conn, rlogger, disk)
-        distro.sudo_conn.close()
+        zap(conn, disk)
+        conn.exit()
 
 
 def list_disk(conn, logger):
