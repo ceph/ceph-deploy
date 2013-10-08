@@ -3,7 +3,6 @@ import contextlib
 
 from . import exc
 
-
 class _TrimIndentFile(object):
     def __init__(self, fp):
         self.fp = fp
@@ -26,7 +25,7 @@ class CephConf(ConfigParser.RawConfigParser):
         to be doing try/except {ConfigParser Exceptions} every time.
         """
         try:
-            #Use full parent function so we can replace it in the class 
+            #Use full parent function so we can replace it in the class
             # if desired
             return ConfigParser.RawConfigParser.get(self, section, key)
         except (ConfigParser.NoSectionError,
@@ -56,8 +55,12 @@ def write_conf(cluster, conf, overwrite):
     """ write cluster configuration to /etc/ceph/{cluster}.conf """
     import os
 
-    path = '/etc/ceph/{cluster}.conf'.format(cluster=cluster)
+    dir = '/etc/ceph'
+    path = '{dir}/{cluster}.conf'.format(cluster=cluster,dir=dir)
     tmp = '{path}.{pid}.tmp'.format(path=path, pid=os.getpid())
+
+    if not(os.path.exists(dir)):
+        os.mkdir('/etc/ceph')
 
     if os.path.exists(path):
         with file(path, 'rb') as f:
