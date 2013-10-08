@@ -2,14 +2,15 @@ from ceph_deploy.util import paths
 from ceph_deploy.util.wrappers import check_call
 from ceph_deploy.util.context import remote
 from ceph_deploy import conf
+from ceph_deploy.lib.remoto import process
 from StringIO import StringIO
 
 
-def ceph_version(conn, logger):
+def ceph_version(conn):
     """
     Log the remote ceph-version by calling `ceph --version`
     """
-    return check_call(conn, logger, ['ceph', '--version'])
+    return process.run(conn, ['ceph', '--version'])
 
 
 def which_service(conn, logger):
