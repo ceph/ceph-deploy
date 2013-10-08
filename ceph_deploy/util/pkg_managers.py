@@ -1,7 +1,7 @@
-from ceph_deploy.util import wrappers
+from ceph_deploy.lib.remoto import process
 
 
-def apt(conn, logger, package, *a, **kw):
+def apt(conn, package, *a, **kw):
     cmd = [
         'env',
         'DEBIAN_FRONTEND=noninteractive',
@@ -11,29 +11,28 @@ def apt(conn, logger, package, *a, **kw):
         '--assume-yes',
         package,
     ]
-    return wrappers.check_call(
+    return process.run(
         conn,
-        logger,
         cmd,
         *a,
         **kw
     )
 
 
-def apt_update(conn, logger):
+def apt_update(conn):
     cmd = [
         'apt-get',
         '-q',
         'update',
     ]
-    return wrappers.check_call(
+    return process.run(
         conn,
         logger,
         cmd,
     )
 
 
-def yum(conn, logger, package, *a, **kw):
+def yum(conn, package, *a, **kw):
     cmd = [
         'yum',
         '-y',
@@ -41,16 +40,15 @@ def yum(conn, logger, package, *a, **kw):
         'install',
         package,
     ]
-    return wrappers.check_call(
+    return process.run(
         conn,
-        logger,
         cmd,
         *a,
         **kw
     )
 
 
-def rpm(conn, logger, rpm_args=None, *a, **kw):
+def rpm(conn, rpm_args=None, *a, **kw):
     """
     A minimal front end for ``rpm`. Extra flags can be passed in via
     ``rpm_args`` as an iterable.
@@ -61,9 +59,8 @@ def rpm(conn, logger, rpm_args=None, *a, **kw):
         '-Uvh',
     ]
     cmd.extend(rpm_args)
-    return wrappers.check_call(
+    return process.run(
         conn,
-        logger,
         cmd,
         *a,
         **kw
