@@ -166,8 +166,10 @@ def install(args):
         LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
         rlogger = logging.getLogger(hostname)
         rlogger.info('installing ceph on %s' % hostname)
-        distro.install(distro, rlogger, args.version_kind, version, args.adjust_repos)
-        distro.sudo_conn.close()
+        distro.install(distro, args.version_kind, version, args.adjust_repos)
+        # Check the ceph version we just installed
+        hosts.common.ceph_version(distro.conn)
+        distro.conn.exit()
 
 
 def uninstall(args):
