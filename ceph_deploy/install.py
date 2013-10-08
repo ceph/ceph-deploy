@@ -144,7 +144,7 @@ def purge_data_any():
                 'rm', '-rf', '--one-file-system', '--', '/var/lib/ceph',
                 ])
     subprocess.check_call(args=[
-            'rm', '-rf', '--one-file-system', '--', '/etc/ceph',
+            'rm', '-rf', '--one-file-system', '--', '/etc/ceph/*',
             ])
 
 
@@ -202,6 +202,7 @@ def uninstall(args):
         uninstall_r()
         sudo.close()
 
+
 def purge(args):
     LOG.debug(
         'Purging from cluster %s hosts %s',
@@ -231,6 +232,7 @@ def purge(args):
         LOG.debug('Purging host %s ...', hostname)
         purge_r(arg_purge=True)
         sudo.close()
+
 
 def purge_data(args):
     LOG.debug(
@@ -262,6 +264,7 @@ def purge_data(args):
         purge_data_any_r = sudo.compile(purge_data_any)
         purge_data_any_r()
         sudo.close()
+
 
 class StoreVersion(argparse.Action):
     """
