@@ -7,3 +7,6 @@ export DH_VERBOSE=1
 %:
 	dh $@ --buildsystem python_distutils --with python2
 
+override_dh_clean:
+	rm -rf ceph_deploy/lib/remoto
+	dh_clean

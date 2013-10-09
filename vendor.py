@@ -48,7 +48,12 @@ def vendor_library(name, version):
     if path.exists(vendor_src):
         run(['rm', '-rf', vendor_src])
 
-    if not os.path.exists(vendor_dest):
+    if path.exists(vendor_dest):
+        module = __import__('ceph_deploy.lib.remoto', globals(), locals(), ['__version__'])
+        if module.__version__ != version:
+            run(['rm', '-rf', vendor_dest])
+
+    if not path.exists(vendor_dest):
         run(['git', 'clone', 'git://ceph.com/%s' % name])
         os.chdir(vendor_src)
         run(['git', 'checkout', version])
