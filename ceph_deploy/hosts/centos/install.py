@@ -1,6 +1,4 @@
-from ceph_deploy.util.wrappers import process.run
 from ceph_deploy.util import pkg_managers
-from ceph_deploy.hosts import common
 from ceph_deploy.lib.remoto import process
 
 
@@ -10,7 +8,7 @@ def install(distro, version_kind, version, adjust_repos):
 
     # Get EPEL installed before we continue:
     if adjust_repos:
-        install_epel(distro, logger)
+        install_epel(distro)
     if version_kind in ['stable', 'testing']:
         key = 'release'
     else:
@@ -18,8 +16,12 @@ def install(distro, version_kind, version, adjust_repos):
 
     if adjust_repos:
         process.run(
-            distro.sudo_conn,
-            ['su -c \'rpm --import "https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc"\''.format(key=key),],
+            distro.conn,
+            [
+                "su",
+                "-c",
+                "'rpm --import \"https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc\"'".format(key=key),
+            ],
         )
 
         if version_kind == 'stable':
@@ -36,7 +38,7 @@ def install(distro, version_kind, version, adjust_repos):
                 )
 
         process.run(
-            distro.sudo_conn,
+            distro.conn,
             [
                 'rpm',
                 '-Uvh',
@@ -46,7 +48,7 @@ def install(distro, version_kind, version, adjust_repos):
         )
 
     process.run(
-        distro.sudo_conn,
+        distro.conn,
         [
             'yum',
             '-y',
@@ -63,14 +65,14 @@ def install_epel(distro):
     installed.
     """
     if distro.name.lower() in ['centos', 'scientific']:
-        distro.logger.info('adding EPEL repository')
+        distro.conn.logger.info('adding EPEL repository')
         if float(distro.release) >= 6:
             process.run(
-                distro.sudo_conn,
+                distro.conn,
                 ['wget', 'http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm'],
             )
             pkg_managers.rpm(
-                distro.sudo_conn,
+                distro.conn,
                 [
                     '--replacepkgs',
                     'epel-release-6*.rpm',
@@ -78,11 +80,11 @@ def install_epel(distro):
             )
         else:
             process.run(
-                distro.sudo_conn,
+                distro.conn,
                 ['wget', 'wget http://dl.fedoraproject.org/pub/epel/5/x86_64/epel-release-5-4.noarch.rpm'],
             )
             pkg_managers.rpm(
-                distro.sudo_conn,
+                distro.conn,
                 [
                     '--replacepkgs',
                     'epel-release-5*.rpm'
