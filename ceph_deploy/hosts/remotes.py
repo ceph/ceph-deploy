@@ -1,3 +1,4 @@
+import socket
 import os
 import tempfile
 import platform
@@ -40,6 +41,56 @@ def write_conf(cluster, conf, overwrite):
                 raise RuntimeError(err_msg)
     tmp_file.write(conf)
     os.rename(tmp_file.name, path)
+
+
+def create_mon_path(path):
+    """create the mon path if it does not exist"""
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+
+def create_done_path(done_path):
+    """create a done file to avoid re-doing the mon deployment"""
+    with file(done_path, 'w'):
+        pass
+
+
+def create_init_path(init_path):
+    """create the init path if it does not exist"""
+    if not os.path.exists(init_path):
+        with file(init_path, 'w'):
+            pass
+
+
+def path_exists(path):
+    return os.path.exists(path)
+
+
+def makedir(path):
+    os.makedirs(path)
+
+
+def unlink(_file):
+    os.unlink(_file)
+
+
+def write_monitor_keyring(keyring, monitor_keyring):
+    """create the monitor keyring file"""
+    with file(keyring, 'w') as f:
+        f.write(monitor_keyring)
+
+
+def shortname():
+    """get remote short hostname"""
+    return socket.gethostname().split('.', 1)[0]
+
+
+def which_service():
+    """ locating the `service` executable... """
+    locations = ['/sbin/service', '/usr/sbin/service']
+    for location in locations:
+        if os.path.exists(location):
+            return location
 
 
 # remoto magic, needed to execute these functions remotely
