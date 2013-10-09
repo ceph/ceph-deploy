@@ -145,9 +145,9 @@ def mon_create(args):
             rlogger = logging.getLogger(name)
 
             # ensure remote hostname is good to go
-            hostname_is_compatible(distro.sudo_conn, rlogger, name)
+            hostname_is_compatible(distro.conn, rlogger, name)
             rlogger.debug('deploying mon to %s', name)
-            distro.mon.create(distro, rlogger, args, monitor_keyring)
+            distro.mon.create(distro, args, monitor_keyring)
 
             # tell me the status of the deployed mon
             time.sleep(2)  # give some room to start
@@ -157,6 +157,7 @@ def mon_create(args):
             # starting the monitors
             mon_status(None, rlogger, name)
             catch_mon_errors(None, rlogger, name, cfg)
+            distro.conn.exit()
 
         except RuntimeError as e:
             LOG.error(e)
@@ -172,7 +173,7 @@ def hostname_is_compatible(conn, logger, provided_hostname):
     `hostname` in the remote host, otherwise mons can fail not reaching quorum.
     """
     logger.debug('determining if provided host has same hostname in remote')
-    remote_hostname = remote_shortname(conn.modules.socket)
+    remote_hostname = conn.remote_module.shortname()
     if remote_hostname == provided_hostname:
         return
     logger.warning('*'*80)
