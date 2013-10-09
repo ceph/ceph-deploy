@@ -1,6 +1,3 @@
-from ceph_deploy.util.wrappers import check_call
-from ceph_deploy.util.context import remote
-from ceph_deploy.hosts import common
 from ceph_deploy.lib.remoto import process
 
 
