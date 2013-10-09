@@ -1,10 +1,9 @@
-from ceph_deploy.util.wrappers import check_call
-from ceph_deploy.hosts import common
+from ceph_deploy.lib.remoto import process
 
 
-def install(distro, logger, version_kind, version, adjust_repos):
+def install(distro, version_kind, version, adjust_repos):
     release = distro.release
-    machine = distro.sudo_conn.modules.platform.machine()
+    machine = distro.machine_type
 
     if version_kind in ['stable', 'testing']:
         key = 'release'
@@ -12,12 +11,14 @@ def install(distro, logger, version_kind, version, adjust_repos):
         key = 'autobuild'
 
     if adjust_repos:
-        check_call(
-            distro.sudo_conn,
-            logger,
-            args='su -c \'rpm --import "https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc"\''.format(key=key),
-            shell=True,
-            )
+        process.run(
+            distro.conn,
+            [
+                "su",
+                "-c",
+                "'rpm --import \"https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc\"'".format(key=key),
+            ],
+        )
 
         if version_kind == 'stable':
             url = 'http://ceph.com/rpm-{version}/fc{release}/'.format(
@@ -35,9 +36,8 @@ def install(distro, logger, version_kind, version, adjust_repos):
                 version=version,
                 )
 
-        check_call(
-            distro.sudo_conn,
-            logger,
+        process.run(
+            distro.conn,
             args=[
                 'rpm',
                 '-Uvh',
@@ -51,9 +51,8 @@ def install(distro, logger, version_kind, version, adjust_repos):
                 ]
             )
 
-    check_call(
-        distro.sudo_conn,
-        logger,
+    process.run(
+        distro.conn,
         args=[
             'yum',
             '-y',
@@ -62,6 +61,3 @@ def install(distro, logger, version_kind, version, adjust_repos):
             'ceph',
             ],
         )
-
-    # Check the ceph version
-    common.ceph_version(distro.sudo_conn, logger)
