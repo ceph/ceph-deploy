@@ -1,3 +1,5 @@
+import os
+import tempfile
 import platform
 
 
@@ -23,6 +25,21 @@ def write_sources_list(url, codename):
                 url=url,
                 codename=codename,
                 ))
+
+
+def write_conf(cluster, conf, overwrite):
+    """ write cluster configuration to /etc/ceph/{cluster}.conf """
+    path = '/etc/ceph/{cluster}.conf'.format(cluster=cluster)
+    tmp_file = tempfile.NamedTemporaryFile()
+    err_msg = 'config file %s exists with different content; use --overwrite-conf to overwrite' % path
+
+    if os.path.exists(path):
+        with file(path, 'rb') as f:
+            old = f.read()
+            if old != conf and not overwrite:
+                raise RuntimeError(err_msg)
+    tmp_file.write(conf)
+    os.rename(tmp_file.name, path)
 
 
 # remoto magic, needed to execute these functions remotely
