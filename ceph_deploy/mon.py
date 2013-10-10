@@ -2,18 +2,16 @@ import argparse
 import json
 import logging
 import re
-import subprocess
-import socket
+import os
 from textwrap import dedent
 import time
 
 from . import conf, exc
 from .cliutil import priority
-from .sudo_pushy import get_transport
 from .util import paths
 from .lib.remoto import process
 from . import hosts
-from .misc import mon_hosts, remote_shortname
+from .misc import mon_hosts
 from .connection import get_connection
 from . import gatherkeys
 
@@ -21,7 +19,7 @@ from . import gatherkeys
 LOG = logging.getLogger(__name__)
 
 
-def mon_status_check(conn, logger, hostname, exit=False):
+def mon_status_check(conn, logger, hostname):
     """
     A direct check for JSON output on the monitor status.
 
@@ -41,7 +39,6 @@ def mon_status_check(conn, logger, hostname, exit=False):
             '/var/run/ceph/ceph-%s.asok' % mon,
             'mon_status',
         ],
-        exit=exit
     )
 
     for line in err:
@@ -59,7 +56,6 @@ def catch_mon_errors(conn, logger, hostname, cfg):
     and use that state of a monitor to determine what is missing
     and warn apropriately about it.
     """
-    conn = conn or get_connection(hostname, logger=logger)
     monmap = mon_status_check(conn, logger, hostname).get('monmap', {})
     mon_initial_members = cfg.safe_get('global', 'mon_initial_members')
     public_addr = cfg.safe_get('global', 'public_addr')
@@ -87,10 +83,9 @@ def mon_status(conn, logger, hostname, silent=False):
     running, while ``True`` would mean the monitor is up and running correctly.
     """
     mon = 'mon.%s' % hostname
-    rconn = get_connection(hostname, logger=logger)
 
     try:
-        out = mon_status_check(rconn, logger, hostname, exit=True)
+        out = mon_status_check(conn, logger, hostname)
         if not out:
             logger.warning('monitor: %s, might not be running yet' % mon)
             return False
@@ -151,12 +146,8 @@ def mon_create(args):
 
             # tell me the status of the deployed mon
             time.sleep(2)  # give some room to start
-            # distro.sudo_conn.close() used to happen here but it made some
-            # connections hang. This is terrible, and we should move on to stop
-            # using pushy ASAP.  Connections are closed individually now before
-            # starting the monitors
-            mon_status(None, rlogger, name)
-            catch_mon_errors(None, rlogger, name, cfg)
+            mon_status(distro.conn, rlogger, name)
+            catch_mon_errors(distro.conn, rlogger, name, cfg)
             distro.conn.exit()
 
         except RuntimeError as e:
@@ -184,21 +175,18 @@ def hostname_is_compatible(conn, logger, provided_hostname):
     logger.warning('*'*80)
 
 
-def destroy_mon(cluster, paths, is_running, hostname):
+def destroy_mon(conn, cluster, hostname):
     import datetime
-    import errno
-    import os
-    import subprocess  # noqa
     import time
     retries = 5
 
     path = paths.mon.path(cluster, hostname)
 
-    if os.path.exists(path):
+    if conn.remote_module.path_exists(path):
         # remove from cluster
-        proc = subprocess.Popen(
-            args=[
-                'sudo',
+        process.run(
+            conn,
+            [
                 'ceph',
                 '--cluster={cluster}'.format(cluster=cluster),
                 '-n', 'mon.',
@@ -206,17 +194,12 @@ def destroy_mon(cluster, paths, is_running, hostname):
                 'mon',
                 'remove',
                 hostname,
-                ],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            )
-        out, err = proc.communicate()
-        return_status = proc.wait()
-        if return_status > 0:
-            raise RuntimeError(err.strip())
+            ],
+            timeout=7,
+        )
 
         # stop
-        if os.path.exists(os.path.join(path, 'upstart')):
+        if conn.remote_module.path_exists(os.path.join(path, 'upstart')):
             status_args = [
                 'initctl',
                 'status',
@@ -225,7 +208,7 @@ def destroy_mon(cluster, paths, is_running, hostname):
                 'id={hostname}'.format(hostname=hostname),
             ]
 
-        elif os.path.exists(os.path.join(path, 'sysvinit')):
+        elif conn.remote_module.path_exists(os.path.join(path, 'sysvinit')):
             status_args = [
                 'service',
                 'ceph',
@@ -234,7 +217,8 @@ def destroy_mon(cluster, paths, is_running, hostname):
             ]
 
         while retries:
-            if is_running(status_args):
+            conn.logger.info('polling the daemon to verify it stopped')
+            if is_running(conn, status_args):
                 time.sleep(5)
                 retries -= 1
                 if retries <= 0:
@@ -248,19 +232,17 @@ def destroy_mon(cluster, paths, is_running, hostname):
             cluster=cluster,
             stamp=datetime.datetime.utcnow().strftime("%Y-%m-%dZ%H:%M:%S"),
             )
-        subprocess.check_call(
-            args=[
+
+        process.run(
+            conn,
+            [
                 'mkdir',
                 '-p',
                 '/var/lib/ceph/mon-removed',
-                ],
-            )
-        try:
-            os.makedirs('/var/lib/ceph/mon-removed')
-        except OSError, e:
-            if e.errno != errno.EEXIST:
-                raise
-        os.rename(path, os.path.join('/var/lib/ceph/mon-removed/', fn))
+            ],
+        )
+
+        conn.remote_module.make_mon_removed_dir(path, fn)
 
 
 def mon_destroy(args):
@@ -270,17 +252,15 @@ def mon_destroy(args):
             LOG.debug('Removing mon from %s', name)
 
             # TODO username
-            sudo = args.pushy(get_transport(host))
-            hostname = remote_shortname(sudo.modules.socket)
+            distro = hosts.get(host)
+            hostname = distro.conn.remote_module.shortname()
 
-            destroy_mon_r = sudo.compile(destroy_mon)
-            destroy_mon_r(
-                cluster=args.cluster,
-                paths=paths,
-                is_running=is_running,
-                hostname=hostname,
-                )
-            sudo.close()
+            destroy_mon(
+                distro.conn,
+                args.cluster,
+                hostname,
+            )
+            distro.conn.exit()
 
         except RuntimeError as e:
             LOG.error(e)
@@ -324,6 +304,7 @@ def mon_create_initial(args):
                 mon_in_quorum.add(host)
                 LOG.info('%s monitor has reached quorum!', mon_name)
                 break
+        rconn.exit()
 
     if mon_in_quorum == mon_members:
         LOG.info('all initial monitors are running and have formed quorum')
@@ -396,7 +377,7 @@ def make(parser):
 #
 
 
-def is_running(args):
+def is_running(conn, args):
     """
     Run a command to check the status of a mon, return a boolean.
 
@@ -412,13 +393,11 @@ def is_running(args):
         mon.mira094: dead {"version":"0.61.5"}
         mon.mira094: not running {"version":"0.61.5"}
     """
-    proc = subprocess.Popen(
-        args=args,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+    stdout, stderr, _ = process.check(
+        conn,
+        args
     )
-    result = proc.communicate()
-    result_string = ' '.join(result)
+    result_string = ' '.join(stdout)
     for run_check in [': running', ' start/running']:
         if run_check in result_string:
             return True
