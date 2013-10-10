@@ -85,6 +85,15 @@ def write_file(path, content):
         f.write(content)
 
 
+def get_file(path):
+    """ fetch remote file """
+    try:
+        with file(path, 'rb') as f:
+            return f.read()
+    except IOError:
+        pass
+
+
 def shortname():
     """get remote short hostname"""
     return socket.gethostname().split('.', 1)[0]
