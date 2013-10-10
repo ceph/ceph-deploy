@@ -21,7 +21,6 @@ def create(distro, args, monitor_keyring):
                 'cluster={cluster}'.format(cluster=args.cluster),
                 'id={hostname}'.format(hostname=hostname),
             ],
-            exit=True,
             timeout=7,
         )
 
@@ -37,7 +36,6 @@ def create(distro, args, monitor_keyring):
                 'start',
                 'mon.{hostname}'.format(hostname=hostname)
             ],
-            exit=True,
             timeout=7,
         )
     else:
