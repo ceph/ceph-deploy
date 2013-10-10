@@ -1,3 +1,4 @@
+import errno
 import socket
 import os
 import tempfile
@@ -91,6 +92,16 @@ def which_service():
     for location in locations:
         if os.path.exists(location):
             return location
+
+
+def make_mon_removed_dir(path, file_name):
+    """ move old monitor data """
+    try:
+        os.makedirs('/var/lib/ceph/mon-removed')
+    except OSError, e:
+        if e.errno != errno.EEXIST:
+            raise
+    os.rename(path, os.path.join('/var/lib/ceph/mon-removed/', file_name))
 
 
 # remoto magic, needed to execute these functions remotely
