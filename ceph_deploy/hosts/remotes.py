@@ -32,7 +32,7 @@ def write_sources_list(url, codename):
 def write_conf(cluster, conf, overwrite):
     """ write cluster configuration to /etc/ceph/{cluster}.conf """
     path = '/etc/ceph/{cluster}.conf'.format(cluster=cluster)
-    tmp_file = tempfile.NamedTemporaryFile()
+    tmp_file = tempfile.NamedTemporaryFile(delete=False)
     err_msg = 'config file %s exists with different content; use --overwrite-conf to overwrite' % path
 
     if os.path.exists(path):
