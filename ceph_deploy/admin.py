@@ -5,16 +5,10 @@ from cStringIO import StringIO
 from . import exc
 from . import conf
 from .cliutil import priority
-from .sudo_pushy import get_transport
+from . import hosts
 
 LOG = logging.getLogger(__name__)
 
-def write_file(path, content):
-    try:
-        with file(path, 'w') as f:
-            f.write(content)
-    except:
-        pass        
 
 def admin(args):
     cfg = conf.load(args)
@@ -32,23 +26,21 @@ def admin(args):
     for hostname in args.client:
         LOG.debug('Pushing admin keys and conf to %s', hostname)
         try:
-            sudo = args.pushy(get_transport(hostname))
-            write_conf_r = sudo.compile(conf.write_conf)
-            write_conf_r(
-                cluster=args.cluster,
-                conf=conf_data.getvalue(),
-                overwrite=args.overwrite_conf,
-                )
+            distro = hosts.get(hostname)
+            hostname = distro.conn.remote_module.shortname()
 
-            sudo = args.pushy(get_transport(hostname))
-            write_file_r = sudo.compile(write_file)
-            error = write_file_r(
+            distro.conn.remote_module.write_conf(
+                args.cluster,
+                conf_data.getvalue(),
+                args.overwrite_conf,
+            )
+
+            distro.conn.remote_module.write_file(
                 '/etc/ceph/%s.client.admin.keyring' % args.cluster,
                 keyring
-                )
-            if error is not None:
-                raise exc.GenericError(error)
-            sudo.close()
+            )
+
+            distro.conn.exit()
 
         except RuntimeError as e:
             LOG.error(e)
