@@ -77,8 +77,12 @@ def unlink(_file):
 
 def write_monitor_keyring(keyring, monitor_keyring):
     """create the monitor keyring file"""
-    with file(keyring, 'w') as f:
-        f.write(monitor_keyring)
+    write_file(keyring, monitor_keyring)
+
+
+def write_file(path, content):
+    with file(path, 'w') as f:
+        f.write(content)
 
 
 def shortname():
