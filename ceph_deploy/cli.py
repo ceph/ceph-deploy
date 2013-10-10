@@ -1,7 +1,6 @@
 import pkg_resources
 import argparse
 import logging
-import pushy
 import textwrap
 import sys
 from string import join
@@ -9,7 +8,6 @@ from string import join
 import ceph_deploy
 from . import exc
 from . import validate
-from . import sudo_pushy
 from pushy.client import ClientInitException
 from .util import log
 from .util.decorators import catches
@@ -91,11 +89,6 @@ def get_parser():
     parser.set_defaults(
         # we want to hold on to this, for later
         prog=parser.prog,
-
-        # unit tests can override this to mock pushy; no user-visible
-        # option sets this
-        pushy=pushy.connect,
-
         cluster='ceph',
         )
     return parser
@@ -143,8 +136,6 @@ def main(args=None, namespace=None):
     root_logger.addHandler(sh)
     root_logger.addHandler(fh)
 
-    sudo_pushy.patch()
-    
-    LOG.info("Invoked (%s): %s" %(ceph_deploy.__version__, 
+    LOG.info("Invoked (%s): %s" %(ceph_deploy.__version__,
                                   join(sys.argv, " ")))
     return args.func(args)
