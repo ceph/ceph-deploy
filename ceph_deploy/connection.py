@@ -8,12 +8,17 @@ def get_connection(hostname, logger, threads=5):
     that will know about the need to use sudo.
     """
     try:
-        return Connection(
+        conn = Connection(
             hostname,
             logger=logger,
             sudo=needs_sudo(),
             threads=threads,
         )
+
+        # Set a timeout value in seconds to disconnect and move on
+        # if no data is sent back.
+        conn.global_timeout = 300
+        return conn
 
     except Exception as error:
         msg = "connecting to host: %s " % hostname
