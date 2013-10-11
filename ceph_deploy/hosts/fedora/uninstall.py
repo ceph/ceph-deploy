@@ -10,3 +10,4 @@ def uninstall(conn, purge=False):
         conn,
         packages,
     )
+
