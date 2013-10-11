@@ -19,6 +19,29 @@ def apt(conn, package, *a, **kw):
     )
 
 
+def apt_remove(conn, packages, *a, **kw):
+    purge = kw.pop('purge', False)
+    cmd = [
+        'apt-get',
+        '-q',
+        'remove',
+        '-f',
+        '-y',
+        '--force-yes',
+    ]
+    if purge:
+        cmd.append('--purge')
+    cmd.append('--')
+    cmd.extend(packages)
+
+    return process.run(
+        conn,
+        cmd,
+        *a,
+        **kw
+    )
+
+
 def apt_update(conn):
     cmd = [
         'apt-get',
@@ -40,6 +63,25 @@ def yum(conn, package, *a, **kw):
         'install',
         package,
     ]
+    return process.run(
+        conn,
+        cmd,
+        *a,
+        **kw
+    )
+
+
+def yum_remove(conn, packages, *a, **kw):
+    cmd = [
+        'yum',
+        '-y',
+        '-q',
+        'remove',
+    ]
+    if isinstance(packages, str):
+        cmd.append(packages)
+    else:
+        cmd.extend(packages)
     return process.run(
         conn,
         cmd,
