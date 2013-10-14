@@ -31,11 +31,6 @@ def get_bootstrap_osd_key(cluster):
 def create_osd(conn, cluster, key):
     """
     Run on osd node, writes the bootstrap key if not there yet.
-
-    Returns None on success, error message on error exceptions. pushy
-    mangles exceptions to all be of type ExceptionProxy, so we can't
-    tell between bug and correctly handled failure, so avoid using
-    exceptions for non-exceptional runs.
     """
     logger = conn.logger
     path = '/var/lib/ceph/bootstrap-osd/{cluster}.keyring'.format(
