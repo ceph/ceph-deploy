@@ -7,8 +7,6 @@ def create(distro, args, monitor_keyring):
     common.mon_create(distro, args, monitor_keyring, hostname)
     service = distro.conn.remote_module.which_service()
 
-    distro.sudo_conn.close()
-
     process.run(
         distro.conn,
         [
