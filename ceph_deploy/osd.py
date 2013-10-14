@@ -10,14 +10,7 @@ from . import conf
 from . import exc
 from . import hosts
 from .cliutil import priority
-from .util.wrappers import check_call
-from .util.context import remote
 from .lib.remoto import process
-from .connection import get_connection
-
-# remote execution modules
-from .remote import osd as rosd
-from .remote import host as rhost
 
 
 LOG = logging.getLogger(__name__)
@@ -35,7 +28,7 @@ def get_bootstrap_osd_key(cluster):
         raise RuntimeError('bootstrap-osd keyring not found; run \'gatherkeys\'')
 
 
-def create_osd(conn, logger, cluster, key):
+def create_osd(conn, cluster, key):
     """
     Run on osd node, writes the bootstrap key if not there yet.
 
@@ -44,52 +37,27 @@ def create_osd(conn, logger, cluster, key):
     tell between bug and correctly handled failure, so avoid using
     exceptions for non-exceptional runs.
     """
+    logger = conn.logger
     path = '/var/lib/ceph/bootstrap-osd/{cluster}.keyring'.format(
         cluster=cluster,
         )
-    if not conn.modules.os.path.exists(path):
-        logger.info('keyring file does not exist, creating one at: %s' % path)
-        tmp = '{path}.{pid}.tmp'.format(
-            path=path,
-            pid=conn.modules.os.getpid(),
-            )
+    if not conn.remote_module.path_exists(path):
+        logger.info('osd keyring does not exist yet, creating one')
+        conn.remote_module.write_keyring(path, key)
 
-        def write_keyring(tmp, path, key):
-            """ create mon keyring file """
-            # file() doesn't let us control access mode from the
-            # beginning, and thus would have a race where attacker can
-            # open before we chmod the file, so play games with os.open
-            import os
-            fd = os.open(
-                tmp,
-                (os.O_WRONLY | os.O_CREAT | os.O_EXCL
-                 | os.O_NOCTTY | os.O_NOFOLLOW),
-                0600,
-                )
-            with os.fdopen(fd, 'wb') as f:
-                f.write(key)
-                f.flush()
-                os.fsync(f)
-            os.rename(tmp, path)
-
-        with remote(conn, logger, write_keyring) as remote_func:
-            remote_func(tmp, path, key)
-
-    return check_call(
+    return process.run(
         conn,
-        logger,
-        args=[
+        [
             'udevadm',
             'trigger',
             '--subsystem-match=block',
             '--action=add',
-            ],
-        )
+        ],
+    )
 
 
 def prepare_disk(
         conn,
-        logger,
         cluster,
         disk,
         journal,
@@ -109,7 +77,7 @@ def prepare_disk(
     if fs_type:
         if fs_type not in ('btrfs', 'ext4', 'xfs'):
             raise argparse.ArgumentTypeError(
-                    "FS_TYPE must be one of 'btrfs', 'ext4' or 'xfs'")
+                "FS_TYPE must be one of 'btrfs', 'ext4' or 'xfs'")
         args.extend(['--fs-type', fs_type])
     if dmcrypt:
         args.append('--dmcrypt')
@@ -122,43 +90,25 @@ def prepare_disk(
         '--',
         disk,
     ])
+
     if journal is not None:
         args.append(journal)
 
-    check_call(
+    process.run(
         conn,
-        logger,
         args
     )
 
     if activate_prepared_disk:
-        return check_call(
+        return process.run(
             conn,
-            logger,
-            args=[
+            [
                 'udevadm',
                 'trigger',
                 '--subsystem-match=block',
                 '--action=add',
             ],
         )
-
-
-def activate_disk(conn, logger, cluster, disk, init):
-    """
-    Run on the osd node, activates a disk.
-    """
-    return check_call(
-        conn,
-        logger,
-        args=[
-            'ceph-disk-activate',
-            '--mark-init',
-            init,
-            '--mount',
-            disk,
-        ],
-    )
 
 
 def prepare(args, cfg, activate_prepared_disk):
@@ -185,7 +135,6 @@ def prepare(args, cfg, activate_prepared_disk):
                 distro.release,
                 distro.codename
             )
-            rlogger = logging.getLogger(hostname)
 
             if hostname not in bootstrapped:
                 bootstrapped.add(hostname)
@@ -193,17 +142,19 @@ def prepare(args, cfg, activate_prepared_disk):
 
                 conf_data = StringIO()
                 cfg.write(conf_data)
-                with remote(distro.sudo_conn, rlogger, conf.write_conf) as remote_func:
-                    remote_func(args.cluster, conf_data.getvalue(), overwrite=args.overwrite_conf)
+                distro.conn.remote_module.write_conf(
+                    args.cluster,
+                    conf_data.getvalue(),
+                    args.overwrite_conf
+                )
 
-                create_osd(distro.sudo_conn, rlogger, args.cluster, key)
+                create_osd(distro.conn, args.cluster, key)
 
             LOG.debug('Preparing host %s disk %s journal %s activate %s',
                       hostname, disk, journal, activate_prepared_disk)
 
             prepare_disk(
-                distro.sudo_conn,
-                rlogger,
+                distro.conn,
                 cluster=args.cluster,
                 disk=disk,
                 journal=journal,
@@ -215,7 +166,7 @@ def prepare(args, cfg, activate_prepared_disk):
             )
 
             LOG.debug('Host %s is now ready for osd use.', hostname)
-            distro.sudo_conn.close()
+            distro.conn.exit()
 
         except RuntimeError as e:
             LOG.error(e)
@@ -244,39 +195,22 @@ def activate(args, cfg):
             distro.release,
             distro.codename
         )
-        rlogger = logging.getLogger(hostname)
 
         LOG.debug('activating host %s disk %s', hostname, disk)
         LOG.debug('will use init type: %s', distro.init)
 
-        activate_disk(
-            distro.sudo_conn,
-            rlogger,
-            cluster=args.cluster,
-            disk=disk,
-            init=distro.init,
+        process.run(
+            distro.conn,
+            [
+                'ceph-disk-activate',
+                '--mark-init',
+                distro.init,
+                '--mount',
+                disk,
+            ],
         )
 
-        distro.sudo_conn.close()
-
-
-# NOTE: this mirrors ceph-disk-prepare --zap-disk DEV
-def zap(conn, dev):
-    remote_osd = conn.import_module(rosd)
-    remote_osd.zeroing(dev)
-
-    process.run(
-        conn,
-        [
-            'sgdisk',
-            '--zap-all',
-            '--clear',
-            '--mbrtogpt',
-            '--',
-            dev,
-        ],
-        timeout=7,
-    )
+        distro.conn.exit()
 
 
 def disk_zap(args):
@@ -286,30 +220,30 @@ def disk_zap(args):
         if not disk or not hostname:
             raise RuntimeError('zap command needs both HOSTNAME and DISK but got "%s %s"' % (hostname, disk))
         LOG.debug('zapping %s on %s', disk, hostname)
-        rlogger = logging.getLogger(hostname)
-        conn = get_connection(hostname, logger=rlogger)
-        remote_host = conn.import_module(rhost)
-        distro_name, release, codename = remote_host.platform_information()
-
+        distro = hosts.get(hostname)
         LOG.info(
             'Distro info: %s %s %s',
-            distro_name,
-            release,
-            codename
+            distro.name,
+            distro.release,
+            distro.codename
         )
-        zap(conn, disk)
-        conn.exit()
 
+        # NOTE: this mirrors ceph-disk-prepare --zap-disk DEV
+        # zero the device
+        distro.conn.remote_module.zeroing(disk)
 
-def list_disk(conn, logger):
-    check_call(
-        conn,
-        logger,
-        [
-            'ceph-disk',
-            'list',
-        ],
-    )
+        process.run(
+            distro.conn,
+            [
+                'sgdisk',
+                '--zap-all',
+                '--clear',
+                '--mbrtogpt',
+                '--',
+                disk,
+            ],
+        )
+        distro.conn.exit()
 
 
 def disk_list(args, cfg):
@@ -321,13 +255,17 @@ def disk_list(args, cfg):
             distro.release,
             distro.codename
         )
-        rlogger = logging.getLogger(hostname)
 
         # TODO username
         LOG.debug('Listing disks on {hostname}...'.format(hostname=hostname))
-
-        list_disk(distro.sudo_conn, rlogger)
-        distro.sudo_conn.close()
+        process.run(
+            distro.conn,
+            [
+                'ceph-disk',
+                'list',
+            ],
+        )
+        distro.conn.exit()
 
 
 def osd_list(args, cfg):
@@ -406,7 +344,7 @@ def make(parser):
     for you.
     """
     )
-    parser.formatter_class  = argparse.RawDescriptionHelpFormatter
+    parser.formatter_class = argparse.RawDescriptionHelpFormatter
     parser.description = sub_command_help
 
     parser.add_argument(
