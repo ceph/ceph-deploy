@@ -38,7 +38,6 @@ setup(
 
     install_requires=[
         'setuptools',
-        'pushy >=0.5.2',
         ] + install_requires,
 
     tests_require=[
