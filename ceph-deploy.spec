@@ -32,7 +32,6 @@ BuildRequires:	pytest
 %endif
 BuildRequires:  git
 Requires:       python-argparse
-Requires:       pushy >= 0.5.3
 Requires:       python-distribute
 #Requires:      lsb-release
 #Requires:      ceph
@@ -73,7 +72,7 @@ install -m 0755 -D scripts/ceph-deploy $RPM_BUILD_ROOT/usr/bin
 
 %files
 %defattr(-,root,root)
-%doc LICENSE README.rst 
+%doc LICENSE README.rst
 %{_bindir}/ceph-deploy
 %{python_sitelib}/*
 
