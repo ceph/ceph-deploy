@@ -19,7 +19,7 @@ def ceph_is_installed(conn):
         conn,
         ['which', 'ceph'],
     )
-    return return_code
+    return not return_code
 
 
 def install(args):
