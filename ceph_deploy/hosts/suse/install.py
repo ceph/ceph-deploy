@@ -55,7 +55,7 @@ def install(distro, version_kind, version, adjust_repos):
             )
 
     process.run(
-        distro.sudo_conn,
+        distro.conn,
         [
             'zypper',
             '--non-interactive',
