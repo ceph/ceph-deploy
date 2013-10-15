@@ -1,3 +1,7 @@
+1.3
+---
+* Major refactoring for all the remote connections in ceph-deploy. With global
+  and granular timeouts.
 
 1.2.7
 -----

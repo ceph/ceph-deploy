@@ -2,30 +2,31 @@ import os.path
 import logging
 
 from .cliutil import priority
-from . import misc
-from .sudo_pushy import get_transport
+from . import hosts
+
 
 LOG = logging.getLogger(__name__)
 
 
-def fetch_file(args, frompath, topath, hosts):
-    # mon.
+def fetch_file(args, frompath, topath, _hosts):
     if os.path.exists(topath):
         LOG.debug('Have %s', topath)
         return True
     else:
-        for hostname in hosts:
+        for hostname in _hosts:
             LOG.debug('Checking %s for %s', hostname, frompath)
-            sudo = args.pushy(get_transport(hostname))
-            get_file_r = sudo.compile(misc.get_file)
-            key = get_file_r(path=frompath.format(hostname=hostname))
+            distro = hosts.get(hostname)
+            key = distro.conn.remote_module.get_file(
+                frompath.format(hostname=hostname)
+            )
+
             if key is not None:
                 LOG.debug('Got %s key from %s.', topath, hostname)
                 with file(topath, 'w') as f:
                     f.write(key)
                     return True
-            sudo.close()
-    LOG.warning('Unable to find %s on %s', frompath, hosts)
+            distro.conn.exit()
+    LOG.warning('Unable to find %s on %s', frompath, _hosts)
     return False
 
 
@@ -39,7 +40,7 @@ def gatherkeys(args):
             cluster=args.cluster),
         topath='{cluster}.client.admin.keyring'.format(
             cluster=args.cluster),
-        hosts=args.mon,
+        _hosts=args.mon,
         )
     if not r:
         ret = 1
@@ -49,7 +50,7 @@ def gatherkeys(args):
         args=args,
         frompath='/var/lib/ceph/mon/%s-{hostname}/keyring' % args.cluster,
         topath='{cluster}.mon.keyring'.format(cluster=args.cluster),
-        hosts=args.mon,
+        _hosts=args.mon,
         )
     if not r:
         ret = 1
@@ -64,7 +65,7 @@ def gatherkeys(args):
             topath='{cluster}.bootstrap-{what}.keyring'.format(
                 cluster=args.cluster,
                 what=what),
-            hosts=args.mon,
+            _hosts=args.mon,
             )
         if not r:
             ret = 1

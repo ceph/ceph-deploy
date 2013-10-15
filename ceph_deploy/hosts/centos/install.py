@@ -1,26 +1,28 @@
-from ceph_deploy.util.wrappers import check_call
 from ceph_deploy.util import pkg_managers
-from ceph_deploy.hosts import common
+from ceph_deploy.lib.remoto import process
 
 
-def install(distro, logger, version_kind, version, adjust_repos):
+def install(distro, version_kind, version, adjust_repos):
     release = distro.release
-    machine = distro.sudo_conn.modules.platform.machine()
+    machine = distro.machine_type
 
     # Get EPEL installed before we continue:
     if adjust_repos:
-        install_epel(distro, logger)
+        install_epel(distro)
     if version_kind in ['stable', 'testing']:
         key = 'release'
     else:
         key = 'autobuild'
 
     if adjust_repos:
-        check_call(
-            distro.sudo_conn,
-            logger,
-            ['su -c \'rpm --import "https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc"\''.format(key=key),],
-            shell=True)
+        process.run(
+            distro.conn,
+            [
+                "su",
+                "-c",
+                "'rpm --import \"https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc\"'".format(key=key),
+            ],
+        )
 
         if version_kind == 'stable':
             url = 'http://ceph.com/rpm-{version}/el6/'.format(
@@ -35,9 +37,8 @@ def install(distro, logger, version_kind, version, adjust_repos):
                 version=version,
                 )
 
-        check_call(
-            distro.sudo_conn,
-            logger,
+        process.run(
+            distro.conn,
             [
                 'rpm',
                 '-Uvh',
@@ -46,9 +47,8 @@ def install(distro, logger, version_kind, version, adjust_repos):
             ],
         )
 
-    check_call(
-        distro.sudo_conn,
-        logger,
+    process.run(
+        distro.conn,
         [
             'yum',
             '-y',
@@ -58,46 +58,35 @@ def install(distro, logger, version_kind, version, adjust_repos):
         ],
     )
 
-    # Check the ceph version
-    common.ceph_version(distro.sudo_conn, logger)
 
-
-def install_epel(distro, logger):
+def install_epel(distro):
     """
     CentOS and Scientific need the EPEL repo, otherwise Ceph cannot be
     installed.
     """
     if distro.name.lower() in ['centos', 'scientific']:
-        logger.info('adding EPEL repository')
+        distro.conn.logger.info('adding EPEL repository')
         if float(distro.release) >= 6:
-            check_call(
-                distro.sudo_conn,
-                logger,
+            process.run(
+                distro.conn,
                 ['wget', 'http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm'],
-                stop_on_error=False,
             )
             pkg_managers.rpm(
-                distro.sudo_conn,
-                logger,
+                distro.conn,
                 [
                     '--replacepkgs',
                     'epel-release-6*.rpm',
                 ],
-                stop_on_error=False,
             )
         else:
-            check_call(
-                distro.sudo_conn,
-                logger,
+            process.run(
+                distro.conn,
                 ['wget', 'wget http://dl.fedoraproject.org/pub/epel/5/x86_64/epel-release-5-4.noarch.rpm'],
-                stop_on_error=False,
             )
             pkg_managers.rpm(
-                distro.sudo_conn,
-                logger,
+                distro.conn,
                 [
                     '--replacepkgs',
                     'epel-release-5*.rpm'
                 ],
-                stop_on_error=False,
             )

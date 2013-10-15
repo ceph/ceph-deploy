@@ -19,7 +19,7 @@ if pyversion < (2, 7) or (3, 0) <= pyversion <= (3, 1):
 # Add libraries that are not part of install_requires
 #
 vendorize([
-    ('remoto', '0.0.5'),
+    ('remoto', '0.0.6'),
 ])
 
 
@@ -38,7 +38,6 @@ setup(
 
     install_requires=[
         'setuptools',
-        'pushy >=0.5.2',
         ] + install_requires,
 
     tests_require=[

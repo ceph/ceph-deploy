@@ -14,7 +14,6 @@ Package: ceph-deploy
 Architecture: all
 Depends: python,
          python-argparse,
-         python-pushy (>= 0.5.3),
          python-setuptools,
          ${misc:Depends},
          ${python:Depends}
