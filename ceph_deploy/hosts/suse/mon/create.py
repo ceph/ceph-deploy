@@ -7,7 +7,6 @@ from ceph_deploy.connection import get_connection
 def create(distro, logger, args, monitor_keyring):
     hostname = remote_shortname(distro.sudo_conn.modules.socket)
     common.mon_create(distro, logger, args, monitor_keyring, hostname)
-    service = common.which_service(distro.sudo_conn, logger)
 
     distro.sudo_conn.close()
 
@@ -17,8 +16,7 @@ def create(distro, logger, args, monitor_keyring):
     process.run(
         rconn,
         [
-            service,
-            'ceph',
+            'rcceph',
             '-c',
             '/etc/ceph/{cluster}.conf'.format(cluster=args.cluster),
             'start',
