@@ -1,11 +1,9 @@
-from ceph_deploy.util.wrappers import check_call
-from ceph_deploy.util.context import remote
-from ceph_deploy.hosts import common
+from ceph_deploy.lib.remoto import process
 
 
-def install(distro, logger, version_kind, version, adjust_repos):
+def install(distro, version_kind, version, adjust_repos):
     codename = distro.codename
-    machine = distro.sudo_conn.modules.platform.machine()
+    machine = distro.machine_type
 
     if version_kind in ['stable', 'testing']:
         key = 'release'
@@ -13,9 +11,8 @@ def install(distro, logger, version_kind, version, adjust_repos):
         key = 'autobuild'
 
     # Make sure ca-certificates is installed
-    check_call(
-        distro.sudo_conn,
-        logger,
+    process.run(
+        distro.conn,
         [
             'env',
             'DEBIAN_FRONTEND=noninteractive',
@@ -28,11 +25,15 @@ def install(distro, logger, version_kind, version, adjust_repos):
     )
 
     if adjust_repos:
-        check_call(
-            distro.sudo_conn,
-            logger,
-            ['wget -q -O- \'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc\' | apt-key add -'.format(key=key)],
-            shell=True,
+        process.run(
+            distro.conn,
+            [
+                'wget',
+                '-q',
+                '-O-',
+                "'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc'".format(key=key),
+                "| apt-key add -",
+            ]
         )
 
         if version_kind == 'stable':
@@ -50,27 +51,16 @@ def install(distro, logger, version_kind, version, adjust_repos):
         else:
             raise RuntimeError('Unknown version kind: %r' % version_kind)
 
-        def write_sources_list(url, codename):
-            """add ceph deb repo to sources.list"""
-            with file('/etc/apt/sources.list.d/ceph.list', 'w') as f:
-                f.write('deb {url} {codename} main\n'.format(
-                        url=url,
-                        codename=codename,
-                        ))
+        distro.conn.remote_module.write_sources_list(url, codename)
 
-        with remote(distro.sudo_conn, logger, write_sources_list) as remote_func:
-            remote_func(url, codename)
-
-    check_call(
-        distro.sudo_conn,
-        logger,
+    process.run(
+        distro.conn,
         ['apt-get', '-q', 'update'],
         )
 
     # TODO this does not downgrade -- should it?
-    check_call(
-        distro.sudo_conn,
-        logger,
+    process.run(
+        distro.conn,
         [
             'env',
             'DEBIAN_FRONTEND=noninteractive',
@@ -91,6 +81,3 @@ def install(distro, logger, version_kind, version, adjust_repos):
             'gdisk',
             ],
         )
-
-    # Check the ceph version
-    common.ceph_version(distro.sudo_conn, logger)

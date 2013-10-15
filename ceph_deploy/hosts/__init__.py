@@ -6,13 +6,8 @@ on the type of distribution/version we are dealing with.
 """
 import logging
 from ceph_deploy import exc, lsb
-from ceph_deploy.sudo_pushy import get_transport
-from ceph_deploy.hosts import debian, centos, fedora, suse
-
-# Import sudo_pushy and patch it
-import pushy
-from ceph_deploy import sudo_pushy
-sudo_pushy.patch()
+from ceph_deploy.hosts import debian, centos, fedora, suse, remotes
+from ceph_deploy.connection import get_connection
 
 logger = logging.getLogger()
 
@@ -34,16 +29,19 @@ def get(hostname, fallback=None):
     :param hostname: A hostname that is reachable/resolvable over the network
     :param fallback: Optional fallback to use if no supported distro is found
     """
-    transport = get_transport(hostname)
-    sudo_conn = pushy.connect(transport)
-    (distro, release, codename) = lsb.get_lsb_release(sudo_conn)
+    conn = get_connection(hostname, logger=logging.getLogger(hostname))
+    conn.import_module(remotes)
+    distro_name, release, codename = conn.remote_module.platform_information()
+    machine_type = conn.remote_module.machine_type()
 
-    module = _get_distro(distro)
-    module.name = distro
+    module = _get_distro(distro_name)
+    module.name = distro_name
     module.release = release
     module.codename = codename
-    module.sudo_conn = sudo_conn
-    module.init = lsb.choose_init(distro, codename)
+    module.conn = conn
+    module.machine_type = machine_type
+    module.init = lsb.choose_init(distro_name, codename)
+
     return module
 
 

@@ -1,5 +1,5 @@
+import getpass
 from ceph_deploy.lib.remoto import Connection
-from sudo_pushy import needs_sudo  # TODO move this to utils once pushy is out
 
 
 def get_connection(hostname, logger, threads=5):
@@ -8,14 +8,25 @@ def get_connection(hostname, logger, threads=5):
     that will know about the need to use sudo.
     """
     try:
-        return Connection(
+        conn = Connection(
             hostname,
             logger=logger,
             sudo=needs_sudo(),
             threads=threads,
         )
 
+        # Set a timeout value in seconds to disconnect and move on
+        # if no data is sent back.
+        conn.global_timeout = 300
+        return conn
+
     except Exception as error:
         msg = "connecting to host: %s " % hostname
         errors = "resulted in errors: %s %s" % (error.__class__.__name__, error)
         raise RuntimeError(msg + errors)
+
+
+def needs_sudo():
+    if getpass.getuser() == 'root':
+        return False
+    return True
