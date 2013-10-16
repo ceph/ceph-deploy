@@ -53,6 +53,10 @@ def get_parser():
         help='the current installed version of ceph-deploy',
         )
     parser.add_argument(
+        '--username',
+        help='the username to connect to the remote host',
+        )
+    parser.add_argument(
         '--overwrite-conf',
         action='store_true',
         help='overwrite an existing conf file on remote host (if present)',
