@@ -25,6 +25,7 @@ def ceph_is_installed(conn):
 def install(args):
     version = getattr(args, args.version_kind)
     version_str = args.version_kind
+
     if version:
         version_str += ' version {version}'.format(version=version)
     LOG.debug(
@@ -36,7 +37,7 @@ def install(args):
     for hostname in args.host:
         # TODO username
         LOG.debug('Detecting platform for host %s ...', hostname)
-        distro = hosts.get(hostname)
+        distro = hosts.get(hostname, username=args.username)
         LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
         rlogger = logging.getLogger(hostname)
         rlogger.info('installing ceph on %s' % hostname)
