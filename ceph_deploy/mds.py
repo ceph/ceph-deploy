@@ -58,6 +58,10 @@ def create_mds(conn, name, cluster, init):
     if returncode != errno.EACCES:
         for line in stderr:
             conn.logger.error(line)
+        for line in stdout:
+            # yes stdout as err because this is an error
+            conn.logger.error(line)
+        conn.logger.error('exit code from command was: %s' % returncode)
         raise RuntimeError('could not create mds')
 
         process.check(
