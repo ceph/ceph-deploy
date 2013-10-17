@@ -35,7 +35,6 @@ def install(args):
         ' '.join(args.host),
         )
     for hostname in args.host:
-        # TODO username
         LOG.debug('Detecting platform for host %s ...', hostname)
         distro = hosts.get(hostname, username=args.username)
         LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
@@ -57,7 +56,6 @@ def uninstall(args):
     for hostname in args.host:
         LOG.debug('Detecting platform for host %s ...', hostname)
 
-        # TODO username
         distro = hosts.get(hostname, username=args.username)
         LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
         rlogger = logging.getLogger(hostname)
@@ -76,7 +74,6 @@ def purge(args):
     for hostname in args.host:
         LOG.debug('Detecting platform for host %s ...', hostname)
 
-        # TODO username
         distro = hosts.get(hostname, username=args.username)
         LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
         rlogger = logging.getLogger(hostname)
@@ -106,7 +103,6 @@ def purge_data(args):
             return
 
     for hostname in args.host:
-        # TODO username
         distro = hosts.get(hostname, username=args.username)
         LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
         rlogger = logging.getLogger(hostname)

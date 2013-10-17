@@ -122,7 +122,6 @@ def prepare(args, cfg, activate_prepared_disk):
             if disk is None:
                 raise exc.NeedDiskError(hostname)
 
-            # TODO username
             distro = hosts.get(hostname, username=args.username)
             LOG.info(
                 'Distro info: %s %s %s',
@@ -182,7 +181,6 @@ def activate(args, cfg):
 
     for hostname, disk, journal in args.disk:
 
-        # TODO username
         distro = hosts.get(hostname, username=args.username)
         LOG.info(
             'Distro info: %s %s %s',
@@ -251,7 +249,6 @@ def disk_list(args, cfg):
             distro.codename
         )
 
-        # TODO username
         LOG.debug('Listing disks on {hostname}...'.format(hostname=hostname))
         process.run(
             distro.conn,
