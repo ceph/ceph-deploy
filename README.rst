@@ -79,6 +79,14 @@ You can symlink the ``ceph-deploy`` script in this somewhere
 convenient (like ``~/bin``), or add the current directory to ``PATH``,
 or just always type the full path to ``ceph-deploy``.
 
+
+SSH and Remote Connections
+==========================
+``ceph-deploy`` will attempt to connect via SSH to hosts when the hostnames do
+not match the current host's hostname. For example, if you are connecting to
+host ``node1`` it will attempt an SSH connection as long as the current host's
+hostname is *not* ``node1``.
+
 ceph-deploy at a minimum requires that the machine from which the script is
 being run can ssh as root without password into each Ceph node.
 
@@ -92,8 +100,27 @@ and ensure that the following lines are in the sshd config::
     PermitRootLogin yes
     PermitEmptyPasswords yes
 
-The machine running ceph-deploy does not need to have the Ceph packages installed
-unless it needs to admin the cluster directly using the ``ceph`` command line tool.
+The machine running ceph-deploy does not need to have the Ceph packages
+installed unless it needs to admin the cluster directly using the ``ceph``
+command line tool.
+
+
+usernames
+---------
+When not specified the connection will be done with the same username as the
+one executing ``ceph-deploy``. This is useful if the same username is shared in
+all the nodes but can be cumbersome if that is not the case.
+
+A way to avoid this is to define the correct usernames to connect with in the
+SSH config, but you can also use the ``--username`` flag as well::
+
+    ceph-deploy --username ceph install node1
+
+``ceph-deploy`` then in turn would use ``ceph@node1`` to connect to that host.
+
+This would be the same expectation for any action that warrants a connection to
+a remote host.
+
 
 Managing an existing cluster
 ============================
