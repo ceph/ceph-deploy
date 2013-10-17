@@ -40,8 +40,15 @@ def write_conf(cluster, conf, overwrite):
             old = f.read()
             if old != conf and not overwrite:
                 raise RuntimeError(err_msg)
-    tmp_file.write(conf)
-    os.rename(tmp_file.name, path)
+        tmp_file.write(conf)
+        os.rename(tmp_file.name, path)
+        return
+    if os.path.exists('/etc/ceph'):
+        with open(path, 'w') as f:
+            f.write(conf)
+    else:
+        err_msg = '/etc/ceph/ does not exist - could not write config'
+        raise RuntimeError(err_msg)
 
 
 def write_keyring(path, key):
