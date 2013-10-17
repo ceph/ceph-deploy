@@ -46,6 +46,10 @@ class TestGetDistro(object):
         result = hosts._get_distro('RedHat')
         assert result.__name__.endswith('centos')
 
+    def test_get_redhat_whitespace(self):
+        result = hosts._get_distro('Red Hat Enterprise Linux')
+        assert result.__name__.endswith('centos')
+
     def test_get_uknown(self):
         with raises(exc.UnsupportedPlatform):
             hosts._get_distro('Solaris')
