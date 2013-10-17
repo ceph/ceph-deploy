@@ -134,7 +134,7 @@ def mon_create(args):
         try:
             # TODO add_bootstrap_peer_hint
             LOG.debug('detecting platform for host %s ...', name)
-            distro = hosts.get(host)
+            distro = hosts.get(host, username=args.username)
             LOG.info('distro info: %s %s %s', distro.name, distro.release, distro.codename)
             rlogger = logging.getLogger(name)
 
@@ -250,7 +250,7 @@ def mon_destroy(args):
         try:
             LOG.debug('Removing mon from %s', name)
 
-            distro = hosts.get(host)
+            distro = hosts.get(host, username=args.username)
             hostname = distro.conn.remote_module.shortname()
 
             destroy_mon(
