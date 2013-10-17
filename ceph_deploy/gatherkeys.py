@@ -15,7 +15,7 @@ def fetch_file(args, frompath, topath, _hosts):
     else:
         for hostname in _hosts:
             LOG.debug('Checking %s for %s', hostname, frompath)
-            distro = hosts.get(hostname)
+            distro = hosts.get(hostname, username=args.username)
             key = distro.conn.remote_module.get_file(
                 frompath.format(hostname=hostname)
             )

@@ -58,7 +58,7 @@ def uninstall(args):
         LOG.debug('Detecting platform for host %s ...', hostname)
 
         # TODO username
-        distro = hosts.get(hostname)
+        distro = hosts.get(hostname, username=args.username)
         LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
         rlogger = logging.getLogger(hostname)
         rlogger.info('uninstalling ceph on %s' % hostname)
@@ -77,7 +77,7 @@ def purge(args):
         LOG.debug('Detecting platform for host %s ...', hostname)
 
         # TODO username
-        distro = hosts.get(hostname)
+        distro = hosts.get(hostname, username=args.username)
         LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
         rlogger = logging.getLogger(hostname)
         rlogger.info('purging host ... %s' % hostname)
@@ -94,7 +94,7 @@ def purge_data(args):
 
     installed_hosts = []
     for hostname in args.host:
-        distro = hosts.get(hostname)
+        distro = hosts.get(hostname, username=args.username)
         if ceph_is_installed(distro.conn):
             installed_hosts.append(hostname)
         distro.conn.exit()
@@ -107,7 +107,7 @@ def purge_data(args):
 
     for hostname in args.host:
         # TODO username
-        distro = hosts.get(hostname)
+        distro = hosts.get(hostname, username=args.username)
         LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
         rlogger = logging.getLogger(hostname)
         rlogger.info('purging data on %s' % hostname)

@@ -126,7 +126,7 @@ def mds_create(args):
     for hostname, name in args.mds:
         try:
             # TODO username
-            distro = hosts.get(hostname)
+            distro = hosts.get(hostname, username=args.username)
             rlogger = distro.conn.logger
             LOG.info(
                 'Distro info: %s %s %s',
