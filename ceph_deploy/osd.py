@@ -122,8 +122,7 @@ def prepare(args, cfg, activate_prepared_disk):
             if disk is None:
                 raise exc.NeedDiskError(hostname)
 
-            # TODO username
-            distro = hosts.get(hostname)
+            distro = hosts.get(hostname, username=args.username)
             LOG.info(
                 'Distro info: %s %s %s',
                 distro.name,
@@ -182,8 +181,7 @@ def activate(args, cfg):
 
     for hostname, disk, journal in args.disk:
 
-        # TODO username
-        distro = hosts.get(hostname)
+        distro = hosts.get(hostname, username=args.username)
         LOG.info(
             'Distro info: %s %s %s',
             distro.name,
@@ -215,7 +213,7 @@ def disk_zap(args):
         if not disk or not hostname:
             raise RuntimeError('zap command needs both HOSTNAME and DISK but got "%s %s"' % (hostname, disk))
         LOG.debug('zapping %s on %s', disk, hostname)
-        distro = hosts.get(hostname)
+        distro = hosts.get(hostname, username=args.username)
         LOG.info(
             'Distro info: %s %s %s',
             distro.name,
@@ -243,7 +241,7 @@ def disk_zap(args):
 
 def disk_list(args, cfg):
     for hostname, disk, journal in args.disk:
-        distro = hosts.get(hostname)
+        distro = hosts.get(hostname, username=args.username)
         LOG.info(
             'Distro info: %s %s %s',
             distro.name,
@@ -251,7 +249,6 @@ def disk_list(args, cfg):
             distro.codename
         )
 
-        # TODO username
         LOG.debug('Listing disks on {hostname}...'.format(hostname=hostname))
         process.run(
             distro.conn,

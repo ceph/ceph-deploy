@@ -25,6 +25,7 @@ def ceph_is_installed(conn):
 def install(args):
     version = getattr(args, args.version_kind)
     version_str = args.version_kind
+
     if version:
         version_str += ' version {version}'.format(version=version)
     LOG.debug(
@@ -34,9 +35,8 @@ def install(args):
         ' '.join(args.host),
         )
     for hostname in args.host:
-        # TODO username
         LOG.debug('Detecting platform for host %s ...', hostname)
-        distro = hosts.get(hostname)
+        distro = hosts.get(hostname, username=args.username)
         LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
         rlogger = logging.getLogger(hostname)
         rlogger.info('installing ceph on %s' % hostname)
@@ -56,8 +56,7 @@ def uninstall(args):
     for hostname in args.host:
         LOG.debug('Detecting platform for host %s ...', hostname)
 
-        # TODO username
-        distro = hosts.get(hostname)
+        distro = hosts.get(hostname, username=args.username)
         LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
         rlogger = logging.getLogger(hostname)
         rlogger.info('uninstalling ceph on %s' % hostname)
@@ -75,8 +74,7 @@ def purge(args):
     for hostname in args.host:
         LOG.debug('Detecting platform for host %s ...', hostname)
 
-        # TODO username
-        distro = hosts.get(hostname)
+        distro = hosts.get(hostname, username=args.username)
         LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
         rlogger = logging.getLogger(hostname)
         rlogger.info('purging host ... %s' % hostname)
@@ -93,7 +91,7 @@ def purge_data(args):
 
     installed_hosts = []
     for hostname in args.host:
-        distro = hosts.get(hostname)
+        distro = hosts.get(hostname, username=args.username)
         if ceph_is_installed(distro.conn):
             installed_hosts.append(hostname)
         distro.conn.exit()
@@ -105,8 +103,7 @@ def purge_data(args):
             return
 
     for hostname in args.host:
-        # TODO username
-        distro = hosts.get(hostname)
+        distro = hosts.get(hostname, username=args.username)
         LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
         rlogger = logging.getLogger(hostname)
         rlogger.info('purging data on %s' % hostname)

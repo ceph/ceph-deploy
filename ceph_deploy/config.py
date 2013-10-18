@@ -19,7 +19,7 @@ def config_push(args):
     for hostname in args.client:
         LOG.debug('Pushing config to %s', hostname)
         try:
-            distro = hosts.get(hostname)
+            distro = hosts.get(hostname, username=args.username)
 
             distro.conn.remote_module.write_conf(
                 args.cluster,
@@ -46,7 +46,7 @@ def config_pull(args):
     for hostname in args.client:
         try:
             LOG.debug('Checking %s for %s', hostname, frompath)
-            distro = hosts.get(hostname)
+            distro = hosts.get(hostname, username=args.username)
             conf_file_contents = distro.conn.remote_module.get_file(frompath)
 
             if conf_file_contents is not None:

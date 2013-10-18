@@ -12,7 +12,7 @@ from ceph_deploy.connection import get_connection
 logger = logging.getLogger()
 
 
-def get(hostname, fallback=None):
+def get(hostname, username=None, fallback=None):
     """
     Retrieve the module that matches the distribution of a ``hostname``. This
     function will connect to that host and retrieve the distribution
@@ -29,7 +29,11 @@ def get(hostname, fallback=None):
     :param hostname: A hostname that is reachable/resolvable over the network
     :param fallback: Optional fallback to use if no supported distro is found
     """
-    conn = get_connection(hostname, logger=logging.getLogger(hostname))
+    conn = get_connection(
+        hostname,
+        username=username,
+        logger=logging.getLogger(hostname)
+    )
     conn.import_module(remotes)
     distro_name, release, codename = conn.remote_module.platform_information()
     machine_type = conn.remote_module.machine_type()

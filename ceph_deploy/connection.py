@@ -2,11 +2,13 @@ import getpass
 from ceph_deploy.lib.remoto import Connection
 
 
-def get_connection(hostname, logger, threads=5):
+def get_connection(hostname, username, logger, threads=5):
     """
     A very simple helper, meant to return a connection
     that will know about the need to use sudo.
     """
+    if username:
+        hostname = "%s@%s" % (username, hostname)
     try:
         conn = Connection(
             hostname,
@@ -18,6 +20,7 @@ def get_connection(hostname, logger, threads=5):
         # Set a timeout value in seconds to disconnect and move on
         # if no data is sent back.
         conn.global_timeout = 300
+        logger.debug("connected to host: %s " % hostname)
         return conn
 
     except Exception as error:
