@@ -55,7 +55,7 @@ def create_mds(conn, name, cluster, init):
             os.path.join(keypath),
         ]
     )
-    if returncode != errno.EACCES:
+    if returncode > 0 and returncode != errno.EACCES:
         for line in stderr:
             conn.logger.error(line)
         for line in stdout:
