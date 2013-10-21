@@ -288,7 +288,7 @@ def mon_create_initial(args):
         sleeps = [20, 20, 15, 10, 10, 5]
         tries = 5
         rlogger = logging.getLogger(host)
-        rconn = get_connection(host, logger=rlogger)
+        rconn = get_connection(host, username=args.username, logger=rlogger)
         while tries:
             status = mon_status_check(rconn, rlogger, host)
             has_reached_quorum = status.get('state', '') in ['peon', 'leader']
