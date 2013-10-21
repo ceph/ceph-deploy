@@ -10,6 +10,7 @@
 *.egg-info
 /build
 /dist
+build
 
 /virtualenv
 /.tox
