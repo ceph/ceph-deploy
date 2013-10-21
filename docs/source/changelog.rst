@@ -1,5 +1,5 @@
-1.3
----
+1.3 (unreleased)
+----------------
 * Major refactoring for all the remote connections in ceph-deploy. With global
   and granular timeouts.
 
