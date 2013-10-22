@@ -151,7 +151,7 @@ def mds_create(args):
                 )
 
                 if not distro.conn.remote_module.path_exists(path):
-                    rlogger.info('mds keyring does not exist yet, creating one')
+                    rlogger.warning('mds keyring does not exist yet, creating one')
                     distro.conn.remote_module.write_keyring(path, key)
 
             create_mds(distro.conn, name, args.cluster, distro.init)
