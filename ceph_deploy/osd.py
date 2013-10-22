@@ -37,7 +37,7 @@ def create_osd(conn, cluster, key):
         cluster=cluster,
         )
     if not conn.remote_module.path_exists(path):
-        logger.info('osd keyring does not exist yet, creating one')
+        logger.warning('osd keyring does not exist yet, creating one')
         conn.remote_module.write_keyring(path, key)
 
     return process.run(
