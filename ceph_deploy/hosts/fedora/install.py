@@ -38,7 +38,7 @@ def install(distro, version_kind, version, adjust_repos):
 
         process.run(
             distro.conn,
-            args=[
+            [
                 'rpm',
                 '-Uvh',
                 '--replacepkgs',
@@ -48,16 +48,16 @@ def install(distro, version_kind, version, adjust_repos):
                     url=url,
                     release=release,
                     ),
-                ]
-            )
+            ]
+        )
 
     process.run(
         distro.conn,
-        args=[
+        [
             'yum',
             '-y',
             '-q',
             'install',
             'ceph',
-            ],
-        )
+        ],
+    )
