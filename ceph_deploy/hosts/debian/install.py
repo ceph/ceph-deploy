@@ -33,7 +33,8 @@ def install(distro, version_kind, version, adjust_repos):
                 '-O-',
                 "'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc'".format(key=key),
                 "| apt-key add -",
-            ]
+            ],
+            stop_on_nonzero=False,
         )
 
         if version_kind == 'stable':
