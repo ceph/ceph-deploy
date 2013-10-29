@@ -19,7 +19,7 @@ from . import gatherkeys
 LOG = logging.getLogger(__name__)
 
 
-def mon_status_check(conn, logger, hostname):
+def mon_status_check(conn, logger, hostname, args):
     """
     A direct check for JSON output on the monitor status.
 
@@ -27,7 +27,6 @@ def mon_status_check(conn, logger, hostname):
     was added ( `ceph daemon mon mon_status` ) and should be revisited if the
     output changes as this check depends on that availability.
 
-    WARNING: this function requires the new connection object
     """
     mon = 'mon.%s' % hostname
 
@@ -35,6 +34,7 @@ def mon_status_check(conn, logger, hostname):
         conn,
         [
             'ceph',
+            '--cluster={cluster}'.format(cluster=args.cluster),
             '--admin-daemon',
             '/var/run/ceph/ceph-%s.asok' % mon,
             'mon_status',
@@ -50,13 +50,13 @@ def mon_status_check(conn, logger, hostname):
         return {}
 
 
-def catch_mon_errors(conn, logger, hostname, cfg):
+def catch_mon_errors(conn, logger, hostname, cfg, args):
     """
     Make sure we are able to catch up common mishaps with monitors
     and use that state of a monitor to determine what is missing
     and warn apropriately about it.
     """
-    monmap = mon_status_check(conn, logger, hostname).get('monmap', {})
+    monmap = mon_status_check(conn, logger, hostname, args).get('monmap', {})
     mon_initial_members = cfg.safe_get('global', 'mon_initial_members')
     public_addr = cfg.safe_get('global', 'public_addr')
     public_network = cfg.safe_get('global', 'public_network')
@@ -74,7 +74,7 @@ def catch_mon_errors(conn, logger, hostname, cfg):
             logger.warning('monitors may not be able to form quorum')
 
 
-def mon_status(conn, logger, hostname, silent=False):
+def mon_status(conn, logger, hostname, args, silent=False):
     """
     run ``ceph daemon mon.`hostname` mon_status`` on the remote end and provide
     not only the output, but be able to return a boolean status of what is
@@ -85,7 +85,7 @@ def mon_status(conn, logger, hostname, silent=False):
     mon = 'mon.%s' % hostname
 
     try:
-        out = mon_status_check(conn, logger, hostname)
+        out = mon_status_check(conn, logger, hostname, args)
         if not out:
             logger.warning('monitor: %s, might not be running yet' % mon)
             return False
@@ -145,8 +145,8 @@ def mon_create(args):
 
             # tell me the status of the deployed mon
             time.sleep(2)  # give some room to start
-            mon_status(distro.conn, rlogger, name)
-            catch_mon_errors(distro.conn, rlogger, name, cfg)
+            mon_status(distro.conn, rlogger, name, args)
+            catch_mon_errors(distro.conn, rlogger, name, cfg, args)
             distro.conn.exit()
 
         except RuntimeError as e:
@@ -290,7 +290,7 @@ def mon_create_initial(args):
         rlogger = logging.getLogger(host)
         rconn = get_connection(host, username=args.username, logger=rlogger)
         while tries:
-            status = mon_status_check(rconn, rlogger, host)
+            status = mon_status_check(rconn, rlogger, host, args)
             has_reached_quorum = status.get('state', '') in ['peon', 'leader']
             if not has_reached_quorum:
                 LOG.warning('%s monitor is not yet in quorum, tries left: %s' % (mon_name, tries))
