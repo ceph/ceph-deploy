@@ -19,7 +19,7 @@ if pyversion < (2, 7) or (3, 0) <= pyversion <= (3, 1):
 # Add libraries that are not part of install_requires
 #
 vendorize([
-    ('remoto', '0.0.10'),
+    ('remoto', '0.0.11'),
 ])
 
 
