@@ -34,7 +34,7 @@ class TestCatchCommonErrors(object):
     def test_warn_if_no_intial_members(self):
         fake_conn = make_fake_conn()
         cfg = make_fake_conf()
-        mon.catch_mon_errors(fake_conn, self.logger, 'host', cfg)
+        mon.catch_mon_errors(fake_conn, self.logger, 'host', cfg, Mock())
         expected_msg = 'is not defined in `mon initial members`'
         self.assert_logger_message(self.logger.warning, expected_msg)
 
@@ -43,15 +43,14 @@ class TestCatchCommonErrors(object):
         cfg = make_fake_conf()
         cfg.add_section('global')
         cfg.set('global', 'mon initial members', 'AAAA')
-        mon.catch_mon_errors(fake_conn, self.logger, 'host', cfg)
+        mon.catch_mon_errors(fake_conn, self.logger, 'host', cfg, Mock())
         expected_msg = 'is not defined in `mon initial members`'
         self.assert_logger_message(self.logger.warning, expected_msg)
-
 
     def test_warn_if_not_mon_in_monmap(self):
         fake_conn = make_fake_conn()
         cfg = make_fake_conf()
-        mon.catch_mon_errors(fake_conn, self.logger, 'host', cfg)
+        mon.catch_mon_errors(fake_conn, self.logger, 'host', cfg, Mock())
         expected_msg = 'does not exist in monmap'
         self.assert_logger_message(self.logger.warning, expected_msg)
 
@@ -59,6 +58,6 @@ class TestCatchCommonErrors(object):
         fake_conn = make_fake_conn()
         cfg = make_fake_conf()
         cfg.add_section('global')
-        mon.catch_mon_errors(fake_conn, self.logger, 'host', cfg)
+        mon.catch_mon_errors(fake_conn, self.logger, 'host', cfg, Mock())
         expected_msg = 'neither `public_addr` nor `public_network`'
         self.assert_logger_message(self.logger.warning, expected_msg)
