@@ -14,10 +14,10 @@ def install(distro, version_kind, version, adjust_repos):
         process.run(
             distro.conn,
             [
-                "su",
-                "-c",
-                "'rpm --import \"https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc\"'".format(key=key),
-            ],
+                'rpm',
+                '--import',
+                "https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc".format(key=key)
+            ]
         )
 
         if version_kind == 'stable':
