@@ -2,6 +2,11 @@
 ----------------
 * Major refactoring for all the remote connections in ceph-deploy. With global
   and granular timeouts.
+* Raise the log level for missing keyrings
+* Allow ``--username`` to be used for connecting over SSH
+* Increase verbosity when MDS fails, include the exit code
+* Do not remove ``/etc/ceph``, just the contents
+* Use ``rcceph`` instead of service for SUSE
 
 1.2.7
 -----
