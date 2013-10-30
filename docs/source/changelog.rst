@@ -7,6 +7,7 @@
 * Increase verbosity when MDS fails, include the exit code
 * Do not remove ``/etc/ceph``, just the contents
 * Use ``rcceph`` instead of service for SUSE
+* Fix lack of ``--cluster`` usage on monitor error checks
 
 1.2.7
 -----
