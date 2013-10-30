@@ -8,6 +8,15 @@ import platform
 def platform_information():
     """ detect platform information from remote host """
     distro, release, codename = platform.linux_distribution()
+    if not codename and 'debian' in distro.lower():  # this could be an empty string in Debian
+        debian_codenames = {
+            '8': 'jessie',
+            '7': 'wheezy',
+            '6': 'squeeze',
+        }
+        major_version = release.split('.')[0]
+        codename = debian_codenames.get(major_version, '')
+
     return (
         str(distro).rstrip(),
         str(release).rstrip(),
