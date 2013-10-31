@@ -8,6 +8,7 @@
 * Do not remove ``/etc/ceph``, just the contents
 * Use ``rcceph`` instead of service for SUSE
 * Fix lack of ``--cluster`` usage on monitor error checks
+* ensure we correctly detect Debian releases
 
 1.2.7
 -----
