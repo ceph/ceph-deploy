@@ -6,6 +6,9 @@ def install(distro, version_kind, version, adjust_repos):
     release = distro.release
     machine = distro.machine_type
 
+    # Even before EPEL, make sure we have `wget`
+    pkg_managers.yum(distro.conn, 'wget')
+
     # Get EPEL installed before we continue:
     if adjust_repos:
         install_epel(distro)

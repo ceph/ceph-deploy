@@ -50,7 +50,6 @@ def apt_update(conn):
     ]
     return process.run(
         conn,
-        logger,
         cmd,
     )
 
