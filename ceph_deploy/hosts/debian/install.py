@@ -42,7 +42,7 @@ def install(distro, version_kind, version, adjust_repos):
             [
                 'apt-key',
                 'add',
-                'release.asc'
+                '{key}.asc'.format(key=key)
             ]
         )
 
