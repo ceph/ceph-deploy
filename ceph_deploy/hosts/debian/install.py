@@ -30,11 +30,20 @@ def install(distro, version_kind, version, adjust_repos):
             [
                 'wget',
                 '-q',
-                '-O-',
-                "'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc'".format(key=key),
-                "| apt-key add -",
+                '-O',
+                '{key}.asc'.format(key=key),
+                'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc'.format(key=key),
             ],
             stop_on_nonzero=False,
+        )
+
+        process.run(
+            distro.conn,
+            [
+                'apt-key',
+                'add',
+                'release.asc'
+            ]
         )
 
         if version_kind == 'stable':
