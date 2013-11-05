@@ -81,7 +81,7 @@ def install_epel(distro):
         else:
             process.run(
                 distro.conn,
-                ['wget', 'wget http://dl.fedoraproject.org/pub/epel/5/x86_64/epel-release-5-4.noarch.rpm'],
+                ['wget', 'http://dl.fedoraproject.org/pub/epel/5/x86_64/epel-release-5-4.noarch.rpm'],
             )
             pkg_managers.rpm(
                 distro.conn,
