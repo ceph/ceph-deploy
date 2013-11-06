@@ -1,3 +1,8 @@
+1.3.1
+-----
+* Fix failure to `wget` GPG keys on Debian and Debian-based distros when
+  installing
+
 1.3
 ---
 * Major refactoring for all the remote connections in ceph-deploy. With global
