@@ -1,6 +1,7 @@
 import errno
 import socket
 import os
+import shutil
 import tempfile
 import platform
 
@@ -50,7 +51,8 @@ def write_conf(cluster, conf, overwrite):
             if old != conf and not overwrite:
                 raise RuntimeError(err_msg)
         tmp_file.write(conf)
-        os.rename(tmp_file.name, path)
+        tmp_file.close()
+        shutil.move(tmp_file.name, path)
         return
     if os.path.exists('/etc/ceph'):
         with open(path, 'w') as f:
