@@ -2,18 +2,20 @@ import getpass
 from ceph_deploy.lib.remoto import Connection
 
 
-def get_connection(hostname, username, logger, threads=5):
+def get_connection(hostname, username, logger, threads=5, use_sudo=None):
     """
     A very simple helper, meant to return a connection
     that will know about the need to use sudo.
     """
+    if use_sudo is None:
+        use_sudo = needs_sudo()
     if username:
         hostname = "%s@%s" % (username, hostname)
     try:
         conn = Connection(
             hostname,
             logger=logger,
-            sudo=needs_sudo(),
+            sudo=use_sudo,
             threads=threads,
         )
 
