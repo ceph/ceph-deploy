@@ -1,10 +1,13 @@
 import argparse
 import logging
 from distutils.util import strtobool
+import os
 
 from . import hosts
 from .cliutil import priority
 from .lib.remoto import process
+from .lib.remoto.connection import needs_ssh
+from .connection import get_connection
 
 
 LOG = logging.getLogger(__name__)
@@ -35,6 +38,7 @@ def install(args):
         ' '.join(args.host),
         )
     for hostname in args.host:
+        ssh_copy_keys(hostname)
         LOG.debug('Detecting platform for host %s ...', hostname)
         distro = hosts.get(hostname, username=args.username)
         LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
@@ -44,6 +48,57 @@ def install(args):
         # Check the ceph version we just installed
         hosts.common.ceph_version(distro.conn)
         distro.conn.exit()
+
+
+def ssh_copy_keys(hostname):
+    # Ensure we are not doing this for local hosts
+    if not needs_ssh(hostname):
+        return
+    LOG.info('making sure passwordless SSH succeeds')
+    logger = logging.getLogger(hostname)
+    local_conn = get_connection(
+        'localhost',
+        None,
+        logger,
+        threads=1,
+        use_sudo=False
+    )
+
+    # Check to see if we can login, disabling password prompts
+    command = ['ssh', '-CT', '-o', 'BatchMode=yes', hostname]
+    out, err, retval = process.check(local_conn, command, stop_on_error=False)
+    expected_error = 'Permission denied (publickey,password)'
+    expected_retval = 255
+    has_key_error = False
+    for line in err:
+        if expected_error in line:
+            has_key_error = True
+
+    if retval == expected_retval and has_key_error:
+        LOG.warning('could not connect via SSH')
+        LOG.info('will connect again with password prompt')
+        # Create the key if it doesn't exist:
+        if not os.path.exists(os.path.expanduser(u'~/.ssh/id_rsa.pub')):
+            LOG.info('creating a passwordless id_rsa.pub key file')
+            process.run(local_conn, ['ssh-keygen', '-t', 'rsa', '-N', "''"])
+        else:  # Get the contents of id_rsa.pub and push it to the host
+            distro = hosts.get(hostname)  # XXX Add username
+            auth_keys_path = '.ssh/authorized_keys'
+            if not distro.conn.remote_module.path_exists(auth_keys_path):
+                logger.warning('.ssh/authorized_keys does not exist, will skip adding keys')
+                local_conn.exit()
+                distro.conn.exit()
+                return
+            else:
+                logger.info('adding public keys to authorized_keys')
+                with open(os.path.expanduser('~/.ssh/id_rsa.pub'), 'r') as id_rsa:
+                    contents = id_rsa.read()
+                distro.conn.remote_module.append_to_file(
+                    auth_keys_path,
+                    contents
+                )
+                distro.conn.exit()
+    local_conn.exit()
 
 
 def uninstall(args):
