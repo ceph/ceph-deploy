@@ -1,6 +1,8 @@
 1.3.1
 -----
-* Fix failure to `wget` GPG keys on Debian and Debian-based distros when
+* Use ``shutil.move`` to overwrite files from temporary ones (Thanks Mark
+  Kirkwood)
+* Fix failure to ``wget`` GPG keys on Debian and Debian-based distros when
   installing
 
 1.3
