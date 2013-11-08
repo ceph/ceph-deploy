@@ -37,7 +37,7 @@ def get(hostname, username=None, fallback=None):
     conn.import_module(remotes)
     distro_name, release, codename = conn.remote_module.platform_information()
     if not codename:
-        raise exc.UnsupportedPlatform(distro=distro, codename=codename)
+        raise exc.UnsupportedPlatform(distro=distro_name, codename=codename)
 
     machine_type = conn.remote_module.machine_type()
 
