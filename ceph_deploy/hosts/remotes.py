@@ -88,6 +88,12 @@ def create_init_path(init_path):
             pass
 
 
+def append_to_file(file_path, contents):
+    """append contents to file"""
+    with open(file_path, 'a') as f:
+        f.write(contents)
+
+
 def path_exists(path):
     return os.path.exists(path)
 
