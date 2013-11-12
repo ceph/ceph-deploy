@@ -21,7 +21,7 @@ def can_connect_passwordless(hostname):
         # Check to see if we can login, disabling password prompts
         command = ['ssh', '-CT', '-o', 'BatchMode=yes', hostname]
         out, err, retval = process.check(conn, command, stop_on_error=False)
-        expected_error = 'Permission denied (publickey,password)'
+        expected_error = 'Permission denied '
         has_key_error = False
         for line in err:
             if expected_error in line:
