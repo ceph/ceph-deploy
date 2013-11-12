@@ -212,7 +212,7 @@ def make(parser):
 
     version.set_defaults(
         func=install,
-        stable='dumpling',
+        stable='emperor',
         dev='master',
         version_kind='stable',
         adjust_repos=True,
