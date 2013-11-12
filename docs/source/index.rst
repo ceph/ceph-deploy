@@ -122,6 +122,27 @@ This would be the same expectation for any action that warrants a connection to
 a remote host.
 
 
+SSH Keys
+--------
+Ideally, all nodes will be pre-configured to have their passwordless access
+from the machine executing ``ceph-deploy`` but you can also take advantage of
+automatic detection of this when calling the ``new`` subcommand.
+
+Once called, it will try to establish an SSH connection to the hosts passed
+into the ``new`` subcommand, and determine if it can (or cannot) connect
+without a password prompt.
+
+If it can't proceed, it will try to copy *existing* keys to the remote host, if
+those do not exist, then passwordless ``rsa`` keys will be generated for the
+current user and those will get used.
+
+This feature can be overridden in the ``new`` subcommand like::
+
+    ceph-deploy new --no-ssh-copykey
+
+.. versionadded:: 1.3.2
+
+
 Managing an existing cluster
 ============================
 
