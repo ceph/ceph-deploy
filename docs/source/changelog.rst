@@ -1,3 +1,9 @@
+1.3.2
+-----
+* ``ceph-deploy new`` will now attempt to copy SSH keys if necessary unless it
+  it disabled.
+* Default to Emperor version of ceph when installing.
+
 1.3.1
 -----
 * Use ``shutil.move`` to overwrite files from temporary ones (Thanks Mark
