@@ -158,7 +158,7 @@ cluster::
     ceph-deploy gatherkeys MONHOST
 
 At this point you can skip the steps below that create a new cluster
-(you already have one) and optionally skip instalation and/or monitor
+(you already have one) and optionally skip installation and/or monitor
 creation, depending on what you are trying to accomplish.
 
 
