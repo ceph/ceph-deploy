@@ -39,6 +39,11 @@ def write_sources_list(url, codename):
                 ))
 
 
+def write_yum_repo(content):
+    """set the contents of /etc/yum.repos.d/ceph.repo"""
+    write_file('/etc/yum.repos.d/ceph.repo', content)
+
+
 def write_conf(cluster, conf, overwrite):
     """ write cluster configuration to /etc/ceph/{cluster}.conf """
     path = '/etc/ceph/{cluster}.conf'.format(cluster=cluster)
