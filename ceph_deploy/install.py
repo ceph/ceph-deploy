@@ -40,7 +40,21 @@ def install(args):
         LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
         rlogger = logging.getLogger(hostname)
         rlogger.info('installing ceph on %s' % hostname)
-        distro.install(distro, args.version_kind, version, args.adjust_repos)
+        if args.repo_url:
+            rlogger.info('using custom repository location: %s', args.repo_url)
+            distro.firewall_install(
+                distro,
+                args.repo_url,
+                args.gpg_url,
+                args.adjust_repos
+            )
+        else:
+            distro.install(
+                distro,
+                args.version_kind,
+                version,
+                args.adjust_repos
+            )
         # Check the ceph version we just installed
         hosts.common.ceph_version(distro.conn)
         distro.conn.exit()
@@ -223,6 +237,20 @@ def make(parser):
         metavar='HOST',
         nargs='+',
         help='hosts to install on',
+    )
+
+    version.add_argument(
+        '--repo-url',
+        nargs='?',
+        dest='repo_url',
+        help='specify a repo URL that mirrors/contains ceph packages',
+    )
+
+    version.add_argument(
+        '--gpg-url',
+        nargs='?',
+        dest='gpg_url',
+        help='specify a GPG key URL to be used with custom repos (defaults to ceph.com)'
     )
 
     parser.set_defaults(
