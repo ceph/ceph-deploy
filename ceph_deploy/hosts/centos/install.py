@@ -1,4 +1,4 @@
-from ceph_deploy.util import pkg_managers
+from ceph_deploy.util import pkg_managers, templates
 from ceph_deploy.lib.remoto import process
 
 
@@ -93,3 +93,34 @@ def install_epel(distro):
                     'epel-release-5*.rpm'
                 ],
             )
+
+
+def firewall_install(distro, repo_url, gpg_url, adjust_repos):
+    repo_url = repo_url.strip('/')  # Remove trailing slashes
+    gpg_fallback = 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc'
+    logger = distro.conn.logger
+    if gpg_url is None:
+        logger.warning('--gpg-url was not used, will fallback')
+        logger.warning('using GPG fallback: %s', gpg_fallback)
+        gpg_url = gpg_fallback
+    # Before any install, make sure we have `wget`
+    pkg_managers.yum(distro.conn, 'wget')
+
+    if adjust_repos:
+        process.run(
+            distro.conn,
+            [
+                'rpm',
+                '--import',
+                gpg_url,
+            ]
+        )
+
+        ceph_repo_content = templates.ceph_repo.format(
+            repo_url=repo_url,
+            gpg_url=gpg_url
+        )
+
+        distro.conn.remote_module.write_yum_repo(ceph_repo_content)
+
+    pkg_managers.yum(distro.conn, 'ceph')
