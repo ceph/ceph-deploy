@@ -1,6 +1,7 @@
 import argparse
 import logging
 from distutils.util import strtobool
+import os
 
 from . import hosts
 from .cliutil import priority
@@ -40,12 +41,14 @@ def install(args):
         LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
         rlogger = logging.getLogger(hostname)
         rlogger.info('installing ceph on %s' % hostname)
-        if args.repo_url:
-            rlogger.info('using custom repository location: %s', args.repo_url)
+        repo_url = os.environ.get('CEPH_DEPLOY_REPO_URL') or args.repo_url
+        gpg_url = os.environ.get('CEPH_DEPLOY_GPG_URL') or args.gpg_url
+        if repo_url:
+            rlogger.info('using custom repository location: %s', repo_url)
             distro.firewall_install(
                 distro,
-                args.repo_url,
-                args.gpg_url,
+                repo_url,
+                gpg_url,
                 args.adjust_repos
             )
         else:
