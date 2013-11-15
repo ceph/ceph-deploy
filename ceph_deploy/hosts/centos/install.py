@@ -103,8 +103,6 @@ def firewall_install(distro, repo_url, gpg_url, adjust_repos):
         logger.warning('--gpg-url was not used, will fallback')
         logger.warning('using GPG fallback: %s', gpg_fallback)
         gpg_url = gpg_fallback
-    # Before any install, make sure we have `wget`
-    pkg_managers.yum(distro.conn, 'wget')
 
     if adjust_repos:
         process.run(
@@ -122,5 +120,8 @@ def firewall_install(distro, repo_url, gpg_url, adjust_repos):
         )
 
         distro.conn.remote_module.write_yum_repo(ceph_repo_content)
+
+    # Before any install, make sure we have `wget`
+    pkg_managers.yum(distro.conn, 'wget')
 
     pkg_managers.yum(distro.conn, 'ceph')
