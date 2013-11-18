@@ -1,4 +1,5 @@
 from ceph_deploy.lib.remoto import process
+from ceph_deploy.util import pkg_managers
 
 
 def install(distro, version_kind, version, adjust_repos):
@@ -91,3 +92,48 @@ def install(distro, version_kind, version, adjust_repos):
             'gdisk',
             ],
         )
+
+
+def firewall_install(distro, repo_url, gpg_url, adjust_repos):
+    repo_url = repo_url.strip('/')  # Remove trailing slashes
+
+    if adjust_repos:
+        process.run(
+            distro.conn,
+            [
+                'wget',
+                '-q',
+                '-O',
+                'release.asc',
+                gpg_url,
+            ],
+            stop_on_nonzero=False,
+        )
+
+        process.run(
+            distro.conn,
+            [
+                'apt-key',
+                'add',
+                'release.asc'
+            ]
+        )
+
+        distro.conn.remote_module.write_sources_list(repo_url, distro.codename)
+
+    # Before any install, make sure we have `wget`
+    pkg_managers.apt_update(distro.conn)
+    packages = (
+        'ceph',
+        'ceph-mds',
+        'ceph-common',
+        'ceph-fs-common',
+        # ceph only recommends gdisk, make sure we actually have
+        # it; only really needed for osds, but minimal collateral
+        'gdisk',
+    )
+
+    for pkg in packages:
+        pkg_managers.apt(distro.conn, pkg)
+
+    pkg_managers.apt(distro.conn, 'ceph')
