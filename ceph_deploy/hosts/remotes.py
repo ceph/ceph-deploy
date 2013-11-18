@@ -66,7 +66,7 @@ def write_keyring(path, key):
     """ create a keyring file """
     tmp_file = tempfile.NamedTemporaryFile(delete=False)
     tmp_file.write(key)
-    os.rename(tmp_file.name, path)
+    shutil.move(tmp_file.name, path)
 
 
 def create_mon_path(path):
@@ -150,7 +150,7 @@ def make_mon_removed_dir(path, file_name):
     except OSError, e:
         if e.errno != errno.EEXIST:
             raise
-    os.rename(path, os.path.join('/var/lib/ceph/mon-removed/', file_name))
+    shutil.move(path, os.path.join('/var/lib/ceph/mon-removed/', file_name))
 
 
 def safe_mkdir(path):
