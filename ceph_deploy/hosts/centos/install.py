@@ -97,12 +97,6 @@ def install_epel(distro):
 
 def firewall_install(distro, repo_url, gpg_url, adjust_repos):
     repo_url = repo_url.strip('/')  # Remove trailing slashes
-    gpg_fallback = 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc'
-    logger = distro.conn.logger
-    if gpg_url is None:
-        logger.warning('--gpg-url was not used, will fallback')
-        logger.warning('using GPG fallback: %s', gpg_fallback)
-        gpg_url = gpg_fallback
 
     if adjust_repos:
         process.run(
