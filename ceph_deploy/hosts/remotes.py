@@ -71,6 +71,7 @@ def write_keyring(path, key):
     """ create a keyring file """
     tmp_file = tempfile.NamedTemporaryFile(delete=False)
     tmp_file.write(key)
+    tmp_file.close()
     shutil.move(tmp_file.name, path)
 
 
