@@ -6,3 +6,4 @@ Content Index
 
    index.rst
    changelog.rst
+   install.rst
