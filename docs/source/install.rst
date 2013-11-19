@@ -1,5 +1,5 @@
 
-.. _install::
+.. _install:
 
 ``install``
 ===========
