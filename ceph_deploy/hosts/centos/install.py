@@ -95,7 +95,7 @@ def install_epel(distro):
             )
 
 
-def firewall_install(distro, repo_url, gpg_url, adjust_repos):
+def mirror_install(distro, repo_url, gpg_url, adjust_repos):
     repo_url = repo_url.strip('/')  # Remove trailing slashes
 
     if adjust_repos:
