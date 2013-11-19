@@ -88,7 +88,7 @@ Those values will be used to write to the ceph ``sources.list`` (in Debian and
 Debian-based distros) or the ``yum.repos`` file for RPM distros and will skip
 trying to compose the right URL for the release being installed.
 
-.. _note::
+.. note::
     It is currently not possible to specify what version/release is to be
     installed when ``--repo-url`` is used.
 
