@@ -24,7 +24,7 @@ displayed, similar to::
     [ceph_deploy][ERROR ] UnsupportedPlatform: Platform is not supported: Mandriva
 
 
-.. _install-stable-releases
+.. _install-stable-releases:
 
 Stable releases
 ---------------
@@ -35,7 +35,7 @@ specify exactly what release you need::
     ceph-deploy install --stable emperor {host}
 
 
-.. _install-unstable-releases
+.. _install-unstable-releases:
 
 Unstable releases
 -----------------
@@ -54,7 +54,7 @@ master::
     ceph-deploy install --dev {branch or tag} {host}
 
 
-.. _install-behind-firewall
+.. _install-behind-firewall:
 
 Behind Firewall
 ---------------
