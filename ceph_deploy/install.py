@@ -46,14 +46,14 @@ def install(args):
         repo_url = os.environ.get('CEPH_DEPLOY_REPO_URL') or args.repo_url
         gpg_url = os.environ.get('CEPH_DEPLOY_GPG_URL') or args.gpg_url
         gpg_fallback = 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc'
-        if gpg_url is None:
+        if gpg_url is None and repo_url:
             LOG.warning('--gpg-url was not used, will fallback')
             LOG.warning('using GPG fallback: %s', gpg_fallback)
             gpg_url = gpg_fallback
 
         if repo_url:  # triggers using a custom repository
             rlogger.info('using custom repository location: %s', repo_url)
-            distro.firewall_install(
+            distro.mirror_install(
                 distro,
                 repo_url,
                 gpg_url,
