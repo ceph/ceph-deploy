@@ -1,4 +1,4 @@
-from ceph_deploy.util import pkg_managers
+from ceph_deploy.util import pkg_managers, templates
 from ceph_deploy.lib.remoto import process
 
 
@@ -93,3 +93,29 @@ def install_epel(distro):
                     'epel-release-5*.rpm'
                 ],
             )
+
+
+def mirror_install(distro, repo_url, gpg_url, adjust_repos):
+    repo_url = repo_url.strip('/')  # Remove trailing slashes
+
+    if adjust_repos:
+        process.run(
+            distro.conn,
+            [
+                'rpm',
+                '--import',
+                gpg_url,
+            ]
+        )
+
+        ceph_repo_content = templates.ceph_repo.format(
+            repo_url=repo_url,
+            gpg_url=gpg_url
+        )
+
+        distro.conn.remote_module.write_yum_repo(ceph_repo_content)
+
+    # Before any install, make sure we have `wget`
+    pkg_managers.yum(distro.conn, 'wget')
+
+    pkg_managers.yum(distro.conn, 'ceph')

@@ -1,6 +1,7 @@
 import argparse
 import logging
 from distutils.util import strtobool
+import os
 
 from . import hosts
 from .cliutil import priority
@@ -40,7 +41,32 @@ def install(args):
         LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
         rlogger = logging.getLogger(hostname)
         rlogger.info('installing ceph on %s' % hostname)
-        distro.install(distro, args.version_kind, version, args.adjust_repos)
+
+        # custom repo arguments
+        repo_url = os.environ.get('CEPH_DEPLOY_REPO_URL') or args.repo_url
+        gpg_url = os.environ.get('CEPH_DEPLOY_GPG_URL') or args.gpg_url
+        gpg_fallback = 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc'
+        if gpg_url is None:
+            LOG.warning('--gpg-url was not used, will fallback')
+            LOG.warning('using GPG fallback: %s', gpg_fallback)
+            gpg_url = gpg_fallback
+
+        if repo_url:  # triggers using a custom repository
+            rlogger.info('using custom repository location: %s', repo_url)
+            distro.firewall_install(
+                distro,
+                repo_url,
+                gpg_url,
+                args.adjust_repos
+            )
+
+        else:  # otherwise a normal installation
+            distro.install(
+                distro,
+                args.version_kind,
+                version,
+                args.adjust_repos
+            )
         # Check the ceph version we just installed
         hosts.common.ceph_version(distro.conn)
         distro.conn.exit()
@@ -223,6 +249,20 @@ def make(parser):
         metavar='HOST',
         nargs='+',
         help='hosts to install on',
+    )
+
+    parser.add_argument(
+        '--repo-url',
+        nargs='?',
+        dest='repo_url',
+        help='specify a repo URL that mirrors/contains ceph packages',
+    )
+
+    parser.add_argument(
+        '--gpg-url',
+        nargs='?',
+        dest='gpg_url',
+        help='specify a GPG key URL to be used with custom repos (defaults to ceph.com)'
     )
 
     parser.set_defaults(

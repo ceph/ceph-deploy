@@ -1,3 +1,4 @@
+from ceph_deploy.util import templates
 from ceph_deploy.lib.remoto import process
 
 
@@ -53,6 +54,38 @@ def install(distro, version_kind, version, adjust_repos):
                     ),
                 ]
             )
+
+    process.run(
+        distro.conn,
+        [
+            'zypper',
+            '--non-interactive',
+            '--quiet',
+            'install',
+            'ceph',
+            ],
+        )
+
+
+def mirror_install(distro, repo_url, gpg_url, adjust_repos):
+    repo_url = repo_url.strip('/')  # Remove trailing slashes
+
+    if adjust_repos:
+        process.run(
+            distro.conn,
+            [
+                'rpm',
+                '--import',
+                gpg_url,
+            ]
+        )
+
+        ceph_repo_content = templates.ceph_repo.format(
+            repo_url=repo_url,
+            gpg_url=gpg_url
+        )
+
+        distro.conn.remote_module.write_yum_repo(ceph_repo_content)
 
     process.run(
         distro.conn,
