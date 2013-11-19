@@ -200,21 +200,8 @@ both by external client-facing hosts and internal cluster daemons.
 
 Installing packages
 ===================
-
-To install the Ceph software on the servers, run::
-
-  ceph-deploy install HOST [HOST..]
-
-This installs the current default *stable* release. You can choose a
-different release track with command line options, for example to use
-a release candidate::
-
-  ceph-deploy install --testing HOST
-
-Or to test a development branch::
-
-  ceph-deploy install --dev=wip-mds-now-works-no-kidding HOST [HOST..]
-
+For detailed information on installation instructions refer to the :ref:`install`
+section.
 
 Proxy or Firewall Installs
 --------------------------
