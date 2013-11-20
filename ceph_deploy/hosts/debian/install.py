@@ -30,7 +30,6 @@ def install(distro, version_kind, version, adjust_repos):
             distro.conn,
             [
                 'wget',
-                '-q',
                 '-O',
                 '{key}.asc'.format(key=key),
                 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc'.format(key=key),
@@ -102,7 +101,6 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos):
             distro.conn,
             [
                 'wget',
-                '-q',
                 '-O',
                 'release.asc',
                 gpg_url,
