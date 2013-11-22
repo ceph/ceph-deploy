@@ -130,17 +130,31 @@ def purge_data(args):
 
     for hostname in args.host:
         distro = hosts.get(hostname, username=args.username)
-        LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
+        LOG.info(
+            'Distro info: %s %s %s',
+            distro.name,
+            distro.release,
+            distro.codename
+        )
+
         rlogger = logging.getLogger(hostname)
         rlogger.info('purging data on %s' % hostname)
 
-        process.run(
+        # Try to remove the contents of /var/lib/ceph first, don't worry
+        # about errors here, we deal with them later on
+        process.check(
             distro.conn,
             [
                 'rm', '-rf', '--one-file-system', '--', '/var/lib/ceph',
             ]
         )
+
+        # If we failed in the previous call, then we probably have OSDs
+        # still mounted, so we unmount them here
         if distro.conn.remote_module.path_exists('/var/lib/ceph'):
+            rlogger.warning(
+                'OSDs may still be mounted, trying to unmount them'
+            )
             process.run(
                 distro.conn,
                 [
@@ -151,6 +165,9 @@ def purge_data(args):
                     '-exec', 'umount', '{}', ';',
                 ]
             )
+
+            # And now we try again to remove the contents, since OSDs should be
+            # unmounted, but this time we do check for errors
             process.run(
                 distro.conn,
                 [
