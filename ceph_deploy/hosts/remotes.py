@@ -143,10 +143,9 @@ def shortname():
 
 def which_service():
     """ locating the `service` executable... """
-    locations = ['/sbin/service', '/usr/sbin/service']
-    for location in locations:
-        if os.path.exists(location):
-            return location
+    # XXX This should get deprecated at some point. For now
+    # it just bypasses and uses the new helper.
+    return which('service')
 
 
 def which(executable):
