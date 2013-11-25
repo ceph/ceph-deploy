@@ -11,18 +11,6 @@ from .lib.remoto import process
 LOG = logging.getLogger(__name__)
 
 
-def ceph_is_installed(conn):
-    """
-    Check if the ceph packages are installed by looking for the
-    presence of the ceph command.
-    """
-    stdout, stderr, return_code = process.check(
-        conn,
-        ['which', 'ceph'],
-    )
-    return not return_code
-
-
 def install(args):
     version = getattr(args, args.version_kind)
     version_str = args.version_kind
@@ -118,7 +106,8 @@ def purge_data(args):
     installed_hosts = []
     for hostname in args.host:
         distro = hosts.get(hostname, username=args.username)
-        if ceph_is_installed(distro.conn):
+        ceph_is_installed = distro.conn.remote_module.which('ceph')
+        if ceph_is_installed:
             installed_hosts.append(hostname)
         distro.conn.exit()
 

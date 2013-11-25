@@ -17,3 +17,5 @@ build
 
 /ceph-deploy
 /*.conf
+
+*/lib/remoto

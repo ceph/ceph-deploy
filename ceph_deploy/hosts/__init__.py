@@ -5,7 +5,7 @@ that remote host and set all the special cases for running commands depending
 on the type of distribution/version we are dealing with.
 """
 import logging
-from ceph_deploy import exc, lsb
+from ceph_deploy import exc
 from ceph_deploy.hosts import debian, centos, fedora, suse, remotes
 from ceph_deploy.connection import get_connection
 
@@ -47,7 +47,7 @@ def get(hostname, username=None, fallback=None):
     module.codename = codename
     module.conn = conn
     module.machine_type = machine_type
-    module.init = lsb.choose_init(distro_name, codename)
+    module.init = _choose_init(distro_name, codename)
 
     return module
 
@@ -75,8 +75,19 @@ def _normalized_distro_name(distro):
     distro = distro.lower()
     if distro.startswith(('redhat', 'red hat')):
         return 'redhat'
-    elif  distro.startswith(('scientific', 'scientific linux')):
+    elif distro.startswith(('scientific', 'scientific linux')):
         return 'scientific'
     elif distro.startswith(('suse', 'opensuse')):
         return 'suse'
     return distro
+
+
+def _choose_init(distro, codename):
+    """
+    Select a init system for a given distribution.
+
+    Returns the name of a init system (upstart, sysvinit ...).
+    """
+    if distro == 'Ubuntu':
+        return 'upstart'
+    return 'sysvinit'
