@@ -69,6 +69,9 @@ def write_conf(cluster, conf, overwrite):
 
 def write_keyring(path, key):
     """ create a keyring file """
+    # Note that we *require* to avoid deletion of the temp file
+    # otherwise we risk not being able to copy the contents from
+    # one file system to the other, hence the `delete=False`
     tmp_file = tempfile.NamedTemporaryFile(delete=False)
     tmp_file.write(key)
     tmp_file.close()
