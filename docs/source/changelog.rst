@@ -1,3 +1,13 @@
+1.3.3
+-----
+* Add repo mirror support with ``--repo-url`` and ``--gpg-url``
+* Remove dependency on the ``which`` command
+* Fix problem when removing ``/var/lib/ceph`` and OSDs are still mounted
+* Make sure all tmp files are closed before moving, fixes issue when creating
+  keyrings and conf files
+* Complete remove the lsb module
+
+
 1.3.2
 -----
 * ``ceph-deploy new`` will now attempt to copy SSH keys if necessary unless it
