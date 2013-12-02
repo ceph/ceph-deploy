@@ -1,6 +1,5 @@
 import argparse
 import logging
-from distutils.util import strtobool
 import os
 
 from . import hosts
@@ -112,10 +111,8 @@ def purge_data(args):
         distro.conn.exit()
 
     if installed_hosts:
-        print "ceph is still installed on: ", installed_hosts
-        answer = raw_input("Continue (y/n)")
-        if not strtobool(answer):
-            return
+        LOG.error("ceph is still installed on: ", installed_hosts)
+        raise RuntimeError("refusing to purge data while ceph is still installed")
 
     for hostname in args.host:
         distro = hosts.get(hostname, username=args.username)
