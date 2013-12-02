@@ -164,7 +164,7 @@ def purge_data(args):
         process.run(
             distro.conn,
             [
-                'rm', '-rf', '--one-file-system', '--', '/etc/ceph/*',
+                'rm', '-rf', '--one-file-system', '--', '/etc/ceph/',
             ]
         )
 
