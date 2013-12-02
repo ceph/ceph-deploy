@@ -36,8 +36,11 @@ def get(hostname, username=None, fallback=None):
     )
     conn.import_module(remotes)
     distro_name, release, codename = conn.remote_module.platform_information()
-    if not codename:
-        raise exc.UnsupportedPlatform(distro=distro_name, codename=codename)
+    if not codename or not _get_distro(distro_name):
+        raise exc.UnsupportedPlatform(
+            distro=distro_name,
+            codename=codename,
+            release=release)
 
     machine_type = conn.remote_module.machine_type()
 
@@ -53,6 +56,9 @@ def get(hostname, username=None, fallback=None):
 
 
 def _get_distro(distro, fallback=None):
+    if not distro:
+        return
+
     distro = _normalized_distro_name(distro)
     distributions = {
         'debian': debian,
@@ -63,12 +69,8 @@ def _get_distro(distro, fallback=None):
         'fedora': fedora,
         'suse': suse,
         }
-    try:
-        return distributions[distro]
-    except KeyError:
-        if fallback:
-            return _get_distro(fallback)
-        raise exc.UnsupportedPlatform(distro=distro, codename='')
+
+    return distributions.get(distro) or _get_distro(fallback)
 
 
 def _normalized_distro_name(distro):
