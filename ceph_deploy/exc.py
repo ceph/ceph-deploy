@@ -40,20 +40,24 @@ class NeedDiskError(DeployError):
     Must supply disk/path argument
     """
 
+
 class UnsupportedPlatform(DeployError):
     """
     Platform is not supported
     """
-    def __init__(self, distro, codename):
+    def __init__(self, distro, codename, release):
         self.distro = distro
         self.codename = codename
+        self.release = release
 
     def __str__(self):
-        return '{doc}: {distro} {codename}'.format(
+        return '{doc}: {distro} {codename} {release}'.format(
             doc=self.__doc__.strip(),
             distro=self.distro,
             codename=self.codename,
-            )
+            release=self.release,
+        )
+
 
 class MissingPackageError(DeployError):
     """
