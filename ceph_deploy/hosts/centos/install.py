@@ -99,6 +99,7 @@ def install_epel(distro):
 
 def mirror_install(distro, repo_url, gpg_url, adjust_repos):
     repo_url = repo_url.strip('/')  # Remove trailing slashes
+    gpg_url_path = gpg_url.split('file://')[-1]  # Remove file if present
 
     pkg_managers.yum_clean(distro.conn)
 
@@ -108,7 +109,7 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos):
             [
                 'rpm',
                 '--import',
-                gpg_url,
+                gpg_url_path,
             ]
         )
 

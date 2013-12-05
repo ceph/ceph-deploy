@@ -95,25 +95,28 @@ def install(distro, version_kind, version, adjust_repos):
 
 def mirror_install(distro, repo_url, gpg_url, adjust_repos):
     repo_url = repo_url.strip('/')  # Remove trailing slashes
+    gpg_path = gpg_url.split('file://')[-1]
 
     if adjust_repos:
-        process.run(
-            distro.conn,
-            [
-                'wget',
-                '-O',
-                'release.asc',
-                gpg_url,
-            ],
-            stop_on_nonzero=False,
-        )
+        if not gpg_url.startswith('file://'):
+            process.run(
+                distro.conn,
+                [
+                    'wget',
+                    '-O',
+                    'release.asc',
+                    gpg_url,
+                ],
+                stop_on_nonzero=False,
+            )
 
+        gpg_file = 'release.asc' if not gpg_url.startswith('file://') else gpg_path
         process.run(
             distro.conn,
             [
                 'apt-key',
                 'add',
-                'release.asc'
+                gpg_file,
             ]
         )
 
