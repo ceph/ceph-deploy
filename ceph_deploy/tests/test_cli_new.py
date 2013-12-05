@@ -72,6 +72,7 @@ def test_mons(newcfg):
 
 def test_defaults(newcfg):
     cfg = newcfg('host1')
-    assert cfg.get('global', 'auth_supported') == 'cephx'
-    assert cfg.get('global', 'osd_journal_size') == '1024'
+    assert cfg.get('global', 'auth cluster required') == 'cephx'
+    assert cfg.get('global', 'auth service required') == 'cephx'
+    assert cfg.get('global', 'auth client required') == 'cephx'
     assert cfg.get('global', 'filestore_xattr_use_omap') == 'true'
