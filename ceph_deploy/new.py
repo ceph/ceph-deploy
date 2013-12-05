@@ -120,8 +120,10 @@ def new(args):
 
     # override undesirable defaults, needed until bobtail
 
-    # http://tracker.newdream.net/issues/3136
-    cfg.set('global', 'auth supported', 'cephx')
+    # http://tracker.ceph.com/issues/6788
+    cfg.set('global', 'auth cluster required', 'cephx')
+    cfg.set('global', 'auth service required', 'cephx')
+    cfg.set('global', 'auth client required', 'cephx')
 
     # http://tracker.newdream.net/issues/3137
     cfg.set('global', 'osd journal size', '1024')
