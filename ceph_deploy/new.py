@@ -125,9 +125,6 @@ def new(args):
     cfg.set('global', 'auth service required', 'cephx')
     cfg.set('global', 'auth client required', 'cephx')
 
-    # http://tracker.newdream.net/issues/3137
-    cfg.set('global', 'osd journal size', '1024')
-
     # http://tracker.newdream.net/issues/3138
     cfg.set('global', 'filestore xattr use omap', 'true')
 
