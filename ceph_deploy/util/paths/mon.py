@@ -53,3 +53,14 @@ def keyring(cluster, hostname):
     """
     keyring_file = '%s-%s.mon.keyring' % (cluster, hostname)
     return join(constants.tmp_path, keyring_file)
+
+
+def asok(cluster, hostname):
+    """
+    Example usage::
+
+        >>> mon.asok('mycluster', 'myhostname')
+        /var/run/ceph/mycluster-mon.myhostname.asok
+    """
+    asok_file = '%s-mon.%s.asok' % (cluster, hostname)
+    return join(constants.base_run_path, asok_file)
