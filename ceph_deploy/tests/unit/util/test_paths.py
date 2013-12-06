@@ -27,3 +27,7 @@ class TestMonPaths(object):
         assert result.startswith('/')
         assert result.endswith('tmp/mycluster-myhostname.mon.keyring')
 
+    def test_asok(self):
+        result = paths.mon.asok('mycluster', 'myhostname')
+        assert result.startswith('/')
+        assert result.endswith('mycluster-myhostname.asok')
