@@ -30,4 +30,4 @@ class TestMonPaths(object):
     def test_asok(self):
         result = paths.mon.asok('mycluster', 'myhostname')
         assert result.startswith('/')
-        assert result.endswith('mycluster-myhostname.asok')
+        assert result.endswith('mycluster-mon.myhostname.asok')
