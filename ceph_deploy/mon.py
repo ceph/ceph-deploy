@@ -28,7 +28,7 @@ def mon_status_check(conn, logger, hostname, args):
     output changes as this check depends on that availability.
 
     """
-    mon = 'mon.%s' % hostname
+    asok_path = paths.mon.asok(args.cluster, hostname)
 
     out, err, code = process.check(
         conn,
@@ -36,7 +36,7 @@ def mon_status_check(conn, logger, hostname, args):
             'ceph',
             '--cluster={cluster}'.format(cluster=args.cluster),
             '--admin-daemon',
-            '/var/run/ceph/ceph-%s.asok' % mon,
+            asok_path,
             'mon_status',
         ],
     )
