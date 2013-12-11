@@ -139,6 +139,40 @@ def get_file(path):
         pass
 
 
+def get_realpath(path):
+    """ resolve a link """
+    try:
+        return os.path.realpath(path)
+    except IOError:
+        pass
+
+
+def get_dir_info(path, directories_only, details):
+    """ fetch directory list and extra info """
+    try:
+        d = []
+        for files in os.listdir(path):
+            if directories_only:
+                if not os.path.isdir(os.path.join(path, files)):
+                    continue
+            if details and os.path.islink(os.path.join(path, files)):
+                d.append((files, 'link', os.path.realpath(os.path.join(path, files))))
+            elif details and os.path.ismount(os.path.join(path, files)):
+                for line in open('/proc/mounts', 'rb'):
+                    fields = line.split(' ')
+                    if len(fields) < 3:
+                        continue
+                    if fields[1] == os.path.join(path, files):
+                        d.append((files, 'mount', fields[0]))
+                        break
+            else:
+                d.append((files, '', ''))
+
+        return d
+    except IOError:
+        pass
+
+
 def shortname():
     """get remote short hostname"""
     return socket.gethostname().split('.', 1)[0]
