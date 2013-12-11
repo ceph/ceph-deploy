@@ -28,7 +28,7 @@ class osd_info:
 
     def valid_datapath(self):
         # does our osd number match our directory link?
-        if re.match(self.whoami, ''.join(reversed(self.datapath))):
+        if re.match(''.join(reversed(self.whoami)), ''.join(reversed(self.datapath))):
             return True
         else:
             return False
