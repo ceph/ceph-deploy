@@ -1,4 +1,4 @@
-import mon
+import mon, pkg
 from install import install, mirror_install
 from uninstall import uninstall
 
