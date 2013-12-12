@@ -1,7 +1,9 @@
 from ceph_deploy.lib.remoto import process
 
 
-def apt(conn, package, *a, **kw):
+def apt(conn, packages, *a, **kw):
+    if isinstance(packages, str):
+        packages = [packages]
     cmd = [
         'env',
         'DEBIAN_FRONTEND=noninteractive',
@@ -9,8 +11,8 @@ def apt(conn, package, *a, **kw):
         '-q',
         'install',
         '--assume-yes',
-        package,
     ]
+    cmd.extend(packages)
     return process.run(
         conn,
         cmd,
@@ -20,6 +22,9 @@ def apt(conn, package, *a, **kw):
 
 
 def apt_remove(conn, packages, *a, **kw):
+    if isinstance(packages, str):
+        packages = [packages]
+
     purge = kw.pop('purge', False)
     cmd = [
         'apt-get',
@@ -54,14 +59,17 @@ def apt_update(conn):
     )
 
 
-def yum(conn, package, *a, **kw):
+def yum(conn, packages, *a, **kw):
+    if isinstance(packages, str):
+        packages = [packages]
+
     cmd = [
         'yum',
         '-y',
         '-q',
         'install',
-        package,
     ]
+    cmd.extend(packages)
     return process.run(
         conn,
         cmd,
