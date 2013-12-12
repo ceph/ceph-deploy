@@ -114,3 +114,43 @@ def rpm(conn, rpm_args=None, *a, **kw):
         *a,
         **kw
     )
+
+
+def zypper(conn, packages, *a, **kw):
+    if isinstance(packages, str):
+        packages = [packages]
+
+    cmd = [
+        'zypper',
+        '--non-interactive',
+        '--quiet',
+        'install',
+    ]
+
+    cmd.extend(packages)
+    return process.run(
+        conn,
+        cmd,
+        *a,
+        **kw
+    )
+
+
+def zypper_remove(conn, packages, *a, **kw):
+    cmd = [
+        'zypper',
+        '--non-interactive',
+        '--quiet',
+        'remove',
+        ]
+
+    if isinstance(packages, str):
+        cmd.append(packages)
+    else:
+        cmd.extend(packages)
+    return process.run(
+        conn,
+        cmd,
+        *a,
+        **kw
+    )
