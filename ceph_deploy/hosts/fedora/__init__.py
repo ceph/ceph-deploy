@@ -1,4 +1,5 @@
 import mon
+from ceph_deploy.hosts.centos import pkg
 from install import install, mirror_install
 from uninstall import uninstall
 
