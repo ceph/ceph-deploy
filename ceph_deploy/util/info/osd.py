@@ -4,11 +4,11 @@ A class for helping to report osd details.
 import re
 
 
-class osd_info:
+class OSDInfo:
 
 
     def __init__(self):
-        self.whomai = None
+        self.whoami = None
         self.magic = None
         self.active = None
         self.datapath = None
@@ -20,23 +20,20 @@ class osd_info:
 
     def valid_whoami(self):
         # are we a sensible number for an osd?
-        if (self.whoami).isdigit():
+        if self.whoami.isdigit():
             return True
-        else:
-            return False
+        return False
 
 
     def valid_datapath(self):
         # does our osd number match our directory link?
         if re.match(''.join(reversed(self.whoami)), ''.join(reversed(self.datapath))):
             return True
-        else:
-            return False
+        return False
 
 
     def valid_journal(self):
-        # did we find a journal
+        # did we find a journal?
         if self.journalpath and self.realjournalpath:
             return True
-        else:
-            return False
+        return False

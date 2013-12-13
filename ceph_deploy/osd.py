@@ -271,9 +271,9 @@ def osd_list(args, cfg):
 
         LOG.debug('Listing osds on {hostname}...'.format(hostname=hostname))
 
-        dir = distro.conn.remote_module.get_dir_info(osd_base, True, True)
+        dir = distro.conn.remote_module.get_dir_info(osd_base)
         for file, typ, realfile in dir:
-            osd = info.osd.osd_info()
+            osd = info.osd.OSDInfo()
             osd.datapath = os.path.join(osd_base, file)
             osd.datapathtyp = typ
             osd.realdatapath = realfile
@@ -295,7 +295,7 @@ def osd_list(args, cfg):
                 osd.journalpath = journal_path
                 osd.realjournalpath = distro.conn.remote_module.get_realpath(journal_path)
 
-            if osd.active != None and osd.magic != None and osd.whoami != None:
+            if osd.active and osd.magic and osd.whoami:
                 osds.append(osd)
 
         distro.conn.exit()
