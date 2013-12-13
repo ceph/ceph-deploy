@@ -4,7 +4,7 @@ A class for helping to report osd details.
 import re
 
 
-class OSDInfo:
+class OSDInfo(object):
 
 
     def __init__(self):
