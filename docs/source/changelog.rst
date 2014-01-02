@@ -1,3 +1,13 @@
+1.3.4
+-----
+* ``/etc/ceph`` now gets completely removed when using ``purgedata``.
+* Refuse to perform ``purgedata`` if ceph is installed
+* Add more details when a given platform is not supported
+* Use new Ceph auth settings for ``ceph.conf``
+* Remove old journal size settings from ``ceph.conf``
+* Add a new subcommand: ``pkg`` to install/remove packages from hosts
+
+
 1.3.3
 -----
 * Add repo mirror support with ``--repo-url`` and ``--gpg-url``
