@@ -5,7 +5,6 @@
 
 set -x
 
-#export GNUPGHOME=/home/jenkins-build/build/gnupg.autobuild/
 export GNUPGHOME=/home/jenkins-build/build/gnupg.ceph-release/
 export KEYID=17ED316D
 HOST=$(hostname --short)
