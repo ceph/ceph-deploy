@@ -3,6 +3,8 @@
 # This is the script that runs inside Jenkins.
 # http://jenkins.ceph.com/job/ceph-deploy/
 
+set -x
+
 #export GNUPGHOME=/home/jenkins-build/build/gnupg.autobuild/
 export GNUPGHOME=/home/jenkins-build/build/gnupg.ceph-release/
 export KEYID=17ED316D
