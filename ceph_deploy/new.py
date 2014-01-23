@@ -36,7 +36,10 @@ def get_nonlocal_ip(host):
     """
     Search result of getaddrinfo() for a non-localhost-net address
     """
-    ailist = socket.getaddrinfo(host, None)
+    try:
+        ailist = socket.getaddrinfo(host, None)
+    except socket.gaierror:
+        raise exc.UnableToResolveError(host)
     for ai in ailist:
         # an ai is a 5-tuple; the last element is (ip, port)
         ip = ai[4][0]
