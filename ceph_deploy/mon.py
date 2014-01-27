@@ -312,6 +312,7 @@ def mon_create_initial(args):
         LOG.error('Some monitors have still not reached quorum:')
         for host in mon_members - mon_in_quorum:
             LOG.error('%s', host)
+        raise SystemExit('cluster may not be in a healthy state')
 
 
 def mon(args):
