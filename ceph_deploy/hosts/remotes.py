@@ -68,10 +68,12 @@ def write_conf(cluster, conf, overwrite):
         tmp_file.write(conf)
         tmp_file.close()
         shutil.move(tmp_file.name, path)
+        os.chmod(path, 0644)
         return
     if os.path.exists('/etc/ceph'):
         with open(path, 'w') as f:
             f.write(conf)
+        os.chmod(path, 0644)
     else:
         err_msg = '/etc/ceph/ does not exist - could not write config'
         raise RuntimeError(err_msg)
