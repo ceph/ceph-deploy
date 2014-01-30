@@ -26,7 +26,7 @@ class CephConf(ConfigParser.RawConfigParser):
         to be doing try/except {ConfigParser Exceptions} every time.
         """
         try:
-            #Use full parent function so we can replace it in the class 
+            #Use full parent function so we can replace it in the class
             # if desired
             return ConfigParser.RawConfigParser.get(self, section, key)
         except (ConfigParser.NoSectionError,
@@ -50,6 +50,19 @@ def load(args):
     else:
         with contextlib.closing(f):
             return parse(f)
+
+
+def load_raw(args):
+    """
+    Read the actual file *as is* without parsing/modifiying it
+    so that it can be written maintaining its same properties.
+    """
+    path = '{cluster}.conf'.format(cluster=args.cluster)
+    try:
+        with open(path) as ceph_conf:
+            return ceph_conf.read()
+    except (IOError, OSError) as e:
+        raise exc.ConfigError(e)
 
 
 def write_conf(cluster, conf, overwrite):
