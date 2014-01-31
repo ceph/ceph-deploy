@@ -69,8 +69,8 @@ But they can also be found for ``ceph`` releases in the ``ceph`` repos like::
      ceph.com/rpm-testing
 
 
-bootstraping
-------------
+bootstrapping
+-------------
 To get the source tree ready for use, run this once::
 
   ./bootstrap
@@ -137,7 +137,7 @@ cluster::
     ceph-deploy gatherkeys MONHOST
 
 At this point you can skip the steps below that create a new cluster
-(you already have one) and optionally skip instalation and/or monitor
+(you already have one) and optionally skip installation and/or monitor
 creation, depending on what you are trying to accomplish.
 
 
@@ -336,3 +336,25 @@ in the remote host.
 
 Newer versions of ``ceph-deploy`` should warn you if the results are different
 but that might prevent the monitors from reaching quorum.
+
+Developing ceph-deploy
+======================
+Now that you have cracked your teeth on Ceph, you might find that you want to
+contribute to ceph-deploy.
+
+Resources
+---------
+Bug tracking: http://tracker.ceph.com/projects/devops/issues
+
+Mailing list and IRC info is the same as ceph http://ceph.com/resources/mailing-list-irc/
+
+Submitting Patches
+------------------
+Please add test cases to cover any code you add. You can test your changes
+by running ``tox`` (You will also need ``mock`` and ``pytest`` ) from inside
+the git clone
+
+When creating a commit message please use ``git commit -s`` or otherwise add
+``Signed-off-by: Your Name <email@address.dom>`` to your commit message.
+
+Patches can then be submitted by a pull request on GitHub.

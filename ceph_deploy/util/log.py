@@ -1,4 +1,5 @@
 import logging
+import sys
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 
@@ -16,6 +17,19 @@ BOLD_SEQ = "\033[1m"
 
 BASE_COLOR_FORMAT = "[$BOLD%(name)s$RESET][%(color_levelname)-17s] %(message)s"
 BASE_FORMAT = "%(asctime)s [%(name)s][%(levelname)-6s] %(message)s"
+
+
+def supports_color():
+    """
+    Returns True if the running system's terminal supports color, and False
+    otherwise.
+    """
+    unsupported_platform = (sys.platform in ('win32', 'Pocket PC'))
+    # isatty is not always implemented, #6223.
+    is_a_tty = hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()
+    if unsupported_platform or not is_a_tty:
+        return False
+    return True
 
 
 def color_message(message):
@@ -36,9 +50,11 @@ class ColoredFormatter(logging.Formatter):
     def format(self, record):
         levelname = record.levelname
         truncated_level = record.levelname[:6]
-        if levelname in COLORS:
+        if levelname in COLORS and supports_color():
             levelname_color = COLOR_SEQ % (30 + COLORS[levelname]) + truncated_level + RESET_SEQ
             record.color_levelname = levelname_color
+        else:
+            record.color_levelname = levelname
         return logging.Formatter.format(self, record)
 
 

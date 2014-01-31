@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# This is the script that runs inside Jenkins for each pull request.
+# http://jenkins.ceph.com/job/ceph-deploy-pull-requests/
+
+virtualenv --version
+virtualenv venv
+. venv/bin/activate
+#venv/bin/python setup.py develop
+venv/bin/pip install tox
+venv/bin/tox -rv

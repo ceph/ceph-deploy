@@ -6,9 +6,10 @@ import tempfile
 import platform
 
 
-def platform_information():
+def platform_information(_linux_distribution=None):
     """ detect platform information from remote host """
-    distro, release, codename = platform.linux_distribution()
+    linux_distribution = _linux_distribution or platform.linux_distribution
+    distro, release, codename = linux_distribution()
     if not codename and 'debian' in distro.lower():  # this could be an empty string in Debian
         debian_codenames = {
             '8': 'jessie',
@@ -17,6 +18,15 @@ def platform_information():
         }
         major_version = release.split('.')[0]
         codename = debian_codenames.get(major_version, '')
+
+        # In order to support newer jessie/sid or wheezy/sid strings we test this
+        # if sid is buried in the minor, we should use sid anyway.
+        if not codename and '/' in release:
+            major, minor = release.split('/')
+            if minor == 'sid':
+                codename = minor
+            else:
+                codename = major
 
     return (
         str(distro).rstrip(),
@@ -58,10 +68,12 @@ def write_conf(cluster, conf, overwrite):
         tmp_file.write(conf)
         tmp_file.close()
         shutil.move(tmp_file.name, path)
+        os.chmod(path, 0644)
         return
     if os.path.exists('/etc/ceph'):
         with open(path, 'w') as f:
             f.write(conf)
+        os.chmod(path, 0644)
     else:
         err_msg = '/etc/ceph/ does not exist - could not write config'
         raise RuntimeError(err_msg)

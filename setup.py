@@ -19,7 +19,7 @@ if pyversion < (2, 7) or (3, 0) <= pyversion <= (3, 1):
 # Add libraries that are not part of install_requires
 #
 vendorize([
-    ('remoto', '0.0.12'),
+    ('remoto', '0.0.14'),
 ])
 
 
@@ -65,6 +65,7 @@ setup(
             'forgetkeys = ceph_deploy.forgetkeys:make',
             'config = ceph_deploy.config:make',
             'admin = ceph_deploy.admin:make',
+            'pkg = ceph_deploy.pkg:make'
             ],
 
         },
