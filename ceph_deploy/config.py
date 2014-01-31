@@ -1,5 +1,4 @@
 import logging
-from cStringIO import StringIO
 import os.path
 
 from . import exc
@@ -11,9 +10,7 @@ LOG = logging.getLogger(__name__)
 
 
 def config_push(args):
-    cfg = conf.load(args)
-    conf_data = StringIO()
-    cfg.write(conf_data)
+    conf_data = conf.load_raw(args)
 
     errors = 0
     for hostname in args.client:
@@ -23,7 +20,7 @@ def config_push(args):
 
             distro.conn.remote_module.write_conf(
                 args.cluster,
-                conf_data.getvalue(),
+                conf_data,
                 args.overwrite_conf,
             )
 
