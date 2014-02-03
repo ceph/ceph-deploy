@@ -8,7 +8,8 @@ COLORS = {
     'INFO': WHITE,
     'DEBUG': BLUE,
     'CRITICAL': RED,
-    'ERROR': RED
+    'ERROR': RED,
+    'FATAL': RED,
 }
 
 RESET_SEQ = "\033[0m"
@@ -16,7 +17,7 @@ COLOR_SEQ = "\033[1;%dm"
 BOLD_SEQ = "\033[1m"
 
 BASE_COLOR_FORMAT = "[$BOLD%(name)s$RESET][%(color_levelname)-17s] %(message)s"
-BASE_FORMAT = "%(asctime)s [%(name)s][%(levelname)-6s] %(message)s"
+BASE_FORMAT = "[%(name)s][%(levelname)-6s] %(message)s"
 
 
 def supports_color():
@@ -50,18 +51,17 @@ class ColoredFormatter(logging.Formatter):
     def format(self, record):
         levelname = record.levelname
         truncated_level = record.levelname[:6]
-        if levelname in COLORS and supports_color():
-            levelname_color = COLOR_SEQ % (30 + COLORS[levelname]) + truncated_level + RESET_SEQ
-            record.color_levelname = levelname_color
-        else:
-            record.color_levelname = levelname
+        levelname_color = COLOR_SEQ % (30 + COLORS[levelname]) + truncated_level + RESET_SEQ
+        record.color_levelname = levelname_color
         return logging.Formatter.format(self, record)
 
 
 def color_format():
     """
     Main entry point to get a colored formatter, it will use the
-    BASE_FORMAT by default.
+    BASE_FORMAT by default and fall back to no colors if the system
+    does not support it
     """
-    color_format = color_message(BASE_COLOR_FORMAT)
+    str_format = BASE_COLOR_FORMAT if supports_color() else BASE_FORMAT
+    color_format = color_message(str_format)
     return ColoredFormatter(color_format)
