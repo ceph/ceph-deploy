@@ -1,3 +1,9 @@
+ceph-deploy (1.3.5-1) stable; urgency=low
+
+  * New upstream release
+
+ -- Ken Dreyer <ken.dreyer@inktank.com>  Wed, 05 Feb 2014 19:56:18 +0000
+
 ceph-deploy (1.3.4-1) precise; urgency=low
 
   * New upstream release 
