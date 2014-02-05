@@ -1,3 +1,13 @@
+1.3.5
+-----
+* Support Debian SID for installs
+* Error nicely when hosts cannot be resolved
+* Return a non-zero exit status when monitors have not formed quorum
+* Use the new upstream library for remote connections (execnet 1.2)
+* Ensure proper read permissions for ceph.conf when pushing configs
+* clean up color logging for non-tty sessions
+* do not reformat configs when pushing, pushes are now as-is
+
 1.3.4
 -----
 * ``/etc/ceph`` now gets completely removed when using ``purgedata``.
