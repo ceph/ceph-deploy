@@ -111,7 +111,7 @@ def purge_data(args):
         distro.conn.exit()
 
     if installed_hosts:
-        LOG.error("ceph is still installed on: ", installed_hosts)
+        LOG.error("ceph is still installed on: %s", installed_hosts)
         raise RuntimeError("refusing to purge data while ceph is still installed")
 
     for hostname in args.host:
