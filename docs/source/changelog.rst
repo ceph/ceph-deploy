@@ -7,6 +7,7 @@
 * Ensure proper read permissions for ceph.conf when pushing configs
 * clean up color logging for non-tty sessions
 * do not reformat configs when pushing, pushes are now as-is
+* remove dry-run flag that did nothing
 
 1.3.4
 -----

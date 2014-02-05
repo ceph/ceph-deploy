@@ -42,11 +42,6 @@ def get_parser():
         help='be less verbose',
         )
     parser.add_argument(
-        '-n', '--dry-run',
-        action='store_true', dest='dry_run',
-        help='do not perform any action, but report what would be done',
-        )
-    parser.add_argument(
         '--version',
         action='version',
         version='%s' % ceph_deploy.__version__,

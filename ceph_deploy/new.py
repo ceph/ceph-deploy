@@ -144,30 +144,28 @@ def new(args):
         )
 
     LOG.debug('Writing initial config to %s...', path)
-    if not args.dry_run:
-        tmp = '%s.tmp' % path
-        with file(tmp, 'w') as f:
-            cfg.write(f)
-        try:
-            os.rename(tmp, path)
-        except OSError as e:
-            if e.errno == errno.EEXIST:
-                raise exc.ClusterExistsError(path)
-            else:
-                raise
+    tmp = '%s.tmp' % path
+    with file(tmp, 'w') as f:
+        cfg.write(f)
+    try:
+        os.rename(tmp, path)
+    except OSError as e:
+        if e.errno == errno.EEXIST:
+            raise exc.ClusterExistsError(path)
+        else:
+            raise
 
     LOG.debug('Writing monitor keyring to %s...', keypath)
-    if not args.dry_run:
-        tmp = '%s.tmp' % keypath
-        with file(tmp, 'w') as f:
-            f.write(mon_keyring)
-        try:
-            os.rename(tmp, keypath)
-        except OSError as e:
-            if e.errno == errno.EEXIST:
-                raise exc.ClusterExistsError(keypath)
-            else:
-                raise
+    tmp = '%s.tmp' % keypath
+    with file(tmp, 'w') as f:
+        f.write(mon_keyring)
+    try:
+        os.rename(tmp, keypath)
+    except OSError as e:
+        if e.errno == errno.EEXIST:
+            raise exc.ClusterExistsError(keypath)
+        else:
+            raise
 
 
 @priority(10)
