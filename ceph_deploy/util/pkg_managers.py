@@ -97,6 +97,20 @@ def yum_remove(conn, packages, *a, **kw):
     )
 
 
+def yum_clean(conn, item=None):
+    item = item or 'all'
+    cmd = [
+        'yum',
+        'clean',
+        item,
+    ]
+
+    return process.run(
+        conn,
+        cmd,
+    )
+
+
 def rpm(conn, rpm_args=None, *a, **kw):
     """
     A minimal front end for ``rpm`. Extra flags can be passed in via
