@@ -11,6 +11,8 @@ from . import exc
 from . import hosts
 from .cliutil import priority
 from .lib.remoto import process
+from ceph_deploy.util import paths
+from ceph_deploy.util import info
 
 
 LOG = logging.getLogger(__name__)
@@ -261,8 +263,58 @@ def disk_list(args, cfg):
 
 
 def osd_list(args, cfg):
-    LOG.error('Not yet implemented; see http://tracker.ceph.com/issues/5071')
-    sys.exit(1)
+
+    osd_base = paths.osd.base()
+    for hostname, disk, journal in args.disk:
+        osds = []
+        distro = hosts.get(hostname, username=args.username)
+
+        LOG.debug('Listing osds on {hostname}...'.format(hostname=hostname))
+
+        dir = distro.conn.remote_module.get_dir_info(osd_base)
+        for file, typ, realfile in dir:
+            osd = info.osd.OSDInfo()
+            osd.datapath = os.path.join(osd_base, file)
+            osd.datapathtyp = typ
+            osd.realdatapath = realfile
+
+            magic_path = os.path.join(osd_base, file, 'magic')
+            if distro.conn.remote_module.path_exists(magic_path):
+                osd.magic = (distro.conn.remote_module.get_file(magic_path)).rstrip()
+
+            active_path = os.path.join(osd_base, file, 'active')
+            if distro.conn.remote_module.path_exists(active_path):
+                osd.active = (distro.conn.remote_module.get_file(active_path)).rstrip()
+
+            whoami_path = os.path.join(osd_base, file, 'whoami')
+            if distro.conn.remote_module.path_exists(whoami_path):
+                osd.whoami = (distro.conn.remote_module.get_file(whoami_path)).rstrip()
+
+            journal_path = os.path.join(osd_base, file, 'journal')
+            if distro.conn.remote_module.path_exists(journal_path):
+                osd.journalpath = journal_path
+                osd.realjournalpath = distro.conn.remote_module.get_realpath(journal_path)
+
+            if osd.active and osd.magic and osd.whoami:
+                osds.append(osd)
+
+        distro.conn.exit()
+
+        for osd in osds:
+            if osd.valid_whoami():
+                LOG.info("osd.%s :", osd.whoami)
+            else:
+                LOG.warning("osd.%s : (osd number not valid)", osd.whoami)
+            if osd.valid_datapath():
+                LOG.info(" data    %s, %s, %s", osd.datapath, osd.datapathtyp, osd.realdatapath)
+            else:
+                LOG.warning(" data    %s, %s, %s (data does not match osd number)", osd.datapath, osd.datapathtyp, osd.realdatapath)
+            if osd.valid_journal():
+                LOG.info(" journal %s", osd.realjournalpath)
+            else:
+                LOG.warn(" journal %s (journal missing)", osd.realjournalpath)
+            LOG.info(" magic   %s", osd.magic)
+            LOG.info(" active  %s", osd.active)
 
 
 def osd(args):
