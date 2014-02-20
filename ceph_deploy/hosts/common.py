@@ -128,6 +128,18 @@ def mon_add(distro, args, monitor_keyring, hostname):
             ],
         )
 
+        # add it
+        process.run(
+            distro.conn,
+            [
+                'ceph',
+                'mon',
+                'add',
+                hostname,
+                args.address,
+            ],
+        )
+
         logger.info('unlinking keyring file %s' % keyring)
         distro.conn.remote_module.unlink(keyring)
 
