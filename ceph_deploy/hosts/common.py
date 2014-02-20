@@ -67,7 +67,8 @@ def mon_create(distro, args, monitor_keyring, hostname):
     distro.conn.remote_module.create_init_path(init_path)
 
 
-def mon_add(distro, args, monitor_keyring, hostname):
+def mon_add(distro, args, monitor_keyring):
+    hostname = distro.conn.remote_module.shortname()
     logger = distro.conn.logger
     path = paths.mon.path(args.cluster, hostname)
     monmap_path = paths.mon.monmap(args.cluster, hostname)
@@ -149,3 +150,14 @@ def mon_add(distro, args, monitor_keyring, hostname):
     # create init path
     distro.conn.remote_module.create_init_path(init_path)
 
+    # start the mon using the address
+    process.run(
+        distro.conn,
+        [
+            'ceph-mon',
+            '-i',
+            hostname,
+            '--public-addr',
+            args.address,
+        ],
+    )
