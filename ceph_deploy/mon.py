@@ -6,7 +6,7 @@ import os
 from textwrap import dedent
 import time
 
-from . import conf, exc
+from . import conf, exc, admin
 from .cliutil import priority
 from .util import paths
 from .lib.remoto import process
@@ -105,6 +105,50 @@ def mon_status(conn, logger, hostname, args, silent=False):
         logger.info('monitor: %s is not running' % mon)
         return False
 
+
+def mon_add(args):
+    cfg = conf.load(args)
+    if not args.mon:
+        raise exc.NeedHostError()
+    mon_host = args.mon[0]
+    try:
+        with file('{cluster}.mon.keyring'.format(cluster=args.cluster),
+                  'rb') as f:
+            monitor_keyring = f.read()
+    except IOError:
+        raise RuntimeError('mon keyring not found; run \'new\' to create a new cluster')
+    LOG.info('ensuring configuration of new mon host: %s', mon_host)
+    args.client = [mon_host]
+    admin.admin(args)
+    LOG.debug(
+        'Adding mon to cluster %s, host %s',
+        args.cluster,
+        mon_host,
+    )
+
+    try:
+        LOG.debug('detecting platform for host %s ...', mon_host)
+        distro = hosts.get(mon_host, username=args.username)
+        LOG.info('distro info: %s %s %s', distro.name, distro.release, distro.codename)
+        rlogger = logging.getLogger(mon_host)
+
+        # ensure remote hostname is good to go
+        hostname_is_compatible(distro.conn, rlogger, mon_host)
+        rlogger.debug('adding mon to %s', mon_host)
+        from ceph_deploy.util import net
+        mon_ip = net.get_nonlocal_ip(mon_host)
+        args.address = args.address or mon_ip
+        distro.mon.add(distro, args, monitor_keyring)
+
+        # tell me the status of the deployed mon
+        time.sleep(2)  # give some room to start
+        mon_status(distro.conn, rlogger, mon_host, args)
+        catch_mon_errors(distro.conn, rlogger, mon_host, cfg, args)
+        distro.conn.exit()
+
+    except RuntimeError as e:
+        LOG.error(e)
+        raise exc.GenericError('Failed to add monitor to host:  %s' % mon_host)
 
 def mon_create(args):
 
@@ -318,6 +362,8 @@ def mon_create_initial(args):
 def mon(args):
     if args.subcommand == 'create':
         mon_create(args)
+    elif args.subcommand == 'add':
+        mon_add(args)
     elif args.subcommand == 'destroy':
         mon_destroy(args)
     elif args.subcommand == 'create-initial':
@@ -358,18 +404,27 @@ def make(parser):
     parser.add_argument(
         'subcommand',
         choices=[
+            'add',
             'create',
             'create-initial',
             'destroy',
             ],
         )
+
+    parser.add_argument(
+        '--address',
+        nargs='?',
+        dest='address',
+    )
+
     parser.add_argument(
         'mon',
         nargs='*',
-        )
+    )
+
     parser.set_defaults(
         func=mon,
-        )
+    )
 
 #
 # Helpers
