@@ -11,7 +11,7 @@ from . import exc
 from .cliutil import priority
 from .conf import CephConf
 from . import hosts
-from .util import arg_validators, ssh
+from .util import arg_validators, ssh, net
 from .misc import mon_hosts
 from .lib.remoto import process
 from .connection import get_local_connection
@@ -30,22 +30,6 @@ def generate_auth_key():
         len(key),          # le16: len(key)
     )
     return base64.b64encode(header + key)
-
-
-def get_nonlocal_ip(host):
-    """
-    Search result of getaddrinfo() for a non-localhost-net address
-    """
-    try:
-        ailist = socket.getaddrinfo(host, None)
-    except socket.gaierror:
-        raise exc.UnableToResolveError(host)
-    for ai in ailist:
-        # an ai is a 5-tuple; the last element is (ip, port)
-        ip = ai[4][0]
-        if not ip.startswith('127.'):
-            return ip
-    raise exc.UnableToResolveError(host)
 
 
 def ssh_copy_keys(hostname, username=None):
@@ -106,8 +90,7 @@ def new(args):
 
     for (name, host) in mon_hosts(args.mon):
         LOG.debug('Resolving host %s', host)
-        ip = None
-        ip = get_nonlocal_ip(host)
+        ip = net.get_nonlocal_ip(host)
         LOG.debug('Monitor %s at %s', name, ip)
         mon_initial_members.append(name)
         mon_host.append(ip)
