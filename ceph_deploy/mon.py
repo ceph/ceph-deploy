@@ -8,7 +8,7 @@ import time
 
 from . import conf, exc, admin
 from .cliutil import priority
-from .util import paths
+from .util import paths, net
 from .lib.remoto import process
 from . import hosts
 from .misc import mon_hosts
@@ -108,6 +108,7 @@ def mon_status(conn, logger, hostname, args, silent=False):
 
 def mon_add(args):
     cfg = conf.load(args)
+
     if not args.mon:
         raise exc.NeedHostError()
     mon_host = args.mon[0]
@@ -116,7 +117,10 @@ def mon_add(args):
                   'rb') as f:
             monitor_keyring = f.read()
     except IOError:
-        raise RuntimeError('mon keyring not found; run \'new\' to create a new cluster')
+        raise RuntimeError(
+            'mon keyring not found; run \'new\' to create a new cluster'
+        )
+
     LOG.info('ensuring configuration of new mon host: %s', mon_host)
     args.client = [mon_host]
     admin.admin(args)
@@ -125,6 +129,19 @@ def mon_add(args):
         args.cluster,
         mon_host,
     )
+
+    mon_section = 'mon.%s' % mon_host
+    cfg_mon_addr = cfg.safe_get(mon_section, 'mon addr')
+
+    if args.address:
+        LOG.debug('using mon address via --address %s' % args.address)
+        mon_ip = args.address
+    elif cfg_mon_addr:
+        LOG.debug('using mon address via configuration: %s' % cfg_mon_addr)
+        mon_ip = cfg_mon_addr
+    else:
+        mon_ip = net.get_nonlocal_ip(mon_host)
+        LOG.debug('using mon address by resolving host: %s' % mon_ip)
 
     try:
         LOG.debug('detecting platform for host %s ...', mon_host)
@@ -135,9 +152,7 @@ def mon_add(args):
         # ensure remote hostname is good to go
         hostname_is_compatible(distro.conn, rlogger, mon_host)
         rlogger.debug('adding mon to %s', mon_host)
-        from ceph_deploy.util import net
-        mon_ip = net.get_nonlocal_ip(mon_host)
-        args.address = args.address or mon_ip
+        args.address = mon_ip
         distro.mon.add(distro, args, monitor_keyring)
 
         # tell me the status of the deployed mon
@@ -149,6 +164,7 @@ def mon_add(args):
     except RuntimeError as e:
         LOG.error(e)
         raise exc.GenericError('Failed to add monitor to host:  %s' % mon_host)
+
 
 def mon_create(args):
 
@@ -393,6 +409,19 @@ def make(parser):
 
       If no hosts are passed it will default to use the `mon initial members`
       defined in the configuration.
+
+    add
+      Add a monitor to an existing cluster:
+
+        ceph-deploy mon add node1
+
+      Or:
+
+        ceph-deploy mon add node1 --address 192.168.1.10
+
+      If the section for the monitor exists and defines a `mon address` that
+      will be used, otherwise it will fallback by resolving the hostname to an
+      IP. If `--address` is used it will override all other options.
 
     destroy
       Completely remove monitors on a remote host. Requires hostname(s) as
