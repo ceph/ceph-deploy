@@ -4,6 +4,7 @@
 # http://jenkins.ceph.com/job/ceph-deploy/
 
 set -x
+set -e
 
 # Jenkins will set $RELEASE as a parameter in the job configuration.
 if $RELEASE ; then

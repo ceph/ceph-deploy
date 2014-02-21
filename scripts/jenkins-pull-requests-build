@@ -1,5 +1,8 @@
 #!/bin/sh
 
+set -x
+set -e
+
 # This is the script that runs inside Jenkins for each pull request.
 # http://jenkins.ceph.com/job/ceph-deploy-pull-requests/
 
