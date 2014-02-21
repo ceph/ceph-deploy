@@ -64,3 +64,15 @@ def asok(cluster, hostname):
     """
     asok_file = '%s-mon.%s.asok' % (cluster, hostname)
     return join(constants.base_run_path, asok_file)
+
+
+def monmap(cluster, hostname):
+    """
+    Example usage::
+
+        >>> mon.monmap('mycluster', 'myhostname')
+        /var/lib/ceph/tmp/mycluster.myhostname.monmap
+    """
+    monmap
+    mon_map_file = '%s.%s.monmap' % (cluster, hostname)
+    return join(constants.tmp_path, mon_map_file)

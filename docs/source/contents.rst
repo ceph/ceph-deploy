@@ -8,3 +8,4 @@ Content Index
    changelog.rst
    install.rst
    pkg.rst
+   mon.rst
