@@ -419,7 +419,7 @@ def make(parser):
 
         ceph-deploy mon add node1 --address 192.168.1.10
 
-      If the section for the monitor exists and defines a `mon address` that
+      If the section for the monitor exists and defines a `mon addr` that
       will be used, otherwise it will fallback by resolving the hostname to an
       IP. If `--address` is used it will override all other options.
 
