@@ -6,14 +6,14 @@ import os
 from textwrap import dedent
 import time
 
-from . import conf, exc, admin
-from .cliutil import priority
-from .util import paths, net
-from .lib.remoto import process
-from . import hosts
-from .misc import mon_hosts
-from .connection import get_connection
-from . import gatherkeys
+from ceph_deploy import conf, exc, admin
+from ceph_deploy.cliutil import priority
+from ceph_deploy.util import paths, net
+from ceph_deploy.lib.remoto import process
+from ceph_deploy import hosts
+from ceph_deploy.misc import mon_hosts
+from ceph_deploy.connection import get_connection
+from ceph_deploy import gatherkeys
 
 
 LOG = logging.getLogger(__name__)
@@ -107,7 +107,7 @@ def mon_status(conn, logger, hostname, args, silent=False):
 
 
 def mon_add(args):
-    cfg = conf.load(args)
+    cfg = conf.ceph.load(args)
 
     if not args.mon:
         raise exc.NeedHostError()
@@ -168,7 +168,7 @@ def mon_add(args):
 
 def mon_create(args):
 
-    cfg = conf.load(args)
+    cfg = conf.ceph.load(args)
     if not args.mon:
         mon_initial_members = cfg.safe_get('global', 'mon_initial_members')
         args.mon = re.split(r'[,\s]+', mon_initial_members)
@@ -329,7 +329,7 @@ def mon_destroy(args):
 
 
 def mon_create_initial(args):
-    cfg = conf.load(args)
+    cfg = conf.ceph.load(args)
     cfg_initial_members = cfg.safe_get('global', 'mon_initial_members')
     if cfg_initial_members is None:
         raise RuntimeError('No `mon initial members` defined in config')
