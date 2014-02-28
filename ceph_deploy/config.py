@@ -1,16 +1,16 @@
 import logging
 import os.path
 
-from . import exc
-from . import conf
-from .cliutil import priority
-from . import hosts
+from ceph_deploy import exc
+from ceph_deploy import conf
+from ceph_deploy.cliutil import priority
+from ceph_deploy import hosts
 
 LOG = logging.getLogger(__name__)
 
 
 def config_push(args):
-    conf_data = conf.load_raw(args)
+    conf_data = conf.ceph.load_raw(args)
 
     errors = 0
     for hostname in args.client:
