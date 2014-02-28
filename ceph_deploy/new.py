@@ -5,16 +5,13 @@ import uuid
 import struct
 import time
 import base64
-import socket
 
-from . import exc
-from .cliutil import priority
-from .conf import CephConf
-from . import hosts
-from .util import arg_validators, ssh, net
-from .misc import mon_hosts
-from .lib.remoto import process
-from .connection import get_local_connection
+from ceph_deploy.cliutil import priority
+from ceph_deploy import conf, hosts, exc
+from ceph_deploy.util import arg_validators, ssh, net
+from ceph_deploy.misc import mon_hosts
+from ceph_deploy.lib.remoto import process
+from ceph_deploy.connection import get_local_connection
 
 
 LOG = logging.getLogger(__name__)
@@ -79,7 +76,7 @@ def ssh_copy_keys(hostname, username=None):
 
 def new(args):
     LOG.debug('Creating new cluster named %s', args.cluster)
-    cfg = CephConf()
+    cfg = conf.ceph.CephConf()
     cfg.add_section('global')
 
     fsid = uuid.uuid4()
