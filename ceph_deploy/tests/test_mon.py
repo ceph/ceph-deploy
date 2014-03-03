@@ -1,5 +1,5 @@
 from ceph_deploy import mon
-from ceph_deploy.conf import CephConf
+from ceph_deploy.conf.ceph import CephConf
 from mock import Mock
 
 
