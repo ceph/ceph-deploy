@@ -31,6 +31,7 @@ def _locate_or_create():
         if path.exists(location):
             return location
     create_stub(home_config)
+    return home_config
 
 
 def create_stub(_path=None):
