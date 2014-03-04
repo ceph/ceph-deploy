@@ -2,9 +2,9 @@ import sys
 import py.test
 from mock import Mock, MagicMock, patch, call
 from ceph_deploy import mon
+from ceph_deploy.tests import fakes
 from ceph_deploy.hosts.common import mon_create
 from ceph_deploy.misc import mon_hosts, remote_shortname
-
 
 
 def path_exists(target_paths=None):
@@ -20,23 +20,6 @@ def path_exists(target_paths=None):
     return exists
 
 
-def mock_open(mock=None, data=None):
-    """
-    Fake the behavior of `open` when used as a context manager
-    """
-    if mock is None:
-        mock = MagicMock(spec=file)
-
-    handle = MagicMock(spec=file)
-    handle.write.return_value = None
-    if data is None:
-        handle.__enter__.return_value = handle
-    else:
-        handle.__enter__.return_value = data
-    mock.return_value = handle
-    return mock
-
-
 @py.test.mark.skipif(reason='failing due to removal of pushy')
 class TestCreateMon(object):
 
@@ -47,7 +30,7 @@ class TestCreateMon(object):
         self.socket = Mock()
         self.socket.gethostname.return_value = 'hostname'
         self.fake_write = Mock(name='fake_write')
-        self.fake_file = mock_open(data=self.fake_write)
+        self.fake_file = fakes.mock_open(data=self.fake_write)
         self.fake_file.readline.return_value = self.fake_file
         self.fake_file.readline.lstrip.return_value = ''
         self.distro = Mock()
