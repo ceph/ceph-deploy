@@ -3,24 +3,34 @@ from os import path
 
 
 cd_conf_template = """
+#
+# ceph-deploy configuration file
+#
+
+
 """
 
 
 def location():
+    """
+    Find and return the location of the ceph-deploy configuration file. If this
+    file does not exist, create one in a default location.
+    """
     return _locate_or_create()
 
 
 def _locate_or_create():
+    home_config = path.expanduser('~/.cephdeploy.conf')
     # With order of importance
     locations = [
-        path.join(path.dirname(os.getcwd(), 'cephdeploy.conf')),
-        path.expanduser('~/.cephdeploy.conf'),
+        path.join(path.dirname(os.getcwd()), 'cephdeploy.conf'),
+        home_config,
     ]
 
     for location in locations:
         if path.exists(location):
             return location
-    create_stub(path.expanduser('~/.cephdeploy.conf'))
+    create_stub(home_config)
 
 
 def create_stub(_path=None):
