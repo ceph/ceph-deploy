@@ -11,9 +11,21 @@ LOG = logging.getLogger(__name__)
 
 
 def install(args):
-    version = getattr(args, args.version_kind)
+    # XXX This whole dance is because --stable is getting deprecated
+    if args.stable is not None:
+        LOG.warning('the --stable flag is deprecated, use --release instead')
+        args.release = args.stable
+    if args.version_kind == 'stable':
+        version = args.release
+    else:
+        version = getattr(args, args.version_kind)
+    # XXX Tango ends here.
+
     version_str = args.version_kind
 
+    LOG.info('args: %s' % args)
+    LOG.info('version %s' % version)
+    LOG.info('version str: %s' % version_str)
     if version:
         version_str += ' version {version}'.format(version=version)
     LOG.debug(
@@ -184,6 +196,8 @@ class StoreVersion(argparse.Action):
     """
     def __call__(self, parser, namespace, values, option_string=None):
         setattr(namespace, self.dest, values)
+        if self.dest == 'release':
+            self.dest = 'stable'
         namespace.version_kind = self.dest
 
 
@@ -195,6 +209,7 @@ def make(parser):
 
     version = parser.add_mutually_exclusive_group()
 
+    # XXX deprecated in favor of release
     version.add_argument(
         '--stable',
         nargs='?',
@@ -206,7 +221,23 @@ def make(parser):
             'emperor',
             ],
         metavar='CODENAME',
-        help='install a release known as CODENAME (done by default) (default: %(default)s)',
+        help='[DEPRECATED] install a release known as CODENAME\
+                (done by default) (default: %(default)s)',
+    )
+
+    version.add_argument(
+        '--release',
+        nargs='?',
+        action=StoreVersion,
+        choices=[
+            'bobtail',
+            'cuttlefish',
+            'dumpling',
+            'emperor',
+            ],
+        metavar='CODENAME',
+        help='install a release known as CODENAME\
+                (done by default) (default: %(default)s)',
     )
 
     version.add_argument(
@@ -222,7 +253,8 @@ def make(parser):
         action=StoreVersion,
         const='master',
         metavar='BRANCH_OR_TAG',
-        help='install a bleeding edge build from Git branch or tag (default: %(default)s)',
+        help='install a bleeding edge build from Git branch\
+                or tag (default: %(default)s)',
     )
 
     version.add_argument(
@@ -241,7 +273,8 @@ def make(parser):
 
     version.set_defaults(
         func=install,
-        stable='emperor',
+        stable=None,  # XXX deprecated in favor of release
+        release='emperor',
         dev='master',
         version_kind='stable',
         adjust_repos=True,
@@ -265,7 +298,8 @@ def make(parser):
         '--gpg-url',
         nargs='?',
         dest='gpg_url',
-        help='specify a GPG key URL to be used with custom repos (defaults to ceph.com)'
+        help='specify a GPG key URL to be used with custom repos\
+                (defaults to ceph.com)'
     )
 
     parser.set_defaults(
