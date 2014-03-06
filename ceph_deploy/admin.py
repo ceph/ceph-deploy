@@ -2,16 +2,16 @@ import logging
 
 from cStringIO import StringIO
 
-from . import exc
-from . import conf
-from .cliutil import priority
-from . import hosts
+from ceph_deploy import exc
+from ceph_deploy import conf
+from ceph_deploy.cliutil import priority
+from ceph_deploy import hosts
 
 LOG = logging.getLogger(__name__)
 
 
 def admin(args):
-    cfg = conf.load(args)
+    cfg = conf.ceph.load(args)
     conf_data = StringIO()
     cfg.write(conf_data)
 

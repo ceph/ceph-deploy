@@ -1,7 +1,7 @@
 import ConfigParser
 import contextlib
 
-from . import exc
+from ceph_deploy import exc
 
 
 class _TrimIndentFile(object):

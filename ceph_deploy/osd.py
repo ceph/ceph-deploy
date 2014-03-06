@@ -6,11 +6,9 @@ from textwrap import dedent
 
 from cStringIO import StringIO
 
-from . import conf
-from . import exc
-from . import hosts
-from .cliutil import priority
-from .lib.remoto import process
+from ceph_deploy import conf, exc, hosts
+from ceph_deploy.cliutil import priority
+from ceph_deploy.lib.remoto import process
 
 
 LOG = logging.getLogger(__name__)
@@ -207,7 +205,7 @@ def activate(args, cfg):
 
 
 def disk_zap(args):
-    cfg = conf.load(args)
+    cfg = conf.ceph.load(args)
 
     for hostname, disk, journal in args.disk:
         if not disk or not hostname:
@@ -266,7 +264,7 @@ def osd_list(args, cfg):
 
 
 def osd(args):
-    cfg = conf.load(args)
+    cfg = conf.ceph.load(args)
 
     if args.subcommand == 'list':
         osd_list(args, cfg)
@@ -282,7 +280,7 @@ def osd(args):
 
 
 def disk(args):
-    cfg = conf.load(args)
+    cfg = conf.ceph.load(args)
 
     if args.subcommand == 'list':
         disk_list(args, cfg)

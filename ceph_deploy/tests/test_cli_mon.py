@@ -70,8 +70,8 @@ mon initial members = host1
         assert secret == MON_SECRET
 
     try:
-        with mock.patch('ceph_deploy.new.socket.gethostbyname'):
-            with mock.patch('socket.getaddrinfo', fake_getaddrinfo):
+        with mock.patch('ceph_deploy.new.net.get_nonlocal_ip', lambda x: '10.0.0.1'):
+            with mock.patch('ceph_deploy.new.arg_validators.Hostname', lambda: lambda x: x):
                 with directory(str(tmpdir)):
                     main(
                         args=['-v', 'new', 'host1'],
@@ -86,7 +86,7 @@ mon initial members = host1
     out, err = capsys.readouterr()
     err = err.lower()
     assert 'creating new cluster named ceph' in err
-    assert 'monitor host1 at h' in err
+    assert 'monitor host1 at 10.0.0.1' in err
     assert 'resolving host host1' in err
     assert "monitor initial members are ['host1']" in err
-    assert "monitor addrs are ['h']" in err
+    assert "monitor addrs are ['10.0.0.1']" in err

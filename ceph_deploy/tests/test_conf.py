@@ -1,5 +1,5 @@
 from cStringIO import StringIO
-from .. import conf
+from ceph_deploy import conf
 
 
 def test_simple():
@@ -7,7 +7,7 @@ def test_simple():
 [foo]
 bar = baz
 """)
-    cfg = conf.parse(f)
+    cfg = conf.ceph.parse(f)
     assert cfg.get('foo', 'bar') == 'baz'
 
 
@@ -16,7 +16,7 @@ def test_indent_space():
 [foo]
         bar = baz
 """)
-    cfg = conf.parse(f)
+    cfg = conf.ceph.parse(f)
     assert cfg.get('foo', 'bar') == 'baz'
 
 
@@ -25,7 +25,7 @@ def test_indent_tab():
 [foo]
 \tbar = baz
 """)
-    cfg = conf.parse(f)
+    cfg = conf.ceph.parse(f)
     assert cfg.get('foo', 'bar') == 'baz'
 
 
@@ -34,7 +34,7 @@ def test_words_underscore():
 [foo]
 bar_thud = baz
 """)
-    cfg = conf.parse(f)
+    cfg = conf.ceph.parse(f)
     assert cfg.get('foo', 'bar_thud') == 'baz'
     assert cfg.get('foo', 'bar thud') == 'baz'
 
@@ -44,7 +44,7 @@ def test_words_space():
 [foo]
 bar thud = baz
 """)
-    cfg = conf.parse(f)
+    cfg = conf.ceph.parse(f)
     assert cfg.get('foo', 'bar_thud') == 'baz'
     assert cfg.get('foo', 'bar thud') == 'baz'
 
@@ -54,12 +54,12 @@ def test_words_many():
 [foo]
 bar__ thud   quux = baz
 """)
-    cfg = conf.parse(f)
+    cfg = conf.ceph.parse(f)
     assert cfg.get('foo', 'bar_thud_quux') == 'baz'
     assert cfg.get('foo', 'bar thud quux') == 'baz'
 
 def test_write_words_underscore():
-    cfg = conf.CephConf()
+    cfg = conf.ceph.CephConf()
     cfg.add_section('foo')
     cfg.set('foo', 'bar thud quux', 'baz')
     f = StringIO()

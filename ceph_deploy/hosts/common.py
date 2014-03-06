@@ -18,7 +18,7 @@ def mon_create(distro, args, monitor_keyring, hostname):
     done_path = paths.mon.done(args.cluster, hostname)
     init_path = paths.mon.init(args.cluster, hostname, distro.init)
 
-    configuration = conf.load(args)
+    configuration = conf.ceph.load(args)
     conf_data = StringIO()
     configuration.write(conf_data)
 
@@ -75,7 +75,7 @@ def mon_add(distro, args, monitor_keyring):
     done_path = paths.mon.done(args.cluster, hostname)
     init_path = paths.mon.init(args.cluster, hostname, distro.init)
 
-    configuration = conf.load(args)
+    configuration = conf.ceph.load(args)
     conf_data = StringIO()
     configuration.write(conf_data)
 

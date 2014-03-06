@@ -3,11 +3,11 @@ import errno
 import logging
 import os
 
-from . import conf
-from . import exc
-from . import hosts
-from .lib.remoto import process
-from .cliutil import priority
+from ceph_deploy import conf
+from ceph_deploy import exc
+from ceph_deploy import hosts
+from ceph_deploy.lib.remoto import process
+from ceph_deploy.cliutil import priority
 
 
 LOG = logging.getLogger(__name__)
@@ -109,7 +109,7 @@ def create_mds(conn, name, cluster, init):
 
 
 def mds_create(args):
-    cfg = conf.load(args)
+    cfg = conf.ceph.load(args)
     LOG.debug(
         'Deploying mds, cluster %s hosts %s',
         args.cluster,
