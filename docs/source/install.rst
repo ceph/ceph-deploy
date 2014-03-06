@@ -26,14 +26,19 @@ displayed, similar to::
 
 .. _install-stable-releases:
 
-Stable releases
----------------
-By default the *latest* stable release is assumed. This value changes when
+Specific Releases
+-----------------
+By default the *latest* release is assumed. This value changes when
 newer versions are available. If you are automating deployments it is better to
 specify exactly what release you need::
 
-    ceph-deploy install --stable emperor {host}
+    ceph-deploy install --release emperor {host}
 
+
+Note that the ``--stable`` flag for specifying a Ceph release is deprecated and
+should no longer be used starting from version 1.3.6.
+
+.. versionadded:: 1.3.6
 
 .. _install-unstable-releases:
 
