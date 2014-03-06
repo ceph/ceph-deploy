@@ -7,7 +7,16 @@ cd_conf_template = """
 # ceph-deploy configuration file
 #
 
+[cd-global]
+# Overrides for some of ceph-deploy's global flags, like verbosity or cluster
+# name
 
+[cd-install]
+# Overrides for some of ceph-deploy's install flags, like version of ceph to
+# install
+
+
+# All other sections are considered repository sections
 """
 
 
