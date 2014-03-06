@@ -7,16 +7,30 @@ cd_conf_template = """
 # ceph-deploy configuration file
 #
 
-[cd-global]
+[ceph-deploy-global]
 # Overrides for some of ceph-deploy's global flags, like verbosity or cluster
 # name
 
-[cd-install]
+[ceph-deploy-install]
 # Overrides for some of ceph-deploy's install flags, like version of ceph to
 # install
 
 
 # All other sections are considered repository sections
+# [myrepo]
+# repourl = https://user:pass@example.org/rhel6
+# gpgurl = https://example.org/keys/release.asc
+# default = True
+# extra-repos = cephrepo  # Install the cephrepo file too
+#
+# [cephrepo]
+# name=ceph repo noarch packages
+# baseurl=http://ceph.com/rpm-emperor/el6/noarch
+# enabled=1
+# gpgcheck=1
+# type=rpm-md
+# gpgkey=https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/autobuild.asc
+
 """
 
 
