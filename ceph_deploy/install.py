@@ -23,9 +23,6 @@ def install(args):
 
     version_str = args.version_kind
 
-    LOG.info('args: %s' % args)
-    LOG.info('version %s' % version)
-    LOG.info('version str: %s' % version_str)
     if version:
         version_str += ' version {version}'.format(version=version)
     LOG.debug(
