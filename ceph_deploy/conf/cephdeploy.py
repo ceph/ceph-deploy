@@ -1,4 +1,4 @@
-from ConfigParser import SafeConfigParser
+from ConfigParser import SafeConfigParser, NoSectionError, NoOptionError
 import os
 from os import path
 
@@ -46,7 +46,7 @@ def location():
 
 
 def load():
-    parser = SafeConfigParser()
+    parser = Conf()
     parser.read(location())
     return parser
 
@@ -70,3 +70,39 @@ def create_stub(_path=None):
     _path = _path or path.expanduser('~/.cephdeploy.conf')
     with open(_path, 'w') as cd_conf:
         cd_conf.write(cd_conf_template)
+
+
+class Conf(SafeConfigParser):
+
+    reserved_sections = ['ceph-deploy-global', 'ceph-deploy-install']
+
+    def safe_get(self, section, key):
+        """
+        Attempt to get a configuration value from a certain section
+        in a ``cfg`` object but returning None if not found. Avoids the need
+        to be doing try/except {ConfigParser Exceptions} every time.
+        """
+        try:
+            return self.get(section, key)
+        except (NoSectionError, NoOptionError):
+            return None
+
+    def get_repos(self):
+        """
+        Return all the repo sections from the config, excluding the ceph-deploy
+        reserved sections.
+        """
+        return [
+            section for section in self.sections()
+            if section not in self.reserved_sections
+        ]
+
+    @property
+    def has_repos(self):
+        """
+        boolean to reflect having (or not) any repository sections
+        """
+        for section in self.sections():
+            if section not in self.reserved_sections:
+                return True
+        return False
