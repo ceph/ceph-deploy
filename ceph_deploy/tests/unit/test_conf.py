@@ -11,8 +11,11 @@ class TestLocateOrCreate(object):
         self.fake_file.readline.return_value = self.fake_file
 
     def test_no_conf(self):
+        fake_path = Mock()
+        fake_path.exists = Mock(return_value=False)
         with patch('__builtin__.open', self.fake_file):
-            conf.cephdeploy.location()
+            with patch('ceph_deploy.conf.cephdeploy.path', fake_path):
+                conf.cephdeploy.location()
 
         assert self.fake_file.called is True
         assert self.fake_file.call_args[0][0].endswith('/.cephdeploy.conf')
@@ -34,3 +37,36 @@ class TestLocateOrCreate(object):
             result = conf.cephdeploy.location()
 
         assert result == '/home/alfredo/.cephdeploy.conf'
+
+
+class TestConf(object):
+
+    def test_has_repos(self):
+        cfg = conf.cephdeploy.Conf()
+        cfg.sections = lambda: ['foo']
+        assert cfg.has_repos is True
+
+    def test_has_no_repos(self):
+        cfg = conf.cephdeploy.Conf()
+        cfg.sections = lambda: ['ceph-deploy-install']
+        assert cfg.has_repos is False
+
+    def test_get_repos_is_empty(self):
+        cfg = conf.cephdeploy.Conf()
+        cfg.sections = lambda: ['ceph-deploy-install']
+        assert cfg.get_repos() == []
+
+    def test_get_repos_is_not_empty(self):
+        cfg = conf.cephdeploy.Conf()
+        cfg.sections = lambda: ['ceph-deploy-install', 'foo']
+        assert cfg.get_repos() == ['foo']
+
+    def test_safe_get_not_empty(self):
+        cfg = conf.cephdeploy.Conf()
+        cfg.get = lambda section, key: True
+        assert cfg.safe_get(1, 2) is True
+
+    def test_safe_get_empty(self):
+        cfg = conf.cephdeploy.Conf()
+        #cfg.get = lambda section, key: True
+        assert cfg.safe_get(1, 2) is None
