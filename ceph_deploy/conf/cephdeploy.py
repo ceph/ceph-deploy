@@ -1,3 +1,4 @@
+from ConfigParser import SafeConfigParser
 import os
 from os import path
 
@@ -16,7 +17,10 @@ cd_conf_template = """
 # install
 
 
-# All other sections are considered repository sections
+#
+# Repositories section
+#
+
 # [myrepo]
 # repourl = https://user:pass@example.org/rhel6
 # gpgurl = https://example.org/keys/release.asc
@@ -30,7 +34,6 @@ cd_conf_template = """
 # gpgcheck=1
 # type=rpm-md
 # gpgkey=https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/autobuild.asc
-
 """
 
 
@@ -40,6 +43,12 @@ def location():
     file does not exist, create one in a default location.
     """
     return _locate_or_create()
+
+
+def load():
+    parser = SafeConfigParser()
+    parser.read(location())
+    return parser
 
 
 def _locate_or_create():
@@ -59,5 +68,5 @@ def _locate_or_create():
 
 def create_stub(_path=None):
     _path = _path or path.expanduser('~/.cephdeploy.conf')
-    with open(_path) as cd_conf:
+    with open(_path, 'w') as cd_conf:
         cd_conf.write(cd_conf_template)
