@@ -73,6 +73,11 @@ def create_stub(_path=None):
 
 
 class Conf(SafeConfigParser):
+    """
+    Subclasses from SafeConfigParser to give a few helpers for the ceph-deploy
+    configuration. Specifically, it addresses the need to work with custom
+    sections that signal the usage of custom repositories.
+    """
 
     reserved_sections = ['ceph-deploy-global', 'ceph-deploy-install']
 
