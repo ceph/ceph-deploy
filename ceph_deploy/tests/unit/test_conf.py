@@ -1,3 +1,5 @@
+from cStringIO import StringIO
+from textwrap import dedent
 from mock import Mock, patch
 from ceph_deploy import conf
 from ceph_deploy.tests import fakes
@@ -61,11 +63,67 @@ class TestConf(object):
         cfg.sections = lambda: ['ceph-deploy-install', 'foo']
         assert cfg.get_repos() == ['foo']
 
-    def test_safe_get_not_empty(self):
+    def test_get_safe_not_empty(self):
         cfg = conf.cephdeploy.Conf()
         cfg.get = lambda section, key: True
-        assert cfg.safe_get(1, 2) is True
+        assert cfg.get_safe(1, 2) is True
 
-    def test_safe_get_empty(self):
+    def test_get_safe_empty(self):
         cfg = conf.cephdeploy.Conf()
-        assert cfg.safe_get(1, 2) is None
+        assert cfg.get_safe(1, 2) is None
+
+
+class TestConfGetList(object):
+
+    def test_get_list_empty(self):
+        cfg = conf.cephdeploy.Conf()
+        conf_file = StringIO(dedent("""
+        [foo]
+        key =
+        """))
+        cfg.readfp(conf_file)
+        assert cfg.get_list('foo', 'key') == ['']
+
+    def test_get_list_empty_when_no_key(self):
+        cfg = conf.cephdeploy.Conf()
+        conf_file = StringIO(dedent("""
+        [foo]
+        """))
+        cfg.readfp(conf_file)
+        assert cfg.get_list('foo', 'key') == []
+
+    def test_get_list_if_value_is_one_item(self):
+        cfg = conf.cephdeploy.Conf()
+        conf_file = StringIO(dedent("""
+        [foo]
+        key = 1
+        """))
+        cfg.readfp(conf_file)
+        assert cfg.get_list('foo', 'key') == ['1']
+
+    def test_get_list_with_mutltiple_items(self):
+        cfg = conf.cephdeploy.Conf()
+        conf_file = StringIO(dedent("""
+        [foo]
+        key = 1, 3, 4
+        """))
+        cfg.readfp(conf_file)
+        assert cfg.get_list('foo', 'key') == ['1', '3', '4']
+
+    def test_get_rid_of_comments(self):
+        cfg = conf.cephdeploy.Conf()
+        conf_file = StringIO(dedent("""
+        [foo]
+        key = 1, 3, 4 # this is a wonderful comment y'all
+        """))
+        cfg.readfp(conf_file)
+        assert cfg.get_list('foo', 'key') == ['1', '3', '4']
+
+    def test_get_rid_of_whitespace(self):
+        cfg = conf.cephdeploy.Conf()
+        conf_file = StringIO(dedent("""
+        [foo]
+        key = 1,   3     ,        4
+        """))
+        cfg.readfp(conf_file)
+        assert cfg.get_list('foo', 'key') == ['1', '3', '4']
