@@ -2,14 +2,14 @@ import pkg_resources
 import argparse
 import logging
 import textwrap
+import os
 import sys
 from string import join
 
 import ceph_deploy
-from . import exc
-from . import validate
-from .util import log
-from .util.decorators import catches
+from ceph_deploy import exc, validate
+from ceph_deploy.util import log
+from ceph_deploy.util.decorators import catches
 
 LOG = logging.getLogger(__name__)
 
@@ -83,6 +83,9 @@ def get_parser():
         # ugly kludge but i really want to have a nice way to access
         # the program name, with subcommand, later
         p.set_defaults(prog=p.prog)
+        if not os.environ.get('CEPH_DEPLOY_TEST'):
+            p.set_defaults(cd_conf = ceph_deploy.conf.cephdeploy.load())
+
         fn(p)
     parser.set_defaults(
         # we want to hold on to this, for later
