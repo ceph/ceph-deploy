@@ -25,3 +25,13 @@ gpgcheck=1
 type=rpm-md
 gpgkey={gpg_url}
 """
+
+custom_repo = """
+[{repo_name}]
+name={name}
+baseurl={baseurl}
+enabled={enabled}
+gpgcheck={gpgcheck}
+type={_type}
+gpgkey={gpgkey}
+"""
