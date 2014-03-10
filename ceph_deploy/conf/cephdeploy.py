@@ -1,6 +1,7 @@
 from ConfigParser import SafeConfigParser, NoSectionError, NoOptionError
 import os
 from os import path
+import re
 
 
 cd_conf_template = """
@@ -81,7 +82,7 @@ class Conf(SafeConfigParser):
 
     reserved_sections = ['ceph-deploy-global', 'ceph-deploy-install']
 
-    def safe_get(self, section, key):
+    def get_safe(self, section, key, default=None):
         """
         Attempt to get a configuration value from a certain section
         in a ``cfg`` object but returning None if not found. Avoids the need
@@ -90,7 +91,7 @@ class Conf(SafeConfigParser):
         try:
             return self.get(section, key)
         except (NoSectionError, NoOptionError):
-            return None
+            return default
 
     def get_repos(self):
         """
@@ -111,3 +112,23 @@ class Conf(SafeConfigParser):
             if section not in self.reserved_sections:
                 return True
         return False
+
+    def get_list(self, section, key):
+        """
+        Assumes that the value for a given key is going to be a list
+        separated by commas. It gets rid of trailing comments.
+        If just one item is present it returns a list with a single item, if no
+        key is found an empty list is returned.
+        """
+        value = self.get_safe(section, key, [])
+        if value == []:
+            return value
+
+        # strip comments
+        value = re.split(r'\s+#', value)[0]
+
+        # split on commas
+        value = value.split(',')
+
+        # strip spaces
+        return [x.strip() for x in value]
