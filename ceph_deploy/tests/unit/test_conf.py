@@ -68,5 +68,4 @@ class TestConf(object):
 
     def test_safe_get_empty(self):
         cfg = conf.cephdeploy.Conf()
-        #cfg.get = lambda section, key: True
         assert cfg.safe_get(1, 2) is None
