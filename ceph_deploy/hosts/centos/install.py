@@ -134,7 +134,7 @@ def repo_install(distro, repo_name, baseurl, gpgkey, **kw):
         [
             'rpm',
             '--import',
-            gpg_url,
+            gpgkey,
         ]
     )
 
