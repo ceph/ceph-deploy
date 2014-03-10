@@ -119,3 +119,36 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos):
     pkg_managers.yum(distro.conn, 'wget')
 
     pkg_managers.yum(distro.conn, 'ceph')
+
+
+def repo_install(distro, repo_name, baseurl, gpgkey, **kw):
+    # Get some defaults
+    name = kw.get('name', '%s repo' % repo_name)
+    enabled = kw.get('enabled', 1)
+    gpgcheck = kw.get('gpgcheck', 1)
+    _type = 'repo-md'
+    baseurl = baseurl.strip('/')  # Remove trailing slashes
+
+    process.run(
+        distro.conn,
+        [
+            'rpm',
+            '--import',
+            gpg_url,
+        ]
+    )
+
+    repo_content = templates.custom_repo.format(
+        repo_name=repo_name,
+        name = name,
+        baseurl = baseurl,
+        enabled = enabled,
+        gpgcheck = gpgcheck,
+        _type = _type,
+        gpgkey = gpgkey,
+    )
+
+    distro.conn.remote_module.write_yum_repo(
+        repo_content,
+        filename=repo_name
+    )
