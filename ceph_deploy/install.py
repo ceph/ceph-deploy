@@ -2,9 +2,9 @@ import argparse
 import logging
 import os
 
-from . import hosts
-from .cliutil import priority
-from .lib.remoto import process
+from ceph_deploy import hosts
+from ceph_deploy.cliutil import priority
+from ceph_deploy.lib.remoto import process
 
 
 LOG = logging.getLogger(__name__)
@@ -30,13 +30,22 @@ def install(args):
         version_str,
         args.cluster,
         ' '.join(args.host),
-        )
+    )
+
     for hostname in args.host:
         LOG.debug('Detecting platform for host %s ...', hostname)
         distro = hosts.get(hostname, username=args.username)
-        LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
+        LOG.info(
+            'Distro info: %s %s %s',
+            distro.name,
+            distro.release,
+            distro.codename
+        )
         rlogger = logging.getLogger(hostname)
         rlogger.info('installing ceph on %s' % hostname)
+
+        cd_conf = getattr(args, 'cd_conf', None)
+        default_repo = None
 
         # custom repo arguments
         repo_url = os.environ.get('CEPH_DEPLOY_REPO_URL') or args.repo_url
@@ -48,6 +57,9 @@ def install(args):
             gpg_url = gpg_fallback
 
         if repo_url:  # triggers using a custom repository
+            if default_repo is not None:
+                rlogger.warning('a default repo was found but it was overridden \
+                    on the CLI')
             rlogger.info('using custom repository location: %s', repo_url)
             distro.mirror_install(
                 distro,
@@ -55,6 +67,52 @@ def install(args):
                 gpg_url,
                 args.adjust_repos
             )
+
+        # Detect and install custom repos here if needed
+        elif cd_conf and cd_conf.has_repos:
+            LOG.info('detected custom repositories from config file')
+            default_repo = cd_conf.get_default_repo()
+            if args.release in cd_conf.get_repos():
+                LOG.info('will use repository from conf: %s' % args.release)
+                default_repo = args.release
+            elif default_repo:
+                LOG.info('will use default repository: %s' % default_repo)
+
+            # At this point we know there is a cd_conf and that it has custom
+            # repos make sure we were able to detect and actual repo
+            if not default_repo:
+                LOG.warning('a ceph-deploy config was found with repos \
+                    but could not default to one')
+            else:
+                options = dict(cd_conf.items(default_repo))
+                options['install_ceph'] = True
+                extra_repos = cd_conf.get_list(default_repo, 'extra-repos')
+                rlogger.info('adding custom repository file')
+                try:
+                    distro.repo_install(
+                        distro,
+                        default_repo,
+                        options.pop('baseurl'),
+                        options.pop('gpgkey'),
+                        **options
+                    )
+                except KeyError as err:
+                    raise RuntimeError('missing required key: %s in config section: %s' % (err, default_repo))
+
+                for xrepo in extra_repos:
+                    rlogger.info('adding extra repo file: %s.repo' % xrepo)
+                    options = dict(cd_conf.items(xrepo))
+                    try:
+                        distro.repo_install(
+                            distro,
+                            xrepo,
+                            options.pop('baseurl'),
+                            options.pop('gpgkey'),
+                            **options
+                        )
+                    except KeyError as err:
+                        raise RuntimeError('missing required key: %s in config section: %s' % (err, xrepo))
+
 
         else:  # otherwise a normal installation
             distro.install(
