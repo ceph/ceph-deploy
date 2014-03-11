@@ -23,7 +23,7 @@ cd_conf_template = """
 #
 
 # [myrepo]
-# repourl = https://user:pass@example.org/rhel6
+# baseurl = https://user:pass@example.org/rhel6
 # gpgurl = https://example.org/keys/release.asc
 # default = True
 # extra-repos = cephrepo  # Install the cephrepo file too
@@ -132,3 +132,14 @@ class Conf(SafeConfigParser):
 
         # strip spaces
         return [x.strip() for x in value]
+
+    def get_default_repo(self):
+        """
+        Go through all the repositories defined in the config file and search
+        for a truthy value for the ``default`` key. If there isn't any return
+        None.
+        """
+        for repo in self.get_repos():
+            if self.get_safe(repo, 'default'):
+                return repo
+        return None
