@@ -50,7 +50,7 @@ def write_sources_list(url, codename):
 
 
 def write_yum_repo(content, filename='ceph.repo'):
-    """set the contents of /etc/yum.repos.d/ceph.repo"""
+    """set the contents of repo file to /etc/yum.repos.d/"""
     repo_path = os.path.join('/etc/yum.repos.d', filename)
     write_file(repo_path, content)
 
