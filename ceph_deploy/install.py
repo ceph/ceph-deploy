@@ -269,12 +269,6 @@ def make(parser):
         '--stable',
         nargs='?',
         action=StoreVersion,
-        choices=[
-            'bobtail',
-            'cuttlefish',
-            'dumpling',
-            'emperor',
-            ],
         metavar='CODENAME',
         help='[DEPRECATED] install a release known as CODENAME\
                 (done by default) (default: %(default)s)',
@@ -284,12 +278,6 @@ def make(parser):
         '--release',
         nargs='?',
         action=StoreVersion,
-        choices=[
-            'bobtail',
-            'cuttlefish',
-            'dumpling',
-            'emperor',
-            ],
         metavar='CODENAME',
         help='install a release known as CODENAME\
                 (done by default) (default: %(default)s)',
