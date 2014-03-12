@@ -22,6 +22,7 @@ cd_conf_template = """
 # Repositories section
 #
 
+# yum repos:
 # [myrepo]
 # baseurl = https://user:pass@example.org/rhel6
 # gpgurl = https://example.org/keys/release.asc
@@ -34,6 +35,17 @@ cd_conf_template = """
 # enabled=1
 # gpgcheck=1
 # type=rpm-md
+# gpgkey=https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/autobuild.asc
+
+# apt repos:
+# [myrepo]
+# baseurl = https://user:pass@example.org/
+# gpgurl = https://example.org/keys/release.asc
+# default = True
+# extra-repos = cephrepo  # will install the cephrepo file too
+#
+# [cephrepo]
+# baseurl=http://ceph.com/rpm-emperor/el6/noarch
 # gpgkey=https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/autobuild.asc
 """
 
