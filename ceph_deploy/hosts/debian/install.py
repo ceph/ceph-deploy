@@ -131,7 +131,54 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos):
         'gdisk',
     )
 
-    for pkg in packages:
-        pkg_managers.apt(distro.conn, pkg)
-
+    pkg_managers.apt(distro.conn, packages)
     pkg_managers.apt(distro.conn, 'ceph')
+
+
+def repo_install(distro, repo_name, baseurl, gpgkey, **kw):
+    # Get some defaults
+    safe_filename = '%s.list' % repo_name.replace(' ', '-')
+    install_ceph = kw.pop('install_ceph', False)
+    baseurl = baseurl.strip('/')  # Remove trailing slashes
+
+    process.run(
+        distro.conn,
+        [
+            'wget',
+            '-O',
+            'release.asc',
+            gpgkey,
+        ],
+        stop_on_nonzero=False,
+    )
+
+    process.run(
+        distro.conn,
+        [
+            'apt-key',
+            'add',
+            'release.asc'
+        ]
+    )
+
+    distro.conn.remote_module.write_sources_list(
+        baseurl,
+        distro.codename,
+        safe_filename
+    )
+
+    if install_ceph:
+        # Before any install, make sure we have `wget`
+        pkg_managers.apt_update(distro.conn)
+        packages = (
+            'ceph',
+            'ceph-mds',
+            'ceph-common',
+            'ceph-fs-common',
+            # ceph only recommends gdisk, make sure we actually have
+            # it; only really needed for osds, but minimal collateral
+            'gdisk',
+        )
+
+        pkg_managers.apt(distro.conn, packages)
+        pkg_managers.apt(distro.conn, 'ceph')
