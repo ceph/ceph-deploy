@@ -39,6 +39,7 @@ This is how a default configuration file would look like::
     # Repositories section
     #
 
+    # yum repos:
     # [myrepo]
     # baseurl = https://user:pass@example.org/rhel6
     # gpgurl = https://example.org/keys/release.asc
@@ -53,6 +54,16 @@ This is how a default configuration file would look like::
     # type=rpm-md
     # gpgkey=https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/autobuild.asc
 
+    # apt repos:
+    # [myrepo]
+    # baseurl = https://user:pass@example.org/
+    # gpgurl = https://example.org/keys/release.asc
+    # default = True
+    # extra-repos = cephrepo  # will install the cephrepo file too
+    #
+    # [cephrepo]
+    # baseurl=http://ceph.com/rpm-emperor/el6/noarch
+    # gpgkey=https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/autobuild.asc
 
 .. conf_sections:
 
@@ -75,9 +86,7 @@ Keys will depend on the type of package manager that will use it. Certain keys
 for yum are required (like ``baseurl``) and some others like ``gpgcheck`` are
 optional.
 
-yum
----
-For yum these would be all the required keys in a repository section:
+For both yum and apt these would be all the required keys in a repository section:
 
 * baseurl
 * gpgkey
@@ -85,12 +94,16 @@ For yum these would be all the required keys in a repository section:
 If a required key is not present ceph-deploy will abort the installation
 process with an error identifying the section and key what was missing.
 
-The repository name is taken from the section, so if the section is ``[foo]``,
-then the name of the repository will be ``foo repo`` and the filename written
-to ``/etc/yum.repos.d/`` will be ``foo.repo``.
+In yum the repository name is taken from the section, so if the section is
+``[foo]``, then the name of the repository will be ``foo repo`` and the
+filename written to ``/etc/yum.repos.d/`` will be ``foo.repo``.
 
-Optional values
----------------
+For apt, the same happens except the directory location changes to:
+``/etc/apt/sources.list.d/`` and the file becomes ``foo.list``.
+
+
+Optional values for yum
+-----------------------
 **name**:  A descriptive name for the repository. If not provided ``{repo
 section} repo`` is used
 
