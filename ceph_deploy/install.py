@@ -45,21 +45,28 @@ def install(args):
         rlogger.info('installing ceph on %s' % hostname)
 
         cd_conf = getattr(args, 'cd_conf', None)
-        default_repo = None
 
         # custom repo arguments
         repo_url = os.environ.get('CEPH_DEPLOY_REPO_URL') or args.repo_url
         gpg_url = os.environ.get('CEPH_DEPLOY_GPG_URL') or args.gpg_url
         gpg_fallback = 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc'
+
         if gpg_url is None and repo_url:
             LOG.warning('--gpg-url was not used, will fallback')
             LOG.warning('using GPG fallback: %s', gpg_fallback)
             gpg_url = gpg_fallback
 
         if repo_url:  # triggers using a custom repository
-            if default_repo is not None:
-                rlogger.warning('a default repo was found but it was overridden \
-                    on the CLI')
+            # the user used a custom repo url, this should override anything
+            # we can detect from the configuration, so warn about it
+            if cd_conf:
+                if cd_conf.get_default_repo():
+                    rlogger.warning('a default repo was found but it was \
+                        overridden on the CLI')
+                if args.release in cd_conf.get_repos():
+                    rlogger.warning('a custom repo was found but it was \
+                        overridden on the CLI')
+
             rlogger.info('using custom repository location: %s', repo_url)
             distro.mirror_install(
                 distro,
@@ -69,50 +76,9 @@ def install(args):
             )
 
         # Detect and install custom repos here if needed
-        elif cd_conf and cd_conf.has_repos:
+        elif cd_conf and cd_conf.has_repos and not repo_url:
             LOG.info('detected custom repositories from config file')
-            default_repo = cd_conf.get_default_repo()
-            if args.release in cd_conf.get_repos():
-                LOG.info('will use repository from conf: %s' % args.release)
-                default_repo = args.release
-            elif default_repo:
-                LOG.info('will use default repository: %s' % default_repo)
-
-            # At this point we know there is a cd_conf and that it has custom
-            # repos make sure we were able to detect and actual repo
-            if not default_repo:
-                LOG.warning('a ceph-deploy config was found with repos \
-                    but could not default to one')
-            else:
-                options = dict(cd_conf.items(default_repo))
-                options['install_ceph'] = True
-                extra_repos = cd_conf.get_list(default_repo, 'extra-repos')
-                rlogger.info('adding custom repository file')
-                try:
-                    distro.repo_install(
-                        distro,
-                        default_repo,
-                        options.pop('baseurl'),
-                        options.pop('gpgkey'),
-                        **options
-                    )
-                except KeyError as err:
-                    raise RuntimeError('missing required key: %s in config section: %s' % (err, default_repo))
-
-                for xrepo in extra_repos:
-                    rlogger.info('adding extra repo file: %s.repo' % xrepo)
-                    options = dict(cd_conf.items(xrepo))
-                    try:
-                        distro.repo_install(
-                            distro,
-                            xrepo,
-                            options.pop('baseurl'),
-                            options.pop('gpgkey'),
-                            **options
-                        )
-                    except KeyError as err:
-                        raise RuntimeError('missing required key: %s in config section: %s' % (err, xrepo))
-
+            custom_repo(distro, args, cd_conf, rlogger)
 
         else:  # otherwise a normal installation
             distro.install(
@@ -121,9 +87,58 @@ def install(args):
                 version,
                 args.adjust_repos
             )
+
         # Check the ceph version we just installed
         hosts.common.ceph_version(distro.conn)
         distro.conn.exit()
+
+
+def custom_repo(distro, args, cd_conf, rlogger):
+    """
+    A custom repo install helper that will go through config checks to retrieve
+    repos (and any extra repos defined) and install those
+    """
+    default_repo = cd_conf.get_default_repo()
+    if args.release in cd_conf.get_repos():
+        LOG.info('will use repository from conf: %s' % args.release)
+        default_repo = args.release
+    elif default_repo:
+        LOG.info('will use default repository: %s' % default_repo)
+
+    # At this point we know there is a cd_conf and that it has custom
+    # repos make sure we were able to detect and actual repo
+    if not default_repo:
+        LOG.warning('a ceph-deploy config was found with repos \
+            but could not default to one')
+    else:
+        options = dict(cd_conf.items(default_repo))
+        options['install_ceph'] = True
+        extra_repos = cd_conf.get_list(default_repo, 'extra-repos')
+        rlogger.info('adding custom repository file')
+        try:
+            distro.repo_install(
+                distro,
+                default_repo,
+                options.pop('baseurl'),
+                options.pop('gpgkey'),
+                **options
+            )
+        except KeyError as err:
+            raise RuntimeError('missing required key: %s in config section: %s' % (err, default_repo))
+
+        for xrepo in extra_repos:
+            rlogger.info('adding extra repo file: %s.repo' % xrepo)
+            options = dict(cd_conf.items(xrepo))
+            try:
+                distro.repo_install(
+                    distro,
+                    xrepo,
+                    options.pop('baseurl'),
+                    options.pop('gpgkey'),
+                    **options
+                )
+            except KeyError as err:
+                raise RuntimeError('missing required key: %s in config section: %s' % (err, xrepo))
 
 
 def uninstall(args):
