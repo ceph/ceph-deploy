@@ -9,3 +9,4 @@ Content Index
    install.rst
    pkg.rst
    mon.rst
+   conf.rst
