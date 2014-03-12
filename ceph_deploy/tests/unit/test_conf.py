@@ -127,3 +127,21 @@ class TestConfGetList(object):
         """))
         cfg.readfp(conf_file)
         assert cfg.get_list('foo', 'key') == ['1', '3', '4']
+
+    def test_get_default_repo(self):
+        cfg = conf.cephdeploy.Conf()
+        conf_file = StringIO(dedent("""
+        [foo]
+        default = True
+        """))
+        cfg.readfp(conf_file)
+        assert cfg.get_default_repo() == 'foo'
+
+    def test_get_default_repo_fails_non_truthy(self):
+        cfg = conf.cephdeploy.Conf()
+        conf_file = StringIO(dedent("""
+        [foo]
+        default = 0
+        """))
+        cfg.readfp(conf_file)
+        assert cfg.get_default_repo() is False
