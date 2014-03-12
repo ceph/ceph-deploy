@@ -26,7 +26,7 @@ cd_conf_template = """
 # baseurl = https://user:pass@example.org/rhel6
 # gpgurl = https://example.org/keys/release.asc
 # default = True
-# extra-repos = cephrepo  # Install the cephrepo file too
+# extra-repos = cephrepo  # will install the cephrepo file too
 #
 # [cephrepo]
 # name=ceph repo noarch packages
@@ -140,6 +140,6 @@ class Conf(SafeConfigParser):
         None.
         """
         for repo in self.get_repos():
-            if self.get_safe(repo, 'default'):
+            if self.get_safe(repo, 'default') and self.getboolean(repo, 'default'):
                 return repo
-        return None
+        return False
