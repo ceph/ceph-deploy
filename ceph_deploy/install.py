@@ -76,8 +76,8 @@ def install(args):
             )
 
         # Detect and install custom repos here if needed
-        elif cd_conf and cd_conf.has_repos and not repo_url:
-            LOG.info('detected custom repositories from config file')
+        elif should_use_custom_repo(args, cd_conf, repo_url):
+            LOG.info('detected valid custom repositories from config file')
             custom_repo(distro, args, cd_conf, rlogger)
 
         else:  # otherwise a normal installation
@@ -91,6 +91,23 @@ def install(args):
         # Check the ceph version we just installed
         hosts.common.ceph_version(distro.conn)
         distro.conn.exit()
+
+
+def should_use_custom_repo(args, cd_conf, repo_url):
+    """
+    A boolean to determine the logic needed to proceed with a custom repo
+    installation instead of cramming everything nect to the logic operator.
+    """
+    if repo_url:
+        # repo_url signals a CLI override, return False immediately
+        return False
+    if cd_conf:
+        if cd_conf.has_repos:
+            has_valid_release = args.release in cd_conf.get_repos()
+            has_default_repo = cd_conf.get_default_repo()
+            if has_valid_release or has_default_repo:
+                return True
+    return False
 
 
 def custom_repo(distro, args, cd_conf, rlogger):
