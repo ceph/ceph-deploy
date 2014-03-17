@@ -114,6 +114,10 @@ def custom_repo(distro, args, cd_conf, rlogger):
     """
     A custom repo install helper that will go through config checks to retrieve
     repos (and any extra repos defined) and install those
+
+    ``cd_conf`` is the object built from argparse that holds the flags and
+    information needed to determine what metadata from the configuration to be
+    used.
     """
     default_repo = cd_conf.get_default_repo()
     if args.release in cd_conf.get_repos():
