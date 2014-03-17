@@ -32,7 +32,7 @@ def install(distro, version_kind, version, adjust_repos):
                 distro=distro,
                 )
         elif version_kind == 'testing':
-            url = 'http://ceph.com/rpm-testing/{distro}'.format(distro=distro)
+            url = 'http://ceph.com/rpm-testing/{distro}/'.format(distro=distro)
         elif version_kind == 'dev':
             url = 'http://gitbuilder.ceph.com/ceph-rpm-{distro}{release}-{machine}-basic/ref/{version}/'.format(
                 distro=distro,
