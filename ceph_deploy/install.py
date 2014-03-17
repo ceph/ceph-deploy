@@ -2,9 +2,9 @@ import argparse
 import logging
 import os
 
-from . import hosts
-from .cliutil import priority
-from .lib.remoto import process
+from ceph_deploy import hosts
+from ceph_deploy.cliutil import priority
+from ceph_deploy.lib.remoto import process
 
 
 LOG = logging.getLogger(__name__)
@@ -30,24 +30,43 @@ def install(args):
         version_str,
         args.cluster,
         ' '.join(args.host),
-        )
+    )
+
     for hostname in args.host:
         LOG.debug('Detecting platform for host %s ...', hostname)
         distro = hosts.get(hostname, username=args.username)
-        LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
+        LOG.info(
+            'Distro info: %s %s %s',
+            distro.name,
+            distro.release,
+            distro.codename
+        )
         rlogger = logging.getLogger(hostname)
         rlogger.info('installing ceph on %s' % hostname)
+
+        cd_conf = getattr(args, 'cd_conf', None)
 
         # custom repo arguments
         repo_url = os.environ.get('CEPH_DEPLOY_REPO_URL') or args.repo_url
         gpg_url = os.environ.get('CEPH_DEPLOY_GPG_URL') or args.gpg_url
         gpg_fallback = 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc'
+
         if gpg_url is None and repo_url:
             LOG.warning('--gpg-url was not used, will fallback')
             LOG.warning('using GPG fallback: %s', gpg_fallback)
             gpg_url = gpg_fallback
 
         if repo_url:  # triggers using a custom repository
+            # the user used a custom repo url, this should override anything
+            # we can detect from the configuration, so warn about it
+            if cd_conf:
+                if cd_conf.get_default_repo():
+                    rlogger.warning('a default repo was found but it was \
+                        overridden on the CLI')
+                if args.release in cd_conf.get_repos():
+                    rlogger.warning('a custom repo was found but it was \
+                        overridden on the CLI')
+
             rlogger.info('using custom repository location: %s', repo_url)
             distro.mirror_install(
                 distro,
@@ -56,6 +75,11 @@ def install(args):
                 args.adjust_repos
             )
 
+        # Detect and install custom repos here if needed
+        elif should_use_custom_repo(args, cd_conf, repo_url):
+            LOG.info('detected valid custom repositories from config file')
+            custom_repo(distro, args, cd_conf, rlogger)
+
         else:  # otherwise a normal installation
             distro.install(
                 distro,
@@ -63,9 +87,79 @@ def install(args):
                 version,
                 args.adjust_repos
             )
+
         # Check the ceph version we just installed
         hosts.common.ceph_version(distro.conn)
         distro.conn.exit()
+
+
+def should_use_custom_repo(args, cd_conf, repo_url):
+    """
+    A boolean to determine the logic needed to proceed with a custom repo
+    installation instead of cramming everything nect to the logic operator.
+    """
+    if repo_url:
+        # repo_url signals a CLI override, return False immediately
+        return False
+    if cd_conf:
+        if cd_conf.has_repos:
+            has_valid_release = args.release in cd_conf.get_repos()
+            has_default_repo = cd_conf.get_default_repo()
+            if has_valid_release or has_default_repo:
+                return True
+    return False
+
+
+def custom_repo(distro, args, cd_conf, rlogger):
+    """
+    A custom repo install helper that will go through config checks to retrieve
+    repos (and any extra repos defined) and install those
+
+    ``cd_conf`` is the object built from argparse that holds the flags and
+    information needed to determine what metadata from the configuration to be
+    used.
+    """
+    default_repo = cd_conf.get_default_repo()
+    if args.release in cd_conf.get_repos():
+        LOG.info('will use repository from conf: %s' % args.release)
+        default_repo = args.release
+    elif default_repo:
+        LOG.info('will use default repository: %s' % default_repo)
+
+    # At this point we know there is a cd_conf and that it has custom
+    # repos make sure we were able to detect and actual repo
+    if not default_repo:
+        LOG.warning('a ceph-deploy config was found with repos \
+            but could not default to one')
+    else:
+        options = dict(cd_conf.items(default_repo))
+        options['install_ceph'] = True
+        extra_repos = cd_conf.get_list(default_repo, 'extra-repos')
+        rlogger.info('adding custom repository file')
+        try:
+            distro.repo_install(
+                distro,
+                default_repo,
+                options.pop('baseurl'),
+                options.pop('gpgkey'),
+                **options
+            )
+        except KeyError as err:
+            raise RuntimeError('missing required key: %s in config section: %s' % (err, default_repo))
+
+        for xrepo in extra_repos:
+            rlogger.info('adding extra repo file: %s.repo' % xrepo)
+            options = dict(cd_conf.items(xrepo))
+            try:
+                distro.repo_install(
+                    distro,
+                    xrepo,
+                    options.pop('baseurl'),
+                    options.pop('gpgkey'),
+                    **options
+                )
+            except KeyError as err:
+                raise RuntimeError('missing required key: %s in config section: %s' % (err, xrepo))
 
 
 def uninstall(args):
@@ -211,12 +305,6 @@ def make(parser):
         '--stable',
         nargs='?',
         action=StoreVersion,
-        choices=[
-            'bobtail',
-            'cuttlefish',
-            'dumpling',
-            'emperor',
-            ],
         metavar='CODENAME',
         help='[DEPRECATED] install a release known as CODENAME\
                 (done by default) (default: %(default)s)',
@@ -226,12 +314,6 @@ def make(parser):
         '--release',
         nargs='?',
         action=StoreVersion,
-        choices=[
-            'bobtail',
-            'cuttlefish',
-            'dumpling',
-            'emperor',
-            ],
         metavar='CODENAME',
         help='install a release known as CODENAME\
                 (done by default) (default: %(default)s)',

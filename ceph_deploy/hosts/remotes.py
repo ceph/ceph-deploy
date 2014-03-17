@@ -40,18 +40,20 @@ def machine_type():
     return platform.machine()
 
 
-def write_sources_list(url, codename):
-    """add ceph deb repo to sources.list"""
-    with file('/etc/apt/sources.list.d/ceph.list', 'w') as f:
+def write_sources_list(url, codename, filename='ceph.list'):
+    """add deb repo to sources.list"""
+    repo_path = os.path.join('/etc/apt/sources.list.d', filename)
+    with file(repo_path, 'w') as f:
         f.write('deb {url} {codename} main\n'.format(
                 url=url,
                 codename=codename,
                 ))
 
 
-def write_yum_repo(content):
-    """set the contents of /etc/yum.repos.d/ceph.repo"""
-    write_file('/etc/yum.repos.d/ceph.repo', content)
+def write_yum_repo(content, filename='ceph.repo'):
+    """set the contents of repo file to /etc/yum.repos.d/"""
+    repo_path = os.path.join('/etc/yum.repos.d', filename)
+    write_file(repo_path, content)
 
 
 def write_conf(cluster, conf, overwrite):
