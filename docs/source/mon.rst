@@ -64,7 +64,7 @@ of the provided host.
 .. warning:: If the monitor host has multiple addresses you should specify
              the address directly to ensure the right IP is used.
 
-.. versionadded:: 1.3.6
+.. versionadded:: 1.4.0
 
 
 ``destroy``

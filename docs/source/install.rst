@@ -38,7 +38,7 @@ specify exactly what release you need::
 Note that the ``--stable`` flag for specifying a Ceph release is deprecated and
 should no longer be used starting from version 1.3.6.
 
-.. versionadded:: 1.3.6
+.. versionadded:: 1.4.0
 
 .. _install-unstable-releases:
 
