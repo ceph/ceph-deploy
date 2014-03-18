@@ -1,3 +1,12 @@
+1.4.0
+-----
+* uninstall ceph-release and clean cache in CentOS
+* Add ability to add monitors to an existing cluster
+* Deprecate use of ``--stable`` for releases, introduce ``--release``
+* Eat some tracebacks that may appear when closing remote connections
+* Enable default ceph-deploy configurations for repo handling
+* Fix wrong URL for rpm installs with ``--testing`` flag
+
 1.3.5
 -----
 * Support Debian SID for installs
