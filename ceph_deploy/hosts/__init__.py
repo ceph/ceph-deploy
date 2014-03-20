@@ -34,7 +34,11 @@ def get(hostname, username=None, fallback=None):
         username=username,
         logger=logging.getLogger(hostname)
     )
-    conn.import_module(remotes)
+    try:
+        conn.import_module(remotes)
+    except IOError as error:
+        if 'already closed' in getattr(error, 'message', ''):
+            raise RuntimeError('remote connection got closed, ensure ``requiretty`` is disabled for %s' % hostname)
     distro_name, release, codename = conn.remote_module.platform_information()
     if not codename or not _get_distro(distro_name):
         raise exc.UnsupportedPlatform(
