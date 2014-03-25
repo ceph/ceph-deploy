@@ -54,7 +54,7 @@ def vendor_library(name, version):
             run(['rm', '-rf', vendor_dest])
 
     if not path.exists(vendor_dest):
-        run(['git', 'clone', 'git://ceph.com/%s' % name])
+        run(['git', 'clone', 'https://ceph.com/%s.git' % name])
         os.chdir(vendor_src)
         run(['git', 'checkout', version])
         run(['mv', vendor_module, vendor_dest])
