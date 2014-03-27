@@ -38,7 +38,7 @@ class Hostname(object):
         name = parts[0]
         host = parts[-1]
         try:
-            self.socket.gethostbyname(host)
+            self.socket.getaddrinfo(host, 0)
         except self.socket.gaierror:
             msg = "hostname: %s is not resolvable" % host
             raise argparse.ArgumentError(None, msg)
