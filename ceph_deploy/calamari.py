@@ -106,7 +106,8 @@ def make(parser):
         nargs='?',
         metavar='CODENAME',
         help="Use a given release from repositories\
-                defined in ceph-deploy's configuration",
+                defined in ceph-deploy's configuration. Defaults to\
+                'calamari-minion'",
 
     )
 
