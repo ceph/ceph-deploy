@@ -68,7 +68,7 @@ def _locate_or_create():
     home_config = path.expanduser('~/.cephdeploy.conf')
     # With order of importance
     locations = [
-        path.join(path.dirname(os.getcwd()), 'cephdeploy.conf'),
+        path.join(os.getcwd(), 'cephdeploy.conf'),
         home_config,
     ]
 

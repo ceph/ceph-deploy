@@ -84,7 +84,7 @@ def get_parser():
         # the program name, with subcommand, later
         p.set_defaults(prog=p.prog)
         if not os.environ.get('CEPH_DEPLOY_TEST'):
-            p.set_defaults(cd_conf = ceph_deploy.conf.cephdeploy.load())
+            p.set_defaults(cd_conf=ceph_deploy.conf.cephdeploy.load())
 
         fn(p)
     parser.set_defaults(
@@ -131,6 +131,9 @@ def main(args=None, namespace=None):
     root_logger.addHandler(sh)
     root_logger.addHandler(fh)
 
-    LOG.info("Invoked (%s): %s" %(ceph_deploy.__version__,
-                                  join(sys.argv, " ")))
+    LOG.info("Invoked (%s): %s" % (
+        ceph_deploy.__version__,
+        join(sys.argv, " "))
+    )
+
     return args.func(args)

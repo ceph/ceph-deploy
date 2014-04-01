@@ -130,14 +130,15 @@ def repo_install(distro, repo_name, baseurl, gpgkey, **kw):
     _type = 'repo-md'
     baseurl = baseurl.strip('/')  # Remove trailing slashes
 
-    process.run(
-        distro.conn,
-        [
-            'rpm',
-            '--import',
-            gpgkey,
-        ]
-    )
+    if gpgkey:
+        process.run(
+            distro.conn,
+            [
+                'rpm',
+                '--import',
+                gpgkey,
+            ]
+        )
 
     repo_content = templates.custom_repo.format(
         repo_name=repo_name,
