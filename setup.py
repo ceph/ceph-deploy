@@ -65,7 +65,8 @@ setup(
             'forgetkeys = ceph_deploy.forgetkeys:make',
             'config = ceph_deploy.config:make',
             'admin = ceph_deploy.admin:make',
-            'pkg = ceph_deploy.pkg:make'
+            'pkg = ceph_deploy.pkg:make',
+            'calamari = ceph_deploy.calamari:make',
             ],
 
         },
