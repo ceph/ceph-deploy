@@ -12,6 +12,8 @@ class UnableToResolveError(DeployError):
     """
     Unable to resolve host
     """
+
+
 class ClusterExistsError(DeployError):
     """
     Cluster config exists already
@@ -34,6 +36,7 @@ class NeedMonError(DeployError):
     """
     Cannot find nodes with ceph-mon.
     """
+
 
 class NeedDiskError(DeployError):
     """
