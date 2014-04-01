@@ -1,5 +1,5 @@
 import logging
-from ceph_deploy import hosts
+from ceph_deploy import hosts, exc
 from ceph_deploy.lib.remoto import process
 
 
@@ -36,6 +36,13 @@ def connect(args):
 
     for hostname in args.hosts:
         distro = hosts.get(hostname, username=args.username)
+        if not distro_is_supported(distro.normalized_name):
+            raise exc.UnsupportedPlatform(
+                distro.distro_name,
+                distro.codename,
+                distro.release
+            )
+
         LOG.info(
             'Distro info: %s %s %s',
             distro.name,
@@ -63,6 +70,7 @@ def connect(args):
 
         distro.pkg.install(distro, 'salt-minion')
 
+        # redhat/centos need to get the service started
         if distro.normalized_name in ['redhat', 'centos']:
             process.run(
                 distro.conn,
