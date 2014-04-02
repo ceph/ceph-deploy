@@ -1,4 +1,6 @@
+import errno
 import logging
+import os
 from ceph_deploy import hosts, exc
 from ceph_deploy.lib.remoto import process
 
@@ -68,6 +70,22 @@ def connect(args):
                 )
             )
 
+        # Emplace minion config prior to installation so that it is present
+        # when the minion first starts.
+        minion_config_dir = os.path.join('/etc/salt/', 'minion.d')
+        minion_config_file = os.path.join(minion_config_dir, 'calamari.conf')
+
+        rlogger.debug('creating config dir: %s' % minion_config_dir)
+        distro.conn.remote_module.makedir(minion_config_dir, [errno.EEXIST])
+
+        rlogger.debug(
+            'creating the calamari salt config: %s' % minion_config_file
+        )
+        distro.conn.remote_module.write_file(
+            minion_config_file,
+            'master: %s\n' % args.master
+        )
+
         distro.pkg.install(distro, 'salt-minion')
 
         # redhat/centos need to get the service started
@@ -109,6 +127,13 @@ def make(parser):
                 defined in ceph-deploy's configuration. Defaults to\
                 'calamari-minion'",
 
+    )
+
+    parser.add_argument(
+        '--master',
+        nargs='?',
+        metavar='MASTER SERVER',
+        help="The domain for the Calamari master server"
     )
 
     parser.add_argument(
