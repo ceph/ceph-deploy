@@ -50,6 +50,7 @@ def get(hostname, username=None, fallback=None):
 
     module = _get_distro(distro_name)
     module.name = distro_name
+    module.normalized_name = _normalized_distro_name(distro_name)
     module.release = release
     module.codename = codename
     module.conn = conn

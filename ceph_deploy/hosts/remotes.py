@@ -121,8 +121,16 @@ def path_exists(path):
     return os.path.exists(path)
 
 
-def makedir(path):
-    os.makedirs(path)
+def makedir(path, ignored=None):
+    ignored = ignored or []
+    try:
+        os.makedirs(path)
+    except OSError as error:
+        if error.errno in ignored:
+            pass
+        else:
+            # re-raise the original exception
+            raise
 
 
 def unlink(_file):

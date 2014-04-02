@@ -141,16 +141,17 @@ def repo_install(distro, repo_name, baseurl, gpgkey, **kw):
     install_ceph = kw.pop('install_ceph', False)
     baseurl = baseurl.strip('/')  # Remove trailing slashes
 
-    process.run(
-        distro.conn,
-        [
-            'wget',
-            '-O',
-            'release.asc',
-            gpgkey,
-        ],
-        stop_on_nonzero=False,
-    )
+    if gpgkey:
+        process.run(
+            distro.conn,
+            [
+                'wget',
+                '-O',
+                'release.asc',
+                gpgkey,
+            ],
+            stop_on_nonzero=False,
+        )
 
     process.run(
         distro.conn,
