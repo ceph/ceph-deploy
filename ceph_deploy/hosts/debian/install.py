@@ -30,6 +30,7 @@ def install(distro, version_kind, version, adjust_repos):
             distro.conn,
             [
                 'wget',
+                '--no-check-certificate',
                 '-O',
                 '{key}.asc'.format(key=key),
                 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc'.format(key=key),
