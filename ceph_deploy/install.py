@@ -198,7 +198,7 @@ def purge(args):
         distro.conn.exit()
 
 
-def purge_data(args):
+def purgedata(args):
     LOG.debug(
         'Purging data from cluster %s hosts %s',
         args.cluster,
@@ -430,5 +430,5 @@ def make_purge_data(parser):
         help='hosts to purge Ceph data from',
         )
     parser.set_defaults(
-        func=purge_data,
+        func=purgedata,
         )
