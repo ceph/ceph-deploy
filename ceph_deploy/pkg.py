@@ -38,7 +38,7 @@ def remove(args):
         distro.conn.exit()
 
 
-def action(args):
+def pkg(args):
     if args.install:
         install(args)
     elif args.remove:
@@ -70,5 +70,5 @@ def make(parser):
     )
 
     parser.set_defaults(
-        func=action,
+        func=pkg,
     )
