@@ -92,6 +92,7 @@ def get_parser():
         prog=parser.prog,
         cluster='ceph',
         )
+
     return parser
 
 
@@ -130,6 +131,13 @@ def main(args=None, namespace=None):
 
     root_logger.addHandler(sh)
     root_logger.addHandler(fh)
+
+    # Reads from the config file and sets values for the global
+    # flags and the given sub-command
+    # the one flag that will never work regardless of the config settings is
+    # logging because we cannot set it before hand since the logging config is
+    # not ready yet. This is the earliest we can do.
+    args = ceph_deploy.conf.cephdeploy.set_overrides(args)
 
     LOG.info("Invoked (%s): %s" % (
         ceph_deploy.__version__,
