@@ -1,8 +1,10 @@
 from ConfigParser import SafeConfigParser, NoSectionError, NoOptionError
+import logging
 import os
 from os import path
 import re
 
+logger = logging.getLogger('ceph_deploy.conf')
 
 cd_conf_template = """
 #
@@ -74,15 +76,54 @@ def _locate_or_create():
 
     for location in locations:
         if path.exists(location):
+            logger.debug('found configuration file at: %s' % location)
             return location
+    logger.info('could not find configuration file, will create one in $HOME')
     create_stub(home_config)
     return home_config
 
 
 def create_stub(_path=None):
     _path = _path or path.expanduser('~/.cephdeploy.conf')
+    logger.debug('creating new configuration file: %s' % _path)
     with open(_path, 'w') as cd_conf:
         cd_conf.write(cd_conf_template)
+
+
+def set_overrides(args, _conf=None):
+    """
+    Read the configuration file and look for ceph-deploy sections
+    to set flags/defaults from the values found. This will alter the
+    ``args`` object that is created by argparse.
+    """
+    # Get the subcommand name to avoid overwritting values from other
+    # subcommands that are not going to be used
+    subcommand = args.func.__name__
+    command_section = 'ceph-deploy-%s' % subcommand
+    conf = _conf or load()
+    for section_name in conf.sections():
+        if section_name in ['ceph-deploy-global', command_section]:
+            override_subcommand(
+                section_name,
+                conf.items(section_name),
+                args
+            )
+    return args
+
+
+def override_subcommand(section_name, section_items, args):
+    """
+    Given a specific section in the configuration file that maps to
+    a subcommand (except for the global section) read all the keys that are
+    actual argument flags and slap the values for that one subcommand.
+
+    Return the altered ``args`` object at the end.
+    """
+    # XXX We are not coercing here any int-like values, so if ArgParse
+    # does that in the CLI we are totally non-compliant with that expectation
+    for k, v, in section_items:
+        setattr(args, k, v)
+    return args
 
 
 class Conf(SafeConfigParser):

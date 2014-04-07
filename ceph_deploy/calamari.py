@@ -103,7 +103,7 @@ def connect(args):
         distro.conn.exit()
 
 
-def action(args):
+def calamari(args):
     if args.subcommand == 'connect':
         connect(args)
 
@@ -142,5 +142,5 @@ def make(parser):
     )
 
     parser.set_defaults(
-        func=action,
+        func=calamari,
     )

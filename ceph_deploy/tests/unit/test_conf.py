@@ -145,3 +145,25 @@ class TestConfGetList(object):
         """))
         cfg.readfp(conf_file)
         assert cfg.get_default_repo() is False
+
+
+class TestSetOverrides(object):
+
+    def setup(self):
+        self.args = Mock()
+        self.args.func.__name__ = 'foo'
+        self.conf = Mock()
+
+    def test_override_global(self):
+        self.conf.sections = Mock(return_value=['ceph-deploy-global'])
+        self.conf.items = Mock(return_value=(('foo', 1),))
+        arg_obj = conf.cephdeploy.set_overrides(self.args, self.conf)
+        assert arg_obj.foo == 1
+
+    def test_override_foo_section(self):
+        self.conf.sections = Mock(
+            return_value=['ceph-deploy-global', 'ceph-deploy-foo']
+        )
+        self.conf.items = Mock(return_value=(('bar', 1),))
+        arg_obj = conf.cephdeploy.set_overrides(self.args, self.conf)
+        assert arg_obj.bar == 1
