@@ -6,6 +6,8 @@ def install(distro, version_kind, version, adjust_repos):
     release = distro.release
     machine = distro.machine_type
 
+    pkg_managers.yum_clean(distro.conn)
+
     # Even before EPEL, make sure we have `wget`
     pkg_managers.yum(distro.conn, 'wget')
 
@@ -98,6 +100,8 @@ def install_epel(distro):
 def mirror_install(distro, repo_url, gpg_url, adjust_repos):
     repo_url = repo_url.strip('/')  # Remove trailing slashes
 
+    pkg_managers.yum_clean(distro.conn)
+
     if adjust_repos:
         process.run(
             distro.conn,
@@ -129,6 +133,8 @@ def repo_install(distro, repo_name, baseurl, gpgkey, **kw):
     install_ceph = kw.pop('install_ceph', False)
     _type = 'repo-md'
     baseurl = baseurl.strip('/')  # Remove trailing slashes
+
+    pkg_managers.yum_clean(distro.conn)
 
     if gpgkey:
         process.run(
