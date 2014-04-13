@@ -37,9 +37,7 @@ class TestHostName(object):
     def setup(self):
         self.fake_sock = Mock()
         self.fake_sock.gaierror = socket.gaierror
-        self.fake_sock.error = socket.error
-        self.fake_sock.gethostbyname.side_effect = socket.gaierror
-        self.fake_sock.inet_aton.side_effect = socket.error
+        self.fake_sock.getaddrinfo.side_effect = socket.gaierror
 
     def test_hostname_is_not_resolvable(self):
         hostname = arg_validators.Hostname(self.fake_sock)
@@ -56,26 +54,43 @@ class TestHostName(object):
         assert 'foo is not resolvable' in message
 
     def test_ip_is_allowed_when_paired_with_host(self):
-        self.fake_sock.gethostbyname = Mock(return_value='192.168.1.111')
-        hostname = arg_validators.Hostname(self.fake_sock)
+        self.fake_sock = Mock()
+        self.fake_sock.gaierror = socket.gaierror
+
+        def side_effect(*args):
+                self.fake_sock.getaddrinfo.side_effect = socket.gaierror
+
+	self.fake_sock.getaddrinfo.side_effect = side_effect
+	hostname = arg_validators.Hostname(self.fake_sock)
         result = hostname('name:192.168.1.111')
         assert result == 'name:192.168.1.111'
 
     def test_ipv6_is_allowed_when_paired_with_host(self):
-        self.fake_sock.gethostbyname = Mock(return_value='2001:0db8:85a3:0000:0000:8a2e:0370:7334')
+        self.fake_sock = Mock()
+        self.fake_sock.gaierror = socket.gaierror
+
+        def side_effect(*args):
+                self.fake_sock.getaddrinfo.side_effect = socket.gaierror
+
+	self.fake_sock.getaddrinfo.side_effect = side_effect
         hostname = arg_validators.Hostname(self.fake_sock)
         result = hostname('name:2001:0db8:85a3:0000:0000:8a2e:0370:7334')
         assert result == 'name:2001:0db8:85a3:0000:0000:8a2e:0370:7334'
 
     def test_host_is_resolvable(self):
-        self.fake_sock.gethostbyname = Mock()
+        self.fake_sock = Mock()
+        self.fake_sock.gaierror = socket.gaierror
+
+	def side_effect(*args):
+                self.fake_sock.getaddrinfo.side_effect = socket.gaierror
+
+        self.fake_sock.getaddrinfo.side_effect = side_effect
         hostname = arg_validators.Hostname(self.fake_sock)
         result = hostname('name:example.com')
         assert result == 'name:example.com'
 
     def test_hostname_must_be_an_ip(self):
-        self.fake_sock.gethostbyname = Mock()
-        self.fake_sock.inet_aton = Mock()
+        self.fake_sock.getaddrinfo = Mock()
         hostname = arg_validators.Hostname(self.fake_sock)
         with raises(ArgumentError) as error:
             hostname('0')
