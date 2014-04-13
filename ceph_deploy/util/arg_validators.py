@@ -34,7 +34,7 @@ class Hostname(object):
         self.socket = _socket or socket  # just used for testing
 
     def __call__(self, string):
-        parts = string.split(':')
+        parts = string.split(':', 1)
         name = parts[0]
         host = parts[-1]
         try:
@@ -44,8 +44,8 @@ class Hostname(object):
             raise argparse.ArgumentError(None, msg)
 
         try:
-            self.socket.inet_aton(name)
-        except self.socket.error:
+            self.socket.getaddrinfo(name, 0, 0, 0, 0, self.socket.AI_NUMERICHOST)
+        except self.socket.gaierror:
             return string  # not an IP
         else:
             msg = '%s must be a hostname not an IP' % name
