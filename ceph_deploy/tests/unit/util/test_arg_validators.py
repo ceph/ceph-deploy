@@ -58,6 +58,7 @@ class TestHostName(object):
         self.fake_sock.gaierror = socket.gaierror
 
         def side_effect(*args):
+                # First call passes, second call raises socket.gaierror
                 self.fake_sock.getaddrinfo.side_effect = socket.gaierror
 
         self.fake_sock.getaddrinfo.side_effect = side_effect
@@ -70,6 +71,7 @@ class TestHostName(object):
         self.fake_sock.gaierror = socket.gaierror
 
         def side_effect(*args):
+                # First call passes, second call raises socket.gaierror
                 self.fake_sock.getaddrinfo.side_effect = socket.gaierror
 
         self.fake_sock.getaddrinfo.side_effect = side_effect
@@ -82,6 +84,7 @@ class TestHostName(object):
         self.fake_sock.gaierror = socket.gaierror
 
         def side_effect(*args):
+                # First call passes, second call raises socket.gaierror
                 self.fake_sock.getaddrinfo.side_effect = socket.gaierror
 
         self.fake_sock.getaddrinfo.side_effect = side_effect
