@@ -97,8 +97,8 @@ and place the public key (``id_rsa.pub`` or ``id_dsa.pub``) in::
 
 and ensure that the following lines are in the sshd config::
 
-    PermitRootLogin yes
-    PermitEmptyPasswords yes
+    PermitRootLogin without-password
+    PubkeyAuthentication yes
 
 The machine running ceph-deploy does not need to have the Ceph packages
 installed unless it needs to admin the cluster directly using the ``ceph``
