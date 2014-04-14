@@ -60,8 +60,8 @@ class TestHostName(object):
         def side_effect(*args):
                 self.fake_sock.getaddrinfo.side_effect = socket.gaierror
 
-	self.fake_sock.getaddrinfo.side_effect = side_effect
-	hostname = arg_validators.Hostname(self.fake_sock)
+        self.fake_sock.getaddrinfo.side_effect = side_effect
+        hostname = arg_validators.Hostname(self.fake_sock)
         result = hostname('name:192.168.1.111')
         assert result == 'name:192.168.1.111'
 
@@ -72,7 +72,7 @@ class TestHostName(object):
         def side_effect(*args):
                 self.fake_sock.getaddrinfo.side_effect = socket.gaierror
 
-	self.fake_sock.getaddrinfo.side_effect = side_effect
+        self.fake_sock.getaddrinfo.side_effect = side_effect
         hostname = arg_validators.Hostname(self.fake_sock)
         result = hostname('name:2001:0db8:85a3:0000:0000:8a2e:0370:7334')
         assert result == 'name:2001:0db8:85a3:0000:0000:8a2e:0370:7334'
@@ -81,7 +81,7 @@ class TestHostName(object):
         self.fake_sock = Mock()
         self.fake_sock.gaierror = socket.gaierror
 
-	def side_effect(*args):
+        def side_effect(*args):
                 self.fake_sock.getaddrinfo.side_effect = socket.gaierror
 
         self.fake_sock.getaddrinfo.side_effect = side_effect
