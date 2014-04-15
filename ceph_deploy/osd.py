@@ -65,8 +65,10 @@ def osd_status_check(conn, cluster):
             "full": "false",
             "nearfull": "false"
         }
+
+    Note how the booleans are actually strings, so we need to take that into
+    account and fix it before returning the dictionary. Issue #8108
     """
-    logger = conn.logger
     command = [
         'ceph',
         '--cluster={cluster}'.format(cluster=cluster),
@@ -125,6 +127,7 @@ def catch_osd_errors(conn, logger, args):
 
     if full:
         logger.warning('OSDs are full!')
+
     if nearfull:
         logger.warning('OSDs are near full!')
 
