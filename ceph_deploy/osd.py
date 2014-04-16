@@ -1,7 +1,9 @@
 import argparse
+import json
 import logging
 import os
 import sys
+import time
 from textwrap import dedent
 
 from cStringIO import StringIO
@@ -47,6 +49,87 @@ def create_osd(conn, cluster, key):
             '--action=add',
         ],
     )
+
+
+def osd_status_check(conn, cluster):
+    """
+    Check the status of an OSD. Make sure all are up and in
+
+    What good output would look like::
+
+        {
+            "epoch": 8,
+            "num_osds": 1,
+            "num_up_osds": 1,
+            "num_in_osds": "1",
+            "full": "false",
+            "nearfull": "false"
+        }
+
+    Note how the booleans are actually strings, so we need to take that into
+    account and fix it before returning the dictionary. Issue #8108
+    """
+    command = [
+        'ceph',
+        '--cluster={cluster}'.format(cluster=cluster),
+        'osd',
+        'stat',
+        '--format=json',
+    ]
+
+    out, err, code = process.check(
+        conn,
+        command,
+    )
+
+    try:
+        loaded_json = json.loads(''.join(out))
+        # convert boolean strings to actual booleans because
+        # --format=json fails to do this properly
+        for k, v in loaded_json.items():
+            if v == 'true':
+                loaded_json[k] = True
+            elif v == 'false':
+                loaded_json[k] = False
+        return loaded_json
+    except ValueError:
+        return {}
+
+
+def catch_osd_errors(conn, logger, args):
+    """
+    Look for possible issues when checking the status of an OSD and
+    report them back to the user.
+    """
+    logger.info('checking OSD status...')
+    status = osd_status_check(conn, args.cluster)
+    osds = int(status.get('num_osds', 0))
+    up_osds = int(status.get('num_up_osds', 0))
+    in_osds = int(status.get('num_in_osds', 0))
+    full = status.get('full', False)
+    nearfull = status.get('nearfull', False)
+
+    if osds > up_osds:
+        difference = osds - up_osds
+        logger.warning('there %s %d OSD%s down' % (
+            ['is', 'are'][difference != 1],
+            difference,
+            "s"[difference == 1:])
+        )
+
+    if osds > in_osds:
+        difference = osds - in_osds
+        logger.warning('there %s %d OSD%s out' % (
+            ['is', 'are'][difference != 1],
+            difference,
+            "s"[difference == 1:])
+        )
+
+    if full:
+        logger.warning('OSDs are full!')
+
+    if nearfull:
+        logger.warning('OSDs are near full!')
 
 
 def prepare_disk(
@@ -157,6 +240,9 @@ def prepare(args, cfg, activate_prepared_disk):
                 dmcrypt_dir=args.dmcrypt_key_dir,
             )
 
+            # give the OSD a few seconds to start
+            time.sleep(5)
+            catch_osd_errors(distro.conn, distro.conn.logger, args)
             LOG.debug('Host %s is now ready for osd use.', hostname)
             distro.conn.exit()
 
@@ -200,7 +286,9 @@ def activate(args, cfg):
                 disk,
             ],
         )
-
+        # give the OSD a few seconds to start
+        time.sleep(5)
+        catch_osd_errors(distro.conn, distro.logger, args)
         distro.conn.exit()
 
 
