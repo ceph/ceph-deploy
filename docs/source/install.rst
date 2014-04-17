@@ -148,3 +148,5 @@ repository in an admin host::
     [node2][INFO  ] Running command: sudo ceph --version
     [node2][DEBUG ] ceph version 0.72.1
     (4d923861868f6a15dcb33fef7f50f674997322de)
+
+.. versionadded:: 1.4.1
