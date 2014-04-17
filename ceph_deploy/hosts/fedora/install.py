@@ -1,5 +1,6 @@
 from ceph_deploy.util import pkg_managers, templates
 from ceph_deploy.lib.remoto import process
+from ceph_deploy.hosts.centos.install import repo_install
 
 
 def install(distro, version_kind, version, adjust_repos):
