@@ -4,7 +4,7 @@ import os
 
 from ceph_deploy import hosts
 from ceph_deploy.cliutil import priority
-from ceph_deploy.lib.remoto import process
+from ceph_deploy.lib.remoto import process, rsync
 
 
 LOG = logging.getLogger(__name__)
@@ -57,7 +57,6 @@ def install(args):
             gpg_url = gpg_fallback
 
         if args.local_mirror:
-            from .lib.remoto import rsync
             rsync(hostname, args.local_mirror, '/opt/ceph-deploy/repo', distro.conn.logger, sudo=True)
             repo_url = 'file:///opt/ceph-deploy/repo'
             gpg_url = 'file:///opt/ceph-deploy/repo/release.asc'
@@ -375,7 +374,7 @@ def make(parser):
     parser.add_argument(
         '--local-mirror',
         nargs='?',
-        const='URL',
+        const='PATH',
         default=None,
         help='Fetch packages and push them to hosts for a local repo mirror',
     )
