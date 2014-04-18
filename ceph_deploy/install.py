@@ -4,7 +4,7 @@ import os
 
 from ceph_deploy import hosts
 from ceph_deploy.cliutil import priority
-from ceph_deploy.lib.remoto import process
+from ceph_deploy.lib.remoto import process, rsync
 
 
 LOG = logging.getLogger(__name__)
@@ -55,6 +55,11 @@ def install(args):
             LOG.warning('--gpg-url was not used, will fallback')
             LOG.warning('using GPG fallback: %s', gpg_fallback)
             gpg_url = gpg_fallback
+
+        if args.local_mirror:
+            rsync(hostname, args.local_mirror, '/opt/ceph-deploy/repo', distro.conn.logger, sudo=True)
+            repo_url = 'file:///opt/ceph-deploy/repo'
+            gpg_url = 'file:///opt/ceph-deploy/repo/release.asc'
 
         if repo_url:  # triggers using a custom repository
             # the user used a custom repo url, this should override anything
@@ -364,6 +369,14 @@ def make(parser):
         metavar='HOST',
         nargs='+',
         help='hosts to install on',
+    )
+
+    parser.add_argument(
+        '--local-mirror',
+        nargs='?',
+        const='PATH',
+        default=None,
+        help='Fetch packages and push them to hosts for a local repo mirror',
     )
 
     parser.add_argument(

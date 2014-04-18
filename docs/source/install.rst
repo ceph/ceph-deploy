@@ -103,3 +103,50 @@ It is strongly suggested that both flags be provided. However, the
     https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc
 
 .. versionadded:: 1.3.3
+
+
+Local Mirrors
+-------------
+``ceph-deploy`` supports local mirror installation by syncing a repository to
+remote servers and configuring correctly the remote hosts to install directly
+from those local paths (as opposed to going through the network).
+
+The one requirement for this option to work is to have a ``release.asc`` at the
+top of the directory that holds the repository files.
+
+That file is used by Ceph as the key for its signed packages and it is usually
+retrieved from::
+
+        https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc
+
+This is how it would look the process to get Ceph installed from a local
+repository in an admin host::
+
+    $ ceph-deploy install --local-mirror ~/tmp/rpm-mirror/ceph.com/rpm-emperor/el6 node2
+    [ceph_deploy.cli][INFO  ] Invoked (1.4.1): /bin/ceph-deploy install --local-mirror /Users/alfredo/tmp/rpm-mirror/ceph.com/rpm-emperor/el6 node2
+    [ceph_deploy.install][DEBUG ] Installing stable version emperor on cluster ceph hosts node2
+    [ceph_deploy.install][DEBUG ] Detecting platform for host node2 ...
+    [node2][DEBUG ] connected to host: node2
+    [node2][DEBUG ] detect platform information from remote host
+    [node2][DEBUG ] detect machine type
+    [ceph_deploy.install][INFO  ] Distro info: CentOS 6.4 Final
+    [node2][INFO  ] installing ceph on node2
+    [node2][INFO  ] syncing file: noarch/ceph-deploy-1.3-0.noarch.rpm
+    [node2][INFO  ] syncing file: noarch/ceph-deploy-1.3.1-0.noarch.rpm
+    [node2][INFO  ] syncing file: noarch/ceph-deploy-1.3.2-0.noarch.rpm
+    [node2][INFO  ] syncing file: noarch/ceph-release-1-0.el6.noarch.rpm
+    [node2][INFO  ] syncing file: noarch/index.html
+    [node2][INFO  ] syncing file: noarch/index.html?C=D;O=A
+    [node2][INFO  ] syncing file: noarch/index.html?C=D;O=D
+    [node2][INFO  ] syncing file: noarch/index.html?C=M;O=A
+    ...
+    [node2][DEBUG ]
+    [node2][DEBUG ] Installed:
+    [node2][DEBUG ]   ceph.x86_64 0:0.72.1-0.el6
+    [node2][DEBUG ]
+    [node2][DEBUG ] Complete!
+    [node2][INFO  ] Running command: sudo ceph --version
+    [node2][DEBUG ] ceph version 0.72.1
+    (4d923861868f6a15dcb33fef7f50f674997322de)
+
+.. versionadded:: 1.4.1

@@ -69,6 +69,7 @@ def install(distro, version_kind, version, adjust_repos):
 
 def mirror_install(distro, repo_url, gpg_url, adjust_repos):
     repo_url = repo_url.strip('/')  # Remove trailing slashes
+    gpg_url_path = gpg_url.split('file://')[-1]  # Remove file if present
 
     if adjust_repos:
         process.run(
@@ -76,7 +77,7 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos):
             [
                 'rpm',
                 '--import',
-                gpg_url,
+                gpg_url_path,
             ]
         )
 
