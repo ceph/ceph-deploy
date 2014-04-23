@@ -117,8 +117,20 @@ def append_to_file(file_path, contents):
         f.write(contents)
 
 
+def readline(path):
+    with open(path) as _file:
+        return _file.readline().strip('\n')
+
 def path_exists(path):
     return os.path.exists(path)
+
+
+def get_realpath(path):
+    return os.path.realpath(path)
+
+
+def listdir(path):
+    return os.listdir(path)
 
 
 def makedir(path, ignored=None):
