@@ -11,3 +11,5 @@ tmp_path = join(base_path, 'tmp')
 mon_path = join(base_path, 'mon')
 
 mds_path = join(base_path, 'mds')
+
+osd_path = join(base_path, 'osd')

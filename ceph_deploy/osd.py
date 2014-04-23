@@ -2,6 +2,7 @@ import argparse
 import json
 import logging
 import os
+import re
 import sys
 import time
 from textwrap import dedent
@@ -9,6 +10,7 @@ from textwrap import dedent
 from cStringIO import StringIO
 
 from ceph_deploy import conf, exc, hosts
+from ceph_deploy.util import constants
 from ceph_deploy.cliutil import priority
 from ceph_deploy.lib.remoto import process
 
@@ -49,6 +51,51 @@ def create_osd(conn, cluster, key):
             '--action=add',
         ],
     )
+
+
+def osd_tree(conn, cluster):
+    """
+    Check the status of an OSD. Make sure all are up and in
+
+    What good output would look like::
+
+        {
+            "epoch": 8,
+            "num_osds": 1,
+            "num_up_osds": 1,
+            "num_in_osds": "1",
+            "full": "false",
+            "nearfull": "false"
+        }
+
+    Note how the booleans are actually strings, so we need to take that into
+    account and fix it before returning the dictionary. Issue #8108
+    """
+    command = [
+        'ceph',
+        '--cluster={cluster}'.format(cluster=cluster),
+        'osd',
+        'tree',
+        '--format=json',
+    ]
+
+    out, err, code = process.check(
+        conn,
+        command,
+    )
+
+    try:
+        loaded_json = json.loads(''.join(out))
+        # convert boolean strings to actual booleans because
+        # --format=json fails to do this properly
+        for k, v in loaded_json.items():
+            if v == 'true':
+                loaded_json[k] = True
+            elif v == 'false':
+                loaded_json[k] = False
+        return loaded_json
+    except ValueError:
+        return {}
 
 
 def osd_status_check(conn, cluster):
@@ -347,8 +394,129 @@ def disk_list(args, cfg):
 
 
 def osd_list(args, cfg):
-    LOG.error('Not yet implemented; see http://tracker.ceph.com/issues/5071')
-    sys.exit(1)
+    # FIXME: this portion should probably be abstracted. We do the same in
+    # mon.py
+    cfg = conf.ceph.load(args)
+    mon_initial_members = cfg.safe_get('global', 'mon_initial_members')
+    monitors = re.split(r'[,\s]+', mon_initial_members)
+
+    if not monitors:
+        raise exc.NeedHostError(
+            'could not find `mon initial members` defined in ceph.conf'
+        )
+
+    # get the osd tree from a monitor host
+    mon_host = monitors[0]
+    distro = hosts.get(mon_host, username=args.username)
+    tree = osd_tree(distro.conn, args.cluster)
+    distro.conn.exit()
+
+    interesting_files = ['active', 'magic', 'whoami', 'journal_uuid']
+
+    for hostname, disk, journal in args.disk:
+        distro = hosts.get(hostname, username=args.username)
+        remote_module = distro.conn.remote_module
+        osds = distro.conn.remote_module.listdir(constants.osd_path)
+
+        output, err, exit_code = process.check(
+            distro.conn,
+            [
+                'ceph-disk',
+                'list',
+            ]
+        )
+
+        for _osd in osds:
+            osd_path = os.path.join(constants.osd_path, _osd)
+            journal_path = os.path.join(osd_path, 'journal')
+            _id = int(_osd.split('-')[-1])  # split on dash, get the id
+            osd_name = 'osd.%s' % _id
+            metadata = {}
+            json_blob = {}
+
+            # piggy back from ceph-disk and get the mount point
+            device = get_osd_mount_point(output, osd_name)
+            if device:
+                metadata['device'] = device
+
+            # read interesting metadata from files
+            for f in interesting_files:
+                osd_f_path = os.path.join(osd_path, f)
+                if remote_module.path_exists(osd_f_path):
+                    metadata[f] = remote_module.readline(osd_f_path)
+
+            # do we have a journal path?
+            if remote_module.path_exists(journal_path):
+                metadata['journal path'] = remote_module.get_realpath(journal_path)
+
+            # is this OSD in osd tree?
+            for blob in tree['nodes']:
+                if blob.get('id') == _id:  # matches our OSD
+                    json_blob = blob
+
+            print_osd(
+                distro.conn.logger,
+                hostname,
+                osd_path,
+                json_blob,
+                metadata,
+            )
+
+        distro.conn.exit()
+
+
+def get_osd_mount_point(output, osd_name):
+    """
+    piggy back from `ceph-disk list` output and get the mount point
+    by matching the line where the partition mentions the OSD name
+
+    For example, if the name of the osd is `osd.1` and the output from
+    `ceph-disk list` looks like this::
+
+        /dev/sda :
+         /dev/sda1 other, ext2, mounted on /boot
+         /dev/sda2 other
+         /dev/sda5 other, LVM2_member
+        /dev/sdb :
+         /dev/sdb1 ceph data, active, cluster ceph, osd.1, journal /dev/sdb2
+         /dev/sdb2 ceph journal, for /dev/sdb1
+        /dev/sr0 other, unknown
+        /dev/sr1 other, unknown
+
+    Then `/dev/sdb1` would be the right mount point. We piggy back like this
+    because ceph-disk does *a lot* to properly calculate those values and we
+    don't want to re-implement all the helpers for this.
+
+    :param output: A list of lines from stdout
+    :param osd_name: The actual osd name, like `osd.1`
+    """
+    for line in output:
+        line_parts = re.split(r'[,\s]+', line)
+        for part in line_parts:
+            mount_point = line_parts[1]
+            if osd_name == part:
+                return mount_point
+
+
+def print_osd(logger, hostname, osd_path, json_blob, metadata, journal=None):
+    """
+    A helper to print OSD metadata
+    """
+    logger.info('-'*40)
+    logger.info('%s' % osd_path.split('/')[-1])
+    logger.info('-'*40)
+    logger.info('%-14s %s' % ('Path', osd_path))
+    logger.info('%-14s %s' % ('ID', json_blob.get('id')))
+    logger.info('%-14s %s' % ('Name', json_blob.get('name')))
+    logger.info('%-14s %s' % ('Status', json_blob.get('status')))
+    logger.info('%-14s %s' % ('Reweight', json_blob.get('reweight')))
+    if journal:
+        logger.info('Journal: %s' % journal)
+    for k, v in metadata.items():
+        #logger.info("%s: %-8s" % (k.capitalize(), v))
+        logger.info("%-13s  %s" % (k.capitalize(), v))
+
+    logger.info('-'*40)
 
 
 def osd(args):
