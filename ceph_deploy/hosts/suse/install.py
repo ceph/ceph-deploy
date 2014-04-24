@@ -12,9 +12,9 @@ def install(distro, version_kind, version, adjust_repos):
         key = 'autobuild'
 
     if distro.codename == 'Mantis':
-        distro = 'opensuse12'
+        distro_name = 'opensuse12'
     else:
-        distro = 'sles-11sp2'
+        distro_name = 'sles-11sp2'
 
     if adjust_repos:
         process.run(
