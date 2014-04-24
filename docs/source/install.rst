@@ -26,6 +26,12 @@ displayed, similar to::
 
 .. _install-stable-releases:
 
+
+.. _note:
+    Although ceph-deploy installs some extra dependencies, do note that those
+    are not going to be uninstalled. For example librbd1 and librados which
+    qemu-kvm depends on, and removing it would cause issues for qemu-kvm.
+
 Specific Releases
 -----------------
 By default the *latest* release is assumed. This value changes when
