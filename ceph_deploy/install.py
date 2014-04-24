@@ -168,6 +168,8 @@ def custom_repo(distro, args, cd_conf, rlogger):
 
 
 def uninstall(args):
+    LOG.info('note that some dependencies *will not* be removed because they can cause issues with qemu-kvm')
+    LOG.info('like: librbd1 and librados2')
     LOG.debug(
         'Uninstalling on cluster %s hosts %s',
         args.cluster,
@@ -186,6 +188,9 @@ def uninstall(args):
 
 
 def purge(args):
+    LOG.info('note that some dependencies *will not* be removed because they can cause issues with qemu-kvm')
+    LOG.info('like: librbd1 and librados2')
+
     LOG.debug(
         'Purging from cluster %s hosts %s',
         args.cluster,
