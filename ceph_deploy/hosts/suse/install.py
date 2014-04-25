@@ -1,5 +1,7 @@
 from ceph_deploy.util import templates, pkg_managers
 from ceph_deploy.lib.remoto import process
+import logging
+LOG = logging.getLogger(__name__)
 
 
 def install(distro, version_kind, version, adjust_repos):
@@ -11,31 +13,46 @@ def install(distro, version_kind, version, adjust_repos):
     else:
         key = 'autobuild'
 
+
+    distro_name = None
     if distro.codename == 'Mantis':
-        distro = 'opensuse12'
-    else:
-        distro = 'sles-11sp2'
+        distro_name = 'opensuse12.2'
+
+    if (distro.name == "SUSE Linux Enterprise Server") and (str(distro.release) == "11"):
+        distro_name = 'sles11'
+
+    if distro_name == None:
+        LOG.warning('Untested version of %s: assuming compatible with SUSE Linux Enterprise Server 11', distro.name)
+        distro_name = 'sles11'
+
 
     if adjust_repos:
+        # Work around code due to bug in SLE 11
+        # https://bugzilla.novell.com/show_bug.cgi?id=875170
+        protocol = "https"
+        if distro_name == 'sles11':
+            protocol = "http"
         process.run(
             distro.conn,
             [
                 'rpm',
                 '--import',
-                "https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc".format(key=key)
+                "{protocol}://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc".format(
+                    key=key,
+                    protocol=protocol)
             ]
         )
 
         if version_kind == 'stable':
             url = 'http://ceph.com/rpm-{version}/{distro}/'.format(
                 version=version,
-                distro=distro,
+                distro=distro_name,
                 )
         elif version_kind == 'testing':
-            url = 'http://ceph.com/rpm-testing/{distro}/'.format(distro=distro)
+            url = 'http://ceph.com/rpm-testing/{distro}/'.format(distro=distro_name)
         elif version_kind == 'dev':
             url = 'http://gitbuilder.ceph.com/ceph-rpm-{distro}{release}-{machine}-basic/ref/{version}/'.format(
-                distro=distro,
+                distro=distro_name,
                 release=release.split(".", 1)[0],
                 machine=machine,
                 version=version,
@@ -49,7 +66,7 @@ def install(distro, version_kind, version, adjust_repos):
                 '--replacepkgs',
                 '--force',
                 '--quiet',
-                '{url}noarch/ceph-release-1-0.noarch.rpm'.format(
+                '{url}ceph-release-1-0.noarch.rpm'.format(
                     url=url,
                     ),
                 ]
