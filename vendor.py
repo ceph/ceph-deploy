@@ -2,6 +2,7 @@ import subprocess
 import os
 from os import path
 import traceback
+import sys
 
 
 error_msg = """
@@ -20,7 +21,9 @@ def run(cmd):
             stderr=subprocess.PIPE,
             stdout=subprocess.PIPE
         )
-    except Exception as error:
+    except Exception:
+        # if building with python2.5 this makes it compatible
+        _, error, _ = sys.exc_info()
         print_error([], traceback.format_exc(error).split('\n'))
         raise SystemExit(1)
 
