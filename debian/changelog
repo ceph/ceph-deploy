@@ -1,3 +1,9 @@
+ceph-deploy (1.5.0) stable; urgency=low
+
+  * New upstream release
+
+ -- Alfredo Deza <alfredo.deza@inktank.com>  Fri, 25 Apr 2014 20:15:18 +0000
+
 ceph-deploy (1.4.0-1) UNRELEASED; urgency=low
 
   * New upstream release 
