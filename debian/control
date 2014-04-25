@@ -4,7 +4,7 @@ Uploaders: Sage Weil <sage@newdream.net>
 Section: admin
 Priority: optional
 Build-Depends: debhelper (>= 7), python-setuptools, git
-X-Python-Version: >= 2.4
+X-Python-Version: >= 2.6
 Standards-Version: 3.9.2
 Homepage: http://ceph.com/
 Vcs-Git: git://github.com/ceph/ceph-deploy.git
