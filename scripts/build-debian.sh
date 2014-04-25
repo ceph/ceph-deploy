@@ -33,10 +33,13 @@ rm -f ../ceph-deploy*.dsc ../ceph-deploy*.changes ../ceph-deploy*.deb ../ceph-de
 rm -rf ./debian-repo
 
 # Apply backport tag if release build
+# I am going to jump out the window if this is not fixed and removed from the source
+# of this package. There is absolutely **NO** reason why we need to hard code the
+# DEBEMAIL like this.
 if [ $RELEASE -eq 1 ] ; then 
     DEB_VERSION=$(dpkg-parsechangelog | sed -rne 's,^Version: (.*),\1, p')
     BP_VERSION=${DEB_VERSION}${BPTAG}
-    DEBEMAIL="gary.lowell@inktank.com" dch -D $DIST --force-distribution -b -v "$BP_VERSION" "$comment"
+    DEBEMAIL="alfredo.deza@inktank.com" dch -D $DIST --force-distribution -b -v "$BP_VERSION" "$comment"
     dpkg-source -b .
 fi
 
