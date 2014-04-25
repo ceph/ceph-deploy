@@ -1,3 +1,15 @@
+1.5.0
+-----
+* Warn if ``requiretty`` is causing issues
+* Support IPV6 host resolution (Thanks Frode Nordahl)
+* Fix incorrect paths for local cephdeploy.conf 
+* Support subcommand overrides defined in cephdeploy.conf
+* When installing on CentOS/RHEL call ``yum clean all``
+* Check OSD status when deploying to catch possible issues
+* Add a ``--local-mirror`` flag for installation that syncs files
+* Implement ``osd list`` to list remote osds
+* Fix install issues on Suse (Thanks Owen Synge)
+
 1.4.0
 -----
 * uninstall ceph-release and clean cache in CentOS
