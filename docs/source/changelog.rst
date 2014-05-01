@@ -1,8 +1,13 @@
+1.5.1
+-----
+* Fixes a broken ``osd`` command that had the wrong attribute in the conn
+  object
+
 1.5.0
 -----
 * Warn if ``requiretty`` is causing issues
 * Support IPV6 host resolution (Thanks Frode Nordahl)
-* Fix incorrect paths for local cephdeploy.conf 
+* Fix incorrect paths for local cephdeploy.conf
 * Support subcommand overrides defined in cephdeploy.conf
 * When installing on CentOS/RHEL call ``yum clean all``
 * Check OSD status when deploying to catch possible issues

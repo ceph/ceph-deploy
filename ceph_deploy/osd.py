@@ -124,10 +124,17 @@ def osd_status_check(conn, cluster):
         '--format=json',
     ]
 
-    out, err, code = process.check(
-        conn,
-        command,
-    )
+    try:
+        out, err, code = process.check(
+            conn,
+            command,
+        )
+    except TypeError:
+        # XXX This is a bug in remoto. If the other end disconnects with a timeout
+        # it will return a None, and here we are expecting a 3 item tuple, not a None
+        # so it will break with a TypeError. Once remoto fixes this, we no longer need
+        # this try/except.
+        return {}
 
     try:
         loaded_json = json.loads(''.join(out))
@@ -335,7 +342,7 @@ def activate(args, cfg):
         )
         # give the OSD a few seconds to start
         time.sleep(5)
-        catch_osd_errors(distro.conn, distro.logger, args)
+        catch_osd_errors(distro.conn, distro.conn.logger, args)
         distro.conn.exit()
 
 
