@@ -36,7 +36,6 @@ def apt_remove(conn, packages, *a, **kw):
     ]
     if purge:
         cmd.append('--purge')
-    cmd.append('--')
     cmd.extend(packages)
 
     return process.run(
