@@ -363,7 +363,7 @@ def make(parser):
     version.set_defaults(
         func=install,
         stable=None,  # XXX deprecated in favor of release
-        release='emperor',
+        release='firefly',
         dev='master',
         version_kind='stable',
         adjust_repos=True,
