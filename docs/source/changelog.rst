@@ -1,3 +1,8 @@
+1.5.2
+-----
+* Remove ``--`` from the command to install packages. (Thanks Vincenzo Pii)
+* Default to Firefly as the latest, stable Ceph version
+
 1.5.1
 -----
 * Fixes a broken ``osd`` command that had the wrong attribute in the conn
