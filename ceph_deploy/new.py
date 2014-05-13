@@ -5,6 +5,7 @@ import uuid
 import struct
 import time
 import base64
+import socket
 
 from ceph_deploy.cliutil import priority
 from ceph_deploy import conf, hosts, exc
@@ -90,7 +91,14 @@ def new(args):
         ip = net.get_nonlocal_ip(host)
         LOG.debug('Monitor %s at %s', name, ip)
         mon_initial_members.append(name)
-        mon_host.append(ip)
+        try:
+            socket.inet_pton(socket.AF_INET6, ip)
+            mon_host.append("[" + ip + "]")
+            LOG.info('Monitors are IPv6, binding Messenger traffic on IPv6')
+            cfg.set('global', 'ms bind ipv6', 'true')
+        except socket.error:
+            mon_host.append(ip)
+
         if args.ssh_copykey:
             ssh_copy_keys(host, args.username)
 
