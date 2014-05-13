@@ -34,4 +34,5 @@ enabled={enabled}
 gpgcheck={gpgcheck}
 type={_type}
 gpgkey={gpgkey}
+proxy={proxy}
 """
