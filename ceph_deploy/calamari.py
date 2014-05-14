@@ -52,6 +52,12 @@ def connect(args):
             distro.codename
         )
         rlogger = logging.getLogger(hostname)
+        if distro.name in ('debian', 'ubuntu'):
+            rlogger.info('ensuring proxy is disabled for calamari minions repo')
+            distro.conn.remote_module.write_file(
+                '/etc/apt/apt.conf.d/99ceph',
+                'Acquire::http::Proxy::%s DIRECT;' % args.master,
+            )
         rlogger.info('installing calamari-minion package on %s' % hostname)
         rlogger.info('adding custom repository file')
         try:

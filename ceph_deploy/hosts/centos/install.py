@@ -132,6 +132,7 @@ def repo_install(distro, repo_name, baseurl, gpgkey, **kw):
     enabled = kw.get('enabled', 1)
     gpgcheck = kw.get('gpgcheck', 1)
     install_ceph = kw.pop('install_ceph', False)
+    proxy = kw.get('proxy', '')
     _type = 'repo-md'
     baseurl = baseurl.strip('/')  # Remove trailing slashes
 
@@ -155,6 +156,7 @@ def repo_install(distro, repo_name, baseurl, gpgkey, **kw):
         gpgcheck = gpgcheck,
         _type = _type,
         gpgkey = gpgkey,
+        proxy = proxy,
     )
 
     distro.conn.remote_module.write_yum_repo(
