@@ -171,9 +171,11 @@ def repo_install(distro, repo_name, baseurl, gpgkey, **kw):
         safe_filename
     )
 
+    # repo is not operable until an update
+    pkg_managers.apt_update(distro.conn)
+
     if install_ceph:
         # Before any install, make sure we have `wget`
-        pkg_managers.apt_update(distro.conn)
         packages = (
             'ceph',
             'ceph-mds',
