@@ -46,7 +46,9 @@ def load(args):
     try:
         f = file(path)
     except IOError as e:
-        raise exc.ConfigError(e)
+        raise exc.ConfigError(
+            "%s; has `ceph-deploy new` been run in this directory?" % e
+        )
     else:
         with contextlib.closing(f):
             return parse(f)
@@ -62,7 +64,9 @@ def load_raw(args):
         with open(path) as ceph_conf:
             return ceph_conf.read()
     except (IOError, OSError) as e:
-        raise exc.ConfigError(e)
+        raise exc.ConfigError(
+            "%s; has `ceph-deploy new` been run in this directory?" % e
+        )
 
 
 def write_conf(cluster, conf, overwrite):
