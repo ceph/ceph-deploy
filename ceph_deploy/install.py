@@ -41,6 +41,16 @@ def install(args):
             distro.release,
             distro.codename
         )
+
+        if distro.init == 'sysvinit' and args.cluster != 'ceph':
+            LOG.error('refusing to install on host: %s, with custom cluster name: %s' % (
+                    hostname,
+                    args.cluster,
+                )
+            )
+            LOG.error('custom cluster names are not supported on sysvinit hosts')
+            continue
+
         rlogger = logging.getLogger(hostname)
         rlogger.info('installing ceph on %s' % hostname)
 
