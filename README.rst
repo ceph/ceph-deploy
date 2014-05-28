@@ -208,7 +208,8 @@ setup (and mirrored with all the necessary dependencies) before attempting an
 install.
 
 Another alternative is to set the ``wget`` env variables to point to the right
-hosts, for example, put following lines into ``/root/.wgetrc`` on each node (since ceph-deploy runs wget as root)::
+hosts, for example, put following lines into ``/root/.wgetrc`` on each node
+(since ceph-deploy runs wget as root)::
 
     http_proxy=http://host:port
     ftp_proxy=http://host:port
