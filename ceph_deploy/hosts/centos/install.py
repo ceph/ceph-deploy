@@ -2,9 +2,31 @@ from ceph_deploy.util import pkg_managers, templates
 from ceph_deploy.lib.remoto import process
 
 
+def repository_url_part(distro):
+    """
+    Historically everything CentOS, RHEL, and Scientific has been mapped to
+    `el6` urls, but as we are adding repositories for `rhel`, the URLs should
+    map correctly to, say, `rhel6` or `rhel7`.
+
+    This function looks into the `distro` object and determines the right url
+    part for the given distro, falling back to `el6` when all else fails.
+
+    Specifically to work around the issue of CentOS vs RHEL::
+
+        >>> platform.linux_distribution()
+        ('Red Hat Enterprise Linux Server', '7.0', 'Maipo')
+
+    """
+    if distro.normalized_name == 'redhat':
+        if distro.release.startswith('6'):
+            return 'rhel6'
+    return 'el6'
+
+
 def install(distro, version_kind, version, adjust_repos):
     release = distro.release
     machine = distro.machine_type
+    repo_part = repository_url_part(distro)
 
     pkg_managers.yum_clean(distro.conn)
 
@@ -30,11 +52,12 @@ def install(distro, version_kind, version, adjust_repos):
         )
 
         if version_kind == 'stable':
-            url = 'http://ceph.com/rpm-{version}/el6/'.format(
+            url = 'http://ceph.com/rpm-{version}/{repo}/'.format(
                 version=version,
+                repo=repo_part,
                 )
         elif version_kind == 'testing':
-            url = 'http://ceph.com/rpm-testing/el6/'
+            url = 'http://ceph.com/rpm-testing/{repo}/'.format(repo=repo_part)
         elif version_kind == 'dev':
             url = 'http://gitbuilder.ceph.com/ceph-rpm-centos{release}-{machine}-basic/ref/{version}/'.format(
                 release=release.split(".",1)[0],
