@@ -8,7 +8,6 @@ def apt(conn, packages, *a, **kw):
         'env',
         'DEBIAN_FRONTEND=noninteractive',
         'apt-get',
-        '-q',
         'install',
         '--assume-yes',
     ]
@@ -65,7 +64,6 @@ def yum(conn, packages, *a, **kw):
     cmd = [
         'yum',
         '-y',
-        '-q',
         'install',
     ]
     cmd.extend(packages)
@@ -136,7 +134,6 @@ def zypper(conn, packages, *a, **kw):
     cmd = [
         'zypper',
         '--non-interactive',
-        '--quiet',
         'install',
     ]
 
