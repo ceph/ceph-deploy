@@ -27,7 +27,7 @@ echo "  PWD=$(pwd)"
 echo "  BRANCH=$BRANCH"
 
 case $HOST in
-gitbuilder-cdep-rpm*)
+gitbuilder-*-rpm*)
         rm -rf rpm-repo dist/* build/rpmbuild
         cd build
 	./scripts/build-rpm.sh --release
