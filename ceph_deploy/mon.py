@@ -99,6 +99,9 @@ def mon_status(conn, logger, hostname, args, silent=False):
         if out['rank'] >= 0:
             logger.info('monitor: %s is running' % mon)
             return True
+        if out['rank'] == -1 and out['state']:
+            logger.info('monitor: %s is currently at the state of %s' % (mon, out['state']))
+            return True
         logger.info('monitor: %s is not running' % mon)
         return False
     except RuntimeError:
