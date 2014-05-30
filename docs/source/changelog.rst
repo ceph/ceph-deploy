@@ -1,3 +1,12 @@
+1.5.3
+-----
+* Another fix for IPV6: write correct ``mon_host`` in ceph.conf
+* Support ``proxy`` settings for repo files in YUM
+* Better error message when ceph.conf is not found
+* Refuse to install custom cluster names on sysvinit systems (not supported)
+* Remove quiet flags from package manager's install calls to avoid timing out
+* Use the correct URL repo when installing for RHEL
+
 1.5.2
 -----
 * Remove ``--`` from the command to install packages. (Thanks Vincenzo Pii)
