@@ -22,6 +22,8 @@ __header__ = textwrap.dedent("""
   '/|||\`
   | '|` |
     '|`
+
+Full documentation can be found at: http://ceph.com/ceph-deploy/docs
 """ % ceph_deploy.__version__)
 
 
