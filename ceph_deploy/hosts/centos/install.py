@@ -155,7 +155,7 @@ def repo_install(distro, repo_name, baseurl, gpgkey, **kw):
     enabled = kw.get('enabled', 1)
     gpgcheck = kw.get('gpgcheck', 1)
     install_ceph = kw.pop('install_ceph', False)
-    proxy = kw.get('proxy', '')
+    proxy = kw.get('proxy')
     _type = 'repo-md'
     baseurl = baseurl.strip('/')  # Remove trailing slashes
 
@@ -171,7 +171,7 @@ def repo_install(distro, repo_name, baseurl, gpgkey, **kw):
             ]
         )
 
-    repo_content = templates.custom_repo.format(
+    repo_content = templates.custom_repo(
         repo_name=repo_name,
         name = name,
         baseurl = baseurl,
