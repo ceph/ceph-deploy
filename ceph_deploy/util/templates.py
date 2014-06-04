@@ -47,7 +47,7 @@ def custom_repo(**kw):
     Previously, and for historical purposes, this is how the template used
     to look::
 
-        custom_repo = """
+        custom_repo =
         [{repo_name}]
         name={name}
         baseurl={baseurl}
@@ -56,7 +56,6 @@ def custom_repo(**kw):
         type={_type}
         gpgkey={gpgkey}
         proxy={proxy}
-        """
 
     """
     lines = []
