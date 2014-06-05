@@ -6,6 +6,7 @@ name=Ceph packages for $basearch
 baseurl={repo_url}/$basearch
 enabled=1
 gpgcheck=1
+priority=1
 type=rpm-md
 gpgkey={gpg_url}
 
@@ -14,6 +15,7 @@ name=Ceph noarch packages
 baseurl={repo_url}/noarch
 enabled=1
 gpgcheck=1
+priority=1
 type=rpm-md
 gpgkey={gpg_url}
 
@@ -70,6 +72,7 @@ def custom_repo(**kw):
         ('_type', 'type=%s'),
         ('gpgkey', 'gpgkey=%s'),
         ('proxy', 'proxy=%s'),
+        ('priority', 'priority=%s'),
     )
 
     for line in tmpl:
