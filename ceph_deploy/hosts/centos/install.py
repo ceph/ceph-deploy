@@ -36,6 +36,7 @@ def install(distro, version_kind, version, adjust_repos):
     # Get EPEL installed before we continue:
     if adjust_repos:
         install_epel(distro)
+        install_yum_priorities(distro)
     if version_kind in ['stable', 'testing']:
         key = 'release'
     else:
