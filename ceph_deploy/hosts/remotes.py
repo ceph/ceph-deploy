@@ -1,3 +1,4 @@
+import ConfigParser
 import errno
 import socket
 import os
@@ -54,6 +55,34 @@ def write_yum_repo(content, filename='ceph.repo'):
     """set the contents of repo file to /etc/yum.repos.d/"""
     repo_path = os.path.join('/etc/yum.repos.d', filename)
     write_file(repo_path, content)
+
+
+def set_repo_priority(sections, path='/etc/yum.repos.d/ceph.repo', priority='1'):
+    Config = ConfigParser.ConfigParser()
+    Config.read(path)
+    Config.sections()
+    for section in sections:
+        Config.set(section, 'priority', priority)
+
+    with open(path, 'wb') as fout:
+        Config.write(fout)
+
+    # And now, because ConfigParser is super duper, we need to remove the
+    # assignments so this looks like it was before
+    def remove_whitespace_from_assignments():
+        separator = "="
+        lines = file(path).readlines()
+        fp = open(path, "w")
+        for line in lines:
+            line = line.strip()
+            if not line.startswith("#") and separator in line:
+                assignment = line.split(separator, 1)
+                assignment = map(str.strip, assignment)
+                fp.write("%s%s%s\n" % (assignment[0], separator, assignment[1]))
+            else:
+                fp.write(line + "\n")
+
+    remove_whitespace_from_assignments()
 
 
 def write_conf(cluster, conf, overwrite):
