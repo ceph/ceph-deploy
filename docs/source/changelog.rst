@@ -1,3 +1,10 @@
+1.5.4
+-----
+* Improve help by adding online doc link
+* allow cephdeploy.conf to set priorities in repos
+* install priorities plugin for yum distros
+* set the right priority for ceph.repo and warn about this
+
 1.5.3
 -----
 * Another fix for IPV6: write correct ``mon_host`` in ceph.conf
