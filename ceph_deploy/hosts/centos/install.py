@@ -24,6 +24,7 @@ def repository_url_part(distro):
 
 
 def install(distro, version_kind, version, adjust_repos):
+    logger = distro.conn.logger
     release = distro.release
     machine = distro.machine_type
     repo_part = repository_url_part(distro)
@@ -36,6 +37,7 @@ def install(distro, version_kind, version, adjust_repos):
     # Get EPEL installed before we continue:
     if adjust_repos:
         install_epel(distro)
+        install_yum_priorities(distro)
     if version_kind in ['stable', 'testing']:
         key = 'release'
     else:
@@ -75,12 +77,16 @@ def install(distro, version_kind, version, adjust_repos):
             ],
         )
 
+        # set the right priority
+        logger.warning('ensuring that /etc/yum.repos.d/ceph.repo contains a high pririty')
+        distro.conn.remote_module.set_repo_priority(['Ceph', 'Ceph-noarch', 'ceph-source'])
+        logger.warning('altered ceph.repo priorities to contain: priority=1')
+
     process.run(
         distro.conn,
         [
             'yum',
             '-y',
-            '-q',
             'install',
             'ceph',
         ],
@@ -118,6 +124,34 @@ def install_epel(distro):
                     'epel-release-5*.rpm'
                 ],
             )
+
+
+def install_yum_priorities(distro):
+    """
+    EPEL started packaging Ceph so we need to make sure that the ceph.repo we
+    install has a higher priority than the EPEL repo so that when installing
+    Ceph it will come from the repo file we create.
+
+    The name of the package changed back and forth (!) since CentOS 4:
+
+    From the CentOS wiki::
+
+        Note: This plugin has carried at least two differing names over time.
+        It is named yum-priorities on CentOS-5 but was named
+        yum-plugin-priorities on CentOS-4. CentOS-6 has reverted to
+        yum-plugin-priorities.
+
+    """
+    if distro.normalized_name == 'centos':
+        if distro.release[0] == '6':
+            package_name = 'yum-plugin-priorities'
+        else:
+            package_name = 'yum-priorities'
+
+        pkg_managers.yum(
+            distro.conn,
+            package_name,
+        )
 
 
 def mirror_install(distro, repo_url, gpg_url, adjust_repos):
