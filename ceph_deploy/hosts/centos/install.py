@@ -183,9 +183,9 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos):
     pkg_managers.yum(distro.conn, 'ceph')
 
 
-def repo_install(distro, repo_name, baseurl, gpgkey, **kw):
+def repo_install(distro, reponame, baseurl, gpgkey, **kw):
     # Get some defaults
-    name = kw.get('name', '%s repo' % repo_name)
+    name = kw.get('name', '%s repo' % reponame)
     enabled = kw.get('enabled', 1)
     gpgcheck = kw.get('gpgcheck', 1)
     install_ceph = kw.pop('install_ceph', False)
@@ -206,7 +206,7 @@ def repo_install(distro, repo_name, baseurl, gpgkey, **kw):
         )
 
     repo_content = templates.custom_repo(
-        repo_name=repo_name,
+        reponame=reponame,
         name = name,
         baseurl = baseurl,
         enabled = enabled,
@@ -218,7 +218,7 @@ def repo_install(distro, repo_name, baseurl, gpgkey, **kw):
 
     distro.conn.remote_module.write_yum_repo(
         repo_content,
-        "%s.repo" % repo_name
+        "%s.repo" % reponame
     )
 
     # Some custom repos do not need to install ceph
