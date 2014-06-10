@@ -1,3 +1,7 @@
+1.5.5
+-----
+* Normalize repo file header calls. Fixes breakage on Calamari repos.
+
 1.5.4
 -----
 * Improve help by adding online doc link
