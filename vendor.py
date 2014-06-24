@@ -3,6 +3,7 @@ import os
 from os import path
 import traceback
 import sys
+import shutil
 
 
 error_msg = """
@@ -43,7 +44,7 @@ def print_error(stdout, stderr):
 
 def vendor_library(name, version):
     this_dir = path.dirname(path.abspath(__file__))
-    vendor_dest = path.join(this_dir, 'ceph_deploy/lib/%s' % name)
+    vendor_dest = path.join(this_dir, 'ceph_deploy/lib/vendor/%s' % name)
     vendor_src = path.join(this_dir, name)
     vendor_module = path.join(vendor_src, name)
     current_dir = os.getcwd()
@@ -52,7 +53,7 @@ def vendor_library(name, version):
         run(['rm', '-rf', vendor_src])
 
     if path.exists(vendor_dest):
-        module = __import__('ceph_deploy.lib.remoto', globals(), locals(), ['__version__'])
+        module = __import__('ceph_deploy.lib.vendor.remoto', globals(), locals(), ['__version__'])
         if module.__version__ != version:
             run(['rm', '-rf', vendor_dest])
 
@@ -62,6 +63,16 @@ def vendor_library(name, version):
         run(['git', 'checkout', version])
         run(['mv', vendor_module, vendor_dest])
     os.chdir(current_dir)
+
+
+def clean_vendor(name):
+    """
+    Ensure that vendored code/dirs are removed, possibly when packaging when
+    the environment flag is set to avoid vendoring.
+    """
+    this_dir = path.dirname(path.abspath(__file__))
+    vendor_dest = path.join(this_dir, 'ceph_deploy/lib/vendor/%s' % name)
+    run(['rm', '-rf', vendor_dest])
 
 
 def vendorize(vendor_requirements):
