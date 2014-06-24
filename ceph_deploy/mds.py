@@ -6,7 +6,7 @@ import os
 from ceph_deploy import conf
 from ceph_deploy import exc
 from ceph_deploy import hosts
-from ceph_deploy.lib.remoto import process
+from ceph_deploy.lib import remoto
 from ceph_deploy.cliutil import priority
 
 
@@ -40,7 +40,7 @@ def create_mds(conn, name, cluster, init):
 
     keypath = os.path.join(path, 'keyring')
 
-    stdout, stderr, returncode = process.check(
+    stdout, stderr, returncode = remoto.process.check(
         conn,
         [
             'ceph',
@@ -64,7 +64,7 @@ def create_mds(conn, name, cluster, init):
         conn.logger.error('exit code from command was: %s' % returncode)
         raise RuntimeError('could not create mds')
 
-        process.check(
+        remoto.process.check(
             conn,
             [
                 'ceph',
@@ -84,7 +84,7 @@ def create_mds(conn, name, cluster, init):
     conn.remote_module.touch_file(os.path.join(path, init))
 
     if init == 'upstart':
-        process.run(
+        remoto.process.run(
             conn,
             [
                 'initctl',
@@ -96,7 +96,7 @@ def create_mds(conn, name, cluster, init):
             timeout=7
         )
     elif init == 'sysvinit':
-        process.run(
+        remoto.process.run(
             conn,
             [
                 'service',

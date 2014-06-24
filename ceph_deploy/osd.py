@@ -12,7 +12,7 @@ from cStringIO import StringIO
 from ceph_deploy import conf, exc, hosts
 from ceph_deploy.util import constants
 from ceph_deploy.cliutil import priority
-from ceph_deploy.lib.remoto import process
+from ceph_deploy.lib import remoto
 
 
 LOG = logging.getLogger(__name__)
@@ -42,7 +42,7 @@ def create_osd(conn, cluster, key):
         logger.warning('osd keyring does not exist yet, creating one')
         conn.remote_module.write_keyring(path, key)
 
-    return process.run(
+    return remoto.process.run(
         conn,
         [
             'udevadm',
@@ -79,7 +79,7 @@ def osd_tree(conn, cluster):
         '--format=json',
     ]
 
-    out, err, code = process.check(
+    out, err, code = remoto.process.check(
         conn,
         command,
     )
@@ -125,7 +125,7 @@ def osd_status_check(conn, cluster):
     ]
 
     try:
-        out, err, code = process.check(
+        out, err, code = remoto.process.check(
             conn,
             command,
         )
@@ -224,13 +224,13 @@ def prepare_disk(
     if journal is not None:
         args.append(journal)
 
-    process.run(
+    remoto.process.run(
         conn,
         args
     )
 
     if activate_prepared_disk:
-        return process.run(
+        return remoto.process.run(
             conn,
             [
                 'udevadm',
@@ -330,7 +330,7 @@ def activate(args, cfg):
         LOG.debug('activating host %s disk %s', hostname, disk)
         LOG.debug('will use init type: %s', distro.init)
 
-        process.run(
+        remoto.process.run(
             distro.conn,
             [
                 'ceph-disk-activate',
@@ -365,7 +365,7 @@ def disk_zap(args):
         # zero the device
         distro.conn.remote_module.zeroing(disk)
 
-        process.run(
+        remoto.process.run(
             distro.conn,
             [
                 'sgdisk',
@@ -390,7 +390,7 @@ def disk_list(args, cfg):
         )
 
         LOG.debug('Listing disks on {hostname}...'.format(hostname=hostname))
-        process.run(
+        remoto.process.run(
             distro.conn,
             [
                 'ceph-disk',
@@ -425,7 +425,7 @@ def osd_list(args, cfg):
         remote_module = distro.conn.remote_module
         osds = distro.conn.remote_module.listdir(constants.osd_path)
 
-        output, err, exit_code = process.check(
+        output, err, exit_code = remoto.process.check(
             distro.conn,
             [
                 'ceph-disk',

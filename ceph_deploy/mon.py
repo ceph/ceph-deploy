@@ -9,7 +9,7 @@ import time
 from ceph_deploy import conf, exc, admin
 from ceph_deploy.cliutil import priority
 from ceph_deploy.util import paths, net
-from ceph_deploy.lib.remoto import process
+from ceph_deploy.lib import remoto
 from ceph_deploy import hosts
 from ceph_deploy.misc import mon_hosts
 from ceph_deploy.connection import get_connection
@@ -30,7 +30,7 @@ def mon_status_check(conn, logger, hostname, args):
     """
     asok_path = paths.mon.asok(args.cluster, hostname)
 
-    out, err, code = process.check(
+    out, err, code = remoto.process.check(
         conn,
         [
             'ceph',
@@ -246,7 +246,7 @@ def destroy_mon(conn, cluster, hostname):
 
     if conn.remote_module.path_exists(path):
         # remove from cluster
-        process.run(
+        remoto.process.run(
             conn,
             [
                 'ceph',
@@ -295,7 +295,7 @@ def destroy_mon(conn, cluster, hostname):
             stamp=datetime.datetime.utcnow().strftime("%Y-%m-%dZ%H:%M:%S"),
             )
 
-        process.run(
+        remoto.process.run(
             conn,
             [
                 'mkdir',
@@ -479,7 +479,7 @@ def is_running(conn, args):
         mon.mira094: dead {"version":"0.61.5"}
         mon.mira094: not running {"version":"0.61.5"}
     """
-    stdout, stderr, _ = process.check(
+    stdout, stderr, _ = remoto.process.check(
         conn,
         args
     )
