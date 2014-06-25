@@ -370,6 +370,14 @@ def disk_zap(args):
             [
                 'sgdisk',
                 '--zap-all',
+                '--',
+                disk,
+            ],
+        )
+        process.run(
+            distro.conn,
+            [
+                'sgdisk',
                 '--clear',
                 '--mbrtogpt',
                 '--',
