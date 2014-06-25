@@ -66,6 +66,7 @@ def custom_repo(**kw):
     # return, like starting with a [repo name]
     tmpl = (
         ('reponame', '[%s]'),
+        ('name', 'name=%s'),
         ('baseurl', 'baseurl=%s'),
         ('enabled', 'enabled=%s'),
         ('gpgcheck', 'gpgcheck=%s'),
