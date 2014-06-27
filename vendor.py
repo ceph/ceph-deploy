@@ -54,6 +54,10 @@ def vendor_library(name, version, cmd=None):
         run(['rm', '-rf', vendor_src])
 
     if path.exists(vendor_init):
+        # The following read/regex is done so that we can parse module metadata without the need
+        # to import it. Module metadata is defined as variables with double underscores. We are
+        # particularly insteresting in the version string, so we look into single or double quoted
+        # values, like:  __version__ = '1.0'
         module_file = open(vendor_init).read()
         metadata = dict(re.findall(r"__([a-z]+)__\s*=\s*['\"]([^'\"]*)['\"]", module_file))
         if metadata.get('version') != version:
