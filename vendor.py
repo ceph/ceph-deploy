@@ -1,9 +1,9 @@
 import subprocess
 import os
 from os import path
+import re
 import traceback
 import sys
-import shutil
 
 
 error_msg = """
@@ -42,9 +42,10 @@ def print_error(stdout, stderr):
     print '*'*80
 
 
-def vendor_library(name, version):
+def vendor_library(name, version, cmd=None):
     this_dir = path.dirname(path.abspath(__file__))
     vendor_dest = path.join(this_dir, 'ceph_deploy/lib/vendor/%s' % name)
+    vendor_init = path.join(vendor_dest, '__init__.py')
     vendor_src = path.join(this_dir, name)
     vendor_module = path.join(vendor_src, name)
     current_dir = os.getcwd()
@@ -52,15 +53,18 @@ def vendor_library(name, version):
     if path.exists(vendor_src):
         run(['rm', '-rf', vendor_src])
 
-    if path.exists(vendor_dest):
-        module = __import__('ceph_deploy.lib.vendor.remoto', globals(), locals(), ['__version__'])
-        if module.__version__ != version:
+    if path.exists(vendor_init):
+        module_file = open(vendor_init).read()
+        metadata = dict(re.findall(r"__([a-z]+)__\s*=\s*['\"]([^'\"]*)['\"]", module_file))
+        if metadata.get('version') != version:
             run(['rm', '-rf', vendor_dest])
 
     if not path.exists(vendor_dest):
         run(['git', 'clone', 'git://ceph.com/%s' % name])
         os.chdir(vendor_src)
         run(['git', 'checkout', version])
+        if cmd:
+            run(cmd)
         run(['mv', vendor_module, vendor_dest])
     os.chdir(current_dir)
 
@@ -89,5 +93,9 @@ def vendorize(vendor_requirements):
     """
 
     for library in vendor_requirements:
-        name, version = library
-        vendor_library(name, version)
+        if len(library) == 2:
+            name, version = library
+            cmd = None
+        elif len(library) == 3:  # a possible cmd we need to run
+            name, version, cmd = library
+        vendor_library(name, version, cmd)
