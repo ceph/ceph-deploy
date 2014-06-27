@@ -23,8 +23,11 @@ if pyversion < (2, 7) or (3, 0) <= pyversion <= (3, 1):
 if os.environ.get('CEPH_DEPLOY_NO_VENDOR'):
     clean_vendor('remoto')
 else:
+    # XXX this should *not* point to master, but a tag. Since remoto 0.0.17 lacks
+    # the feature to call `vendor.py` and a release for a non-package feature was not
+    # ideal then the temporary fix is to point to master until a new remoto release
     vendorize([
-        ('remoto', '0.0.16'),
+        ('remoto', 'master', ['python', 'vendor.py']),
     ])
 
 
