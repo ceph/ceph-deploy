@@ -4,7 +4,7 @@ import os
 
 from ceph_deploy import hosts
 from ceph_deploy.cliutil import priority
-from ceph_deploy.lib.remoto import process, rsync
+from ceph_deploy.lib import remoto
 
 
 LOG = logging.getLogger(__name__)
@@ -67,7 +67,7 @@ def install(args):
             gpg_url = gpg_fallback
 
         if args.local_mirror:
-            rsync(hostname, args.local_mirror, '/opt/ceph-deploy/repo', distro.conn.logger, sudo=True)
+            remoto.rsync(hostname, args.local_mirror, '/opt/ceph-deploy/repo', distro.conn.logger, sudo=True)
             repo_url = 'file:///opt/ceph-deploy/repo'
             gpg_url = 'file:///opt/ceph-deploy/repo/release.asc'
 
@@ -251,7 +251,7 @@ def purgedata(args):
 
         # Try to remove the contents of /var/lib/ceph first, don't worry
         # about errors here, we deal with them later on
-        process.check(
+        remoto.process.check(
             distro.conn,
             [
                 'rm', '-rf', '--one-file-system', '--', '/var/lib/ceph',
@@ -264,7 +264,7 @@ def purgedata(args):
             rlogger.warning(
                 'OSDs may still be mounted, trying to unmount them'
             )
-            process.run(
+            remoto.process.run(
                 distro.conn,
                 [
                     'find', '/var/lib/ceph',
@@ -277,14 +277,14 @@ def purgedata(args):
 
             # And now we try again to remove the contents, since OSDs should be
             # unmounted, but this time we do check for errors
-            process.run(
+            remoto.process.run(
                 distro.conn,
                 [
                     'rm', '-rf', '--one-file-system', '--', '/var/lib/ceph',
                 ]
             )
 
-        process.run(
+        remoto.process.run(
             distro.conn,
             [
                 'rm', '-rf', '--one-file-system', '--', '/etc/ceph/',

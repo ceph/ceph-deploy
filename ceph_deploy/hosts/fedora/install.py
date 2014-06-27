@@ -1,5 +1,5 @@
 from ceph_deploy.util import pkg_managers, templates
-from ceph_deploy.lib.remoto import process
+from ceph_deploy.lib import remoto
 from ceph_deploy.hosts.centos.install import repo_install, mirror_install  # noqa
 
 
@@ -14,7 +14,7 @@ def install(distro, version_kind, version, adjust_repos):
         key = 'autobuild'
 
     if adjust_repos:
-        process.run(
+        remoto.process.run(
             distro.conn,
             [
                 'rpm',
@@ -39,7 +39,7 @@ def install(distro, version_kind, version, adjust_repos):
                 version=version,
                 )
 
-        process.run(
+        remoto.process.run(
             distro.conn,
             [
                 'rpm',
@@ -60,7 +60,7 @@ def install(distro, version_kind, version, adjust_repos):
         logger.warning('altered ceph.repo priorities to contain: priority=1')
 
 
-    process.run(
+    remoto.process.run(
         distro.conn,
         [
             'yum',

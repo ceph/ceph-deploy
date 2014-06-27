@@ -1,12 +1,12 @@
 from ceph_deploy.hosts import common
-from ceph_deploy.lib.remoto import process
+from ceph_deploy.lib import remoto
 
 
 def create(distro, args, monitor_keyring):
     hostname = distro.conn.remote_module.shortname()
     common.mon_create(distro, args, monitor_keyring, hostname)
 
-    process.run(
+    remoto.process.run(
         distro.conn,
         [
             'rcceph',

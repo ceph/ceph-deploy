@@ -1,4 +1,4 @@
-from ceph_deploy.lib.remoto import process
+from ceph_deploy.lib import remoto
 
 
 def apt(conn, packages, *a, **kw):
@@ -12,7 +12,7 @@ def apt(conn, packages, *a, **kw):
         '--assume-yes',
     ]
     cmd.extend(packages)
-    return process.run(
+    return remoto.process.run(
         conn,
         cmd,
         *a,
@@ -37,7 +37,7 @@ def apt_remove(conn, packages, *a, **kw):
         cmd.append('--purge')
     cmd.extend(packages)
 
-    return process.run(
+    return remoto.process.run(
         conn,
         cmd,
         *a,
@@ -51,7 +51,7 @@ def apt_update(conn):
         '-q',
         'update',
     ]
-    return process.run(
+    return remoto.process.run(
         conn,
         cmd,
     )
@@ -67,7 +67,7 @@ def yum(conn, packages, *a, **kw):
         'install',
     ]
     cmd.extend(packages)
-    return process.run(
+    return remoto.process.run(
         conn,
         cmd,
         *a,
@@ -86,7 +86,7 @@ def yum_remove(conn, packages, *a, **kw):
         cmd.append(packages)
     else:
         cmd.extend(packages)
-    return process.run(
+    return remoto.process.run(
         conn,
         cmd,
         *a,
@@ -102,7 +102,7 @@ def yum_clean(conn, item=None):
         item,
     ]
 
-    return process.run(
+    return remoto.process.run(
         conn,
         cmd,
     )
@@ -119,7 +119,7 @@ def rpm(conn, rpm_args=None, *a, **kw):
         '-Uvh',
     ]
     cmd.extend(rpm_args)
-    return process.run(
+    return remoto.process.run(
         conn,
         cmd,
         *a,
@@ -138,7 +138,7 @@ def zypper(conn, packages, *a, **kw):
     ]
 
     cmd.extend(packages)
-    return process.run(
+    return remoto.process.run(
         conn,
         cmd,
         *a,
@@ -158,7 +158,7 @@ def zypper_remove(conn, packages, *a, **kw):
         cmd.append(packages)
     else:
         cmd.extend(packages)
-    return process.run(
+    return remoto.process.run(
         conn,
         cmd,
         *a,

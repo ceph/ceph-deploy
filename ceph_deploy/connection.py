@@ -1,6 +1,6 @@
 import getpass
 import socket
-from ceph_deploy.lib.remoto import Connection
+from ceph_deploy.lib import remoto
 
 
 def get_connection(hostname, username, logger, threads=5, use_sudo=None):
@@ -13,7 +13,7 @@ def get_connection(hostname, username, logger, threads=5, use_sudo=None):
     if username:
         hostname = "%s@%s" % (username, hostname)
     try:
-        conn = Connection(
+        conn = remoto.Connection(
             hostname,
             logger=logger,
             sudo=use_sudo,

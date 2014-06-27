@@ -1,5 +1,5 @@
 from ceph_deploy.util import templates, pkg_managers
-from ceph_deploy.lib.remoto import process
+from ceph_deploy.lib import remoto
 import logging
 LOG = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ def install(distro, version_kind, version, adjust_repos):
         protocol = "https"
         if distro_name == 'sles11':
             protocol = "http"
-        process.run(
+        remoto.process.run(
             distro.conn,
             [
                 'rpm',
@@ -58,7 +58,7 @@ def install(distro, version_kind, version, adjust_repos):
                 version=version,
                 )
 
-        process.run(
+        remoto.process.run(
             distro.conn,
             [
                 'rpm',
@@ -72,7 +72,7 @@ def install(distro, version_kind, version, adjust_repos):
                 ]
             )
 
-    process.run(
+    remoto.process.run(
         distro.conn,
         [
             'zypper',
@@ -89,7 +89,7 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos):
     gpg_url_path = gpg_url.split('file://')[-1]  # Remove file if present
 
     if adjust_repos:
-        process.run(
+        remoto.process.run(
             distro.conn,
             [
                 'rpm',
@@ -105,7 +105,7 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos):
 
         distro.conn.remote_module.write_yum_repo(ceph_repo_content)
 
-    process.run(
+    remoto.process.run(
         distro.conn,
         [
             'zypper',
@@ -128,7 +128,7 @@ def repo_install(distro, reponame, baseurl, gpgkey, **kw):
     baseurl = baseurl.strip('/')  # Remove trailing slashes
 
     if gpgkey:
-        process.run(
+        remoto.process.run(
             distro.conn,
             [
                 'rpm',

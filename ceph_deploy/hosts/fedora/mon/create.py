@@ -1,5 +1,5 @@
 from ceph_deploy.hosts import common
-from ceph_deploy.lib.remoto import process
+from ceph_deploy.lib import remoto
 
 
 def create(distro, args, monitor_keyring):
@@ -7,7 +7,7 @@ def create(distro, args, monitor_keyring):
     common.mon_create(distro, args, monitor_keyring, hostname)
     service = distro.conn.remote_module.which_service()
 
-    process.run(
+    remoto.process.run(
         distro.conn,
         [
             service,

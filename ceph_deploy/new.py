@@ -11,7 +11,7 @@ from ceph_deploy.cliutil import priority
 from ceph_deploy import conf, hosts, exc
 from ceph_deploy.util import arg_validators, ssh, net
 from ceph_deploy.misc import mon_hosts
-from ceph_deploy.lib.remoto import process
+from ceph_deploy.lib import remoto
 from ceph_deploy.connection import get_local_connection
 
 
@@ -43,7 +43,7 @@ def ssh_copy_keys(hostname, username=None):
     if not os.path.exists(id_rsa_file):
         LOG.info('creating a passwordless id_rsa.pub key file')
         with get_local_connection(LOG) as conn:
-            process.run(
+            remoto.process.run(
                 conn,
                 [
                     'ssh-keygen',

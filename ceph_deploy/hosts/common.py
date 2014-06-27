@@ -1,6 +1,6 @@
 from ceph_deploy.util import paths
 from ceph_deploy import conf
-from ceph_deploy.lib.remoto import process
+from ceph_deploy.lib import remoto
 from StringIO import StringIO
 
 
@@ -8,7 +8,7 @@ def ceph_version(conn):
     """
     Log the remote ceph-version by calling `ceph --version`
     """
-    return process.run(conn, ['ceph', '--version'])
+    return remoto.process.run(conn, ['ceph', '--version'])
 
 
 def mon_create(distro, args, monitor_keyring, hostname):
@@ -46,7 +46,7 @@ def mon_create(distro, args, monitor_keyring, hostname):
             monitor_keyring,
         )
 
-        process.run(
+        remoto.process.run(
             distro.conn,
             [
                 'ceph-mon',
@@ -104,7 +104,7 @@ def mon_add(distro, args, monitor_keyring):
         )
 
         # get the monmap
-        process.run(
+        remoto.process.run(
             distro.conn,
             [
                 'ceph',
@@ -116,7 +116,7 @@ def mon_add(distro, args, monitor_keyring):
         )
 
         # now use it to prepare the monitor's data dir
-        process.run(
+        remoto.process.run(
             distro.conn,
             [
                 'ceph-mon',
@@ -130,7 +130,7 @@ def mon_add(distro, args, monitor_keyring):
         )
 
         # add it
-        process.run(
+        remoto.process.run(
             distro.conn,
             [
                 'ceph',
@@ -151,7 +151,7 @@ def mon_add(distro, args, monitor_keyring):
     distro.conn.remote_module.create_init_path(init_path)
 
     # start the mon using the address
-    process.run(
+    remoto.process.run(
         distro.conn,
         [
             'ceph-mon',

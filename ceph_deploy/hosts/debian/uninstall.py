@@ -1,5 +1,5 @@
 from ceph_deploy.util import pkg_managers
-from ceph_deploy.lib.remoto import process
+from ceph_deploy.lib import remoto
 
 
 def uninstall(conn, purge=False):

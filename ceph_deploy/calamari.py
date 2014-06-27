@@ -2,7 +2,7 @@ import errno
 import logging
 import os
 from ceph_deploy import hosts, exc
-from ceph_deploy.lib.remoto import process
+from ceph_deploy.lib import remoto
 
 
 LOG = logging.getLogger(__name__)
@@ -96,12 +96,12 @@ def connect(args):
 
         # redhat/centos need to get the service started
         if distro.normalized_name in ['redhat', 'centos']:
-            process.run(
+            remoto.process.run(
                 distro.conn,
                 ['chkconfig', 'salt-minion', 'on']
             )
 
-            process.run(
+            remoto.process.run(
                 distro.conn,
                 ['service', 'salt-minion', 'start']
             )
