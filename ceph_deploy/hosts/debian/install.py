@@ -1,4 +1,4 @@
-from ceph_deploy.lib.remoto import process
+from ceph_deploy.lib import remoto
 from ceph_deploy.util import pkg_managers
 
 
@@ -12,7 +12,7 @@ def install(distro, version_kind, version, adjust_repos):
         key = 'autobuild'
 
     # Make sure ca-certificates is installed
-    process.run(
+    remoto.process.run(
         distro.conn,
         [
             'env',
@@ -26,7 +26,7 @@ def install(distro, version_kind, version, adjust_repos):
     )
 
     if adjust_repos:
-        process.run(
+        remoto.process.run(
             distro.conn,
             [
                 'wget',
@@ -37,7 +37,7 @@ def install(distro, version_kind, version, adjust_repos):
             stop_on_nonzero=False,
         )
 
-        process.run(
+        remoto.process.run(
             distro.conn,
             [
                 'apt-key',
@@ -63,13 +63,13 @@ def install(distro, version_kind, version, adjust_repos):
 
         distro.conn.remote_module.write_sources_list(url, codename)
 
-    process.run(
+    remoto.process.run(
         distro.conn,
         ['apt-get', '-q', 'update'],
         )
 
     # TODO this does not downgrade -- should it?
-    process.run(
+    remoto.process.run(
         distro.conn,
         [
             'env',
@@ -99,7 +99,7 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos):
 
     if adjust_repos:
         if not gpg_url.startswith('file://'):
-            process.run(
+            remoto.process.run(
                 distro.conn,
                 [
                     'wget',
@@ -111,7 +111,7 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos):
             )
 
         gpg_file = 'release.asc' if not gpg_url.startswith('file://') else gpg_path
-        process.run(
+        remoto.process.run(
             distro.conn,
             [
                 'apt-key',
@@ -145,7 +145,7 @@ def repo_install(distro, repo_name, baseurl, gpgkey, **kw):
     baseurl = baseurl.strip('/')  # Remove trailing slashes
 
     if gpgkey:
-        process.run(
+        remoto.process.run(
             distro.conn,
             [
                 'wget',
@@ -156,7 +156,7 @@ def repo_install(distro, repo_name, baseurl, gpgkey, **kw):
             stop_on_nonzero=False,
         )
 
-    process.run(
+    remoto.process.run(
         distro.conn,
         [
             'apt-key',

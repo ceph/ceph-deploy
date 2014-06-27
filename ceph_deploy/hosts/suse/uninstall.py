@@ -1,4 +1,4 @@
-from ceph_deploy.lib.remoto import process
+from ceph_deploy.lib import remoto
 
 
 def uninstall(conn, purge=False):
@@ -16,4 +16,4 @@ def uninstall(conn, purge=False):
         ]
 
     cmd.extend(packages)
-    process.run(conn, cmd)
+    remoto.process.run(conn, cmd)

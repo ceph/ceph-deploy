@@ -1,5 +1,5 @@
 from ceph_deploy.hosts import common
-from ceph_deploy.lib.remoto import process
+from ceph_deploy.lib import remoto
 
 
 def create(distro, args, monitor_keyring):
@@ -12,7 +12,7 @@ def create(distro, args, monitor_keyring):
         logger.warning('could not find `service` executable')
 
     if distro.init == 'upstart':  # Ubuntu uses upstart
-        process.run(
+        remoto.process.run(
             distro.conn,
             [
                 'initctl',
@@ -26,7 +26,7 @@ def create(distro, args, monitor_keyring):
 
     elif distro.init == 'sysvinit':  # Debian uses sysvinit
 
-        process.run(
+        remoto.process.run(
             distro.conn,
             [
                 service,

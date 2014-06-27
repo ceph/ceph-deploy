@@ -5,7 +5,7 @@ from ceph_deploy.util import pkg_managers
 class TestRPM(object):
 
     def setup(self):
-        self.to_patch = 'ceph_deploy.util.pkg_managers.process.run'
+        self.to_patch = 'ceph_deploy.util.pkg_managers.remoto.process.run'
 
     def test_normal_flags(self):
         fake_run = Mock()
@@ -27,7 +27,7 @@ class TestRPM(object):
 class TestApt(object):
 
     def setup(self):
-        self.to_patch = 'ceph_deploy.util.pkg_managers.process.run'
+        self.to_patch = 'ceph_deploy.util.pkg_managers.remoto.process.run'
 
     def test_install_single_package(self):
         fake_run = Mock()
@@ -65,7 +65,7 @@ class TestApt(object):
 class TestYum(object):
 
     def setup(self):
-        self.to_patch = 'ceph_deploy.util.pkg_managers.process.run'
+        self.to_patch = 'ceph_deploy.util.pkg_managers.remoto.process.run'
 
     def test_install_single_package(self):
         fake_run = Mock()
@@ -103,7 +103,7 @@ class TestYum(object):
 class TestZypper(object):
 
     def setup(self):
-        self.to_patch = 'ceph_deploy.util.pkg_managers.process.run'
+        self.to_patch = 'ceph_deploy.util.pkg_managers.remoto.process.run'
 
     def test_install_single_package(self):
         fake_run = Mock()

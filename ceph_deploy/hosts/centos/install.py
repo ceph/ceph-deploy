@@ -1,5 +1,5 @@
 from ceph_deploy.util import pkg_managers, templates
-from ceph_deploy.lib.remoto import process
+from ceph_deploy.lib import remoto
 
 
 def repository_url_part(distro):
@@ -44,7 +44,7 @@ def install(distro, version_kind, version, adjust_repos):
         key = 'autobuild'
 
     if adjust_repos:
-        process.run(
+        remoto.process.run(
             distro.conn,
             [
                 'rpm',
@@ -67,7 +67,7 @@ def install(distro, version_kind, version, adjust_repos):
                 version=version,
                 )
 
-        process.run(
+        remoto.process.run(
             distro.conn,
             [
                 'rpm',
@@ -82,7 +82,7 @@ def install(distro, version_kind, version, adjust_repos):
         distro.conn.remote_module.set_repo_priority(['Ceph', 'Ceph-noarch', 'ceph-source'])
         logger.warning('altered ceph.repo priorities to contain: priority=1')
 
-    process.run(
+    remoto.process.run(
         distro.conn,
         [
             'yum',
@@ -101,7 +101,7 @@ def install_epel(distro):
     if distro.name.lower() in ['centos', 'scientific']:
         distro.conn.logger.info('adding EPEL repository')
         if float(distro.release) >= 6:
-            process.run(
+            remoto.process.run(
                 distro.conn,
                 ['wget', 'http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm'],
             )
@@ -113,7 +113,7 @@ def install_epel(distro):
                 ],
             )
         else:
-            process.run(
+            remoto.process.run(
                 distro.conn,
                 ['wget', 'http://dl.fedoraproject.org/pub/epel/5/x86_64/epel-release-5-4.noarch.rpm'],
             )
@@ -161,7 +161,7 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos):
     pkg_managers.yum_clean(distro.conn)
 
     if adjust_repos:
-        process.run(
+        remoto.process.run(
             distro.conn,
             [
                 'rpm',
@@ -196,7 +196,7 @@ def repo_install(distro, reponame, baseurl, gpgkey, **kw):
     pkg_managers.yum_clean(distro.conn)
 
     if gpgkey:
-        process.run(
+        remoto.process.run(
             distro.conn,
             [
                 'rpm',
