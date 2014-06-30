@@ -2,6 +2,12 @@ ceph-deploy (1.5.6) stable; urgency=low
 
   * New upstream release
 
+ -- Alfredo Deza <alfredo.deza@inktank.com>  Mon, 30 Jun 2014 21:35:19 +0000
+
+ceph-deploy (1.5.6) stable; urgency=low
+
+  * New upstream release
+
  -- Alfredo Deza <alfredo.deza@inktank.com>  Mon, 30 Jun 2014 19:31:45 +0000
 
 ceph-deploy (1.5.5) stable; urgency=low
