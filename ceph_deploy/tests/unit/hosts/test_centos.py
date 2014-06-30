@@ -1,8 +1,7 @@
 from ceph_deploy.hosts import centos
 from mock import Mock
 
-
-class TestCentosUrlPart(object):
+class TestCentosVersionDetection(object):
 
     def setup(self):
         self.distro = Mock()
@@ -23,3 +22,18 @@ class TestCentosUrlPart(object):
         self.distro.normalized_name = 'redhat'
         self.distro.release = '7.0'
         assert centos.repository_url_part(self.distro) == 'rhel7'
+
+    def test_rpm_dist_fallsback_to_el6(self):
+        self.distro.normalized_name = 'redhat'
+        self.distro.release = '3'
+        assert centos.rpm_dist(self.distro) == 'el6'
+
+    def test_rpm_dist_detects_rhel6(self):
+        self.distro.normalized_name = 'redhat'
+        self.distro.release = '6.6'
+        assert centos.rpm_dist(self.distro) == 'el6'
+
+    def test_rpm_dist_detects_rhel7(self):
+        self.distro.normalized_name = 'redhat'
+        self.distro.release = '7.0'
+        assert centos.rpm_dist(self.distro) == 'el7'
