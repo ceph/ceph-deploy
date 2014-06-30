@@ -346,6 +346,155 @@ def activate(args, cfg):
         distro.conn.exit()
 
 
+def destroy(args):
+    for hostname, disk, journal in args.disk:
+        if not hostname:
+            raise RuntimeError('invalided hostname')
+        LOG.debug(
+            'Destroy osd id %s in host %s',
+            args.osd_id, hostname
+        )
+
+        distro = hosts.get(hostname, username=args.username)
+        LOG.info(
+            'Distro info: %s %s %s',
+            distro.name,
+            distro.release,
+            distro.codename
+        )
+
+        destroy_osd(distro.conn, hostname, osd_id=args.osd_id)
+
+
+def destroy_osd(conn, host, osd_id):
+
+    found = False
+
+    if not osd_id:
+        LOG.info("(NOT IMPLEMENT) remove all osd")
+
+    #check osd in this host befor deleteing
+
+    command = [
+        'ceph',
+        'osd',
+        'tree',
+        '--format=json',
+    ]
+
+    out, err, code = process.check(
+        conn,
+        command,
+    )
+
+    try:
+        loaded_json = json.loads(''.join(out))
+        for item in loaded_json['nodes']:
+            if item[u'type'] == u'host' and \
+               (int(osd_id) in item[u'children'] and item[u'name'] == host):
+                found = True
+                LOG.info(
+                    'Find the situable host %s with osd id %s!',
+                    host, osd_id
+                )
+                takeout_osd(conn, osd_id)
+                ret = stopping_osd(conn, osd_id)
+                if ret:
+                    removing_osd(conn, osd_id)
+                else:
+                    LOG.debug('CAN NOT STOP CEPH OSD %s', osd_id)
+                    conn.exit()
+        if not found:
+            LOG.info(
+                'Could not find the situable osd id %s in host %s',
+                osd_id, host
+            )
+    except ValueError:
+        return {}
+    conn.exit()
+
+
+def takeout_osd(conn, osd_id):
+    command = [
+        'ceph',
+        'osd',
+        'out',
+        osd_id,
+    ]
+
+    process.run(
+        conn,
+        command,
+    )
+
+
+def stopping_osd(conn, osd_id):
+    command = [
+        'stop',
+        'ceph-osd',
+        'id=%s' % osd_id,
+    ]
+
+    out, err, code = process.check(
+        conn,
+        command,
+    )
+
+    if out[0] == 'ceph-osd stop/waiting':
+        return True
+    else:
+        return False
+
+
+def removing_osd(conn, osd_id):
+    command = [
+        'ceph',
+        'osd',
+        'crush',
+        'remove',
+        'osd.%s' % osd_id,
+    ]
+
+    process.run(
+        conn,
+        command,
+    )
+
+    command = [
+        'ceph',
+        'auth',
+        'del',
+        'osd.%s' % osd_id,
+    ]
+
+    process.run(
+        conn,
+        command,
+    )
+
+    command = [
+        'ceph',
+        'osd',
+        'rm',
+        osd_id,
+    ]
+
+    process.run(
+        conn,
+        command,
+    )
+
+    command = [
+        'umount',
+        '/var/lib/ceph/osd/ceph-%s' % osd_id,
+    ]
+
+    process.run(
+        conn,
+        command,
+    )
+
+
 def disk_zap(args):
     cfg = conf.ceph.load(args)
 
@@ -545,6 +694,8 @@ def osd(args):
         prepare(args, cfg, activate_prepared_disk=True)
     elif args.subcommand == 'activate':
         activate(args, cfg)
+    elif args.subcommand == 'destroy':
+        destroy(args)
     else:
         LOG.error('subcommand %s not implemented', args.subcommand)
         sys.exit(1)
