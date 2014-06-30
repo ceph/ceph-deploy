@@ -1,3 +1,8 @@
+1.5.6
+-----
+* Optionally avoid vendoring libraries for upstream package maintainers.
+* Fix RHEL7 installation issue that was pulling ``el6`` packages (David Vossel)
+
 1.5.5
 -----
 * Normalize repo file header calls. Fixes breakage on Calamari repos.
