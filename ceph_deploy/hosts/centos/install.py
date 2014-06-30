@@ -2,6 +2,12 @@ from ceph_deploy.util import pkg_managers, templates
 from ceph_deploy.lib import remoto
 
 
+def rpm_dist(distro):
+    # start using the el7 prefix now that rhel7 exists.
+    if distro.normalized_name == 'redhat' and distro.release.startswith('7'):
+        return 'el7'
+    return 'el6'
+
 def repository_url_part(distro):
     """
     Historically everything CentOS, RHEL, and Scientific has been mapped to
@@ -30,6 +36,7 @@ def install(distro, version_kind, version, adjust_repos):
     release = distro.release
     machine = distro.machine_type
     repo_part = repository_url_part(distro)
+    dist = rpm_dist(distro)
 
     pkg_managers.yum_clean(distro.conn)
 
@@ -75,7 +82,7 @@ def install(distro, version_kind, version, adjust_repos):
                 'rpm',
                 '-Uvh',
                 '--replacepkgs',
-                '{url}noarch/ceph-release-1-0.el6.noarch.rpm'.format(url=url),
+                '{url}noarch/ceph-release-1-0.{dist}.noarch.rpm'.format(url=url, dist=dist),
             ],
         )
 
