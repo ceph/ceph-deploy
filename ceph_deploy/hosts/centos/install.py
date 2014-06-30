@@ -20,6 +20,8 @@ def repository_url_part(distro):
     if distro.normalized_name == 'redhat':
         if distro.release.startswith('6'):
             return 'rhel6'
+        elif distro.release.startswith('7'):
+            return 'rhel7'
     return 'el6'
 
 
