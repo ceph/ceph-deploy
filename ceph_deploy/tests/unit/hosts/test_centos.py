@@ -19,3 +19,7 @@ class TestCentosUrlPart(object):
         self.distro.release = '5.0'
         assert centos.repository_url_part(self.distro) == 'el6'
 
+    def test_url_detects_rhel7(self):
+        self.distro.normalized_name = 'redhat'
+        self.distro.release = '7.0'
+        assert centos.repository_url_part(self.distro) == 'rhel7'
