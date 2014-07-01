@@ -382,7 +382,7 @@ def destroy_osd(conn, host, osd_id):
         '--format=json',
     ]
 
-    out, err, code = process.check(
+    out, err, code = remoto.process.check(
         conn,
         command,
     )
@@ -398,7 +398,7 @@ def destroy_osd(conn, host, osd_id):
                     host, osd_id
                 )
                 takeout_osd(conn, osd_id)
-                ret = stopping_osd(conn, osd_id)
+                ret = stopping_osd(loaded_json, conn, osd_id)
                 if ret:
                     removing_osd(conn, osd_id)
                 else:
@@ -422,28 +422,37 @@ def takeout_osd(conn, osd_id):
         osd_id,
     ]
 
-    process.run(
+    remoto.process.run(
         conn,
         command,
     )
 
 
-def stopping_osd(conn, osd_id):
+def stopping_osd(loaded_json, conn, osd_id):
+
+    osd_name = u'osd.%s' % osd_id
+
+    for item in loaded_json['nodes']:
+        if item[u'name'] == osd_name and item[u'status'] == u'down':
+            LOG.info('OSD already down.')
+            return True
+
     command = [
         'stop',
         'ceph-osd',
         'id=%s' % osd_id,
     ]
 
-    out, err, code = process.check(
+    out, err, code = remoto.process.check(
         conn,
         command,
     )
 
-    if out[0] == 'ceph-osd stop/waiting':
-        return True
-    else:
+    # check out first.
+    if not out:
         return False
+    elif out[0] == 'ceph-osd stop/waiting':
+        return True
 
 
 def removing_osd(conn, osd_id):
@@ -455,7 +464,7 @@ def removing_osd(conn, osd_id):
         'osd.%s' % osd_id,
     ]
 
-    process.run(
+    remoto.process.run(
         conn,
         command,
     )
@@ -467,7 +476,7 @@ def removing_osd(conn, osd_id):
         'osd.%s' % osd_id,
     ]
 
-    process.run(
+    remoto.process.run(
         conn,
         command,
     )
@@ -479,7 +488,7 @@ def removing_osd(conn, osd_id):
         osd_id,
     ]
 
-    process.run(
+    remoto.process.run(
         conn,
         command,
     )
@@ -489,7 +498,7 @@ def removing_osd(conn, osd_id):
         '/var/lib/ceph/osd/ceph-%s' % osd_id,
     ]
 
-    process.run(
+    remoto.process.run(
         conn,
         command,
     )
