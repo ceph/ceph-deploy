@@ -800,6 +800,13 @@ def make(parser):
         default='/etc/ceph/dmcrypt-keys',
         help='directory where dm-crypt keys are stored',
         )
+    parser.add_argument(
+        '--osd-id',
+        metavar='OSD_ID',
+        default=None,
+        # XXX: (NOT IMPLEMENT) w/o this option will destroy all OSD on HOST'
+        help='destroy specific osd id on HOST',
+        )
     parser.set_defaults(
         func=osd,
         )
