@@ -32,10 +32,6 @@ def connect(args):
     if not has_minion_repo:
         raise RuntimeError('no calamari-minion repo found')
 
-    # We rely on the default for repo installs that does not
-    # install ceph unless specified otherwise
-    options = dict(cd_conf.items(repo_name))
-
     for hostname in args.hosts:
         distro = hosts.get(hostname, username=args.username)
         if not distro_is_supported(distro.normalized_name):
@@ -51,6 +47,13 @@ def connect(args):
             distro.release,
             distro.codename
         )
+
+        # We rely on the default for repo installs that does not install ceph
+        # unless specified otherwise. We define the `options` dictionary here
+        # because ceph-deploy pops items iternally and that causes issues when
+        # those items need to be available for every host
+        options = dict(cd_conf.items(repo_name))
+
         rlogger = logging.getLogger(hostname)
         if distro.name in ('debian', 'ubuntu'):
             rlogger.info('ensuring proxy is disabled for calamari minions repo')
