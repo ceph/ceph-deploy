@@ -1,3 +1,8 @@
+1.5.7
+-----
+* Fix ``NameError`` on osd.py from an undefined variable
+* Fix a calamari connect problem when installing on multiple hosts
+
 1.5.6
 -----
 * Optionally avoid vendoring libraries for upstream package maintainers.
