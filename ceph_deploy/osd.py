@@ -532,7 +532,7 @@ def disk_zap(args):
                 disk,
             ],
         )
-        process.run(
+        remoto.process.run(
             distro.conn,
             [
                 'sgdisk',
