@@ -18,6 +18,7 @@ def path(cluster, hostname):
     """
     Example usage::
 
+        >>> from ceph_deploy.util.paths import mon
         >>> mon.path('mycluster', 'hostname')
         /var/lib/ceph/mon/mycluster-myhostname
     """
@@ -28,6 +29,7 @@ def done(cluster, hostname):
     """
     Example usage::
 
+        >>> from ceph_deploy.util.paths import mon
         >>> mon.done('mycluster', 'hostname')
         /var/lib/ceph/mon/mycluster-myhostname/done
     """
@@ -38,6 +40,7 @@ def init(cluster, hostname, init):
     """
     Example usage::
 
+        >>> from ceph_deploy.util.paths import mon
         >>> mon.init('mycluster', 'hostname', 'init')
         /var/lib/ceph/mon/mycluster-myhostname/init
     """
@@ -48,6 +51,7 @@ def keyring(cluster, hostname):
     """
     Example usage::
 
+        >>> from ceph_deploy.util.paths import mon
         >>> mon.keyring('mycluster', 'myhostname')
         /var/lib/ceph/tmp/mycluster-myhostname.mon.keyring
     """
@@ -59,6 +63,7 @@ def asok(cluster, hostname):
     """
     Example usage::
 
+        >>> from ceph_deploy.util.paths import mon
         >>> mon.asok('mycluster', 'myhostname')
         /var/run/ceph/mycluster-mon.myhostname.asok
     """
@@ -70,6 +75,7 @@ def monmap(cluster, hostname):
     """
     Example usage::
 
+        >>> from ceph_deploy.util.paths import mon
         >>> mon.monmap('mycluster', 'myhostname')
         /var/lib/ceph/tmp/mycluster.myhostname.monmap
     """
