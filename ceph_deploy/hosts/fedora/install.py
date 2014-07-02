@@ -1,4 +1,3 @@
-from ceph_deploy.util import pkg_managers, templates
 from ceph_deploy.lib import remoto
 from ceph_deploy.hosts.centos.install import repo_install, mirror_install  # noqa
 
@@ -58,7 +57,6 @@ def install(distro, version_kind, version, adjust_repos):
         logger.warning('ensuring that /etc/yum.repos.d/ceph.repo contains a high pririty')
         distro.conn.remote_module.set_repo_priority(['Ceph', 'Ceph-noarch', 'ceph-source'])
         logger.warning('altered ceph.repo priorities to contain: priority=1')
-
 
     remoto.process.run(
         distro.conn,
