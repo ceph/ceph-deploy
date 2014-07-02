@@ -1,2 +1,2 @@
-import ceph
-import cephdeploy
+import ceph  # noqa
+import cephdeploy  # noqa
