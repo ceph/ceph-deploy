@@ -5,6 +5,7 @@ import os
 import shutil
 import tempfile
 import platform
+from ceph_deploy import conf
 
 
 def platform_information(_linux_distribution=None):
@@ -85,25 +86,25 @@ def set_repo_priority(sections, path='/etc/yum.repos.d/ceph.repo', priority='1')
     remove_whitespace_from_assignments()
 
 
-def write_conf(cluster, conf, overwrite):
+def write_conf(cluster, conf_data, overwrite):
     """ write cluster configuration to /etc/ceph/{cluster}.conf """
     path = '/etc/ceph/{cluster}.conf'.format(cluster=cluster)
-    tmp_file = tempfile.NamedTemporaryFile(delete=False)
-    err_msg = 'config file %s exists with different content; use --overwrite-conf to overwrite' % path
 
     if os.path.exists(path):
-        with file(path, 'rb') as f:
-            old = f.read()
-            if old != conf and not overwrite:
-                raise RuntimeError(err_msg)
-        tmp_file.write(conf)
-        tmp_file.close()
-        shutil.move(tmp_file.name, path)
-        os.chmod(path, 0644)
+        if overwrite:
+            tmp_file = tempfile.NamedTemporaryFile(delete=False)
+            tmp_file.write(conf_data)
+            tmp_file.close()
+            shutil.move(tmp_file.name, path)
+            os.chmod(path, 0644)
+        elif not conf.ceph.match(conf_data, path):
+            err_msg = ('config file %s exists with different content; '
+                       'use --overwrite-conf to overwrite') % path
+            raise RuntimeError(err_msg)
         return
     if os.path.exists('/etc/ceph'):
         with open(path, 'w') as f:
-            f.write(conf)
+            f.write(conf_data)
         os.chmod(path, 0644)
     else:
         err_msg = '/etc/ceph/ does not exist - could not write config'
