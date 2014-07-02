@@ -347,7 +347,6 @@ def activate(args, cfg):
 
 
 def disk_zap(args):
-    cfg = conf.ceph.load(args)
 
     for hostname, disk, journal in args.disk:
         if not disk or not hostname:
