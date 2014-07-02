@@ -13,6 +13,7 @@ def repository_url_part(distro):
 
     Specifically to work around the issue of CentOS vs RHEL::
 
+        >>> import platform
         >>> platform.linux_distribution()
         ('Red Hat Enterprise Linux Server', '7.0', 'Maipo')
 

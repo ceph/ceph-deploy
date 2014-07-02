@@ -1,2 +1,2 @@
-import mon
-import osd
+import mon # noqa
+import osd # noqa

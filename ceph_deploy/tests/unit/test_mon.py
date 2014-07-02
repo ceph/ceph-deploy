@@ -1,6 +1,6 @@
 import sys
 import py.test
-from mock import Mock, MagicMock, patch, call
+from mock import Mock, patch, call
 from ceph_deploy import mon
 from ceph_deploy.tests import fakes
 from ceph_deploy.hosts.common import mon_create

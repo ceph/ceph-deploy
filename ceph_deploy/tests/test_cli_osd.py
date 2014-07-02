@@ -1,13 +1,5 @@
-import argparse
-import collections
-import mock
 import pytest
 import subprocess
-
-from ..cli import main
-from .. import osd
-
-from .directory import directory
 
 
 def test_help(tmpdir, cli):

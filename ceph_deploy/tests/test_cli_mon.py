@@ -5,10 +5,8 @@ import pytest
 import subprocess
 
 from ..cli import main
-from .. import mon
-
 from .directory import directory
-from .fakes import fake_getaddrinfo
+
 
 def test_help(tmpdir, cli):
     with cli(

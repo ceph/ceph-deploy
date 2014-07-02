@@ -6,7 +6,6 @@ import uuid
 from .. import conf
 from ..cli import main
 from .directory import directory
-from .fakes import fake_getaddrinfo
 
 
 def test_help(tmpdir, cli):
@@ -32,13 +31,12 @@ def test_write_global_conf_section(tmpdir, cli):
 
 def pytest_funcarg__newcfg(request):
     tmpdir = request.getfuncargvalue('tmpdir')
-    cli = request.getfuncargvalue('cli')
 
     def new(*args):
         with patch('ceph_deploy.new.net.get_nonlocal_ip', lambda x: '10.0.0.1'):
             with patch('ceph_deploy.new.arg_validators.Hostname', lambda: lambda x: x):
                 with directory(str(tmpdir)):
-                    main( args=['new'] + list(args))
+                    main(args=['new'] + list(args))
                     with tmpdir.join('ceph.conf').open() as f:
                         cfg = conf.ceph.parse(f)
                     return cfg
