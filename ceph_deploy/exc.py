@@ -62,6 +62,22 @@ class UnsupportedPlatform(DeployError):
         )
 
 
+class ExecutableNotFound(DeployError):
+    """
+    Could not locate executable
+    """
+    def __init__(self, executable, host):
+        self.executable = executable
+        self.host = host
+
+    def __str__(self):
+        return "{doc} '{executable}' make sure it is installed and available on {host}".format(
+            doc=self.__doc__.strip(),
+            executable=self.executable,
+            host=self.host,
+        )
+
+
 class MissingPackageError(DeployError):
     """
     A required package or command is missing
