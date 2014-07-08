@@ -9,6 +9,9 @@ workstation, requiring no servers, databases, or anything like that.
 If you set up and tear down Ceph clusters a lot, and want minimal
 extra bureaucracy, this is for you.
 
+This ``README`` provides a brief overview of ceph-deploy, for thorough
+documentation please go to http://ceph.com/ceph-deploy/docs
+
 .. _what this tool is not:
 
 What this tool is not
