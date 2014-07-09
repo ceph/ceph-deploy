@@ -1,3 +1,11 @@
+1.5.8
+-----
+* Create a flake8/pep8/linting job so that we prevent Undefined errors
+* Add partprobe/partx calls when zapping disks
+* Fix RHEL7 installation issues (url was using el6 incorrectly) (Thanks David Vossel)
+* Warn when an executable is not found
+* Fix an ``AttributeError`` in execnet (see https://github.com/alfredodeza/execnet/issues/1)
+
 1.5.7
 -----
 * Fix ``NameError`` on osd.py from an undefined variable
@@ -6,7 +14,7 @@
 1.5.6
 -----
 * Optionally avoid vendoring libraries for upstream package maintainers.
-* Fix RHEL7 installation issue that was pulling ``el6`` packages (David Vossel)
+* Fix RHEL7 installation issue that was pulling ``el6`` packages (Thanks David Vossel)
 
 1.5.5
 -----
