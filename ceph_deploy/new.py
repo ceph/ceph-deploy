@@ -80,7 +80,7 @@ def new(args):
     cfg = conf.ceph.CephConf()
     cfg.add_section('global')
 
-    fsid = uuid.uuid4()
+    fsid = args.fsid or uuid.uuid4()
     cfg.set('global', 'fsid', str(fsid))
 
     mon_initial_members = []
@@ -174,6 +174,12 @@ def make(parser):
         action='store_false',
         default=True,
         help='do not attempt to copy SSH keys',
+    )
+
+    parser.add_argument(
+        '--fsid',
+        dest='fsid',
+        help='provide an alternate FSID for ceph.conf generation',
     )
 
     parser.set_defaults(
