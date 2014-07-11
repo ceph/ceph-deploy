@@ -5,7 +5,7 @@ class TestSuseInit(object):
         self.host = suse
 
     def test_choose_init_default(self):
-        self.host.release = '11'
+        self.host.release = None
         init_type = self.host.choose_init()
         assert ( init_type == "sysvinit")
         
