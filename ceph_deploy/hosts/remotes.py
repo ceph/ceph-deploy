@@ -56,11 +56,6 @@ def write_yum_repo(content, filename='ceph.repo'):
     repo_path = os.path.join('/etc/yum.repos.d', filename)
     write_file(repo_path, content)
 
-def write_zypper_repo(content, filename='ceph.repo'):
-    """set the contents of repo file to /etc/zypp/repos.d/"""
-    repo_path = os.path.join('/etc/zypp/repos.d/', filename)
-    write_file(repo_path, content)
-
 def set_repo_priority(sections, path='/etc/yum.repos.d/ceph.repo', priority='1'):
     Config = ConfigParser.ConfigParser()
     Config.read(path)
