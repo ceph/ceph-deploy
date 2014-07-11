@@ -9,3 +9,8 @@ from uninstall import uninstall  # noqa
 distro = None
 release = None
 codename = None
+
+def choose_init():
+    if distro == 'Ubuntu':
+        return 'upstart'
+    return 'sysvinit'

@@ -10,3 +10,6 @@ from uninstall import uninstall  # noqa
 distro = None
 release = None
 codename = None
+
+def choose_init():
+    return 'sysvinit'

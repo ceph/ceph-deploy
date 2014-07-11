@@ -55,8 +55,7 @@ def get(hostname, username=None, fallback=None):
     module.codename = codename
     module.conn = conn
     module.machine_type = machine_type
-    module.init = _choose_init(distro_name, codename)
-
+    module.init = module.choose_init()
     return module
 
 
@@ -87,14 +86,3 @@ def _normalized_distro_name(distro):
     elif distro.startswith(('suse', 'opensuse')):
         return 'suse'
     return distro
-
-
-def _choose_init(distro, codename):
-    """
-    Select a init system for a given distribution.
-
-    Returns the name of a init system (upstart, sysvinit ...).
-    """
-    if distro == 'Ubuntu':
-        return 'upstart'
-    return 'sysvinit'
