@@ -98,12 +98,13 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos):
             ]
         )
 
-        ceph_repo_content = templates.ceph_repo.format(
+        ceph_repo_content = templates.zypper_repo.format(
             repo_url=repo_url,
             gpg_url=gpg_url
         )
-
-        distro.conn.remote_module.write_yum_repo(ceph_repo_content)
+        distro.conn.remote_module.write_file(
+            '/etc/zypp/repos.d/ceph.repo',
+            ceph_repo_content)
 
     remoto.process.run(
         distro.conn,
@@ -148,9 +149,9 @@ def repo_install(distro, reponame, baseurl, gpgkey, **kw):
         proxy = proxy,
     )
 
-    distro.conn.remote_module.write_yum_repo(
-        repo_content,
-        "%s.repo" % reponame
+    distro.conn.remote_module.write_file(
+        '/etc/zypp/repos.d/%s' % (reponame),
+        repo_content
     )
 
     # Some custom repos do not need to install ceph

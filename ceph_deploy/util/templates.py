@@ -28,6 +28,15 @@ type=rpm-md
 gpgkey={gpg_url}
 """
 
+zypper_repo = """[ceph]
+name=Ceph packages
+type=rpm-md
+baseurl={repo_url}
+gpgcheck=1
+gpgkey={gpg_url}
+enabled=1
+"""
+
 
 def custom_repo(**kw):
     """
