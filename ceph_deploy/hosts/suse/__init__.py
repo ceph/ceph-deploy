@@ -14,11 +14,13 @@ release = None
 codename = None
 
 def choose_init():
-    initMapping = { '11' : 'sysvinit',  # SLE_11
+    """
+    Select a init system
+
+    Returns the name of a init system (upstart, sysvinit ...).
+    """
+    init_mapping = { '11' : 'sysvinit', # SLE_11
         '12' : 'systemd',               # SLE_12
         '13.1' : 'systemd',             # openSUSE_13.1
         }
-    if release in initMapping:
-        log.debug("init=%s" % (initMapping[release]))
-        return initMapping[release]
-    return 'sysvinit'
+    return init_mapping.get(release, 'sysvinit')
