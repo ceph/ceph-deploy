@@ -19,7 +19,7 @@ class TestSuseInit(object):
         init_type = self.host.choose_init()
         assert ( init_type == "systemd")
 
-    def test_choose_init_openSUSE_13.1(self):
+    def test_choose_init_openSUSE_13_1(self):
         self.host.release = '13.1'
         init_type = self.host.choose_init()
         assert ( init_type == "systemd")
