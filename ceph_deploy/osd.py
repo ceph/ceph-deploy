@@ -10,7 +10,7 @@ from textwrap import dedent
 from cStringIO import StringIO
 
 from ceph_deploy import conf, exc, hosts
-from ceph_deploy.util import constants
+from ceph_deploy.util import constants, system
 from ceph_deploy.cliutil import priority
 from ceph_deploy.lib import remoto
 
@@ -71,8 +71,9 @@ def osd_tree(conn, cluster):
     Note how the booleans are actually strings, so we need to take that into
     account and fix it before returning the dictionary. Issue #8108
     """
+    ceph_executable = system.executable_path(conn, 'ceph')
     command = [
-        'ceph',
+        ceph_executable,
         '--cluster={cluster}'.format(cluster=cluster),
         'osd',
         'tree',
@@ -424,10 +425,11 @@ def disk_list(args, cfg):
         )
 
         LOG.debug('Listing disks on {hostname}...'.format(hostname=hostname))
+        ceph_disk_executable = system.executable_path(distro.conn, 'ceph-disk')
         remoto.process.run(
             distro.conn,
             [
-                'ceph-disk',
+                ceph_disk_executable,
                 'list',
             ],
         )
@@ -459,10 +461,11 @@ def osd_list(args, cfg):
         remote_module = distro.conn.remote_module
         osds = distro.conn.remote_module.listdir(constants.osd_path)
 
+        ceph_disk_executable = system.executable_path(distro.conn, 'ceph-disk')
         output, err, exit_code = remoto.process.check(
             distro.conn,
             [
-                'ceph-disk',
+                ceph_disk_executable,
                 'list',
             ]
         )
