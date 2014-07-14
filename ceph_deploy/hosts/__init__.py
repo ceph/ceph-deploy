@@ -85,4 +85,6 @@ def _normalized_distro_name(distro):
         return 'scientific'
     elif distro.startswith(('suse', 'opensuse')):
         return 'suse'
+    elif distro.startswith('centos'):
+        return 'centos'
     return distro
