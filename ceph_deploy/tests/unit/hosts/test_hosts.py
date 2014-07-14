@@ -11,6 +11,10 @@ class TestNormalized(object):
         result = hosts._normalized_distro_name('Debian')
         assert result == 'debian'
 
+    def test_get_centos(self):
+        result = hosts._normalized_distro_name('CentOS Linux')
+        assert result == 'centos'
+
     def test_get_ubuntu(self):
         result = hosts._normalized_distro_name('Ubuntu')
         assert result == 'ubuntu'
