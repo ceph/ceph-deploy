@@ -1,3 +1,10 @@
+1.5.9
+-----
+* Allow to optionally set the ``fsid`` when calling ``new``
+* Correctly select sysvinit or systemd for Suse versions (Thanks Owen Synge)
+* Use correct version of remoto (``0.0.19``) that holds the ``None`` global fix
+* Fix new naming scheme for CentOS platforms that prevented CentOS 7 installs
+
 1.5.8
 -----
 * Create a flake8/pep8/linting job so that we prevent Undefined errors
