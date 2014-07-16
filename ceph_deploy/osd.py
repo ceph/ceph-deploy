@@ -201,7 +201,9 @@ def prepare_disk(
     Run on osd node, prepares a data disk for use.
     """
     args = [
-        'ceph-disk-prepare',
+        'ceph-disk',
+        '-v',
+        'prepare',
         ]
     if zap:
         args.append('--zap-disk')
@@ -334,7 +336,9 @@ def activate(args, cfg):
         remoto.process.run(
             distro.conn,
             [
-                'ceph-disk-activate',
+                'ceph-disk',
+                '-v',
+                'activate',
                 '--mark-init',
                 distro.init,
                 '--mount',
