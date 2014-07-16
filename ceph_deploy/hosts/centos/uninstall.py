@@ -5,6 +5,7 @@ def uninstall(conn, purge=False):
     packages = [
         'ceph',
         'ceph-release',
+        'ceph-common',
         ]
 
     pkg_managers.yum_remove(
