@@ -365,26 +365,14 @@ def disk_zap(args):
             distro.codename
         )
 
-        # NOTE: this mirrors ceph-disk-prepare --zap-disk DEV
-        # zero the device
         distro.conn.remote_module.zeroing(disk)
 
+        ceph_disk_executable = system.executable_path(distro.conn, 'ceph-disk')
         remoto.process.run(
             distro.conn,
             [
-                'sgdisk',
-                '--zap-all',
-                '--',
-                disk,
-            ],
-        )
-        remoto.process.run(
-            distro.conn,
-            [
-                'sgdisk',
-                '--clear',
-                '--mbrtogpt',
-                '--',
+                ceph_disk_executable,
+                'zap',
                 disk,
             ],
         )
