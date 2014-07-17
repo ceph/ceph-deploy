@@ -56,7 +56,6 @@ def write_yum_repo(content, filename='ceph.repo'):
     repo_path = os.path.join('/etc/yum.repos.d', filename)
     write_file(repo_path, content)
 
-
 def set_repo_priority(sections, path='/etc/yum.repos.d/ceph.repo', priority='1'):
     Config = ConfigParser.ConfigParser()
     Config.read(path)
