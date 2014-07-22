@@ -181,6 +181,10 @@ def custom_repo(distro, args, cd_conf, rlogger, install_ceph=None):
 
 
 def install_repo(args):
+    """
+    For a user that only wants to install the repository only (and avoid
+    installing ceph and its dependencies).
+    """
     cd_conf = getattr(args, 'cd_conf', None)
 
     for hostname in args.host:
