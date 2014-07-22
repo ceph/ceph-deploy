@@ -11,6 +11,9 @@ LOG = logging.getLogger(__name__)
 
 
 def install(args):
+    if args.subcommand == 'repo':
+        return install_repo(args)
+
     # XXX This whole dance is because --stable is getting deprecated
     if args.stable is not None:
         LOG.warning('the --stable flag is deprecated, use --release instead')
@@ -125,7 +128,7 @@ def should_use_custom_repo(args, cd_conf, repo_url):
     return False
 
 
-def custom_repo(distro, args, cd_conf, rlogger):
+def custom_repo(distro, args, cd_conf, rlogger, install_ceph=None):
     """
     A custom repo install helper that will go through config checks to retrieve
     repos (and any extra repos defined) and install those
@@ -148,7 +151,7 @@ def custom_repo(distro, args, cd_conf, rlogger):
             but could not default to one')
     else:
         options = dict(cd_conf.items(default_repo))
-        options['install_ceph'] = True
+        options['install_ceph'] = False if install_ceph is False else True
         extra_repos = cd_conf.get_list(default_repo, 'extra-repos')
         rlogger.info('adding custom repository file')
         try:
@@ -175,6 +178,24 @@ def custom_repo(distro, args, cd_conf, rlogger):
                 )
             except KeyError as err:
                 raise RuntimeError('missing required key: %s in config section: %s' % (err, xrepo))
+
+
+def install_repo(args):
+    cd_conf = getattr(args, 'cd_conf', None)
+
+    for hostname in args.host:
+        LOG.debug('Detecting platform for host %s ...', hostname)
+        distro = hosts.get(hostname, username=args.username)
+        rlogger = logging.getLogger(hostname)
+
+        LOG.info(
+            'Distro info: %s %s %s',
+            distro.name,
+            distro.release,
+            distro.codename
+        )
+
+        return custom_repo(distro, args, cd_conf, rlogger, install_ceph=False)
 
 
 def uninstall(args):
@@ -378,6 +399,13 @@ def make(parser):
         version_kind='stable',
         adjust_repos=True,
     )
+
+    parser.add_argument(
+        'subcommand',
+        choices=[
+            'repo',
+            ],
+        )
 
     parser.add_argument(
         'host',
