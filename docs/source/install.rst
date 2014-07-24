@@ -160,7 +160,7 @@ repository in an admin host::
 
 Repo file only
 --------------
-The ``install`` command has a subcommand that offers flexibility for installing
+The ``install`` command has a flag that offers flexibility for installing
 "repo files" only, avoiding installation of ceph and its dependencies.
 
 These "repo files" are the configuration files for package managers ("yum" or
@@ -177,7 +177,7 @@ Repositories are specified in the ``cephdeploy.conf`` (or
 ``$HOME/.cephdeploy.conf``) file. If a specific repository section is needed,
 it can be specified with the ``--release`` flag::
 
-    ceph-deploy install repo --release firefly {HOSTS}
+    ceph-deploy install --repo --release firefly {HOSTS}
 
 The above command would install the ``firefly`` repo file in every ``{HOST}``
 specified.
@@ -186,6 +186,6 @@ If a repository section exists with the ``default = True`` flag, there is no
 need to specify anything else and the repo file can be installed simply by
 passing in the hosts::
 
-    ceph-deploy install repo {HOSTS}
+    ceph-deploy install --repo {HOSTS}
 
 .. versionadded:: 1.5.10
