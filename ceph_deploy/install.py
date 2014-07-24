@@ -11,7 +11,7 @@ LOG = logging.getLogger(__name__)
 
 
 def install(args):
-    if args.subcommand == 'repo':
+    if args.repo:
         return install_repo(args)
 
     # XXX This whole dance is because --stable is getting deprecated
@@ -405,10 +405,8 @@ def make(parser):
     )
 
     parser.add_argument(
-        'subcommand',
-        choices=[
-            'repo',
-            ],
+        '--repo',
+        action='store_true',
         )
 
     parser.add_argument(
