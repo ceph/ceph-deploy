@@ -407,6 +407,7 @@ def make(parser):
     parser.add_argument(
         '--repo',
         action='store_true',
+        help='install repo files only (skips package installation)',
         )
 
     parser.add_argument(
