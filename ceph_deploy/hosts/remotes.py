@@ -118,6 +118,9 @@ def write_keyring(path, key):
     tmp_file = tempfile.NamedTemporaryFile(delete=False)
     tmp_file.write(key)
     tmp_file.close()
+    keyring_dir = os.path.dirname(path)
+    if not path_exists(keyring_dir):
+        makedir(keyring_dir)
     shutil.move(tmp_file.name, path)
 
 
