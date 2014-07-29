@@ -279,7 +279,7 @@ def prepare(args, cfg, activate_prepared_disk):
 
             disk_is_dir = False
             if disk[0] == "/":
-                disk_is_dir = False
+                disk_is_dir = True
             distro = hosts.get(hostname, username=args.username)
             LOG.info(
                 'Distro info: %s %s %s',
