@@ -186,11 +186,24 @@ def catch_osd_errors(conn, logger, args):
     if nearfull:
         logger.warning('OSDs are near full!')
 
+def prepare_disk_dir(
+        conn,
+        disk):
+    if conn.remote_module.path_exists(disk):
+        return
+    return remoto.process.run(
+        conn,
+        [
+            'mkdir',
+            disk
+        ],
+    )
 
 def prepare_disk(
         conn,
         cluster,
         disk,
+        disk_is_dir,
         journal,
         activate_prepared_disk,
         zap,
@@ -217,9 +230,13 @@ def prepare_disk(
         if dmcrypt_dir is not None:
             args.append('--dmcrypt-key-dir')
             args.append(dmcrypt_dir)
+    data_validation = '--data-dev'
+    if disk_is_dir:
+        data_validation = '--data-dir'
     args.extend([
         '--cluster',
         cluster,
+        data_validation,
         '--',
         disk,
     ])
@@ -260,6 +277,9 @@ def prepare(args, cfg, activate_prepared_disk):
             if disk is None:
                 raise exc.NeedDiskError(hostname)
 
+            disk_is_dir = False
+            if disk[0] == "/":
+                disk_is_dir = False
             distro = hosts.get(hostname, username=args.username)
             LOG.info(
                 'Distro info: %s %s %s',
@@ -285,10 +305,16 @@ def prepare(args, cfg, activate_prepared_disk):
             LOG.debug('Preparing host %s disk %s journal %s activate %s',
                       hostname, disk, journal, activate_prepared_disk)
 
+            if disk_is_dir:
+                prepare_disk_dir(
+                    distro.conn,
+                    disk=disk
+                )
             prepare_disk(
                 distro.conn,
                 cluster=args.cluster,
                 disk=disk,
+                disk_is_dir=disk_is_dir,
                 journal=journal,
                 activate_prepared_disk=activate_prepared_disk,
                 zap=args.zap_disk,
