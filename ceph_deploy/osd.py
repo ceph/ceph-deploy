@@ -189,7 +189,7 @@ def catch_osd_errors(conn, logger, args):
 def detect_disk_dir(
         disk):
     path_norm = os.path.normpath(disk)
-    path_test = os.path.commonprefix([path_norm,'/dev/'])
+    path_test = os.path.commonprefix([path_norm, '/dev/'])
     if path_test == '/dev/':
         return False
     return True
