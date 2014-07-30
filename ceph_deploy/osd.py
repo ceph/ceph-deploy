@@ -186,6 +186,14 @@ def catch_osd_errors(conn, logger, args):
     if nearfull:
         logger.warning('OSDs are near full!')
 
+def detect_disk_dir(
+        disk):
+    path_norm = os.path.normpath(disk)
+    path_test = os.path.commonprefix([path_norm,'/dev/'])
+    if path_test == '/dev/':
+        return False
+    return True
+
 def prepare_disk_dir(
         conn,
         disk):
@@ -277,9 +285,7 @@ def prepare(args, cfg, activate_prepared_disk):
             if disk is None:
                 raise exc.NeedDiskError(hostname)
 
-            disk_is_dir = False
-            if disk[0] == "/":
-                disk_is_dir = True
+            disk_is_dir = detect_disk_dir(disk)
             distro = hosts.get(hostname, username=args.username)
             LOG.info(
                 'Distro info: %s %s %s',
