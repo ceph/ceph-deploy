@@ -88,7 +88,7 @@ def install(distro, version_kind, version, adjust_repos):
         )
 
         # set the right priority
-        logger.warning('ensuring that /etc/yum.repos.d/ceph.repo contains a high pririty')
+        logger.warning('ensuring that /etc/yum.repos.d/ceph.repo contains a high priority')
         distro.conn.remote_module.set_repo_priority(['Ceph', 'Ceph-noarch', 'ceph-source'])
         logger.warning('altered ceph.repo priorities to contain: priority=1')
 
