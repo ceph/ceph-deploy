@@ -62,7 +62,13 @@ def set_repo_priority(sections, path='/etc/yum.repos.d/ceph.repo', priority='1')
     Config.read(path)
     Config.sections()
     for section in sections:
-        Config.set(section, 'priority', priority)
+        try:
+            Config.set(section, 'priority', priority)
+        except ConfigParser.NoSectionError:
+            # Emperor versions of Ceph used all lowercase sections
+            # so lets just try again for the section that failed, maybe
+            # we are able to find it if it is lower
+            Config.set(section.lower(), 'priority', priority)
 
     with open(path, 'wb') as fout:
         Config.write(fout)
