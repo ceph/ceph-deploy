@@ -1,3 +1,13 @@
+1.5.10
+------
+* Use ``ceph-disk`` with high verbosity
+* Don't require ``ceph-common`` on EL distros
+* Use ``ceph-disk zap`` instead of re-implementing it
+* Use proper paths for ``zypper`` (Thanks Owen Synge)
+* More robust ``init`` detection for Ubuntu (Thanks Joao Eduardo Luis)
+* Allow to install repo files only
+* Work with inconsistent repo sections for Emperor when setting priorities
+
 1.5.9
 -----
 * Allow to optionally set the ``fsid`` when calling ``new``
