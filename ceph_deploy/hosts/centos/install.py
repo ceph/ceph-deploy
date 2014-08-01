@@ -8,6 +8,7 @@ def rpm_dist(distro):
         return 'el7'
     return 'el6'
 
+
 def repository_url_part(distro):
     """
     Historically everything CentOS, RHEL, and Scientific has been mapped to
@@ -54,38 +55,47 @@ def install(distro, version_kind, version, adjust_repos):
         key = 'autobuild'
 
     if adjust_repos:
-        remoto.process.run(
-            distro.conn,
-            [
-                'rpm',
-                '--import',
-                "https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc".format(key=key)
-            ]
-        )
+        if version_kind != 'dev':
+            remoto.process.run(
+                distro.conn,
+                [
+                    'rpm',
+                    '--import',
+                    "https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc".format(key=key)
+                ]
+            )
 
-        if version_kind == 'stable':
-            url = 'http://ceph.com/rpm-{version}/{repo}/'.format(
-                version=version,
-                repo=repo_part,
-                )
-        elif version_kind == 'testing':
-            url = 'http://ceph.com/rpm-testing/{repo}/'.format(repo=repo_part)
-        elif version_kind == 'dev':
-            url = 'http://gitbuilder.ceph.com/ceph-rpm-centos{release}-{machine}-basic/ref/{version}/'.format(
-                release=release.split(".",1)[0],
-                machine=machine,
-                version=version,
-                )
+            if version_kind == 'stable':
+                url = 'http://ceph.com/rpm-{version}/{repo}/'.format(
+                    version=version,
+                    repo=repo_part,
+                    )
+            elif version_kind == 'testing':
+                url = 'http://ceph.com/rpm-testing/{repo}/'.format(repo=repo_part)
 
-        remoto.process.run(
-            distro.conn,
-            [
-                'rpm',
-                '-Uvh',
-                '--replacepkgs',
-                '{url}noarch/ceph-release-1-0.{dist}.noarch.rpm'.format(url=url, dist=dist),
-            ],
-        )
+            remoto.process.run(
+                distro.conn,
+                [
+                    'rpm',
+                    '-Uvh',
+                    '--replacepkgs',
+                    '{url}noarch/ceph-release-1-0.{dist}.noarch.rpm'.format(url=url, dist=dist),
+                ],
+            )
+
+        if version_kind == 'dev':
+            logger.info('skipping install of ceph-release package')
+            logger.info('repo file will be created manually')
+            mirror_install(
+                distro,
+                'http://gitbuilder.ceph.com/ceph-rpm-centos{release}-{machine}-basic/ref/{version}/'.format(
+                    release=release.split(".", 1)[0],
+                    machine=machine,
+                    version=version),
+                "https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc".format(key=key),
+                adjust_repos=True,
+                extra_installs=False
+            )
 
         # set the right priority
         logger.warning('ensuring that /etc/yum.repos.d/ceph.repo contains a high priority')
@@ -164,7 +174,7 @@ def install_yum_priorities(distro):
         )
 
 
-def mirror_install(distro, repo_url, gpg_url, adjust_repos):
+def mirror_install(distro, repo_url, gpg_url, adjust_repos, extra_installs=True):
     repo_url = repo_url.strip('/')  # Remove trailing slashes
     gpg_url_path = gpg_url.split('file://')[-1]  # Remove file if present
 
@@ -187,10 +197,11 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos):
 
         distro.conn.remote_module.write_yum_repo(ceph_repo_content)
 
-    # Before any install, make sure we have `wget`
-    pkg_managers.yum(distro.conn, 'wget')
+    if extra_installs:
+        # Before any install, make sure we have `wget`
+        pkg_managers.yum(distro.conn, 'wget')
 
-    pkg_managers.yum(distro.conn, 'ceph')
+        pkg_managers.yum(distro.conn, 'ceph')
 
 
 def repo_install(distro, reponame, baseurl, gpgkey, **kw):
