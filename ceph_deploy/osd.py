@@ -410,6 +410,8 @@ def destroy_osd(conn, host, cluster, osd_id):
                 ret = stopping_osd(loaded_json, conn, osd_id)
                 if ret:
                     removing_osd(conn, osd_id)
+                    conn.exit()
+                    sys.exit(1)
                 else:
                     LOG.debug('CAN NOT STOP CEPH OSD %s', osd_id)
                     conn.exit()
@@ -430,6 +432,8 @@ def destroy_osd(conn, host, cluster, osd_id):
                 if not ret:
                     LOG.debug('THIS OSD %s IS NOT UP', osd_id)
                 removing_osd(conn, osd_id)
+                conn.exit()
+                sys.exit(1)
         if not found_in_stray:
             LOG.info(
                 'Could not find the situable osd id %s in "stray". ABANDON!',
@@ -533,7 +537,7 @@ def umount_osd(conn, osd_id):
         command,
     )
 
-    if not out:
+    if code == 0:
         LOG.info('It did not need any action to umount file system.')
 
 
