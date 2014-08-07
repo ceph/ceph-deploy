@@ -351,6 +351,192 @@ def activate(args, cfg):
         distro.conn.exit()
 
 
+def destroy(args):
+    cluster = args.cluster
+
+    for hostname, disk, journal in args.disk:
+        if not hostname:
+            raise RuntimeError('invalided hostname')
+        LOG.debug(
+            'Destroy osd id %s in host %s',
+            args.osd_id, hostname
+        )
+
+        distro = hosts.get(hostname, username=args.username)
+        LOG.info(
+            'Distro info: %s %s %s',
+            distro.name,
+            distro.release,
+            distro.codename
+        )
+
+        destroy_osd(distro.conn, hostname, cluster, osd_id=args.osd_id)
+
+
+def destroy_osd(conn, host, cluster, osd_id):
+
+    found_in_node = False
+    found_in_stray = False
+
+    if not osd_id:
+        LOG.info("(NOT IMPLEMENT) remove all osd")
+
+    #check osd in this host befor deleteing
+
+    command = [
+        'ceph',
+        '--cluster={cluster}'.format(cluster=cluster),
+        'osd',
+        'tree',
+        '--format=json',
+    ]
+
+    out, err, code = remoto.process.check(
+        conn,
+        command,
+    )
+
+    try:
+        osdname = 'osd.%s' % osd_id
+        loaded_json = json.loads(''.join(out))
+        for item in loaded_json['nodes']:
+            if item[u'name'] == osdname and item[u'type'] == u'osd':
+                found_in_node = True
+                LOG.info(
+                    'Found the osd id %s!',
+                    osd_id
+                )
+                takeout_osd(conn, osd_id)
+                ret = stopping_osd(loaded_json, conn, osd_id)
+                if ret:
+                    removing_osd(conn, osd_id)
+                else:
+                    LOG.debug('CAN NOT STOP CEPH OSD %s', osd_id)
+                    conn.exit()
+        if not found_in_node:
+            LOG.info(
+                'Could not find the situable osd id %s in current acting set.'
+                'try "stray"', osd_id
+            )
+        for item in loaded_json['stray']:
+            if item[u'name'] == osdname and item[u'type'] == u'osd':
+                found_in_stray = True
+                LOG.info(
+                    'Found the osd id %s!',
+                    osd_id
+                )
+                takeout_osd(conn, osd_id)
+                ret = stopping_osd(loaded_json, conn, osd_id)
+                if not ret:
+                    LOG.debug('THIS OSD %s IS NOT UP', osd_id)
+                removing_osd(conn, osd_id)
+        if not found_in_stray:
+            LOG.info(
+                'Could not find the situable osd id %s in "stray". ABANDON!',
+                osd_id
+            )
+    except ValueError:
+        return {}
+    conn.exit()
+
+
+def takeout_osd(conn, osd_id):
+    command = [
+        'ceph',
+        'osd',
+        'out',
+        osd_id,
+    ]
+
+    remoto.process.run(
+        conn,
+        command,
+    )
+
+
+def stopping_osd(loaded_json, conn, osd_id):
+
+    osd_name = u'osd.%s' % osd_id
+
+    for item in loaded_json['nodes']:
+        if item[u'name'] == osd_name and item[u'status'] == u'down':
+            LOG.info('OSD already down.')
+            return True
+
+    command = [
+        'stop',
+        'ceph-osd',
+        'id=%s' % osd_id,
+    ]
+
+    out, err, code = remoto.process.check(
+        conn,
+        command,
+    )
+
+    # check out first.
+    if not out:
+        return False
+    elif out[0] == 'ceph-osd stop/waiting':
+        return True
+
+
+def removing_osd(conn, osd_id):
+    command = [
+        'ceph',
+        'osd',
+        'crush',
+        'remove',
+        'osd.%s' % osd_id,
+    ]
+
+    remoto.process.run(
+        conn,
+        command,
+    )
+
+    command = [
+        'ceph',
+        'auth',
+        'del',
+        'osd.%s' % osd_id,
+    ]
+
+    remoto.process.run(
+        conn,
+        command,
+    )
+
+    command = [
+        'ceph',
+        'osd',
+        'rm',
+        osd_id,
+    ]
+
+    remoto.process.run(
+        conn,
+        command,
+    )
+
+    umount_osd(conn, osd_id)
+
+
+def umount_osd(conn, osd_id):
+    command = [
+        'umount',
+        '/var/lib/ceph/osd/ceph-%s' % osd_id,
+    ]
+
+    out, err, code = remoto.process.check(
+        conn,
+        command,
+    )
+
+    if not out:
+        LOG.info('It did not need any action to umount file system.')
+
+
 def disk_zap(args):
 
     for hostname, disk, journal in args.disk:
@@ -566,6 +752,8 @@ def osd(args):
         prepare(args, cfg, activate_prepared_disk=True)
     elif args.subcommand == 'activate':
         activate(args, cfg)
+    elif args.subcommand == 'destroy':
+        destroy(args)
     else:
         LOG.error('subcommand %s not implemented', args.subcommand)
         sys.exit(1)
@@ -669,6 +857,13 @@ def make(parser):
         metavar='KEYDIR',
         default='/etc/ceph/dmcrypt-keys',
         help='directory where dm-crypt keys are stored',
+        )
+    parser.add_argument(
+        '--osd-id',
+        metavar='OSD_ID',
+        default=None,
+        # XXX: (NOT IMPLEMENT) w/o this option will destroy all OSD on HOST'
+        help='destroy specific osd id on HOST',
         )
     parser.set_defaults(
         func=osd,
