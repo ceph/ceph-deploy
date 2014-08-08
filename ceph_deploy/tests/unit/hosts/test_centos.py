@@ -106,7 +106,7 @@ class TestCentosVersionDetection(object):
 
     def test_normalize_release_number(self):
         self.distro.release = '6.9'
-        assert centos.normalize_release(self.distro.release) == 6.9
+        assert centos.normalize_release(self.distro.release) == 6.0
 
     def test_normalize_release_empty_string(self):
         self.distro.release = ''
