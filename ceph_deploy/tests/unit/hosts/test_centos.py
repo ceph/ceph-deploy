@@ -1,7 +1,6 @@
 from ceph_deploy.hosts import centos
 from ceph_deploy import hosts
 from mock import Mock, patch
-import pytest
 
 def pytest_generate_tests(metafunc):
     # called once per each test function
