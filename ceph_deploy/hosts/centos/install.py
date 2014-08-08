@@ -4,7 +4,7 @@ import re
 
 
 def rpm_dist(distro):
-    release = int(float_or_zero(distro.release))
+    release = normalize_release(distro.release)
     if distro.normalized_name in ['redhat', 'centos', 'scientific'] and release >= 6:
         return 'el' + str(release)
     return 'el6'
@@ -26,7 +26,7 @@ def repository_url_part(distro):
         ('Red Hat Enterprise Linux Server', '7.0', 'Maipo')
 
     """
-    release = int(float_or_zero(distro.release))
+    release = normalize_release(distro.release)
     if release >= 6:
         if distro.normalized_name == 'redhat':
             return 'rhel' + str(release)
@@ -253,11 +253,11 @@ def repo_install(distro, reponame, baseurl, gpgkey, **kw):
         pkg_managers.yum(distro.conn, 'ceph')
 
 
-def float_or_zero(value):
+def normalize_release(value):
     try:
         regex = re.compile(r"^[^.]*")
         newvalue = re.search(regex, value).group(0)
-        return float(newvalue)
+        return int(float(newvalue))
     except:
         return 0.0
 

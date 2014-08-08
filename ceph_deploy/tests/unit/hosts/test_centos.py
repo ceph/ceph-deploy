@@ -103,3 +103,15 @@ class TestCentosVersionDetection(object):
         self.distro.normalized_name = 'scientific'
         self.distro.release = '7.0'
         assert centos.rpm_dist(self.distro) == 'el7'
+
+    def test_normalize_release_number(self):
+        self.distro.release = '6.9'
+        assert centos.normalize_release(self.distro.release) == 6.9
+
+    def test_normalize_release_empty_string(self):
+        self.distro.release = ''
+        assert centos.normalize_release(self.distro.release) == 0.0
+
+    def test_normalize_release_complex_release(self):
+        self.distro.release = '7.0.1406'
+        assert centos.normalize_release(self.distro.release) == 7.0
