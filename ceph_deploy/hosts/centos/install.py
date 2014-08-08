@@ -1,11 +1,11 @@
 from ceph_deploy.util import pkg_managers, templates
 from ceph_deploy.lib import remoto
+import re
 
 
 def rpm_dist(distro):
-    # start using the el7 prefix now that rhel7 exists.
-    if distro.normalized_name == 'redhat' and distro.release.startswith('7'):
-        return 'el7'
+    if distro.normalized_name in ['redhat', 'centos', 'scientific'] and distro.normalized_release.int_major >= 6:
+        return 'el' + distro.normalized_release.major
     return 'el6'
 
 
@@ -25,11 +25,12 @@ def repository_url_part(distro):
         ('Red Hat Enterprise Linux Server', '7.0', 'Maipo')
 
     """
-    if distro.normalized_name == 'redhat':
-        if distro.release.startswith('6'):
-            return 'rhel6'
-        elif distro.release.startswith('7'):
-            return 'rhel7'
+    if distro.normalized_release.int_major >= 6:
+        if distro.normalized_name == 'redhat':
+            return 'rhel' + distro.normalized_release.major
+        if distro.normalized_name in ['centos', 'scientific']:
+            return 'el' + distro.normalized_release.major
+
     return 'el6'
 
 
@@ -248,3 +249,13 @@ def repo_install(distro, reponame, baseurl, gpgkey, **kw):
         pkg_managers.yum(distro.conn, 'wget')
 
         pkg_managers.yum(distro.conn, 'ceph')
+
+
+def normalize_release(value):
+    try:
+        regex = re.compile(r"^[^.]*")
+        newvalue = re.search(regex, value).group(0)
+        return int(float(newvalue))
+    except:
+        return 0.0
+
