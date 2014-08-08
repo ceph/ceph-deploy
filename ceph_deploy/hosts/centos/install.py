@@ -257,3 +257,4 @@ def float_or_zero(value):
         return float(value)
     except:
         return 0.0
+
