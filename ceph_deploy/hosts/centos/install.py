@@ -1,6 +1,5 @@
 from ceph_deploy.util import pkg_managers, templates
 from ceph_deploy.lib import remoto
-import re
 
 
 def rpm_dist(distro):
