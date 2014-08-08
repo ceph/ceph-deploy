@@ -249,13 +249,3 @@ def repo_install(distro, reponame, baseurl, gpgkey, **kw):
         pkg_managers.yum(distro.conn, 'wget')
 
         pkg_managers.yum(distro.conn, 'ceph')
-
-
-def normalize_release(value):
-    try:
-        regex = re.compile(r"^[^.]*")
-        newvalue = re.search(regex, value).group(0)
-        return int(float(newvalue))
-    except:
-        return 0.0
-
