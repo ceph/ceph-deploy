@@ -28,6 +28,306 @@ class TestNormalized(object):
         assert result == 'redhat'
 
 
+class TestNormalizeRelease(object):
+
+    def test_int_single_version(self):
+        result = hosts._normalized_release('1')
+        assert result.int_major == 1
+        assert result.int_minor == 0
+        assert result.int_patch == 0
+        assert result.int_garbage == 0
+
+    def test_int_single_version_with_trailing_space(self):
+        result = hosts._normalized_release(' 1')
+        assert result.int_major == 1
+        assert result.int_minor == 0
+        assert result.int_patch == 0
+        assert result.int_garbage == 0
+
+    def test_int_single_version_with_prepended_zero(self):
+        result = hosts._normalized_release('01')
+        assert result.int_major == 1
+        assert result.int_minor == 0
+        assert result.int_patch == 0
+        assert result.int_garbage == 0
+
+    def test_int_minor_version(self):
+        result = hosts._normalized_release('1.8')
+        assert result.int_major == 1
+        assert result.int_minor == 8
+        assert result.int_patch == 0
+        assert result.int_garbage == 0
+
+    def test_int_minor_version_with_trailing_space(self):
+        result = hosts._normalized_release(' 1.8')
+        assert result.int_major == 1
+        assert result.int_minor == 8
+        assert result.int_patch == 0
+        assert result.int_garbage == 0
+
+    def test_int_minor_version_with_prepended_zero(self):
+        result = hosts._normalized_release('01.08')
+        assert result.int_major == 1
+        assert result.int_minor == 8
+        assert result.int_patch == 0
+        assert result.int_garbage == 0
+
+    def test_int_patch_version(self):
+        result = hosts._normalized_release('1.8.1234')
+        assert result.int_major == 1
+        assert result.int_minor == 8
+        assert result.int_patch == 1234
+        assert result.int_garbage == 0
+
+    def test_int_patch_version_with_trailing_space(self):
+        result = hosts._normalized_release(' 1.8.1234')
+        assert result.int_major == 1
+        assert result.int_minor == 8
+        assert result.int_patch == 1234
+        assert result.int_garbage == 0
+
+    def test_int_patch_version_with_prepended_zero(self):
+        result = hosts._normalized_release('01.08.01234')
+        assert result.int_major == 1
+        assert result.int_minor == 8
+        assert result.int_patch == 1234
+        assert result.int_garbage == 0
+
+    def test_int_garbage_version(self):
+        result = hosts._normalized_release('1.8.1234.1')
+        assert result.int_major == 1
+        assert result.int_minor == 8
+        assert result.int_patch == 1234
+        assert result.int_garbage == 1
+
+    def test_int_garbage_version_with_trailing_space(self):
+        result = hosts._normalized_release(' 1.8.1234.1')
+        assert result.int_major == 1
+        assert result.int_minor == 8
+        assert result.int_patch == 1234
+        assert result.int_garbage == 1
+
+    def test_int_garbage_version_with_prepended_zero(self):
+        result = hosts._normalized_release('01.08.01234.1')
+        assert result.int_major == 1
+        assert result.int_minor == 8
+        assert result.int_patch == 1234
+        assert result.int_garbage == 1
+
+    def test_int_single_version_rc(self):
+        result = hosts._normalized_release('1rc-123')
+        assert result.int_major == 1
+        assert result.int_minor == 0
+        assert result.int_patch == 0
+        assert result.int_garbage == 0
+
+    def test_int_single_version_with_trailing_space_rc(self):
+        result = hosts._normalized_release(' 1rc-123')
+        assert result.int_major == 1
+        assert result.int_minor == 0
+        assert result.int_patch == 0
+        assert result.int_garbage == 0
+
+    def test_int_single_version_with_prepended_zero_rc(self):
+        result = hosts._normalized_release('01rc-123')
+        assert result.int_major == 1
+        assert result.int_minor == 0
+        assert result.int_patch == 0
+        assert result.int_garbage == 0
+
+    def test_int_minor_version_rc(self):
+        result = hosts._normalized_release('1.8rc-123')
+        assert result.int_major == 1
+        assert result.int_minor == 8
+        assert result.int_patch == 0
+        assert result.int_garbage == 0
+
+    def test_int_minor_version_with_trailing_space_rc(self):
+        result = hosts._normalized_release(' 1.8rc-123')
+        assert result.int_major == 1
+        assert result.int_minor == 8
+        assert result.int_patch == 0
+        assert result.int_garbage == 0
+
+    def test_int_minor_version_with_prepended_zero_rc(self):
+        result = hosts._normalized_release('01.08rc-123')
+        assert result.int_major == 1
+        assert result.int_minor == 8
+        assert result.int_patch == 0
+        assert result.int_garbage == 0
+
+    def test_int_patch_version_rc(self):
+        result = hosts._normalized_release('1.8.1234rc-123')
+        assert result.int_major == 1
+        assert result.int_minor == 8
+        assert result.int_patch == 1234
+        assert result.int_garbage == 0
+
+    def test_int_patch_version_with_trailing_space_rc(self):
+        result = hosts._normalized_release(' 1.8.1234rc-123')
+        assert result.int_major == 1
+        assert result.int_minor == 8
+        assert result.int_patch == 1234
+        assert result.int_garbage == 0
+
+    def test_int_patch_version_with_prepended_zero_rc(self):
+        result = hosts._normalized_release('01.08.01234rc-123')
+        assert result.int_major == 1
+        assert result.int_minor == 8
+        assert result.int_patch == 1234
+        assert result.int_garbage == 0
+
+    def test_int_garbage_version_rc(self):
+        result = hosts._normalized_release('1.8.1234.1rc-123')
+        assert result.int_major == 1
+        assert result.int_minor == 8
+        assert result.int_patch == 1234
+        assert result.int_garbage == 1
+
+    def test_int_garbage_version_with_trailing_space_rc(self):
+        result = hosts._normalized_release(' 1.8.1234.1rc-123')
+        assert result.int_major == 1
+        assert result.int_minor == 8
+        assert result.int_patch == 1234
+        assert result.int_garbage == 1
+
+    def test_int_garbage_version_with_prepended_zero_rc(self):
+        result = hosts._normalized_release('01.08.01234.1rc-1')
+        assert result.int_major == 1
+        assert result.int_minor == 8
+        assert result.int_patch == 1234
+        assert result.int_garbage == 1
+
+    # with non ints
+
+    def test_single_version(self):
+        result = hosts._normalized_release('1')
+        assert result.major == "1"
+        assert result.minor == "0"
+        assert result.patch == "0"
+        assert result.garbage == "0"
+
+    def test_single_version_with_trailing_space(self):
+        result = hosts._normalized_release(' 1')
+        assert result.major == "1"
+        assert result.minor == "0"
+        assert result.patch == "0"
+        assert result.garbage == "0"
+
+    def test_single_version_with_prepended_zero(self):
+        result = hosts._normalized_release('01')
+        assert result.major == "01"
+        assert result.minor == "0"
+        assert result.patch == "0"
+        assert result.garbage == "0"
+
+    def test_minor_version(self):
+        result = hosts._normalized_release('1.8')
+        assert result.major == "1"
+        assert result.minor == "8"
+        assert result.patch == "0"
+        assert result.garbage == "0"
+
+    def test_minor_version_with_trailing_space(self):
+        result = hosts._normalized_release(' 1.8')
+        assert result.major == "1"
+        assert result.minor == "8"
+        assert result.patch == "0"
+        assert result.garbage == "0"
+
+    def test_minor_version_with_prepended_zero(self):
+        result = hosts._normalized_release('01.08')
+        assert result.major == "01"
+        assert result.minor == "08"
+        assert result.patch == "0"
+        assert result.garbage == "0"
+
+    def test_patch_version(self):
+        result = hosts._normalized_release('1.8.1234')
+        assert result.major == "1"
+        assert result.minor == "8"
+        assert result.patch == "1234"
+        assert result.garbage == "0"
+
+    def test_patch_version_with_trailing_space(self):
+        result = hosts._normalized_release(' 1.8.1234')
+        assert result.major == "1"
+        assert result.minor == "8"
+        assert result.patch == "1234"
+        assert result.garbage == "0"
+
+    def test_patch_version_with_prepended_zero(self):
+        result = hosts._normalized_release('01.08.01234')
+        assert result.major == "01"
+        assert result.minor == "08"
+        assert result.patch == "01234"
+        assert result.garbage == "0"
+
+    def test_garbage_version(self):
+        result = hosts._normalized_release('1.8.1234.1')
+        assert result.major == "1"
+        assert result.minor == "8"
+        assert result.patch == "1234"
+        assert result.garbage == "1"
+
+    def test_garbage_version_with_trailing_space(self):
+        result = hosts._normalized_release(' 1.8.1234.1')
+        assert result.major == "1"
+        assert result.minor == "8"
+        assert result.patch == "1234"
+        assert result.garbage == "1"
+
+    def test_garbage_version_with_prepended_zero(self):
+        result = hosts._normalized_release('01.08.01234.1')
+        assert result.major == "01"
+        assert result.minor == "08"
+        assert result.patch == "01234"
+        assert result.garbage == "1"
+
+    def test_patch_version_rc(self):
+        result = hosts._normalized_release('1.8.1234rc-123')
+        assert result.major == "1"
+        assert result.minor == "8"
+        assert result.patch == "1234rc-123"
+        assert result.garbage == "0"
+
+    def test_patch_version_with_trailing_space_rc(self):
+        result = hosts._normalized_release(' 1.8.1234rc-123')
+        assert result.major == "1"
+        assert result.minor == "8"
+        assert result.patch == "1234rc-123"
+        assert result.garbage == "0"
+
+    def test_patch_version_with_prepended_zero_rc(self):
+        result = hosts._normalized_release('01.08.01234.1rc-123')
+        assert result.major == "01"
+        assert result.minor == "08"
+        assert result.patch == "01234"
+        assert result.garbage == "1rc-123"
+
+    def test_garbage_version_rc(self):
+        result = hosts._normalized_release('1.8.1234.1rc-123')
+        assert result.major == "1"
+        assert result.minor == "8"
+        assert result.patch == "1234"
+        assert result.garbage == "1rc-123"
+
+    def test_garbage_version_with_trailing_space_rc(self):
+        result = hosts._normalized_release(' 1.8.1234.1rc-123')
+        assert result.major == "1"
+        assert result.minor == "8"
+        assert result.patch == "1234"
+        assert result.garbage == "1rc-123"
+
+    def test_garbage_version_with_prepended_zero_rc(self):
+        result = hosts._normalized_release('01.08.01234.1rc-1')
+        assert result.major == "01"
+        assert result.minor == "08"
+        assert result.patch == "01234"
+        assert result.garbage == "1rc-1"
+
+
+
 class TestHostGet(object):
 
     def make_fake_connection(self, platform_information=None):
