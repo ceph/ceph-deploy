@@ -1,5 +1,6 @@
 from ceph_deploy.util import pkg_managers, templates
 from ceph_deploy.lib import remoto
+import re
 
 
 def rpm_dist(distro):
@@ -254,7 +255,9 @@ def repo_install(distro, reponame, baseurl, gpgkey, **kw):
 
 def float_or_zero(value):
     try:
-        return float(value)
+        regex = re.compile(r"^[^.]*")
+        newvalue = re.search(regex, value).group(0)
+        return float(newvalue)
     except:
         return 0.0
 
