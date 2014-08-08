@@ -84,6 +84,11 @@ class TestCentosVersionDetection(object):
         self.distro.release = '7.0'
         assert centos.rpm_dist(self.distro) == 'el7'
 
+    def test_rpm_dist_detects_centos_version_with_subversion(self):
+        self.distro.normalized_name = 'centos'
+        self.distro.release = '7.0.1406'
+        assert centos.rpm_dist(self.distro) == 'el7'
+
     def test_rpm_dist_fallsback_to_el6_scientific(self):
         self.distro.normalized_name = 'scientific'
         self.distro.release = '5'
