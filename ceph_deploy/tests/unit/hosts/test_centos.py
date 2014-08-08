@@ -1,117 +1,60 @@
 from ceph_deploy.hosts import centos
-from mock import Mock
+from ceph_deploy import hosts
+from mock import Mock, patch
+import pytest
 
-class TestCentosVersionDetection(object):
+def pytest_generate_tests(metafunc):
+    # called once per each test function
+    funcarglist = metafunc.cls.params[metafunc.function.__name__]
+    argnames = list(funcarglist[0])
+    metafunc.parametrize(argnames, [[funcargs[name] for name in argnames]
+            for funcargs in funcarglist])
 
-    def setup(self):
-        self.distro = Mock()
+class TestCentosRepositoryUrlPart(object):
 
-    def test_url_fallsback_to_el6(self):
-        assert centos.repository_url_part(self.distro) == 'el6'
+    params= {
+        'test_repository_url_part': [
+            dict(distro="CentOS Linux", release='4.3', codename="Foo", output='el6'),
+            dict(distro="CentOS Linux", release='6.5', codename="Final", output='el6'),
+            dict(distro="CentOS Linux", release='7.0', codename="Core", output='el7'),
+            dict(distro="CentOS Linux", release='7.0.1406', codename="Core", output='el7'),
+            dict(distro="CentOS Linux", release='10.4.000', codename="Core", output='el10'),
+            dict(distro="RedHat", release='4.3', codename="Foo", output='el6'),
+            dict(distro="RedHat", release='6.5', codename="Final", output='rhel6'),
+            dict(distro="RedHat", release='7.0', codename="Core", output='rhel7'),
+            dict(distro="RedHat", release='7.0.1406', codename="Core", output='rhel7'),
+            dict(distro="RedHat", release='10.999.12', codename="Core", output='rhel10'),
+            ],
+        'test_rpm_dist': [
+            dict(distro="CentOS Linux", release='4.3', codename="Foo", output='el6'),
+            dict(distro="CentOS Linux", release='6.5', codename="Final", output='el6'),
+            dict(distro="CentOS Linux", release='7.0', codename="Core", output='el7'),
+            dict(distro="CentOS Linux", release='7.0.1406', codename="Core", output='el7'),
+            dict(distro="CentOS Linux", release='10.10.9191', codename="Core", output='el10'),
+            dict(distro="RedHat", release='4.3', codename="Foo", output='el6'),
+            dict(distro="RedHat", release='6.5', codename="Final", output='el6'),
+            dict(distro="RedHat", release='7.0', codename="Core", output='el7'),
+            dict(distro="RedHat", release='7.0.1406', codename="Core", output='el7'),
+            dict(distro="RedHat", release='10.9.8765', codename="Core", output='el10'),
+        ]
+    }
+    
 
-    def test_url_detects_rhel6(self):
-        self.distro.normalized_name = 'redhat'
-        self.distro.release = "6.4"
-        assert centos.repository_url_part(self.distro) == 'rhel6'
+    def make_fake_connection(self, platform_information=None):
+        get_connection = Mock()
+        get_connection.return_value = get_connection
+        get_connection.remote_module.platform_information = Mock(
+            return_value=platform_information)
+        return get_connection
 
-    def test_url_detects_rhel5(self):
-        self.distro.normalized_name = 'redhat'
-        self.distro.release = '5.0'
-        assert centos.repository_url_part(self.distro) == 'el6'
+    def test_repository_url_part(self, distro, release, codename, output):
+        fake_get_connection = self.make_fake_connection((distro, release, codename))
+        with patch('ceph_deploy.hosts.get_connection', fake_get_connection):
+            self.module = hosts.get('testhost')
+        assert centos.repository_url_part(self.module) == output
 
-    def test_url_detects_rhel7(self):
-        self.distro.normalized_name = 'redhat'
-        self.distro.release = '7.0'
-        assert centos.repository_url_part(self.distro) == 'rhel7'
-
-    def test_url_detects_el5(self):
-        self.distro.normalized_name = 'centos'
-        self.distro.release = '5'
-        assert centos.repository_url_part(self.distro) == 'el6'
-
-    def test_url_detects_el6(self):
-        self.distro.normalized_name = 'centos'
-        self.distro.release = '6.2'
-        assert centos.repository_url_part(self.distro) == 'el6'
-
-    def test_url_detects_el7(self):
-        self.distro.normalized_name = 'centos'
-        self.distro.release = '7.0'
-        assert centos.repository_url_part(self.distro) == 'el7'
-
-    def test_url_detects_scientific_el5(self):
-        self.distro.normalized_name = 'scientific'
-        self.distro.release = '5'
-        assert centos.repository_url_part(self.distro) == 'el6'
-
-    def test_url_detects_scientific_el6(self):
-        self.distro.normalized_name = 'scientific'
-        self.distro.release = '6.2'
-        assert centos.repository_url_part(self.distro) == 'el6'
-
-    def test_url_detects_scientific_el7(self):
-        self.distro.normalized_name = 'scientific'
-        self.distro.release = '7.0'
-        assert centos.repository_url_part(self.distro) == 'el7'
-
-    def test_rpm_dist_fallsback_to_el6(self):
-        self.distro.normalized_name = 'redhat'
-        self.distro.release = '3'
-        assert centos.rpm_dist(self.distro) == 'el6'
-
-    def test_rpm_dist_detects_rhel6(self):
-        self.distro.normalized_name = 'redhat'
-        self.distro.release = '6.6'
-        assert centos.rpm_dist(self.distro) == 'el6'
-
-    def test_rpm_dist_detects_rhel7(self):
-        self.distro.normalized_name = 'redhat'
-        self.distro.release = '7.0'
-        assert centos.rpm_dist(self.distro) == 'el7'
-
-    def test_rpm_dist_fallsback_to_el6_centos(self):
-        self.distro.normalized_name = 'centos'
-        self.distro.release = '4'
-        assert centos.rpm_dist(self.distro) == 'el6'
-
-    def test_rpm_dist_detects_el6_centos(self):
-        self.distro.normalized_name = 'centos'
-        self.distro.release = '6.6'
-        assert centos.rpm_dist(self.distro) == 'el6'
-
-    def test_rpm_dist_detects_el7_centos(self):
-        self.distro.normalized_name = 'centos'
-        self.distro.release = '7.0'
-        assert centos.rpm_dist(self.distro) == 'el7'
-
-    def test_rpm_dist_detects_centos_version_with_subversion(self):
-        self.distro.normalized_name = 'centos'
-        self.distro.release = '7.0.1406'
-        assert centos.rpm_dist(self.distro) == 'el7'
-
-    def test_rpm_dist_fallsback_to_el6_scientific(self):
-        self.distro.normalized_name = 'scientific'
-        self.distro.release = '5'
-        assert centos.rpm_dist(self.distro) == 'el6'
-
-    def test_rpm_dist_detects_el6_scientific(self):
-        self.distro.normalized_name = 'scientific'
-        self.distro.release = '6.6'
-        assert centos.rpm_dist(self.distro) == 'el6'
-
-    def test_rpm_dist_detects_el7_scientific(self):
-        self.distro.normalized_name = 'scientific'
-        self.distro.release = '7.0'
-        assert centos.rpm_dist(self.distro) == 'el7'
-
-    def test_normalize_release_number(self):
-        self.distro.release = '6.9'
-        assert centos.normalize_release(self.distro.release) == 6.0
-
-    def test_normalize_release_empty_string(self):
-        self.distro.release = ''
-        assert centos.normalize_release(self.distro.release) == 0.0
-
-    def test_normalize_release_complex_release(self):
-        self.distro.release = '7.0.1406'
-        assert centos.normalize_release(self.distro.release) == 7.0
+    def test_rpm_dist(self, distro, release, codename, output):
+        fake_get_connection = self.make_fake_connection((distro, release, codename))
+        with patch('ceph_deploy.hosts.get_connection', fake_get_connection):
+            self.module = hosts.get('testhost')
+        assert centos.rpm_dist(self.module) == output
