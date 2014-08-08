@@ -10,7 +10,7 @@ from textwrap import dedent
 from cStringIO import StringIO
 
 from ceph_deploy import conf, exc, hosts
-from ceph_deploy.util import constants, system
+from ceph_deploy.util import constants, system, paths
 from ceph_deploy.cliutil import priority
 from ceph_deploy.lib import remoto
 
@@ -370,18 +370,19 @@ def destroy(args):
             distro.codename
         )
 
-        destroy_osd(distro.conn, hostname, cluster, osd_id=args.osd_id)
+        destroy_osd(distro.conn, cluster, args.osd_id)
 
 
-def destroy_osd(conn, host, cluster, osd_id):
+def destroy_osd(conn, cluster, osd_id):
 
     found_in_node = False
     found_in_stray = False
+    cluster_path = paths.osd.base(cluster)
 
-    if not osd_id:
+    if not osd_id or \
+       osd_id is None:
         LOG.info("(NOT IMPLEMENT) remove all osd")
-
-    #check osd in this host befor deleteing
+        raise NotImplementedError("It need to assign the specific osd id.")
 
     command = [
         'ceph',
@@ -396,11 +397,20 @@ def destroy_osd(conn, host, cluster, osd_id):
         command,
     )
 
+    LOG.info('prepare to search osd in acting set...')
+    des_osd_in_act_set(out, conn, osd_id, cluster_path)
+
+    LOG.info('prepare to search osd in nonacting set...')
+    des_osd_in_nonact_set(out, conn, osd_id, cluster_path)
+
+    conn.exit()
+
+def des_osd_in_act_set(out, conn, osd_id, cluster_path):
+    osd_name = 'osd.%s' % osd_id
     try:
-        osdname = 'osd.%s' % osd_id
         loaded_json = json.loads(''.join(out))
         for item in loaded_json['nodes']:
-            if item[u'name'] == osdname and item[u'type'] == u'osd':
+            if item[u'name'] == osd_name and item[u'type'] == u'osd':
                 found_in_node = True
                 LOG.info(
                     'Found the osd id %s!',
@@ -409,19 +419,29 @@ def destroy_osd(conn, host, cluster, osd_id):
                 takeout_osd(conn, osd_id)
                 ret = stopping_osd(loaded_json, conn, osd_id)
                 if ret:
-                    removing_osd(conn, osd_id)
+                    removing_osd(conn, osd_id, cluster_path)
                     conn.exit()
                     sys.exit(1)
                 else:
                     LOG.debug('CAN NOT STOP CEPH OSD %s', osd_id)
                     conn.exit()
+                    sys.exit(1)
         if not found_in_node:
             LOG.info(
                 'Could not find the situable osd id %s in current acting set.'
                 'try "stray"', osd_id
             )
+        return False
+    except ValueError:
+        conn.exit()
+        return {}
+
+def des_osd_in_nonact_set(out, conn, osd_id, cluster_path):
+    osd_name = 'osd.%s' % osd_id
+
+    try:
         for item in loaded_json['stray']:
-            if item[u'name'] == osdname and item[u'type'] == u'osd':
+            if item[u'name'] == osd_name and item[u'type'] == u'osd':
                 found_in_stray = True
                 LOG.info(
                     'Found the osd id %s!',
@@ -431,7 +451,7 @@ def destroy_osd(conn, host, cluster, osd_id):
                 ret = stopping_osd(loaded_json, conn, osd_id)
                 if not ret:
                     LOG.debug('THIS OSD %s IS NOT UP', osd_id)
-                removing_osd(conn, osd_id)
+                removing_osd(conn, osd_id, cluster_path)
                 conn.exit()
                 sys.exit(1)
         if not found_in_stray:
@@ -439,9 +459,10 @@ def destroy_osd(conn, host, cluster, osd_id):
                 'Could not find the situable osd id %s in "stray". ABANDON!',
                 osd_id
             )
+            return False
     except ValueError:
+        conn.exit()
         return {}
-    conn.exit()
 
 
 def takeout_osd(conn, osd_id):
@@ -485,7 +506,7 @@ def stopping_osd(loaded_json, conn, osd_id):
         return True
 
 
-def removing_osd(conn, osd_id):
+def removing_osd(conn, osd_id, cluster_path):
     command = [
         'ceph',
         'osd',
@@ -523,22 +544,19 @@ def removing_osd(conn, osd_id):
         command,
     )
 
-    umount_osd(conn, osd_id)
+    umount_osd(conn, osd_id, cluster_path)
 
 
-def umount_osd(conn, osd_id):
+def umount_osd(conn, osd_id, cluster_path):
     command = [
         'umount',
-        '/var/lib/ceph/osd/ceph-%s' % osd_id,
+        cluster_path+'%s' % osd_id,
     ]
 
-    out, err, code = remoto.process.check(
+    remoto.process.check(
         conn,
         command,
     )
-
-    if code == 0:
-        LOG.info('It did not need any action to umount file system.')
 
 
 def disk_zap(args):
