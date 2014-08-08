@@ -4,9 +4,8 @@ import re
 
 
 def rpm_dist(distro):
-    release = normalize_release(distro.release)
-    if distro.normalized_name in ['redhat', 'centos', 'scientific'] and release >= 6:
-        return 'el' + str(release)
+    if distro.normalized_name in ['redhat', 'centos', 'scientific'] and int(distro.normalized_release.major) >= 6:
+        return 'el' + str(distro.normalized_release.major)
     return 'el6'
 
 
@@ -26,12 +25,11 @@ def repository_url_part(distro):
         ('Red Hat Enterprise Linux Server', '7.0', 'Maipo')
 
     """
-    release = normalize_release(distro.release)
-    if release >= 6:
+    if int(distro.normalized_release.major) >= 6:
         if distro.normalized_name == 'redhat':
-            return 'rhel' + str(release)
+            return 'rhel' + str(distro.normalized_release.major)
         if distro.normalized_name in ['centos', 'scientific']:
-            return 'el' + str(release)
+            return 'el' + str(distro.normalized_release.major)
 
     return 'el6'
 
