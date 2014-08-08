@@ -6,7 +6,7 @@ def rpm_dist(distro):
     # start using the el7 prefix now that rhel7 exists.
     if distro.normalized_name == 'redhat' and distro.release.startswith('7'):
         return 'el7'
-    elif distro.normalized_name == 'centos' and distro.release.startswith('7'):
+    if distro.normalized_name == 'centos' and distro.release.startswith('7'):
         return 'el7'
     return 'el6'
 
@@ -34,6 +34,8 @@ def repository_url_part(distro):
             return 'rhel7'
 
     if distro.normalized_name == 'centos':
+        if distro.release.startswith('6'):
+            return 'el6'
         if distro.release.startswith('7'):
             return 'el7'
 
