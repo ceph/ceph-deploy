@@ -3,11 +3,9 @@ from ceph_deploy.lib import remoto
 
 
 def rpm_dist(distro):
-    # start using the el7 prefix now that rhel7 exists.
-    if distro.normalized_name == 'redhat' and distro.release.startswith('7'):
-        return 'el7'
-    if distro.normalized_name == 'centos' and distro.release.startswith('7'):
-        return 'el7'
+    release = int(float_or_zero(distro.release))
+    if distro.normalized_name in ['redhat', 'centos', 'scientific'] and release >= 6:
+        return 'el' + str(release)
     return 'el6'
 
 
@@ -27,17 +25,12 @@ def repository_url_part(distro):
         ('Red Hat Enterprise Linux Server', '7.0', 'Maipo')
 
     """
-    if distro.normalized_name == 'redhat':
-        if distro.release.startswith('6'):
-            return 'rhel6'
-        elif distro.release.startswith('7'):
-            return 'rhel7'
-
-    if distro.normalized_name == 'centos':
-        if distro.release.startswith('6'):
-            return 'el6'
-        if distro.release.startswith('7'):
-            return 'el7'
+    release = int(float_or_zero(distro.release))
+    if release >= 6:
+        if distro.normalized_name == 'redhat':
+            return 'rhel' + str(release)
+        if distro.normalized_name in ['centos', 'scientific']:
+            return 'el' + str(release)
 
     return 'el6'
 
@@ -257,3 +250,10 @@ def repo_install(distro, reponame, baseurl, gpgkey, **kw):
         pkg_managers.yum(distro.conn, 'wget')
 
         pkg_managers.yum(distro.conn, 'ceph')
+
+
+def float_or_zero(value):
+    try:
+        return float(value)
+    except:
+        return 0.0

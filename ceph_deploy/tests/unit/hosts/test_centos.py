@@ -11,6 +11,7 @@ class TestCentosVersionDetection(object):
 
     def test_url_detects_rhel6(self):
         self.distro.normalized_name = 'redhat'
+        self.distro.release = "6.4"
         assert centos.repository_url_part(self.distro) == 'rhel6'
 
     def test_url_detects_rhel5(self):
@@ -22,6 +23,36 @@ class TestCentosVersionDetection(object):
         self.distro.normalized_name = 'redhat'
         self.distro.release = '7.0'
         assert centos.repository_url_part(self.distro) == 'rhel7'
+
+    def test_url_detects_el5(self):
+        self.distro.normalized_name = 'centos'
+        self.distro.release = '5'
+        assert centos.repository_url_part(self.distro) == 'el6'
+
+    def test_url_detects_el6(self):
+        self.distro.normalized_name = 'centos'
+        self.distro.release = '6.2'
+        assert centos.repository_url_part(self.distro) == 'el6'
+
+    def test_url_detects_el7(self):
+        self.distro.normalized_name = 'centos'
+        self.distro.release = '7.0'
+        assert centos.repository_url_part(self.distro) == 'el7'
+
+    def test_url_detects_scientific_el5(self):
+        self.distro.normalized_name = 'scientific'
+        self.distro.release = '5'
+        assert centos.repository_url_part(self.distro) == 'el6'
+
+    def test_url_detects_scientific_el6(self):
+        self.distro.normalized_name = 'scientific'
+        self.distro.release = '6.2'
+        assert centos.repository_url_part(self.distro) == 'el6'
+
+    def test_url_detects_scientific_el7(self):
+        self.distro.normalized_name = 'scientific'
+        self.distro.release = '7.0'
+        assert centos.repository_url_part(self.distro) == 'el7'
 
     def test_rpm_dist_fallsback_to_el6(self):
         self.distro.normalized_name = 'redhat'
@@ -38,29 +69,9 @@ class TestCentosVersionDetection(object):
         self.distro.release = '7.0'
         assert centos.rpm_dist(self.distro) == 'el7'
 
-    def test_url_fallsback_to_el6_centos(self):
-        self.distro.normalized_name = 'centos'
-        self.distro.release = ''
-        assert centos.repository_url_part(self.distro) == 'el6'
-
-    def test_url_detects_el5(self):
-        self.distro.normalized_name = 'centos'
-        self.distro.release = '5.0'
-        assert centos.repository_url_part(self.distro) == 'el6'
-
-    def test_url_detects_el6(self):
-        self.distro.normalized_name = 'centos'
-        self.distro.release = '6.0'
-        assert centos.repository_url_part(self.distro) == 'el6'
-
-    def test_url_detects_el7(self):
-        self.distro.normalized_name = 'centos'
-        self.distro.release = '7.0'
-        assert centos.repository_url_part(self.distro) == 'el7'
-
     def test_rpm_dist_fallsback_to_el6_centos(self):
         self.distro.normalized_name = 'centos'
-        self.distro.release = '5'
+        self.distro.release = '4'
         assert centos.rpm_dist(self.distro) == 'el6'
 
     def test_rpm_dist_detects_el6_centos(self):
@@ -68,7 +79,22 @@ class TestCentosVersionDetection(object):
         self.distro.release = '6.6'
         assert centos.rpm_dist(self.distro) == 'el6'
 
-    def test_rpm_dist_detects_el7(self):
+    def test_rpm_dist_detects_el7_centos(self):
         self.distro.normalized_name = 'centos'
+        self.distro.release = '7.0'
+        assert centos.rpm_dist(self.distro) == 'el7'
+
+    def test_rpm_dist_fallsback_to_el6_scientific(self):
+        self.distro.normalized_name = 'scientific'
+        self.distro.release = '5'
+        assert centos.rpm_dist(self.distro) == 'el6'
+
+    def test_rpm_dist_detects_el6_scientific(self):
+        self.distro.normalized_name = 'scientific'
+        self.distro.release = '6.6'
+        assert centos.rpm_dist(self.distro) == 'el6'
+
+    def test_rpm_dist_detects_el7_scientific(self):
+        self.distro.normalized_name = 'scientific'
         self.distro.release = '7.0'
         assert centos.rpm_dist(self.distro) == 'el7'
