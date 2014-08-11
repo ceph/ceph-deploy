@@ -115,7 +115,6 @@ def _normalized_release(release):
     # safe int versions that remove non-numerical chars
     # for example 'rc1' in a version like '1-rc1
     for name, value in release_map.items():
-        print name, value
         if '-' in value:  # get rid of garbage like -dev1 or -rc1
             value = value.split('-')[0]
         value = float(''.join(c for c in value if c.isdigit()))
