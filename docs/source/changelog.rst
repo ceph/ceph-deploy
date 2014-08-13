@@ -1,3 +1,8 @@
+1.5.11
+------
+* Fix a problem where CentOS7 is not matched correctly against repos (Thanks
+  Tom Walsh)
+
 1.5.10
 ------
 * Use ``ceph-disk`` with high verbosity
