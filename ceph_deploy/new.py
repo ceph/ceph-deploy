@@ -85,6 +85,14 @@ def new(args):
     fsid = args.fsid or uuid.uuid4()
     cfg.set('global', 'fsid', str(fsid))
 
+    # if networks were passed in, lets set them in the
+    # global section
+    if args.public_network:
+        cfg.set('global', 'public network', str(args.public_network))
+
+    if args.cluster_network:
+        cfg.set('global', 'cluster network', str(args.cluster_network))
+
     mon_initial_members = []
     mon_host = []
 
@@ -182,6 +190,18 @@ def make(parser):
         '--fsid',
         dest='fsid',
         help='provide an alternate FSID for ceph.conf generation',
+    )
+
+    parser.add_argument(
+        '--cluster-network',
+        help='specify the (internal) cluster network',
+        type=arg_validators.Subnet(),
+    )
+
+    parser.add_argument(
+        '--public-network',
+        help='specify the public network for a cluster',
+        type=arg_validators.Subnet(),
     )
 
     parser.set_defaults(
