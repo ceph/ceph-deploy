@@ -52,3 +52,32 @@ class Hostname(object):
             raise argparse.ArgumentError(None, msg)
 
         return string
+
+
+class Subnet(object):
+    """
+    A really dumb validator to ensure that we are receiving a subnet (or
+    something that actually looks like a subnet).
+
+    It doesn't enforce at all the constraints of proper validation as that has
+    its own set of caveats that are difficult to implement given that
+    ceph-deploy doesn't (should not) include third party dependencies.
+    """
+
+    def __call__(self, string):
+        ip = string.split('/')[0]
+        ip_parts = ip.split('.')
+
+        if len(ip_parts) != 4:
+            err = "subnet must have at least 4 numbers separated by dots like x.x.x.x/xx, but got: %s" % string
+            raise argparse.ArgumentError(None, err)
+
+        if [i for i in ip_parts[:4] if i.isalpha()]:  # only numbers
+            err = "subnet must have digits separated by dots like x.x.x.x/xx, but got: %s" % string
+            raise argparse.ArgumentError(None, err)
+
+        if len(string.split('/')) != 2:
+            err = "subnet must contain a slash, like x.x.x.x/xx, but got: %s" % string
+            raise argparse.ArgumentError(None, err)
+
+        return string
