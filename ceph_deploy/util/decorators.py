@@ -1,5 +1,6 @@
 import logging
 import sys
+import traceback
 from functools import wraps
 
 
@@ -67,6 +68,28 @@ def catches(catch=None, handler=None, exit=True):
                     logger.error(make_exception_message(e))
                     if exit:
                         sys.exit(1)
+            except Exception as err:  # anything else
+                str_failure = traceback.format_exc(err)
+                if str_failure:
+                    for line in str_failure.split('\n'):
+                        logger.error("%s" % line)
+                else:  # if for whatever reason we can't get an err message
+                    logger.error(make_exception_message(err))
+
+            finally:
+                # This block is crucial to avoid having issues with
+                # Python spitting non-sense thread exceptions. We have already
+                # handled what we could, so close stderr and stdout.
+                import sys
+                try:
+                    sys.stdout.close()
+                except:
+                    pass
+                try:
+                    sys.stderr.close()
+                except:
+                    pass
+
         return newfunc
 
     return decorate
