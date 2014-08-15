@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 import traceback
 from functools import wraps
@@ -80,15 +81,16 @@ def catches(catch=None, handler=None, exit=True):
                 # This block is crucial to avoid having issues with
                 # Python spitting non-sense thread exceptions. We have already
                 # handled what we could, so close stderr and stdout.
-                import sys
-                try:
-                    sys.stdout.close()
-                except:
-                    pass
-                try:
-                    sys.stderr.close()
-                except:
-                    pass
+                if not os.environ.get('CEPH_DEPLOY_TEST'):
+                    import sys
+                    try:
+                        sys.stdout.close()
+                    except:
+                        pass
+                    try:
+                        sys.stderr.close()
+                    except:
+                        pass
 
         return newfunc
 
