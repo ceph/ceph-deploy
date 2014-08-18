@@ -75,7 +75,7 @@ def catches(catch=None, handler=None, exit=True, handle_all=False):
                     if exit:
                         exit_from_catch = True
                         sys.exit(1)
-            except Exception as err:  # anything else
+            except Exception:  # anything else, no need to save the exception as a variable
                 if handle_all is False:  # re-raise if we are not supposed to handle everything
                     raise
                 # Make sure we don't spit double tracebacks if we are raising
@@ -83,12 +83,9 @@ def catches(catch=None, handler=None, exit=True, handle_all=False):
                 if exit_from_catch:
                     sys.exit(1)
 
-                str_failure = traceback.format_exc(err)
-                if str_failure:
-                    for line in str_failure.split('\n'):
-                        logger.error("%s" % line)
-                else:  # if for whatever reason we can't get an err message
-                    logger.error(make_exception_message(err))
+                str_failure = traceback.format_exc()
+                for line in str_failure.split('\n'):
+                    logger.error("%s" % line)
 
         return newfunc
 
