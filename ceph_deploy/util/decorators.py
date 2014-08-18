@@ -5,7 +5,7 @@ import traceback
 from functools import wraps
 
 
-def catches(catch=None, handler=None, exit=True):
+def catches(catch=None, handler=None, exit=True, handle_all=False):
     """
     Very simple decorator that tries any of the exception(s) passed in as
     a single exception class or tuple (containing multiple ones) returning the
@@ -52,6 +52,11 @@ def catches(catch=None, handler=None, exit=True):
     execution, otherwise the decorator would continue as a normal try/except
     block.
 
+
+    :param catch: A tuple with one (or more) Exceptions to catch
+    :param handler: Optional handler to have custom handling of exceptions
+    :param exit: Raise a ``SystemExit`` after handling exceptions
+    :param handle_all: Handle all other exceptions via logging.
     """
     catch = catch or Exception
     logger = logging.getLogger('ceph_deploy')
@@ -72,6 +77,8 @@ def catches(catch=None, handler=None, exit=True):
                         exit_from_catch = True
                         sys.exit(1)
             except Exception as err:  # anything else
+                if handle_all is False:  # re-raise if we are not supposed to handle everything
+                    raise
                 # Make sure we don't spit double tracebacks if we are raising
                 # SystemExit from the `except catch` block
                 if exit_from_catch:
@@ -83,21 +90,6 @@ def catches(catch=None, handler=None, exit=True):
                         logger.error("%s" % line)
                 else:  # if for whatever reason we can't get an err message
                     logger.error(make_exception_message(err))
-
-            finally:
-                # This block is crucial to avoid having issues with
-                # Python spitting non-sense thread exceptions. We have already
-                # handled what we could, so close stderr and stdout.
-                if not os.environ.get('CEPH_DEPLOY_TEST'):
-                    import sys
-                    try:
-                        sys.stdout.close()
-                    except:
-                        pass
-                    try:
-                        sys.stderr.close()
-                    except:
-                        pass
 
         return newfunc
 

@@ -98,7 +98,7 @@ def get_parser():
     return parser
 
 
-@catches((KeyboardInterrupt, RuntimeError, exc.DeployError,))
+@catches((KeyboardInterrupt, RuntimeError, exc.DeployError,), handle_all=True)
 def main(args=None, namespace=None):
     parser = get_parser()
 
