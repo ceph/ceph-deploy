@@ -1,9 +1,10 @@
 import logging
 import sys
+import traceback
 from functools import wraps
 
 
-def catches(catch=None, handler=None, exit=True):
+def catches(catch=None, handler=None, exit=True, handle_all=False):
     """
     Very simple decorator that tries any of the exception(s) passed in as
     a single exception class or tuple (containing multiple ones) returning the
@@ -50,6 +51,11 @@ def catches(catch=None, handler=None, exit=True):
     execution, otherwise the decorator would continue as a normal try/except
     block.
 
+
+    :param catch: A tuple with one (or more) Exceptions to catch
+    :param handler: Optional handler to have custom handling of exceptions
+    :param exit: Raise a ``SystemExit`` after handling exceptions
+    :param handle_all: Handle all other exceptions via logging.
     """
     catch = catch or Exception
     logger = logging.getLogger('ceph_deploy')
@@ -58,6 +64,7 @@ def catches(catch=None, handler=None, exit=True):
 
         @wraps(f)
         def newfunc(*a, **kw):
+            exit_from_catch = False
             try:
                 return f(*a, **kw)
             except catch as e:
@@ -66,7 +73,20 @@ def catches(catch=None, handler=None, exit=True):
                 else:
                     logger.error(make_exception_message(e))
                     if exit:
+                        exit_from_catch = True
                         sys.exit(1)
+            except Exception:  # anything else, no need to save the exception as a variable
+                if handle_all is False:  # re-raise if we are not supposed to handle everything
+                    raise
+                # Make sure we don't spit double tracebacks if we are raising
+                # SystemExit from the `except catch` block
+                if exit_from_catch:
+                    sys.exit(1)
+
+                str_failure = traceback.format_exc()
+                for line in str_failure.split('\n'):
+                    logger.error("%s" % line)
+
         return newfunc
 
     return decorate
