@@ -99,3 +99,30 @@ class TestHostName(object):
             hostname('0')
         message = error.value.message
         assert '0 must be a hostname' in message
+
+
+class TestSubnet(object):
+
+    def test_subnet_has_less_than_four_numbers(self):
+        validator = arg_validators.Subnet()
+
+        with raises(ArgumentError) as error:
+            validator('3.3.3/12')
+        message = error.value.message
+        assert 'at least 4 numbers' in message
+
+    def test_subnet_has_non_digits(self):
+        validator = arg_validators.Subnet()
+
+        with raises(ArgumentError) as error:
+            validator('3.3.3.a/12')
+        message = error.value.message
+        assert 'have digits separated by dots' in message
+
+    def test_subnet_missing_slash(self):
+        validator = arg_validators.Subnet()
+
+        with raises(ArgumentError) as error:
+            validator('3.3.3.3')
+        message = error.value.message
+        assert 'must contain a slash' in message
