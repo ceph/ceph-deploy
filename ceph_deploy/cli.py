@@ -151,7 +151,7 @@ def _main(args=None, namespace=None):
 
 def main(args=None, namespace=None):
     try:
-        _main(args=None, namespace=None)
+        _main(args=args, namespace=namespace)
     finally:
         # This block is crucial to avoid having issues with
         # Python spitting non-sense thread exceptions. We have already

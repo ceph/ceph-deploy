@@ -18,18 +18,4 @@ elif os.path.exists('/usr/lib/python2.6/site-packages/ceph_deploy'):
 from ceph_deploy.cli import main
 
 if __name__ == '__main__':
-    try:
-        sys.exit(main())
-    finally:
-        # This block is crucial to avoid having issues with
-        # Python spitting non-sense thread exceptions. We have already
-        # handled what we could, so close stderr and stdout.
-        if not os.environ.get('CEPH_DEPLOY_TEST'):
-            try:
-                sys.stdout.close()
-            except:
-                pass
-            try:
-                sys.stderr.close()
-            except:
-                pass
+    sys.exit(main())
