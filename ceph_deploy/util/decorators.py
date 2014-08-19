@@ -72,6 +72,7 @@ def catches(catch=None, handler=None, exit=True, handle_all=False):
                     return handler(e)
                 else:
                     logger.error(make_exception_message(e))
+
                     if exit:
                         exit_from_catch = True
                         sys.exit(1)
@@ -80,12 +81,14 @@ def catches(catch=None, handler=None, exit=True, handle_all=False):
                     raise
                 # Make sure we don't spit double tracebacks if we are raising
                 # SystemExit from the `except catch` block
+
                 if exit_from_catch:
                     sys.exit(1)
 
                 str_failure = traceback.format_exc()
                 for line in str_failure.split('\n'):
                     logger.error("%s" % line)
+                sys.exit(1)
 
         return newfunc
 
