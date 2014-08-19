@@ -99,7 +99,7 @@ def get_parser():
 
 
 @catches((KeyboardInterrupt, RuntimeError, exc.DeployError,), handle_all=True)
-def main(args=None, namespace=None):
+def _main(args=None, namespace=None):
     parser = get_parser()
 
     if len(sys.argv) < 2:
@@ -147,3 +147,21 @@ def main(args=None, namespace=None):
     )
 
     return args.func(args)
+
+
+def main(args=None, namespace=None):
+    try:
+        _main(args=args, namespace=namespace)
+    finally:
+        # This block is crucial to avoid having issues with
+        # Python spitting non-sense thread exceptions. We have already
+        # handled what we could, so close stderr and stdout.
+        if not os.environ.get('CEPH_DEPLOY_TEST'):
+            try:
+                sys.stdout.close()
+            except:
+                pass
+            try:
+                sys.stderr.close()
+            except:
+                pass
