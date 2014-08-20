@@ -16,3 +16,12 @@ def get_nonlocal_ip(host):
         if not ip.startswith('127.'):
             return ip
     raise exc.UnableToResolveError(host)
+
+
+def ip_in_subnet(ip, subnet):
+    """Does IP exists in a given subnet utility. Returns a boolean"""
+    ipaddr = int(''.join(['%02x' % int(x) for x in ip.split('.')]), 16)
+    netstr, bits = subnet.split('/')
+    netaddr = int(''.join(['%02x' % int(x) for x in netstr.split('.')]), 16)
+    mask = (0xffffffff << (32 - int(bits))) & 0xffffffff
+    return (ipaddr & mask) == (netaddr & mask)
