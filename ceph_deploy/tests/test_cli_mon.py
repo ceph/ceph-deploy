@@ -68,7 +68,7 @@ mon initial members = host1
         assert secret == MON_SECRET
 
     try:
-        with mock.patch('ceph_deploy.new.net.get_nonlocal_ip', lambda x: '10.0.0.1'):
+        with mock.patch('ceph_deploy.new.net.get_nonlocal_ip', lambda x, subnet: '10.0.0.1'):
             with mock.patch('ceph_deploy.new.arg_validators.Hostname', lambda: lambda x: x):
                 with directory(str(tmpdir)):
                     main(
