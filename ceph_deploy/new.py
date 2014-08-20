@@ -98,7 +98,7 @@ def new(args):
 
     for (name, host) in mon_hosts(args.mon):
         LOG.debug('Resolving host %s', host)
-        ip = net.get_nonlocal_ip(host)
+        ip = net.get_nonlocal_ip(host, subnet=args.public_network)
         LOG.debug('Monitor %s at %s', name, ip)
         mon_initial_members.append(name)
         try:
