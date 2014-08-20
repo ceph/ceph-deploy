@@ -20,7 +20,7 @@ def test_help(tmpdir, cli):
 
 
 def test_write_global_conf_section(tmpdir, cli):
-    with patch('ceph_deploy.new.net.get_nonlocal_ip', lambda x: '10.0.0.1'):
+    with patch('ceph_deploy.new.net.get_nonlocal_ip', lambda x, subnet: '10.0.0.1'):
         with patch('ceph_deploy.new.arg_validators.Hostname', lambda: lambda x: x):
             with directory(str(tmpdir)):
                 main(args=['new', 'host1'])
@@ -33,7 +33,7 @@ def pytest_funcarg__newcfg(request):
     tmpdir = request.getfuncargvalue('tmpdir')
 
     def new(*args):
-        with patch('ceph_deploy.new.net.get_nonlocal_ip', lambda x: '10.0.0.1'):
+        with patch('ceph_deploy.new.net.get_nonlocal_ip', lambda x, subnet: '10.0.0.1'):
             with patch('ceph_deploy.new.arg_validators.Hostname', lambda: lambda x: x):
                 with directory(str(tmpdir)):
                     main(args=['new'] + list(args))
