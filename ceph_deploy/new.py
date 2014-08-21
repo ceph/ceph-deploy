@@ -76,6 +76,8 @@ def ssh_copy_keys(hostname, username=None):
 
 
 def new(args):
+    if args.ceph_conf:
+        raise RuntimeError('will not create a ceph conf file if attemtping to re-use with `--ceph-conf` flag')
     LOG.debug('Creating new cluster named %s', args.cluster)
     cfg = conf.ceph.CephConf()
     cfg.add_section('global')
