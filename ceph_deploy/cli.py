@@ -64,6 +64,11 @@ def get_parser():
         help='name of the cluster',
         type=validate.alphanumeric,
         )
+    parser.add_argument(
+        '--ceph-conf',
+        dest='ceph_conf',
+        help='use (or reuse) a given ceph.conf file',
+    )
     sub = parser.add_subparsers(
         title='commands',
         metavar='COMMAND',
