@@ -42,7 +42,12 @@ def parse(fp):
 
 
 def load(args):
-    path = '{cluster}.conf'.format(cluster=args.cluster)
+    """
+    :param args: Will be used to infer the proper configuration name, or
+    if args.ceph_conf is passed in, that will take precedence
+    """
+    path = args.ceph_conf or '{cluster}.conf'.format(cluster=args.cluster)
+
     try:
         f = file(path)
     except IOError as e:
@@ -58,8 +63,11 @@ def load_raw(args):
     """
     Read the actual file *as is* without parsing/modifiying it
     so that it can be written maintaining its same properties.
+
+    :param args: Will be used to infer the proper configuration name
+    :paran path: alternatively, use a path for any configuration file loading
     """
-    path = '{cluster}.conf'.format(cluster=args.cluster)
+    path = args.ceph_conf or '{cluster}.conf'.format(cluster=args.cluster)
     try:
         with open(path) as ceph_conf:
             return ceph_conf.read()
