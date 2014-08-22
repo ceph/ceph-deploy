@@ -517,6 +517,7 @@ def make(parser):
         '--keyrings',
         nargs='?',
         dest='keyrings',
+        help='concatenate multiple keyrings to be seeded on new monitors',
     )
 
     parser.add_argument(
