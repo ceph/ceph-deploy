@@ -1,3 +1,11 @@
+1.5.12
+------
+* Better traceback reporting with logging.
+* Close stderr/stdout when ceph-deploy completes operations (silences odd
+  tracebacks)
+* Allow to re-use a ceph.conf file with ``--ceph-conf`` global flag
+* Be able to concatenate and seed keyring files with ``--keyrings``
+
 1.5.11
 ------
 * Fix a problem where CentOS7 is not matched correctly against repos (Thanks
