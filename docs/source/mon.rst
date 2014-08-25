@@ -73,3 +73,27 @@ Completely remove monitors on a remote host. Requires hostname(s) as
 arguments::
 
     ceph-deploy mon destroy node1
+
+
+``--keyrings``
+--------------
+Both ``create`` and ``create-initial`` subcommands can be used with the
+``--keyrings`` flag that accepts a path to search for keyring files.
+
+When this flag is used it will then look into the passed in path for files that
+end with ``.keyring`` and will proceed to concatenate them in memory and seed
+them to the monitor being created in the remote mode.
+
+This is useful when having several different keyring files that are needed at
+initial setup, but normally, ceph-deploy will only use the
+``$cluster.mon.keyring`` file for initial seeding.
+
+To keep things in order, create a directory and use that directory to store all
+the keyring files that are needed. This is how the commands would look like for
+a directory called ``keyrings``::
+
+    ceph-deploy mon --keyrings keyrings create-initial
+
+Or for the ``create`` sub-command::
+
+    ceph-deploy mon --keyrings keyrings create {nodes}
