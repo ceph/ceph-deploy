@@ -109,12 +109,73 @@ def mon_status(conn, logger, hostname, args, silent=False):
         return False
 
 
+def keyring_parser(path):
+    """
+    This is a very, very, dumb parser that will look for `[entity]` sections
+    and return a list of those sections. It is not possible to parse this with
+    ConfigParser even though it is almost the same thing.
+
+    Since this is only used to spit out warnings, it is OK to just be naive
+    about the parsing.
+    """
+    sections = []
+    with open(path) as keyring:
+        lines = keyring.readlines()
+        for line in lines:
+            line = line.strip('\n')
+            if line.startswith('[') and line.endswith(']'):
+                sections.append(line.strip('[]'))
+    return sections
+
+
+def concatenate_keyrings(args):
+    """
+    A helper to collect all keyrings into a single blob that will be
+    used to inject it to mons with ``--mkfs`` on remote nodes
+
+    We require all keyring files to be concatenated to be in a directory
+    to end with ``.keyring``.
+    """
+    keyring_path = os.path.abspath(args.keyrings)
+    LOG.info('concatenating keyrings from %s' % keyring_path)
+    LOG.info('to seed remote monitors')
+
+    keyrings = [
+        os.path.join(keyring_path, f) for f in os.listdir(keyring_path)
+        if os.path.isfile(os.path.join(keyring_path, f)) and f.endswith('.keyring')
+    ]
+
+    contents = []
+    seen_sections = {}
+
+    if not keyrings:
+        path_from_arg = os.path.abspath(args.keyrings)
+        raise RuntimeError('could not find any keyrings in %s' % path_from_arg)
+
+    for keyring in keyrings:
+        path = os.path.abspath(keyring)
+
+        for section in keyring_parser(path):
+            if not seen_sections.get(section):
+                seen_sections[section] = path
+                LOG.info('adding entity "%s" from keyring %s' % (section, path))
+                with open(path) as k:
+                    contents.append(k.read())
+            else:
+                LOG.warning('will not add keyring: %s' % path)
+                LOG.warning('entity "%s" from keyring %s is a duplicate' % (section, path))
+                LOG.warning('already present in keyring: %s' % seen_sections[section])
+
+    return ''.join(contents)
+
+
 def mon_add(args):
     cfg = conf.ceph.load(args)
 
     if not args.mon:
         raise exc.NeedHostError()
     mon_host = args.mon[0]
+
     try:
         with file('{cluster}.mon.keyring'.format(cluster=args.cluster),
                   'rb') as f:
@@ -179,12 +240,15 @@ def mon_create(args):
     if not args.mon:
         raise exc.NeedHostError()
 
-    try:
-        with file('{cluster}.mon.keyring'.format(cluster=args.cluster),
-                  'rb') as f:
-            monitor_keyring = f.read()
-    except IOError:
-        raise RuntimeError('mon keyring not found; run \'new\' to create a new cluster')
+    if args.keyrings:
+        monitor_keyring = concatenate_keyrings(args)
+    else:
+        try:
+            with file('{cluster}.mon.keyring'.format(cluster=args.cluster),
+                      'rb') as f:
+                monitor_keyring = f.read()
+        except IOError:
+            raise RuntimeError('mon keyring not found; run \'new\' to create a new cluster')
 
     LOG.debug(
         'Deploying mon, cluster %s hosts %s',
@@ -447,6 +511,13 @@ def make(parser):
         '--address',
         nargs='?',
         dest='address',
+    )
+
+    parser.add_argument(
+        '--keyrings',
+        nargs='?',
+        dest='keyrings',
+        help='concatenate multiple keyrings to be seeded on new monitors',
     )
 
     parser.add_argument(

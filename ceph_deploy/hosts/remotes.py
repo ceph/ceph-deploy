@@ -159,6 +159,7 @@ def readline(path):
     with open(path) as _file:
         return _file.readline().strip('\n')
 
+
 def path_exists(path):
     return os.path.exists(path)
 

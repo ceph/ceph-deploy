@@ -165,3 +165,61 @@ class TestIsRunning(object):
         with patch('ceph_deploy.mon.subprocess.Popen', self.fake_popen):
             result = mon.is_running(['ceph', 'status'])
         assert result is False
+
+
+class TestKeyringParser(object):
+
+    def test_line_ends_with_newline_char(self, tmpdir):
+        keyring = tmpdir.join('foo.mon.keyring')
+        keyring.write('[section]\nasdfasdf\nkey = value')
+        result = mon.keyring_parser(keyring.strpath)
+
+        assert result == ['section']
+
+    def test_line_does_not_end_with_newline_char(self, tmpdir):
+        keyring = tmpdir.join('foo.mon.keyring')
+        keyring.write('[section]asdfasdf\nkey = value')
+        result = mon.keyring_parser(keyring.strpath)
+
+        assert result == []
+
+
+class TestConcatenateKeyrings(object):
+
+    def setup(self):
+        self.args = Mock()
+
+    def make_keyring(self, tmpdir, name, contents):
+        keyring = tmpdir.join(name)
+        keyring.write(contents)
+        return keyring
+
+    def test_multiple_keyrings_work(self, tmpdir):
+        self.make_keyring(tmpdir, 'foo.keyring', '[mon.1]\nkey = value\n')
+        self.make_keyring(tmpdir, 'bar.keyring', '[mon.2]\nkey = value\n')
+        self.make_keyring(tmpdir, 'fez.keyring', '[mon.3]\nkey = value\n')
+        self.args.keyrings = tmpdir.strpath
+        result = mon.concatenate_keyrings(self.args).split('\n')
+        assert '[mon.2]' in result
+        assert 'key = value' in result
+        assert '[mon.3]' in result
+        assert 'key = value' in result
+        assert '[mon.1]' in result
+        assert 'key = value' in result
+
+    def test_skips_duplicate_content(self, tmpdir):
+        self.make_keyring(tmpdir, 'foo.keyring', '[mon.1]\nkey = value\n')
+        self.make_keyring(tmpdir, 'bar.keyring', '[mon.2]\nkey = value\n')
+        self.make_keyring(tmpdir, 'fez.keyring', '[mon.3]\nkey = value\n')
+        self.make_keyring(tmpdir, 'dupe.keyring', '[mon.3]\nkey = value\n')
+        self.args.keyrings = tmpdir.strpath
+        result = mon.concatenate_keyrings(self.args).split('\n')
+        assert result.count('[mon.3]') == 1
+        assert result.count('[mon.2]') == 1
+        assert result.count('[mon.1]') == 1
+
+    def test_errors_when_no_keyrings(self, tmpdir):
+        self.args.keyrings = tmpdir.strpath
+
+        with py.test.raises(RuntimeError):
+            mon.concatenate_keyrings(self.args)
