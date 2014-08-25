@@ -199,17 +199,13 @@ class TestConcatenateKeyrings(object):
         self.make_keyring(tmpdir, 'bar.keyring', '[mon.2]\nkey = value\n')
         self.make_keyring(tmpdir, 'fez.keyring', '[mon.3]\nkey = value\n')
         self.args.keyrings = tmpdir.strpath
-        expected = '\n'.join([
-            '[mon.2]',
-            'key = value',
-            '[mon.3]',
-            'key = value',
-            '[mon.1]',
-            'key = value',
-            '',
-        ])
-
-        assert mon.concatenate_keyrings(self.args) == expected
+        result = mon.concatenate_keyrings(self.args).split('\n')
+        assert '[mon.2]' in result
+        assert 'key = value' in result
+        assert '[mon.3]' in result
+        assert 'key = value' in result
+        assert '[mon.1]' in result
+        assert 'key = value' in result
 
     def test_skips_duplicate_content(self, tmpdir):
         self.make_keyring(tmpdir, 'foo.keyring', '[mon.1]\nkey = value\n')
@@ -217,17 +213,10 @@ class TestConcatenateKeyrings(object):
         self.make_keyring(tmpdir, 'fez.keyring', '[mon.3]\nkey = value\n')
         self.make_keyring(tmpdir, 'dupe.keyring', '[mon.3]\nkey = value\n')
         self.args.keyrings = tmpdir.strpath
-        expected = '\n'.join([
-            '[mon.2]',
-            'key = value',
-            '[mon.3]',
-            'key = value',
-            '[mon.1]',
-            'key = value',
-            '',
-        ])
-
-        assert mon.concatenate_keyrings(self.args) == expected
+        result = mon.concatenate_keyrings(self.args).split('\n')
+        assert result.count('[mon.3]') == 1
+        assert result.count('[mon.2]') == 1
+        assert result.count('[mon.1]') == 1
 
     def test_errors_when_no_keyrings(self, tmpdir):
         self.args.keyrings = tmpdir.strpath
