@@ -105,8 +105,24 @@ def get_parser():
 
 @catches((KeyboardInterrupt, RuntimeError, exc.DeployError,), handle_all=True)
 def _main(args=None, namespace=None):
-    parser = get_parser()
+    # Set console logging first with some defaults, to prevent having exceptions
+    # before hitting logging configuration. The defaults can/will get overridden
+    # later.
 
+    # Console Logger
+    sh = logging.StreamHandler()
+    sh.setFormatter(log.color_format())
+    sh.setLevel(logging.WARNING)
+
+    # because we're in a module already, __name__ is not the ancestor of
+    # the rest of the package; use the root as the logger for everyone
+    root_logger = logging.getLogger()
+
+    # allow all levels at root_logger, handlers control individual levels
+    root_logger.setLevel(logging.DEBUG)
+    root_logger.addHandler(sh)
+
+    parser = get_parser()
     if len(sys.argv) < 2:
         parser.print_help()
         sys.exit()
@@ -120,8 +136,6 @@ def _main(args=None, namespace=None):
         console_loglevel = logging.DEBUG
 
     # Console Logger
-    sh = logging.StreamHandler()
-    sh.setFormatter(log.color_format())
     sh.setLevel(console_loglevel)
 
     # File Logger
@@ -129,14 +143,6 @@ def _main(args=None, namespace=None):
     fh.setLevel(logging.DEBUG)
     fh.setFormatter(logging.Formatter(log.BASE_FORMAT))
 
-    # because we're in a module already, __name__ is not the ancestor of
-    # the rest of the package; use the root as the logger for everyone
-    root_logger = logging.getLogger()
-
-    # allow all levels at root_logger, handlers control individual levels
-    root_logger.setLevel(logging.DEBUG)
-
-    root_logger.addHandler(sh)
     root_logger.addHandler(fh)
 
     # Reads from the config file and sets values for the global
