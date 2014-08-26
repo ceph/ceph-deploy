@@ -75,6 +75,32 @@ def ssh_copy_keys(hostname, username=None):
     distro.conn.exit()
 
 
+def validate_host_ip(username, host, subnets):
+    """
+    Make sure that a given host will have IP addresses that will be
+    present in one (or all) of the the subnets specified
+    """
+    distro = hosts.get(host, username=username)
+    ips = net.ip_addresses(distro.conn)
+
+    def ip_in_one_subnet(ip, subnets):
+        """ ensure an ip exists in at least one subnet """
+        for subnet in subnets:
+            if net.ip_in_subnet(ip, subnet):
+                return True
+        return False
+
+    try:
+        for ip in ips:
+            if ip_in_one_subnet(ip, subnets):
+                continue
+            else:
+                msg = "IP (%s) is not valid for any of the subnets specified %s" % (ip, str(subnets))
+                raise RuntimeError(msg)
+    finally:
+        distro.conn.exit()
+
+
 def new(args):
     if args.ceph_conf:
         raise RuntimeError('will not create a ceph conf file if attemtping to re-use with `--ceph-conf` flag')
@@ -97,6 +123,8 @@ def new(args):
     mon_host = []
 
     for (name, host) in mon_hosts(args.mon):
+        if args.public_network or args.cluster_network:
+            validate_host_ip(args.username, host, [args.public_network, args.cluster_network])
         LOG.debug('Resolving host %s', host)
         ip = net.get_nonlocal_ip(host, subnet=args.public_network)
         LOG.debug('Monitor %s at %s', name, ip)
