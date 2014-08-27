@@ -45,6 +45,17 @@ def test_bad_no_mon(tmpdir, cli):
     assert err.value.status == 2
 
 
+from mock import Mock, patch
+
+
+def make_fake_connection(platform_information=None):
+    get_connection = Mock()
+    get_connection.return_value = get_connection
+    get_connection.remote_module.platform_information = Mock(
+        return_value=platform_information)
+    return get_connection
+
+
 def test_simple(tmpdir, capsys):
     with tmpdir.join('ceph.conf').open('w') as f:
         f.write("""\
@@ -67,18 +78,21 @@ mon initial members = host1
         secret = get_monitor_secret()
         assert secret == MON_SECRET
 
+    fake_ip_addresses = lambda x: ['10.0.0.1']
     try:
-        with mock.patch('ceph_deploy.new.net.get_nonlocal_ip', lambda x, subnet: '10.0.0.1'):
-            with mock.patch('ceph_deploy.new.arg_validators.Hostname', lambda: lambda x: x):
-                with directory(str(tmpdir)):
-                    main(
-                        args=['-v', 'new', 'host1'],
-                        namespace=ns,
-                        )
-                    main(
-                        args=['-v', 'mon', 'create', 'host1'],
-                        namespace=ns,
-                        )
+        with patch('ceph_deploy.new.net.ip_addresses', fake_ip_addresses):
+            with mock.patch('ceph_deploy.new.net.get_nonlocal_ip', lambda x: '10.0.0.1'):
+                with mock.patch('ceph_deploy.new.arg_validators.Hostname', lambda: lambda x: x):
+                    with mock.patch('ceph_deploy.new.hosts'):
+                        with directory(str(tmpdir)):
+                            main(
+                                args=['-v', 'new', '--no-ssh-copykey', 'host1'],
+                                namespace=ns,
+                                )
+                            main(
+                                args=['-v', 'mon', 'create', 'host1'],
+                                namespace=ns,
+                                )
     except SystemExit as e:
         raise AssertionError('Unexpected exit: %s', e)
     out, err = capsys.readouterr()

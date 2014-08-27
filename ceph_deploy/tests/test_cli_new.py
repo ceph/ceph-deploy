@@ -20,10 +20,14 @@ def test_help(tmpdir, cli):
 
 
 def test_write_global_conf_section(tmpdir, cli):
-    with patch('ceph_deploy.new.net.get_nonlocal_ip', lambda x, subnet: '10.0.0.1'):
-        with patch('ceph_deploy.new.arg_validators.Hostname', lambda: lambda x: x):
-            with directory(str(tmpdir)):
-                main(args=['new', 'host1'])
+    fake_ip_addresses = lambda x: ['10.0.0.1']
+
+    with patch('ceph_deploy.new.hosts'):
+        with patch('ceph_deploy.new.net.ip_addresses', fake_ip_addresses):
+            with patch('ceph_deploy.new.net.get_nonlocal_ip', lambda x: '10.0.0.1'):
+                with patch('ceph_deploy.new.arg_validators.Hostname', lambda: lambda x: x):
+                    with directory(str(tmpdir)):
+                        main(args=['new', 'host1'])
     with tmpdir.join('ceph.conf').open() as f:
         cfg = conf.ceph.parse(f)
     assert cfg.sections() == ['global']
@@ -31,15 +35,18 @@ def test_write_global_conf_section(tmpdir, cli):
 
 def pytest_funcarg__newcfg(request):
     tmpdir = request.getfuncargvalue('tmpdir')
+    fake_ip_addresses = lambda x: ['10.0.0.1']
 
     def new(*args):
-        with patch('ceph_deploy.new.net.get_nonlocal_ip', lambda x, subnet: '10.0.0.1'):
-            with patch('ceph_deploy.new.arg_validators.Hostname', lambda: lambda x: x):
-                with directory(str(tmpdir)):
-                    main(args=['new'] + list(args))
-                    with tmpdir.join('ceph.conf').open() as f:
-                        cfg = conf.ceph.parse(f)
-                    return cfg
+        with patch('ceph_deploy.new.net.ip_addresses', fake_ip_addresses):
+            with patch('ceph_deploy.new.hosts'):
+                with patch('ceph_deploy.new.net.get_nonlocal_ip', lambda x: '10.0.0.1'):
+                    with patch('ceph_deploy.new.arg_validators.Hostname', lambda: lambda x: x):
+                        with directory(str(tmpdir)):
+                            main(args=['new'] + list(args))
+                            with tmpdir.join('ceph.conf').open() as f:
+                                cfg = conf.ceph.parse(f)
+                            return cfg
     return new
 
 
