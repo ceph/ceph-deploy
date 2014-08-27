@@ -67,6 +67,12 @@ def ip_addresses(conn, interface=None, include_loopback=False):
     Returns a list of IPv4 addresses assigned to the host. 127.0.0.1 is
     ignored, unless 'include_loopback=True' is indicated. If 'interface' is
     provided, then only IP addresses from that interface will be returned.
+
+    Example output looks like::
+
+        >>> ip_addresses(conn)
+        >>> ['192.168.1.111', '10.0.1.12']
+
     """
     ret = set()
     ifaces = linux_interfaces(conn)
