@@ -77,29 +77,28 @@ def ssh_copy_keys(hostname, username=None):
 
 def validate_host_ip(ips, subnets):
     """
-    Make sure that a given host will have IP addresses that will be
-    present in one (or all) of the the subnets specified
+    Make sure that a given host all subnets specified will have at least one IP
+    in that range.
     """
     # Make sure we prune ``None`` arguments
     subnets = [s for s in subnets if s is not None]
     validate_one_subnet = len(subnets) == 1
 
-    def ip_in_one_subnet(ip, subnets):
+    def ip_in_one_subnet(ips, subnet):
         """ ensure an ip exists in at least one subnet """
-        for subnet in subnets:
-            if subnet:
-                if net.ip_in_subnet(ip, subnet):
-                    return True
+        for ip in ips:
+            if net.ip_in_subnet(ip, subnet):
+                return True
         return False
 
-    for ip in ips:
-        if ip_in_one_subnet(ip, subnets):
+    for subnet in subnets:
+        if ip_in_one_subnet(ips, subnet):
             if validate_one_subnet:
                 return
             else:  # keep going to make sure the other subnets are ok
                 continue
         else:
-            msg = "IP (%s) is not valid for any of the subnets specified %s" % (ip, str(subnets))
+            msg = "subnet (%s) is not valid for any of the ips found %s" % (subnet, str(ips))
             raise RuntimeError(msg)
 
 
