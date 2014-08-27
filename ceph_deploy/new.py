@@ -75,30 +75,44 @@ def ssh_copy_keys(hostname, username=None):
     distro.conn.exit()
 
 
-def validate_host_ip(username, host, subnets):
+def validate_host_ip(ips, subnets):
     """
     Make sure that a given host will have IP addresses that will be
     present in one (or all) of the the subnets specified
     """
-    distro = hosts.get(host, username=username)
-    ips = net.ip_addresses(distro.conn)
+    # Make sure we prune ``None`` arguments
+    subnets = [s for s in subnets if s is not None]
+    validate_one_subnet = len(subnets) == 1
 
     def ip_in_one_subnet(ip, subnets):
         """ ensure an ip exists in at least one subnet """
         for subnet in subnets:
-            if net.ip_in_subnet(ip, subnet):
-                return True
+            if subnet:
+                if net.ip_in_subnet(ip, subnet):
+                    return True
         return False
 
-    try:
-        for ip in ips:
-            if ip_in_one_subnet(ip, subnets):
+    for ip in ips:
+        if ip_in_one_subnet(ip, subnets):
+            if validate_one_subnet:
+                return
+            else:  # keep going to make sure the other subnets are ok
                 continue
-            else:
-                msg = "IP (%s) is not valid for any of the subnets specified %s" % (ip, str(subnets))
-                raise RuntimeError(msg)
-    finally:
-        distro.conn.exit()
+        else:
+            msg = "IP (%s) is not valid for any of the subnets specified %s" % (ip, str(subnets))
+            raise RuntimeError(msg)
+
+
+def get_public_network_ip(ips, public_subnet):
+    """
+    Given a public subnet, chose the one IP from the remote host that exists
+    within the subnet range.
+    """
+    for ip in ips:
+        if net.ip_in_subnet(ip, public_subnet):
+            return ip
+    msg = "IPs (%s) are not valid for any of subnet specified %s" % (str(ips), str(public_subnet))
+    raise RuntimeError(msg)
 
 
 def new(args):
@@ -123,10 +137,26 @@ def new(args):
     mon_host = []
 
     for (name, host) in mon_hosts(args.mon):
+        # Try to ensure we can ssh in properly before anything else
+        if args.ssh_copykey:
+            ssh_copy_keys(host, args.username)
+
+        # Now get the non-local IPs from the remote node
+        distro = hosts.get(host, username=args.username)
+        remote_ips = net.ip_addresses(distro.conn)
+        distro.conn.exit()
+
+        # Validate subnets if we received any
         if args.public_network or args.cluster_network:
-            validate_host_ip(args.username, host, [args.public_network, args.cluster_network])
+            validate_host_ip(remote_ips, [args.public_network, args.cluster_network])
+
+        # Pick the IP that matches the public cluster (if we were told to do
+        # so) otherwise pick the first, non-local IP
         LOG.debug('Resolving host %s', host)
-        ip = net.get_nonlocal_ip(host, subnet=args.public_network)
+        if args.public_network:
+            ip = get_public_network_ip(remote_ips, args.public_network)
+        else:
+            ip = net.get_nonlocal_ip(host)
         LOG.debug('Monitor %s at %s', name, ip)
         mon_initial_members.append(name)
         try:
@@ -137,8 +167,7 @@ def new(args):
         except socket.error:
             mon_host.append(ip)
 
-        if args.ssh_copykey:
-            ssh_copy_keys(host, args.username)
+
 
     LOG.debug('Monitor initial members are %s', mon_initial_members)
     LOG.debug('Monitor addrs are %s', mon_host)
