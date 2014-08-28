@@ -2,6 +2,8 @@
 A utility module that can host utilities that will be used by more than
 one type of distro and not common to all of them
 """
+from ceph_deploy.util import pkg_managers
+
 
 def install_yum_priorities(distro, _yum=None):
     """
