@@ -2,12 +2,17 @@ from ceph_deploy.hosts import centos
 from ceph_deploy import hosts
 from mock import Mock, patch
 
+
 def pytest_generate_tests(metafunc):
     # called once per each test function
-    funcarglist = metafunc.cls.params[metafunc.function.__name__]
+    try:
+        funcarglist = metafunc.cls.params[metafunc.function.__name__]
+    except AttributeError:
+        return
     argnames = list(funcarglist[0])
     metafunc.parametrize(argnames, [[funcargs[name] for name in argnames]
-            for funcargs in funcarglist])
+                                    for funcargs in funcarglist])
+
 
 class TestCentosRepositoryUrlPart(object):
 
@@ -38,7 +43,6 @@ class TestCentosRepositoryUrlPart(object):
             dict(distro="RedHat", release='10.9.8765', codename="Core", output='el10'),
         ]
     }
-    
 
     def make_fake_connection(self, platform_information=None):
         get_connection = Mock()

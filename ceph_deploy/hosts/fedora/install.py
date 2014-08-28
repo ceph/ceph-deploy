@@ -1,5 +1,6 @@
 from ceph_deploy.lib import remoto
 from ceph_deploy.hosts.centos.install import repo_install, mirror_install  # noqa
+from ceph_deploy.hosts.util import install_yum_priorities
 
 
 def install(distro, version_kind, version, adjust_repos):
@@ -13,6 +14,8 @@ def install(distro, version_kind, version, adjust_repos):
         key = 'autobuild'
 
     if adjust_repos:
+        install_yum_priorities(distro)
+
         if version_kind != 'dev':
             remoto.process.run(
                 distro.conn,
