@@ -1,3 +1,9 @@
+1.5.13
+------
+* Fix missing priority plugin in YUM for Fedora when installing
+* Implement --public-network and --cluster-network with remote IP validation
+* Fixed an issue where errors before the logger was setup would be silenced.
+
 1.5.12
 ------
 * Better traceback reporting with logging.
