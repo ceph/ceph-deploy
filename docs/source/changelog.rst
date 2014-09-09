@@ -1,3 +1,8 @@
+1.5.14
+------
+* Do not override environment variables on remote hosts, preserve them and
+  extend the ``$PATH`` if not explicitly told not to.
+
 1.5.13
 ------
 * Fix missing priority plugin in YUM for Fedora when installing
