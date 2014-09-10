@@ -549,7 +549,6 @@ def print_osd(logger, hostname, osd_path, json_blob, metadata, journal=None):
     if journal:
         logger.info('Journal: %s' % journal)
     for k, v in metadata.items():
-        #logger.info("%s: %-8s" % (k.capitalize(), v))
         logger.info("%-13s  %s" % (k.capitalize(), v))
 
     logger.info('-'*40)
