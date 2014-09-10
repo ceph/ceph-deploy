@@ -244,12 +244,45 @@ def prepare_disk(
         )
 
 
+def exceeds_max_osds(args, reasonable=20):
+    """
+    A very simple function to check against multiple OSDs getting created and
+    warn about the possibility of more than the recommended which would cause
+    issues with max allowed PIDs in a system.
+
+    The check is done against the ``args.disk`` object that should look like::
+
+        [
+            ('cephnode-01', '/dev/sdb', '/dev/sda5'),
+            ('cephnode-01', '/dev/sdc', '/dev/sda6'),
+            ...
+        ]
+    """
+    hosts = [item[0] for item in args.disk]
+    per_host_count = dict(
+        (
+            (h, hosts.count(h)) for h in set(hosts)
+            if hosts.count(h) > reasonable
+        )
+    )
+
+    return per_host_count
+
+
 def prepare(args, cfg, activate_prepared_disk):
     LOG.debug(
         'Preparing cluster %s disks %s',
         args.cluster,
         ' '.join(':'.join(x or '' for x in t) for t in args.disk),
         )
+
+    hosts_in_danger = exceeds_max_osds(args)
+
+    if hosts_in_danger:
+        LOG.warning('if ``kernel.pid_max`` is not increased to a high enough value')
+        LOG.warning('the following hosts will encounter issues:')
+        for host, count in hosts_in_danger.items():
+            LOG.warning('Host: %8s, OSDs: %s' % (host, count))
 
     key = get_bootstrap_osd_key(cluster=args.cluster)
 
@@ -549,7 +582,6 @@ def print_osd(logger, hostname, osd_path, json_blob, metadata, journal=None):
     if journal:
         logger.info('Journal: %s' % journal)
     for k, v in metadata.items():
-        #logger.info("%s: %-8s" % (k.capitalize(), v))
         logger.info("%-13s  %s" % (k.capitalize(), v))
 
     logger.info('-'*40)
