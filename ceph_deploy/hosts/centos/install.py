@@ -44,7 +44,9 @@ def install(distro, version_kind, version, adjust_repos):
     pkg_managers.yum_clean(distro.conn)
 
     # Even before EPEL, make sure we have `wget`
-    pkg_managers.yum(distro.conn, 'wget')
+    has_wget = distro.conn.remote_module.which('wget')
+    if not has_wget:
+        pkg_managers.yum(distro.conn, 'wget')
 
     # Get EPEL installed before we continue:
     if adjust_repos:
