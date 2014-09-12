@@ -1,3 +1,7 @@
+1.5.15
+------
+* If ``wget`` is installed don't try to install it regardless.
+
 1.5.14
 ------
 * Do not override environment variables on remote hosts, preserve them and
