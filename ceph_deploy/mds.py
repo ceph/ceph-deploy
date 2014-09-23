@@ -26,7 +26,8 @@ def get_bootstrap_mds_key(cluster):
         raise RuntimeError('bootstrap-mds keyring not found; run \'gatherkeys\'')
 
 
-def create_mds(conn, name, cluster, init):
+def create_mds(distro, name, cluster, init):
+    conn = distro.conn
 
     path = '/var/lib/ceph/mds/{cluster}-{name}'.format(
         cluster=cluster,
@@ -158,7 +159,7 @@ def mds_create(args):
                     rlogger.warning('mds keyring does not exist yet, creating one')
                     distro.conn.remote_module.write_keyring(path, key)
 
-            create_mds(distro.conn, name, args.cluster, distro.init)
+            create_mds(distro, name, args.cluster, distro.init)
             distro.conn.exit()
         except RuntimeError as e:
             LOG.error(e)
