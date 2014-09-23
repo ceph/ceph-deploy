@@ -212,6 +212,33 @@ def get_file(path):
         pass
 
 
+def object_grep(term, file_object):
+    for line in file_object.readlines():
+        if term in line:
+            return True
+    return False
+
+
+def grep(term, file_path):
+    # A small grep-like function that will search for a word in a file and
+    # return True if it does and False if it does not.
+
+    # Implemented initially to have a similar behavior as the init system
+    # detection in Ceph's init scripts::
+
+    #     # detect systemd
+    #     # SYSTEMD=0
+    #     grep -qs systemd /proc/1/comm && SYSTEMD=1
+
+    # .. note:: Because we intent to be operating in silent mode, we explicitly
+    # return ``False`` if the file does not exist.
+    if not os.path.isfile(file_path):
+        return False
+
+    with open(file_path) as _file:
+        return object_grep(term, _file)
+
+
 def shortname():
     """get remote short hostname"""
     return socket.gethostname().split('.', 1)[0]
