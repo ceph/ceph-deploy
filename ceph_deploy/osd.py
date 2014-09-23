@@ -383,6 +383,9 @@ def activate(args, cfg):
         catch_osd_errors(distro.conn, distro.conn.logger, args)
         distro.conn.exit()
 
+        if distro.is_el:
+            system.enable_service(distro.conn)
+
 
 def disk_zap(args):
 
