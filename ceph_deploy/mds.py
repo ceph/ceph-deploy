@@ -6,6 +6,7 @@ import os
 from ceph_deploy import conf
 from ceph_deploy import exc
 from ceph_deploy import hosts
+from ceph_deploy.util import system
 from ceph_deploy.lib import remoto
 from ceph_deploy.cliutil import priority
 
@@ -25,7 +26,8 @@ def get_bootstrap_mds_key(cluster):
         raise RuntimeError('bootstrap-mds keyring not found; run \'gatherkeys\'')
 
 
-def create_mds(conn, name, cluster, init):
+def create_mds(distro, name, cluster, init):
+    conn = distro.conn
 
     path = '/var/lib/ceph/mds/{cluster}-{name}'.format(
         cluster=cluster,
@@ -107,6 +109,9 @@ def create_mds(conn, name, cluster, init):
             timeout=7
         )
 
+    if distro.is_el:
+        system.enable_service(distro.conn)
+
 
 def mds_create(args):
     cfg = conf.ceph.load(args)
@@ -154,7 +159,7 @@ def mds_create(args):
                     rlogger.warning('mds keyring does not exist yet, creating one')
                     distro.conn.remote_module.write_keyring(path, key)
 
-            create_mds(distro.conn, name, args.cluster, distro.init)
+            create_mds(distro, name, args.cluster, distro.init)
             distro.conn.exit()
         except RuntimeError as e:
             LOG.error(e)

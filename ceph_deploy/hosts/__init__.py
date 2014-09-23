@@ -53,6 +53,7 @@ def get(hostname, username=None, fallback=None):
     module.normalized_name = _normalized_distro_name(distro_name)
     module.normalized_release = _normalized_release(release)
     module.distro = module.normalized_name
+    module.is_el = module.normalized_name in ['redhat', 'centos', 'fedora', 'scientific']
     module.release = release
     module.codename = codename
     module.conn = conn
