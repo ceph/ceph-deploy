@@ -6,6 +6,7 @@ import os
 from ceph_deploy import conf
 from ceph_deploy import exc
 from ceph_deploy import hosts
+from ceph_deploy.util import system
 from ceph_deploy.lib import remoto
 from ceph_deploy.cliutil import priority
 
@@ -106,6 +107,9 @@ def create_mds(conn, name, cluster, init):
             ],
             timeout=7
         )
+
+    if distro.is_el:
+        system.enable_service(distro.conn)
 
 
 def mds_create(args):
