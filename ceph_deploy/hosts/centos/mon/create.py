@@ -1,4 +1,5 @@
 from ceph_deploy.hosts import common
+from ceph_deploy.util import system
 from ceph_deploy.lib import remoto
 
 
@@ -19,3 +20,5 @@ def create(distro, args, monitor_keyring):
         ],
         timeout=7,
     )
+
+    system.enable_service(distro.conn)
