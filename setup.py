@@ -24,7 +24,7 @@ if os.environ.get('CEPH_DEPLOY_NO_VENDOR'):
     clean_vendor('remoto')
 else:
     vendorize([
-        ('remoto', '0.0.21', ['python', 'vendor.py']),
+        ('remoto', '0.0.22', ['python', 'vendor.py']),
     ])
 
 
