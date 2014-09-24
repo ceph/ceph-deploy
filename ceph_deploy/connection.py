@@ -16,8 +16,8 @@ def get_connection(hostname, username, logger, threads=5, use_sudo=None):
         conn = remoto.Connection(
             hostname,
             logger=logger,
-            sudo=use_sudo,
             threads=threads,
+            detect_sudo=True,
         )
 
         # Set a timeout value in seconds to disconnect and move on
