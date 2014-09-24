@@ -8,8 +8,6 @@ def get_connection(hostname, username, logger, threads=5, use_sudo=None):
     A very simple helper, meant to return a connection
     that will know about the need to use sudo.
     """
-    if use_sudo is None:
-        use_sudo = needs_sudo()
     if username:
         hostname = "%s@%s" % (username, hostname)
     try:
@@ -44,9 +42,3 @@ def get_local_connection(logger, use_sudo=False):
         threads=1,
         use_sudo=use_sudo
     )
-
-
-def needs_sudo():
-    if getpass.getuser() == 'root':
-        return False
-    return True
