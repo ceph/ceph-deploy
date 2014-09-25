@@ -1,9 +1,8 @@
-import getpass
 import socket
 from ceph_deploy.lib import remoto
 
 
-def get_connection(hostname, username, logger, threads=5, use_sudo=None):
+def get_connection(hostname, username, logger, threads=5, use_sudo=None, detect_sudo=True):
     """
     A very simple helper, meant to return a connection
     that will know about the need to use sudo.
@@ -15,7 +14,7 @@ def get_connection(hostname, username, logger, threads=5, use_sudo=None):
             hostname,
             logger=logger,
             threads=threads,
-            detect_sudo=True,
+            detect_sudo=detect_sudo,
         )
 
         # Set a timeout value in seconds to disconnect and move on
@@ -40,5 +39,6 @@ def get_local_connection(logger, use_sudo=False):
         None,
         logger=logger,
         threads=1,
-        use_sudo=use_sudo
+        use_sudo=use_sudo,
+        detect_sudo=False
     )
