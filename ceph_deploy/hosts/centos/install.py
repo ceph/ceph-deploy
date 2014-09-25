@@ -43,11 +43,6 @@ def install(distro, version_kind, version, adjust_repos):
 
     pkg_managers.yum_clean(distro.conn)
 
-    # Even before EPEL, make sure we have `wget`
-    has_wget = distro.conn.remote_module.which('wget')
-    if not has_wget:
-        pkg_managers.yum(distro.conn, 'wget')
-
     # Get EPEL installed before we continue:
     if adjust_repos:
         install_epel(distro)
@@ -123,30 +118,7 @@ def install_epel(distro):
     """
     if distro.name.lower() in ['centos', 'scientific']:
         distro.conn.logger.info('adding EPEL repository')
-        if float(distro.release) >= 6:
-            remoto.process.run(
-                distro.conn,
-                ['wget', 'http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm'],
-            )
-            pkg_managers.rpm(
-                distro.conn,
-                [
-                    '--replacepkgs',
-                    'epel-release-6*.rpm',
-                ],
-            )
-        else:
-            remoto.process.run(
-                distro.conn,
-                ['wget', 'http://dl.fedoraproject.org/pub/epel/5/x86_64/epel-release-5-4.noarch.rpm'],
-            )
-            pkg_managers.rpm(
-                distro.conn,
-                [
-                    '--replacepkgs',
-                    'epel-release-5*.rpm'
-                ],
-            )
+        pkg_managers.yum(distro.conn, 'epel-release')
 
 
 def mirror_install(distro, repo_url, gpg_url, adjust_repos, extra_installs=True):
@@ -173,9 +145,6 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos, extra_installs=True)
         distro.conn.remote_module.write_yum_repo(ceph_repo_content)
 
     if extra_installs:
-        # Before any install, make sure we have `wget`
-        pkg_managers.yum(distro.conn, 'wget')
-
         pkg_managers.yum(distro.conn, 'ceph')
 
 
@@ -203,13 +172,13 @@ def repo_install(distro, reponame, baseurl, gpgkey, **kw):
 
     repo_content = templates.custom_repo(
         reponame=reponame,
-        name = name,
-        baseurl = baseurl,
-        enabled = enabled,
-        gpgcheck = gpgcheck,
-        _type = _type,
-        gpgkey = gpgkey,
-        proxy = proxy,
+        name=name,
+        baseurl=baseurl,
+        enabled=enabled,
+        gpgcheck=gpgcheck,
+        _type=_type,
+        gpgkey=gpgkey,
+        proxy=proxy,
     )
 
     distro.conn.remote_module.write_yum_repo(
@@ -219,7 +188,4 @@ def repo_install(distro, reponame, baseurl, gpgkey, **kw):
 
     # Some custom repos do not need to install ceph
     if install_ceph:
-        # Before any install, make sure we have `wget`
-        pkg_managers.yum(distro.conn, 'wget')
-
         pkg_managers.yum(distro.conn, 'ceph')
