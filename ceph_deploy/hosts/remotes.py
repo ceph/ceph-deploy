@@ -57,6 +57,13 @@ def write_yum_repo(content, filename='ceph.repo'):
     write_file(repo_path, content)
 
 
+def set_apt_priority(fqdn, path='/etc/apt/preferences.d/ceph.pref'):
+    template = "Package: *\nPin: origin {fqdn}\nPin-Priority: 999\n"
+    content = template.format(fqdn=fqdn)
+    with open(path, 'wb') as fout:
+        fout.write(content)
+
+
 def set_repo_priority(sections, path='/etc/yum.repos.d/ceph.repo', priority='1'):
     Config = ConfigParser.ConfigParser()
     Config.read(path)
