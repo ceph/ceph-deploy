@@ -1,3 +1,5 @@
+from urlparse import urlparse
+
 from ceph_deploy.lib import remoto
 from ceph_deploy.util import pkg_managers
 
@@ -61,6 +63,9 @@ def install(distro, version_kind, version, adjust_repos):
         else:
             raise RuntimeError('Unknown version kind: %r' % version_kind)
 
+        # set the repo priority for the right domain
+        fqdn = urlparse(url).hostname
+        distro.conn.remote_module.set_apt_priority(fqdn)
         distro.conn.remote_module.write_sources_list(url, codename)
 
     remoto.process.run(
@@ -120,9 +125,12 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos):
             ]
         )
 
+        # set the repo priority for the right domain
+        fqdn = urlparse(repo_url).hostname
+        distro.conn.remote_module.set_apt_priority(fqdn)
+
         distro.conn.remote_module.write_sources_list(repo_url, distro.codename)
 
-    # Before any install, make sure we have `wget`
     pkg_managers.apt_update(distro.conn)
     packages = (
         'ceph',
@@ -170,6 +178,10 @@ def repo_install(distro, repo_name, baseurl, gpgkey, **kw):
         distro.codename,
         safe_filename
     )
+
+    # set the repo priority for the right domain
+    fqdn = urlparse(baseurl).hostname
+    distro.conn.remote_module.set_apt_priority(fqdn)
 
     # repo is not operable until an update
     pkg_managers.apt_update(distro.conn)
