@@ -47,7 +47,6 @@ def get(hostname, username=None, fallback=None):
             release=release)
 
     machine_type = conn.remote_module.machine_type()
-
     module = _get_distro(distro_name)
     module.name = distro_name
     module.normalized_name = _normalized_distro_name(distro_name)
@@ -118,7 +117,7 @@ def _normalized_release(release):
     for name, value in release_map.items():
         if '-' in value:  # get rid of garbage like -dev1 or -rc1
             value = value.split('-')[0]
-        value = float(''.join(c for c in value if c.isdigit()))
+        value = float(''.join(c for c in value if c.isdigit()) or 0)
         int_name = "int_%s" % name
         setattr(v, int_name, value)
 

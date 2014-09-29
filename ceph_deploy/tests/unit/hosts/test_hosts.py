@@ -326,6 +326,12 @@ class TestNormalizeRelease(object):
         assert result.patch == "01234"
         assert result.garbage == "1rc-1"
 
+    def test_garbage_version_with_no_numbers(self):
+        result = hosts._normalized_release('sid')
+        assert result.major == "sid"
+        assert result.minor == "0"
+        assert result.patch == "0"
+        assert result.garbage == "0"
 
 
 class TestHostGet(object):
@@ -358,7 +364,6 @@ class TestHostGet(object):
                 hosts.get('myhost')
 
         assert error.value.__str__() == 'Platform is not supported: Solaris 12 Tijuana'
-
 
 
 class TestGetDistro(object):
