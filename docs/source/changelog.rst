@@ -1,3 +1,11 @@
+1.5.16
+------
+* Enable services on ``el`` distros when deploying Ceph daemons.
+* Smarter detection of ``sudo`` need on remote nodes (prevents issues when
+  running ceph-deploy as ``root`` or with ``sudo``.
+* Fix an issue where Debian Sid would break ceph-deploy failing Distro
+  detection.
+
 1.5.15
 ------
 * If ``wget`` is installed don't try to install it regardless.
