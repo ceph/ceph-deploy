@@ -12,7 +12,7 @@ from ceph_deploy.connection import get_connection
 logger = logging.getLogger()
 
 
-def get(hostname, username=None, fallback=None):
+def get(hostname, username=None, fallback=None, detect_sudo=True):
     """
     Retrieve the module that matches the distribution of a ``hostname``. This
     function will connect to that host and retrieve the distribution
@@ -32,7 +32,8 @@ def get(hostname, username=None, fallback=None):
     conn = get_connection(
         hostname,
         username=username,
-        logger=logging.getLogger(hostname)
+        logger=logging.getLogger(hostname),
+        detect_sudo=detect_sudo
     )
     try:
         conn.import_module(remotes)

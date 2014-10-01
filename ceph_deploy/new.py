@@ -58,7 +58,7 @@ def ssh_copy_keys(hostname, username=None):
 
     # Get the contents of id_rsa.pub and push it to the host
     LOG.info('will connect again with password prompt')
-    distro = hosts.get(hostname, username)  # XXX Add username
+    distro = hosts.get(hostname, username, detect_sudo=False)
     auth_keys_path = '.ssh/authorized_keys'
     if not distro.conn.remote_module.path_exists(auth_keys_path):
         distro.conn.logger.warning(
