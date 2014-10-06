@@ -1,3 +1,8 @@
+1.5.17
+------
+* Do not ask twice for passwords when calling ``new``.
+* Ensure priorities are installed and enforced for custom repositories.
+
 1.5.16
 ------
 * Enable services on ``el`` distros when deploying Ceph daemons.
