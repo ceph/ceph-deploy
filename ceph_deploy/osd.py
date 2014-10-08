@@ -381,10 +381,11 @@ def activate(args, cfg):
         # give the OSD a few seconds to start
         time.sleep(5)
         catch_osd_errors(distro.conn, distro.conn.logger, args)
-        distro.conn.exit()
 
         if distro.is_el:
             system.enable_service(distro.conn)
+
+        distro.conn.exit()
 
 
 def disk_zap(args):
