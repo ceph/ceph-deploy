@@ -1,3 +1,8 @@
+1.5.18
+------
+* Fix issue for enabling the OSD service in el-like distros.
+* Create a monitor keyring if it doesn't exist.
+
 1.5.17
 ------
 * Do not ask twice for passwords when calling ``new``.
