@@ -189,13 +189,7 @@ def new(args):
         name=args.cluster,
         )
 
-    # FIXME: create a random key
-    LOG.debug('Creating a random mon key...')
-    mon_keyring = '[mon.]\nkey = %s\ncaps mon = allow *\n' % generate_auth_key()
-
-    keypath = '{name}.mon.keyring'.format(
-        name=args.cluster,
-        )
+    new_mon_keyring(args)
 
     LOG.debug('Writing initial config to %s...', path)
     tmp = '%s.tmp' % path
@@ -208,6 +202,15 @@ def new(args):
             raise exc.ClusterExistsError(path)
         else:
             raise
+
+
+def new_mon_keyring(args):
+    LOG.debug('Creating a random mon key...')
+    mon_keyring = '[mon.]\nkey = %s\ncaps mon = allow *\n' % generate_auth_key()
+
+    keypath = '{name}.mon.keyring'.format(
+        name=args.cluster,
+        )
 
     LOG.debug('Writing monitor keyring to %s...', keypath)
     tmp = '%s.tmp' % keypath

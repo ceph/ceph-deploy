@@ -8,8 +8,9 @@ import time
 
 from ceph_deploy import conf, exc, admin
 from ceph_deploy.cliutil import priority
-from ceph_deploy.util import paths, net
+from ceph_deploy.util import paths, net, files
 from ceph_deploy.lib import remoto
+from ceph_deploy.new import new_mon_keyring
 from ceph_deploy import hosts
 from ceph_deploy.misc import mon_hosts
 from ceph_deploy.connection import get_connection
@@ -243,12 +244,13 @@ def mon_create(args):
     if args.keyrings:
         monitor_keyring = concatenate_keyrings(args)
     else:
+        keyring_path = '{cluster}.mon.keyring'.format(cluster=args.cluster)
         try:
-            with file('{cluster}.mon.keyring'.format(cluster=args.cluster),
-                      'rb') as f:
-                monitor_keyring = f.read()
+            monitor_keyring = files.read_file(keyring_path)
         except IOError:
-            raise RuntimeError('mon keyring not found; run \'new\' to create a new cluster')
+            LOG.warning('keyring (%s) not found, creating a new one' % keyring_path)
+            new_mon_keyring(args)
+            monitor_keyring = files.read_file(keyring_path)
 
     LOG.debug(
         'Deploying mon, cluster %s hosts %s',
