@@ -1,3 +1,6 @@
+Changelog
+=========
+
 1.5.18
 ------
 * Fix issue for enabling the OSD service in el-like distros.
