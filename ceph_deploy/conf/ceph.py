@@ -1,5 +1,7 @@
 import ConfigParser
 import contextlib
+from collections import OrderedDict
+from StringIO import StringIO
 
 from ceph_deploy import exc
 
@@ -35,7 +37,7 @@ class CephConf(ConfigParser.RawConfigParser):
 
 
 def parse(fp):
-    cfg = CephConf()
+    cfg = CephConf(dict_type=OrderedDict)
     ifp = _TrimIndentFile(fp)
     cfg.readfp(ifp)
     return cfg
@@ -77,20 +79,9 @@ def load_raw(args):
         )
 
 
-def write_conf(cluster, conf, overwrite):
-    """ write cluster configuration to /etc/ceph/{cluster}.conf """
-    import os
-
-    path = '/etc/ceph/{cluster}.conf'.format(cluster=cluster)
-    tmp = '{path}.{pid}.tmp'.format(path=path, pid=os.getpid())
-
-    if os.path.exists(path):
-        with file(path, 'rb') as f:
-            old = f.read()
-            if old != conf and not overwrite:
-                raise RuntimeError('config file %s exists with different content; use --overwrite-conf to overwrite' % path)
-    with file(tmp, 'w') as f:
-        f.write(conf)
-        f.flush()
-        os.fsync(f)
-    os.rename(tmp, path)
+def match(conf_data, path):
+    with file(path, 'rb') as f:
+        conf = parse(f)
+        data = StringIO()
+        conf.write(data)
+        return data.getvalue() == conf_data
