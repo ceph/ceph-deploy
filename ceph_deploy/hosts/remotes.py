@@ -101,7 +101,7 @@ def set_repo_priority(sections, path='/etc/yum.repos.d/ceph.repo', priority='1')
 def write_conf(cluster, conf, overwrite):
     """ write cluster configuration to /etc/ceph/{cluster}.conf """
     path = '/etc/ceph/{cluster}.conf'.format(cluster=cluster)
-    tmp_file = tempfile.NamedTemporaryFile(delete=False)
+    tmp_file = tempfile.NamedTemporaryFile(dir='/etc/ceph', delete=False)
     err_msg = 'config file %s exists with different content; use --overwrite-conf to overwrite' % path
 
     if os.path.exists(path):
