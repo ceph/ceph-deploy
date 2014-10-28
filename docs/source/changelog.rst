@@ -1,6 +1,11 @@
 Changelog
 =========
 
+1.5.19
+------
+* Create temporary ceph.conf files in ``/etc/ceph`` to avoid issues with
+  SELinux.
+
 1.5.18
 ------
 * Fix issue for enabling the OSD service in el-like distros.
