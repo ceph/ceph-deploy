@@ -29,7 +29,6 @@ echo "  BRANCH=$BRANCH"
 case $HOST in
 gitbuilder-*-rpm*)
         rm -rf rpm-repo dist/* build/rpmbuild
-        cd build
 	./scripts/build-rpm.sh --release
         if [ $? -eq 0 ] ; then
             mv rpm-repo $WORKSPACE/.
@@ -41,7 +40,6 @@ gitbuilder-cdep-deb* | tala* | mira*)
         rm -rf debian-repo
         rm -rf dist
         rm -f *.changes *.dsc *.gz *.diff
-        cd build
 	./scripts/build-debian.sh --release
         if [ $? -eq 0 ] ; then
             mv debian-repo $WORKSPACE/.
