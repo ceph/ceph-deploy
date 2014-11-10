@@ -39,13 +39,13 @@ gitbuilder-*-rpm*)
 gitbuilder-cdep-deb* | tala* | mira*)
         rm -rf debian-repo
         rm -rf dist
-        rm -f *.changes *.dsc *.gz *.diff
+        rm -f ../*.changes ../*.dsc ../*.gz ../*.diff
 	./scripts/build-debian.sh --release
         if [ $? -eq 0 ] ; then
             #mv debian-repo $WORKSPACE/.
             cd $WORKSPACE
             mkdir -p dist
-            mv *.changes *.dsc *.deb *.tar.gz dist/.
+            mv ../*.changes ../*.dsc ../*.deb ../*.tar.gz dist/.
         fi
         ;;
 *)
