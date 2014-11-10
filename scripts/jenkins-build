@@ -31,7 +31,6 @@ gitbuilder-*-rpm*)
         rm -rf rpm-repo dist/* build/rpmbuild
 	./scripts/build-rpm.sh --release
         if [ $? -eq 0 ] ; then
-            #mv rpm-repo $WORKSPACE/.
             cd $WORKSPACE
             mkdir -p dist
         fi
@@ -42,7 +41,6 @@ gitbuilder-cdep-deb* | tala* | mira*)
         rm -f ../*.changes ../*.dsc ../*.gz ../*.diff
 	./scripts/build-debian.sh --release
         if [ $? -eq 0 ] ; then
-            #mv debian-repo $WORKSPACE/.
             cd $WORKSPACE
             mkdir -p dist
             mv ../*.changes ../*.dsc ../*.deb ../*.tar.gz dist/.
