@@ -1,6 +1,10 @@
 Changelog
 =========
 
+1.5.20
+------
+* log stderr and stdout in the same order as they happen remotely.
+
 1.5.19
 ------
 * Create temporary ceph.conf files in ``/etc/ceph`` to avoid issues with
