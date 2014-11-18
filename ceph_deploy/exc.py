@@ -95,3 +95,22 @@ class GenericError(DeployError):
 
     def __str__(self):
         return self.message
+
+
+class KeyNotFoundError(DeployError):
+    """
+    Could not find keyring file
+    """
+    def __init__(self, keyring, hosts):
+        self.keyring = keyring
+        self.hosts = hosts
+
+    def __str__(self):
+        return '{doc}: {keys}'.format(
+            doc=self.__doc__.strip(),
+            keys=', '.join(
+                [self.keyring.format(hostname=host) +
+                 " on host {hostname}".format(hostname=host)
+                 for host in self.hosts]
+            )
+        )
