@@ -1,8 +1,8 @@
 import os.path
 import logging
 
-from .cliutil import priority
-from . import hosts
+from ceph_deploy import hosts
+from ceph_deploy.cliutil import priority
 
 
 LOG = logging.getLogger(__name__)
