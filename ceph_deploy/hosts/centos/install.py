@@ -116,7 +116,7 @@ def install_epel(distro):
     CentOS and Scientific need the EPEL repo, otherwise Ceph cannot be
     installed.
     """
-    if distro.name.lower() in ['centos', 'scientific']:
+    if distro.normalized_name in ['centos', 'scientific']:
         distro.conn.logger.info('adding EPEL repository')
         pkg_managers.yum(distro.conn, 'epel-release')
 
