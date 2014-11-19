@@ -265,7 +265,7 @@ Usually, features are added when/if it is sensible for someone that wants to
 get started with ceph and said feature would make sense in that context.  If
 you believe this is the case and you've read "`what this tool is not`_" and
 still think feature ``X`` should exist in ceph-deploy, open a feature request
-in the ceph tracker: http://tracker.ceph.com/projects/devops/issues
+in the ceph tracker: http://tracker.ceph.com/projects/ceph-deploy/issues
 
 A command gave me an error, what is going on?
 ---------------------------------------------
