@@ -1,6 +1,14 @@
 Changelog
 =========
 
+1.5.21
+------
+* Fix distro detection for CentOS and Scientific Linux, which was
+  preventing installation of EPEL repo as a prerequisite.
+* Default to Giant on install.
+* Fix an issue where ``gatherkeys`` did not exit non-zero when
+  keys were not found.
+
 1.5.20
 ------
 * log stderr and stdout in the same order as they happen remotely.
