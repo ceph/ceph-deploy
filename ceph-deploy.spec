@@ -10,25 +10,25 @@
 #################################################################################
 # common
 #################################################################################
-Name:		ceph-deploy
-Version:       1.5.21
-Release: 	0
-Summary: 	Admin and deploy tool for Ceph
-License: 	MIT
-Group:   	System/Filesystems
-URL:     	http://ceph.com/
-Source0: 	%{name}-%{version}.tar.bz2
+Name:           ceph-deploy
+Version:        1.5.21
+Release:        0
+Summary:        Admin and deploy tool for Ceph
+License:        MIT
+Group:          System/Filesystems
+URL:            http://ceph.com/
+Source0:        %{name}-%{version}.tar.bz2
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 BuildRequires:  python-devel
 BuildRequires:  python-distribute
-BuildRequires:	python-setuptools
-BuildRequires:	python-virtualenv
+BuildRequires:  python-setuptools
+BuildRequires:  python-virtualenv
 BuildRequires:  python-mock
 BuildRequires:  python-tox
 %if 0%{?suse_version}
-BuildRequires:	python-pytest
+BuildRequires:  python-pytest
 %else
-BuildRequires:	pytest
+BuildRequires:  pytest
 %endif
 BuildRequires:  git
 Requires:       python-argparse
@@ -49,8 +49,8 @@ BuildArch:      noarch
 %endif
 
 %if 0%{?rhel}
-BuildRequires: 	python >= %{pyver}
-Requires: 	python >= %{pyver}
+BuildRequires:  python >= %{pyver}
+Requires:       python >= %{pyver}
 %endif
 
 %description
