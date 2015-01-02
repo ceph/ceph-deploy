@@ -57,7 +57,7 @@ Requires:       python >= %{pyver}
 An easy to use admin tool for deploy ceph storage clusters.
 
 %prep
-#%setup -q -n %{name}
+#%%setup -q -n %%{name}
 %setup -q
 
 %build
