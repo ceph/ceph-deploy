@@ -233,10 +233,7 @@ def mon_add(args):
 
 def mon_create(args):
 
-    cfg = conf.ceph.load(args)
-    if not args.mon:
-        mon_initial_members = cfg.safe_get('global', 'mon_initial_members')
-        args.mon = re.split(r'[,\s]+', mon_initial_members)
+    args.mon = get_mon_member(args)
 
     if not args.mon:
         raise exc.NeedHostError()
@@ -398,11 +395,7 @@ def mon_destroy(args):
 
 
 def mon_create_initial(args):
-    cfg = conf.ceph.load(args)
-    cfg_initial_members = cfg.safe_get('global', 'mon_initial_members')
-    if cfg_initial_members is None:
-        raise RuntimeError('No `mon initial members` defined in config')
-    mon_initial_members = re.split(r'[,\s]+', cfg_initial_members)
+    mon_initial_members = get_mon_member(args, True)
 
     # create them normally through mon_create
     mon_create(args)
@@ -534,6 +527,26 @@ def make(parser):
 #
 # Helpers
 #
+
+def get_mon_member(args, init_tags=False):
+    """
+    Abstracte the process about getting mon_member.
+
+    @init_tags for choose normal/init stage
+
+    return value are monitor members
+    """
+    cfg = conf.ceph.load(args)
+    if init_tags is not True:
+        mon_initial_members = cfg.safe_get('global', 'mon_initial_members')
+        monitors = re.split(r'[,\s]+', mon_initial_members)
+        return monitors
+    else:
+        cfg_initial_members = cfg.safe_get('global', 'mon_initial_members')
+        if cfg_initial_members is None:
+            raise RuntimeError('No `mon initial members` defined in config')
+        mon_initial_members = re.split(r'[,\s]+', cfg_initial_members)
+        return mon_initial_members
 
 
 def is_running(conn, args):
