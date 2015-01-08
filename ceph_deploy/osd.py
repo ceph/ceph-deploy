@@ -422,34 +422,22 @@ def destroy_osd(distro, cluster, osd_id):
         LOG.info("(NOT IMPLEMENT) remove all osd")
         raise NotImplementedError("It need to assign the specific osd id.")
 
-    command = [
-        'ceph',
-        '--cluster={cluster}'.format(cluster=cluster),
-        'osd',
-        'tree',
-        '--format=json',
-    ]
-
-    out, err, code = remoto.process.check(
-        conn,
-        command,
-    )
+    tree = osd_tree(conn, cluster)
 
     LOG.info('prepare to search osd in acting set...')
-    des_osd_in_act_set(out, distro, osd_id, cluster_path)
+    des_osd_in_act_set(tree, distro, osd_id, cluster_path)
 
     LOG.info('prepare to search osd in nonacting set...')
-    des_osd_in_nonact_set(out, distro, osd_id, cluster_path)
+    des_osd_in_nonact_set(tree, distro, osd_id, cluster_path)
 
     conn.exit()
 
 
-def des_osd_in_act_set(out, distro, osd_id, cluster_path):
+def des_osd_in_act_set(tree, distro, osd_id, cluster_path):
     osd_name = 'osd.%s' % osd_id
     conn = distro.conn
     try:
-        loaded_json = json.loads(''.join(out))
-        for item in loaded_json['nodes']:
+        for item in tree['nodes']:
             if item[u'name'] == osd_name and item[u'type'] == u'osd':
                 found_in_node = True
                 LOG.info(
@@ -457,7 +445,7 @@ def des_osd_in_act_set(out, distro, osd_id, cluster_path):
                     osd_id
                 )
                 takeout_osd(conn, osd_id)
-                ret = stopping_osd(loaded_json, distro, osd_id)
+                ret = stopping_osd(tree, distro, osd_id)
                 if ret:
                     removing_osd(conn, osd_id, cluster_path)
                     conn.exit()
@@ -477,11 +465,11 @@ def des_osd_in_act_set(out, distro, osd_id, cluster_path):
         return {}
 
 
-def des_osd_in_nonact_set(out, distro, osd_id, cluster_path):
+def des_osd_in_nonact_set(tree, distro, osd_id, cluster_path):
     osd_name = 'osd.%s' % osd_id
     conn = distro.conn
     try:
-        for item in loaded_json['stray']:
+        for item in tree['stray']:
             if item[u'name'] == osd_name and item[u'type'] == u'osd':
                 found_in_stray = True
                 LOG.info(
@@ -489,7 +477,7 @@ def des_osd_in_nonact_set(out, distro, osd_id, cluster_path):
                     osd_id
                 )
                 takeout_osd(conn, osd_id)
-                ret = stopping_osd(loaded_json, distro, osd_id)
+                ret = stopping_osd(tree, distro, osd_id)
                 if not ret:
                     LOG.debug('THIS OSD %s IS NOT UP', osd_id)
                 removing_osd(conn, osd_id, cluster_path)
@@ -520,12 +508,12 @@ def takeout_osd(conn, osd_id):
     )
 
 
-def stopping_osd(loaded_json, distro, osd_id):
+def stopping_osd(tree, distro, osd_id):
 
     osd_name = u'osd.%s' % osd_id
     conn = distro.conn
 
-    for item in loaded_json['nodes']:
+    for item in tree['nodes']:
         if item[u'name'] == osd_name and item[u'status'] == u'down':
             LOG.info('OSD already down.')
             return True
