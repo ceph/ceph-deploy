@@ -313,6 +313,15 @@ def zeroing(dev):
         f.write(size*'\0')
 
 
+def enable_yum_priority_obsoletes(path="/etc/yum/pluginconf.d/priorities.conf"):
+    """Configure Yum priorities to include obsoletes"""
+    config = ConfigParser.ConfigParser()
+    config.read(path)
+    config.set('main', 'check_obsoletes', '1')
+    with open(path, 'wb') as fout:
+        config.write(fout)
+
+
 # remoto magic, needed to execute these functions remotely
 if __name__ == '__channelexec__':
     for item in channel:  # noqa
