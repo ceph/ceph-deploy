@@ -32,6 +32,24 @@ displayed, similar to::
     are not going to be uninstalled. For example librbd1 and librados which
     qemu-kvm depends on, and removing it would cause issues for qemu-kvm.
 
+Distribution Notes
+------------------
+
+RPMs
+^^^^
+
+On RPM-based distributions, ``yum-plugin-priorities`` is installed to make sure
+that upstream ceph.com repos have a higher priority than distro repos.
+
+Fedora
+^^^^^^
+
+The Fedora distribution maintains packages for Ceph in their own repos, independent
+of the upstream repos on ceph.com.  The packages are structured differently than
+the upstream packages, and can cause dependency resolution errors despite the use
+of the Yum priorities plugin.  To resolve this, ``ceph-deploy`` enables the
+``check_obsoletes`` flag for the Yum priorities plugin.
+
 Specific Releases
 -----------------
 By default the *latest* release is assumed. This value changes when
