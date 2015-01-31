@@ -48,11 +48,6 @@ BuildArch:      noarch
 %py_requires
 %endif
 
-%if 0%{?rhel}
-BuildRequires:  python >= %{pyver}
-Requires:       python >= %{pyver}
-%endif
-
 %description
 An easy to use admin tool for deploy ceph storage clusters.
 
