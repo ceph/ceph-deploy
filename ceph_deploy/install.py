@@ -37,7 +37,10 @@ def install(args):
 
     for hostname in args.host:
         LOG.debug('Detecting platform for host %s ...', hostname)
-        distro = hosts.get(hostname, username=args.username)
+        distro = hosts.get(
+            hostname,
+            username=args.username,
+            use_rhceph=bool(getattr(args, 'use_rhceph', False)))
         LOG.info(
             'Distro info: %s %s %s',
             distro.name,
@@ -214,7 +217,10 @@ def uninstall(args):
     for hostname in args.host:
         LOG.debug('Detecting platform for host %s ...', hostname)
 
-        distro = hosts.get(hostname, username=args.username)
+        distro = hosts.get(
+            hostname,
+            username=args.username,
+            use_rhceph=bool(getattr(args, 'use_rhceph', False)))
         LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
         rlogger = logging.getLogger(hostname)
         rlogger.info('uninstalling ceph on %s' % hostname)
@@ -235,7 +241,10 @@ def purge(args):
     for hostname in args.host:
         LOG.debug('Detecting platform for host %s ...', hostname)
 
-        distro = hosts.get(hostname, username=args.username)
+        distro = hosts.get(
+            hostname,
+            username=args.username,
+            use_rhceph=bool(getattr(args, 'use_rhceph', False)))
         LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
         rlogger = logging.getLogger(hostname)
         rlogger.info('purging host ... %s' % hostname)
