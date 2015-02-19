@@ -6,17 +6,21 @@ on the type of distribution/version we are dealing with.
 """
 import logging
 from ceph_deploy import exc
-from ceph_deploy.hosts import debian, centos, fedora, suse, remotes
+from ceph_deploy.hosts import debian, centos, fedora, suse, remotes, rhel
 from ceph_deploy.connection import get_connection
 
 logger = logging.getLogger()
 
 
-def get(hostname, username=None, fallback=None, detect_sudo=True):
+def get(hostname,
+        username=None,
+        fallback=None,
+        detect_sudo=True,
+        use_rhceph=False):
     """
     Retrieve the module that matches the distribution of a ``hostname``. This
     function will connect to that host and retrieve the distribution
-    informaiton, then return the appropriate module and slap a few attributes
+    information, then return the appropriate module and slap a few attributes
     to that module defining the information it found from the hostname.
 
     For example, if host ``node1.example.com`` is an Ubuntu server, the
@@ -28,6 +32,9 @@ def get(hostname, username=None, fallback=None, detect_sudo=True):
 
     :param hostname: A hostname that is reachable/resolvable over the network
     :param fallback: Optional fallback to use if no supported distro is found
+    :param use_rhceph: Whether or not to install RH Ceph on a RHEL machine or
+                       the community distro.  Changes what host module is
+                       returned for RHEL.
     """
     conn = get_connection(
         hostname,
@@ -48,7 +55,7 @@ def get(hostname, username=None, fallback=None, detect_sudo=True):
             release=release)
 
     machine_type = conn.remote_module.machine_type()
-    module = _get_distro(distro_name)
+    module = _get_distro(distro_name, use_rhceph=use_rhceph)
     module.name = distro_name
     module.normalized_name = _normalized_distro_name(distro_name)
     module.normalized_release = _normalized_release(release)
@@ -62,7 +69,7 @@ def get(hostname, username=None, fallback=None, detect_sudo=True):
     return module
 
 
-def _get_distro(distro, fallback=None):
+def _get_distro(distro, fallback=None, use_rhceph=False):
     if not distro:
         return
 
@@ -77,7 +84,10 @@ def _get_distro(distro, fallback=None):
         'suse': suse,
         }
 
-    return distributions.get(distro) or _get_distro(fallback)
+    if distro == 'redhat' and use_rhceph:
+        return rhel
+    else:
+        return distributions.get(distro) or _get_distro(fallback)
 
 
 def _normalized_distro_name(distro):
