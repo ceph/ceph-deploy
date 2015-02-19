@@ -54,7 +54,13 @@ def install(args):
         distro = hosts.get(
             hostname,
             username=args.username,
-            use_rhceph=bool(getattr(args, 'use_rhceph', False)))
+            # XXX this should get removed once ceph packages are split for
+            # upstream. If default_release is True, it means that the user is
+            # trying to install on a RHEL machine and should expect to get RHEL
+            # packages. Otherwise, it will need to specify either a specific
+            # version, or repo, or a development branch.
+            use_rhceph=args.default_release,
+            )
         LOG.info(
             'Distro info: %s %s %s',
             distro.name,
