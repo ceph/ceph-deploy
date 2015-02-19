@@ -47,6 +47,8 @@ def install(distro, version_kind, version, adjust_repos):
     if adjust_repos:
         install_epel(distro)
         install_yum_priorities(distro)
+        distro.conn.remote_module.enable_yum_priority_obsoletes()
+        logger.warning('check_obsoletes has been enabled for Yum priorities plugin')
     if version_kind in ['stable', 'testing']:
         key = 'release'
     else:
