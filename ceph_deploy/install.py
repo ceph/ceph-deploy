@@ -213,7 +213,17 @@ def install_repo(args):
 
     for hostname in args.host:
         LOG.debug('Detecting platform for host %s ...', hostname)
-        distro = hosts.get(hostname, username=args.username)
+        distro = hosts.get(
+            hostname,
+            username=args.username,
+            # XXX this should get removed once ceph packages are split for
+            # upstream. If default_release is True, it means that the user is
+            # trying to install on a RHEL machine and should expect to get RHEL
+            # packages. Otherwise, it will need to specify either a specific
+            # version, or repo, or a development branch. Other distro users should
+            # not see any differences.
+            use_rhceph=args.default_release,
+        )
         rlogger = logging.getLogger(hostname)
 
         LOG.info(
