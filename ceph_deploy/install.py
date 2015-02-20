@@ -240,7 +240,7 @@ def uninstall(args):
         distro = hosts.get(
             hostname,
             username=args.username,
-            use_rhceph=bool(getattr(args, 'use_rhceph', False)))
+            use_rhceph=True)
         LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
         rlogger = logging.getLogger(hostname)
         rlogger.info('uninstalling ceph on %s' % hostname)
@@ -264,7 +264,8 @@ def purge(args):
         distro = hosts.get(
             hostname,
             username=args.username,
-            use_rhceph=bool(getattr(args, 'use_rhceph', False)))
+            use_rhceph=True
+        )
         LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
         rlogger = logging.getLogger(hostname)
         rlogger.info('purging host ... %s' % hostname)
