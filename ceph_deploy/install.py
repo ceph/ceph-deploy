@@ -10,19 +10,33 @@ from ceph_deploy.lib import remoto
 LOG = logging.getLogger(__name__)
 
 
-def install(args):
-    if args.repo:
-        return install_repo(args)
+def sanitize_args(args):
+    """
+    args may need a bunch of logic to set proper defaults that argparse is
+    not well suited for.
+    """
+    if args.release is None:
+        args.release = 'giant'
+        args.default_release = True
 
     # XXX This whole dance is because --stable is getting deprecated
     if args.stable is not None:
         LOG.warning('the --stable flag is deprecated, use --release instead')
         args.release = args.stable
+    # XXX Tango ends here.
+
+    return args
+
+
+def install(args):
+    args = sanitize_args(args)
+    if args.repo:
+        return install_repo(args)
+
     if args.version_kind == 'stable':
         version = args.release
     else:
         version = getattr(args, args.version_kind)
-    # XXX Tango ends here.
 
     version_str = args.version_kind
 
@@ -37,7 +51,17 @@ def install(args):
 
     for hostname in args.host:
         LOG.debug('Detecting platform for host %s ...', hostname)
-        distro = hosts.get(hostname, username=args.username)
+        distro = hosts.get(
+            hostname,
+            username=args.username,
+            # XXX this should get removed once ceph packages are split for
+            # upstream. If default_release is True, it means that the user is
+            # trying to install on a RHEL machine and should expect to get RHEL
+            # packages. Otherwise, it will need to specify either a specific
+            # version, or repo, or a development branch. Other distro users should
+            # not see any differences.
+            use_rhceph=args.default_release,
+            )
         LOG.info(
             'Distro info: %s %s %s',
             distro.name,
@@ -214,7 +238,10 @@ def uninstall(args):
     for hostname in args.host:
         LOG.debug('Detecting platform for host %s ...', hostname)
 
-        distro = hosts.get(hostname, username=args.username)
+        distro = hosts.get(
+            hostname,
+            username=args.username,
+            use_rhceph=True)
         LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
         rlogger = logging.getLogger(hostname)
         rlogger.info('uninstalling ceph on %s' % hostname)
@@ -235,7 +262,11 @@ def purge(args):
     for hostname in args.host:
         LOG.debug('Detecting platform for host %s ...', hostname)
 
-        distro = hosts.get(hostname, username=args.username)
+        distro = hosts.get(
+            hostname,
+            username=args.username,
+            use_rhceph=True
+        )
         LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
         rlogger = logging.getLogger(hostname)
         rlogger.info('purging host ... %s' % hostname)
@@ -398,7 +429,7 @@ def make(parser):
     version.set_defaults(
         func=install,
         stable=None,  # XXX deprecated in favor of release
-        release='giant',
+        release=None,  # Set the default release in sanitize_args()
         dev='master',
         version_kind='stable',
         adjust_repos=True,

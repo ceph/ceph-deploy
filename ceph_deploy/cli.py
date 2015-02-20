@@ -93,6 +93,8 @@ def get_parser():
         if not os.environ.get('CEPH_DEPLOY_TEST'):
             p.set_defaults(cd_conf=ceph_deploy.conf.cephdeploy.load())
 
+        # flag if the default release is being used
+        p.set_defaults(default_release=False)
         fn(p)
     parser.set_defaults(
         # we want to hold on to this, for later
