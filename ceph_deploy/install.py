@@ -58,7 +58,8 @@ def install(args):
             # upstream. If default_release is True, it means that the user is
             # trying to install on a RHEL machine and should expect to get RHEL
             # packages. Otherwise, it will need to specify either a specific
-            # version, or repo, or a development branch.
+            # version, or repo, or a development branch. Other distro users should
+            # not see any differences.
             use_rhceph=args.default_release,
             )
         LOG.info(
