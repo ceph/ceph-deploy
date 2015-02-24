@@ -467,7 +467,7 @@ def disk_list(args, cfg):
 
 def osd_list(args, cfg):
 
-    monitors = mon.get_mon_initial_members(args)
+    monitors = mon.get_mon_initial_members(args, error_on_empty=True, _cfg=cfg)
 
     # get the osd tree from a monitor host
     mon_host = monitors[0]

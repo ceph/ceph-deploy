@@ -58,7 +58,7 @@ def catch_mon_errors(conn, logger, hostname, cfg, args):
     and warn apropriately about it.
     """
     monmap = mon_status_check(conn, logger, hostname, args).get('monmap', {})
-    mon_initial_members = cfg.safe_get('global', 'mon_initial_members')
+    mon_initial_members = get_mon_initial_members(args, _cfg=cfg)
     public_addr = cfg.safe_get('global', 'public_addr')
     public_network = cfg.safe_get('global', 'public_network')
     mon_in_monmap = [
@@ -234,7 +234,7 @@ def mon_add(args):
 def mon_create(args):
     cfg = conf.ceph.load(args)
     if not args.mon:
-        args.mon = get_mon_initial_members(args)
+        args.mon = get_mon_initial_members(args, _cfg=cfg)
 
     if not args.mon:
         raise exc.NeedHostError()
@@ -530,20 +530,23 @@ def make(parser):
 #
 
 
-def get_mon_initial_members(args, error_on_empty=False):
+def get_mon_initial_members(args, error_on_empty=False, _cfg=None):
     """
     Read the ceph config file and return the value of mon_initial_members
 
     Optionally, a NeedHostError can be raised if the value is None.
     """
-    cfg = conf.ceph.load(args)
+    if _cfg:
+        cfg = _cfg
+    else:
+        cfg = conf.ceph.load(args)
     mon_initial_members = cfg.safe_get('global', 'mon_initial_members')
     monitors = re.split(r'[,\s]+', mon_initial_members)
     if not monitors and error_on_empty:
         raise exc.NeedHostError(
             'could not find `mon initial members` defined in ceph.conf'
         )
-    return mon_initial_members
+    return monitors
 
 
 def is_running(conn, args):
