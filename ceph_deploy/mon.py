@@ -234,10 +234,7 @@ def mon_add(args):
 def mon_create(args):
     cfg = conf.ceph.load(args)
     if not args.mon:
-        args.mon = get_mon_initial_members(args, _cfg=cfg)
-
-    if not args.mon:
-        raise exc.NeedHostError()
+        args.mon = get_mon_initial_members(args, error_on_empty=True, _cfg=cfg)
 
     if args.keyrings:
         monitor_keyring = concatenate_keyrings(args)
