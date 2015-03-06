@@ -37,18 +37,13 @@ Distribution Notes
 
 RPMs
 ^^^^
-
 On RPM-based distributions, ``yum-plugin-priorities`` is installed to make sure
 that upstream ceph.com repos have a higher priority than distro repos.
 
-Fedora
-^^^^^^
-
-The Fedora distribution maintains packages for Ceph in their own repos, independent
-of the upstream repos on ceph.com.  The packages are structured differently than
-the upstream packages, and can cause dependency resolution errors despite the use
-of the Yum priorities plugin.  To resolve this, ``ceph-deploy`` enables the
-``check_obsoletes`` flag for the Yum priorities plugin.
+.. versionchanged:: 1.5.22
+Because of packaging splits that are present in downstream repos that may not
+be present in ceph.com repos, ``ceph-deploy`` enables the ``check_obsoletes``
+flag for the Yum priorities plugin.
 
 Specific Releases
 -----------------
