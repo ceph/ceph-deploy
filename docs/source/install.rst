@@ -45,6 +45,16 @@ Because of packaging splits that are present in downstream repos that may not
 be present in ceph.com repos, ``ceph-deploy`` enables the ``check_obsoletes``
 flag for the Yum priorities plugin.
 
+RHEL
+^^^^
+.. versionchanged:: 1.5.22
+When installing packages on systems running Red Hat Enterprise Linux (RHEL),
+``ceph-deploy`` will not install the latest upstream release by default. On other
+distros, running ``ceph-deploy install`` without the ``--release`` flag will
+install the latest upstream release by default (i.e. firefly, giant, etc). On
+RHEL, the ``--release`` flag *must* be used if you wish to use the upstream
+packages hosted on http://ceph.com.
+
 Specific Releases
 -----------------
 By default the *latest* release is assumed. This value changes when
