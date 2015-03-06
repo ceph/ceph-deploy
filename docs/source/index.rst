@@ -50,24 +50,33 @@ a contained way.
 
 DEB
 ---
-The DEB repo can be found at http://ceph.com/packages/ceph-extras/debian/
+All new releases of ``ceph-deploy`` are pushed to all ``ceph`` DEB release
+repos.
 
-But they can also be found for ``ceph`` releases in the ``ceph`` repos like::
+The DEB release repos are found at::
 
-     ceph.com/debian-{release}
-     ceph.com/debian-testing
+     http://ceph.com/debian-{release}
+     http://ceph.com/debian-testing
+
+This means, for example, that installing ``ceph-deploy`` from
+http://ceph.com/debian-giant will install the same version as from
+http://ceph.com/debian-firefly or http://ceph.com/debian-testing.
 
 RPM
 ---
-The RPM repos can be found at http://ceph.com/packages/ceph-extras/rpm/
+All new releases of ``ceph-deploy`` are pushed to all ``ceph`` RPM release
+repos.
 
-Make sure you add the proper one for your distribution.
+The RPM release repos are found at::
 
-But they can also be found for ``ceph`` releases in the ``ceph`` repos like::
+     http://ceph.com/rpm-{release}
+     http://ceph.com/rpm-testing
 
-     ceph.com/rpm-{release}
-     ceph.com/rpm-testing
+Make sure you add the proper one for your distribution (i.e. el7 vs rhel7).
 
+This means, for example, that installing ``ceph-deploy`` from
+http://ceph.com/rpm-giant will install the same version as from
+http://ceph.com/rpm-firefly or http://ceph.com/rpm-testing.
 
 bootstraping
 ------------
