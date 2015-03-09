@@ -1,6 +1,13 @@
 Changelog
 =========
 
+1.5.22
+------
+* Enable ``check_obsoletes`` in Yum priorities plugin when deploying
+  upstream Ceph on RPM-based distros
+* Require ``--release`` flag to install upstream Ceph on RHEL
+* Uninstall ``ceph-common`` on Fedora
+
 1.5.21
 ------
 * Fix distro detection for CentOS and Scientific Linux, which was
