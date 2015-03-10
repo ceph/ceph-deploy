@@ -10,7 +10,7 @@ from textwrap import dedent
 from cStringIO import StringIO
 
 from ceph_deploy import conf, exc, hosts
-from ceph_deploy.util import constants, system
+from ceph_deploy.util import constants, system, paths
 from ceph_deploy.cliutil import priority
 from ceph_deploy.lib import remoto
 
@@ -388,6 +388,216 @@ def activate(args, cfg):
         distro.conn.exit()
 
 
+def destroy(args):
+    cluster = args.cluster
+
+    for hostname, disk, journal in args.disk:
+        if not hostname:
+            raise RuntimeError('invalided hostname')
+        LOG.debug(
+            'Destroy osd id %s in host %s',
+            args.osd_id, hostname
+        )
+
+        distro = hosts.get(hostname, username=args.username)
+        LOG.info(
+            'Distro info: %s %s %s',
+            distro.name,
+            distro.release,
+            distro.codename
+        )
+
+        destroy_osd(distro, cluster, args.osd_id)
+
+
+def destroy_osd(distro, cluster, osd_id):
+
+    found_in_node = False
+    found_in_stray = False
+    cluster_path = paths.osd.base(cluster)
+    conn = distro.conn
+
+    if not osd_id or \
+       osd_id is None:
+        LOG.info("(NOT IMPLEMENT) remove all osd")
+        raise NotImplementedError("It need to assign the specific osd id.")
+
+    tree = osd_tree(conn, cluster)
+
+    LOG.info('prepare to search osd in acting set...')
+    des_osd_in_act_set(tree, distro, osd_id, cluster_path)
+
+    LOG.info('prepare to search osd in nonacting set...')
+    des_osd_in_nonact_set(tree, distro, osd_id, cluster_path)
+
+    conn.exit()
+
+
+def des_osd_in_act_set(tree, distro, osd_id, cluster_path):
+    osd_name = 'osd.%s' % osd_id
+    conn = distro.conn
+    try:
+        for item in tree['nodes']:
+            if item[u'name'] == osd_name and item[u'type'] == u'osd':
+                found_in_node = True
+                LOG.info(
+                    'Found the osd id %s!',
+                    osd_id
+                )
+                takeout_osd(conn, osd_id)
+                ret = stopping_osd(tree, distro, osd_id)
+                if ret:
+                    removing_osd(conn, osd_id, cluster_path)
+                    conn.exit()
+                    sys.exit(1)
+                else:
+                    LOG.debug('CAN NOT STOP CEPH OSD %s', osd_id)
+                    conn.exit()
+                    sys.exit(1)
+        if not found_in_node:
+            LOG.info(
+                'Could not find the situable osd id %s in current acting set.'
+                'try "stray"', osd_id
+            )
+        return False
+    except ValueError:
+        conn.exit()
+        return {}
+
+
+def des_osd_in_nonact_set(tree, distro, osd_id, cluster_path):
+    osd_name = 'osd.%s' % osd_id
+    conn = distro.conn
+    try:
+        for item in tree['stray']:
+            if item[u'name'] == osd_name and item[u'type'] == u'osd':
+                found_in_stray = True
+                LOG.info(
+                    'Found the osd id %s!',
+                    osd_id
+                )
+                takeout_osd(conn, osd_id)
+                ret = stopping_osd(tree, distro, osd_id)
+                if not ret:
+                    LOG.debug('THIS OSD %s IS NOT UP', osd_id)
+                removing_osd(conn, osd_id, cluster_path)
+                conn.exit()
+                sys.exit(1)
+        if not found_in_stray:
+            LOG.info(
+                'Could not find the situable osd id %s in "stray". ABANDON!',
+                osd_id
+            )
+            return False
+    except ValueError:
+        conn.exit()
+        return {}
+
+
+def takeout_osd(conn, osd_id):
+    command = [
+        'ceph',
+        'osd',
+        'out',
+        osd_id,
+    ]
+
+    remoto.process.run(
+        conn,
+        command,
+    )
+
+
+def stopping_osd(tree, distro, osd_id):
+
+    osd_name = u'osd.%s' % osd_id
+    conn = distro.conn
+
+    for item in tree['nodes']:
+        if item[u'name'] == osd_name and item[u'status'] == u'down':
+            LOG.info('OSD already down.')
+            return True
+
+    # With different distros, try to handle differently #
+    if distro.normalized_name.startswith(('centos', 'red')):
+        command = [
+            '/etc/init.d/ceph',
+            'stop',
+            'osd.%s' % osd_id,
+        ]
+    else:
+        command = [
+            'stop',
+            'ceph-osd',
+            'id=%s' % osd_id,
+        ]
+
+    out, err, code = remoto.process.check(
+        conn,
+        command,
+    )
+
+    # check out first.
+    if not out:
+        return False
+    elif out[0] == 'ceph-osd stop/waiting' or \
+                   'done' in out[1].split(' ')[-1]:
+        return True
+
+
+def removing_osd(conn, osd_id, cluster_path):
+    command = [
+        'ceph',
+        'osd',
+        'crush',
+        'remove',
+        'osd.%s' % osd_id,
+    ]
+
+    remoto.process.run(
+        conn,
+        command,
+    )
+
+    command = [
+        'ceph',
+        'auth',
+        'del',
+        'osd.%s' % osd_id,
+    ]
+
+    remoto.process.run(
+        conn,
+        command,
+    )
+
+    command = [
+        'ceph',
+        'osd',
+        'rm',
+        osd_id,
+    ]
+
+    remoto.process.run(
+        conn,
+        command,
+    )
+
+    umount_osd(conn, osd_id, cluster_path)
+
+
+def umount_osd(conn, osd_id, cluster_path):
+    command = [
+        'umount',
+        cluster_path+'%s' % osd_id,
+    ]
+
+    remoto.process.check(
+        conn,
+        command,
+    )
+
+
 def disk_zap(args):
 
     for hostname, disk, journal in args.disk:
@@ -602,6 +812,8 @@ def osd(args):
         prepare(args, cfg, activate_prepared_disk=True)
     elif args.subcommand == 'activate':
         activate(args, cfg)
+    elif args.subcommand == 'destroy':
+        destroy(args)
     else:
         LOG.error('subcommand %s not implemented', args.subcommand)
         sys.exit(1)
@@ -705,6 +917,13 @@ def make(parser):
         metavar='KEYDIR',
         default='/etc/ceph/dmcrypt-keys',
         help='directory where dm-crypt keys are stored',
+        )
+    parser.add_argument(
+        '--osd-id',
+        metavar='OSD_ID',
+        default=None,
+        # XXX: (NOT IMPLEMENT) w/o this option will destroy all OSD on HOST'
+        help='destroy specific osd id on HOST',
         )
     parser.set_defaults(
         func=osd,
