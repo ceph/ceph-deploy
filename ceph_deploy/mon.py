@@ -58,7 +58,7 @@ def catch_mon_errors(conn, logger, hostname, cfg, args):
     and warn apropriately about it.
     """
     monmap = mon_status_check(conn, logger, hostname, args).get('monmap', {})
-    mon_initial_members = get_mon_initial_members(args, _cfg=cfg)
+    mon_initial_members = get_mon_initial_members(args, error_on_empty=True, _cfg=cfg)
     public_addr = cfg.safe_get('global', 'public_addr')
     public_network = cfg.safe_get('global', 'public_network')
     mon_in_monmap = [
@@ -538,11 +538,11 @@ def get_mon_initial_members(args, error_on_empty=False, _cfg=None):
     else:
         cfg = conf.ceph.load(args)
     mon_initial_members = cfg.safe_get('global', 'mon_initial_members')
-    monitors = re.split(r'[,\s]+', mon_initial_members)
-    if not monitors and error_on_empty:
+    if not mon_initial_members and error_on_empty:
         raise exc.NeedHostError(
             'could not find `mon initial members` defined in ceph.conf'
         )
+    monitors = re.split(r'[,\s]+', mon_initial_members)
     return monitors
 
 
