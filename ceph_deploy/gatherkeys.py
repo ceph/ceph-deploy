@@ -56,7 +56,7 @@ def gatherkeys(args):
         raise exc.KeyNotFoundError(keyring, args.mon)
 
     # bootstrap
-    for what in ['osd', 'mds']:
+    for what in ['osd', 'mds', 'rgw']:
         keyring = '/var/lib/ceph/bootstrap-{what}/{cluster}.keyring'.format(
             what=what,
             cluster=args.cluster)
