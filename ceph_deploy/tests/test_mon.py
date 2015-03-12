@@ -1,6 +1,7 @@
 from ceph_deploy import exc, mon
 from ceph_deploy.conf.ceph import CephConf
 from mock import Mock
+import pytest
 
 
 def make_fake_conf():
@@ -20,6 +21,45 @@ def make_fake_conn(receive_returns=None):
     return conn
 
 
+class TestGetMonInitialMembers(object):
+
+    def list_and_size_checker(self, chk_item, flag):
+        if isinstance(chk_item, list):
+            if len(chk_item) == 1 and flag == 'single':
+                return True
+            if len(chk_item) > 1 and flag == 'multiple':
+                return True
+        else:
+            raise AssertionError('Return value is invalid! (isList:%s, List size:%d)' %
+                                    (isinstance(chk_item, list), len(chk_item)))
+
+    def test_assert_if_mon_none_and_empty_True(self):
+        cfg = make_fake_conf()
+        with pytest.raises(exc.NeedHostError):
+            mon.get_mon_initial_members(Mock(), True, cfg)
+
+    def test_return_if_mon_none_and_empty_false(self):
+        cfg = make_fake_conf()
+        mon_initial_members = mon.get_mon_initial_members(Mock(), False, cfg)
+        if mon_initial_members is None:
+            return True
+        raise AssertionError("Return value is invalid! (Should be None)")
+
+    def test_single_item_if_mon_not_none(self):
+        cfg = make_fake_conf()
+        cfg.add_section('global')
+        cfg.set('global', 'mon initial members', 'AAAA')
+        mon_initial_members = mon.get_mon_initial_members(Mock(), False, cfg)
+        self.list_and_size_checker(mon_initial_members, 'single')
+
+    def test_multiple_item_if_mon_not_none(self):
+        cfg = make_fake_conf()
+        cfg.add_section('global')
+        cfg.set('global', 'mon initial members', 'AAAA, BBBB')
+        mon_initial_members = mon.get_mon_initial_members(Mock(), False, cfg)
+        self.list_and_size_checker(mon_initial_members, 'multiple')
+
+
 class TestCatchCommonErrors(object):
 
     def setup(self):
@@ -35,10 +75,7 @@ class TestCatchCommonErrors(object):
     def test_warn_if_no_intial_members(self):
         fake_conn = make_fake_conn()
         cfg = make_fake_conf()
-        try:
-            mon.catch_mon_errors(fake_conn, self.logger, 'host', cfg, Mock())
-        except exc.NeedHostError:
-            self.logger.warning('host is not defined in `mon initial members`')
+        mon.catch_mon_errors(fake_conn, self.logger, 'host', cfg, Mock())
         expected_msg = 'is not defined in `mon initial members`'
         self.assert_logger_message(self.logger.warning, expected_msg)
 
@@ -54,10 +91,7 @@ class TestCatchCommonErrors(object):
     def test_warn_if_not_mon_in_monmap(self):
         fake_conn = make_fake_conn()
         cfg = make_fake_conf()
-        try:
-            mon.catch_mon_errors(fake_conn, self.logger, 'host', cfg, Mock())
-        except exc.NeedHostError:
-            self.logger.warning('monitor host does not exist in monmap')
+        mon.catch_mon_errors(fake_conn, self.logger, 'host', cfg, Mock())
         expected_msg = 'does not exist in monmap'
         self.assert_logger_message(self.logger.warning, expected_msg)
 
@@ -65,10 +99,6 @@ class TestCatchCommonErrors(object):
         fake_conn = make_fake_conn()
         cfg = make_fake_conf()
         cfg.add_section('global')
-        try:
-            mon.catch_mon_errors(fake_conn, self.logger, 'host', cfg, Mock())
-        except exc.NeedHostError:
-            self.logger.warning('neither `public_addr` nor `public_network` '
-                                'keys are defined for monitors')
+        mon.catch_mon_errors(fake_conn, self.logger, 'host', cfg, Mock())
         expected_msg = 'neither `public_addr` nor `public_network`'
         self.assert_logger_message(self.logger.warning, expected_msg)
