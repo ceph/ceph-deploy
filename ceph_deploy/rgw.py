@@ -49,9 +49,9 @@ def create_rgw(distro, name, cluster, init):
             '--cluster', cluster,
             '--name', 'client.bootstrap-rgw',
             '--keyring', bootstrap_keyring,
-            'auth', 'get-or-create', 'client.rgw.{name}'.format(name=name),
+            'auth', 'get-or-create', 'client.{name}'.format(name=name),
             'osd', 'allow rwx',
-            'mon', 'allow rwx',
+            'mon', 'allow rw',
             '-o',
             os.path.join(keypath),
         ]
@@ -72,7 +72,7 @@ def create_rgw(distro, name, cluster, init):
                 '--cluster', cluster,
                 '--name', 'client.bootstrap-rgw',
                 '--keyring', bootstrap_keyring,
-                'auth', 'get-or-create', 'client.rgw.{name}'.format(name=name),
+                'auth', 'get-or-create', 'client.{name}'.format(name=name),
                 'osd', 'allow *',
                 'mon', 'allow *',
                 '-o',
@@ -176,7 +176,7 @@ def rgw(args):
 
 def colon_separated(s):
     host = s
-    name = s
+    name = 'rgw.' + s
     if s.count(':') == 1:
         (host, name) = s.split(':')
     return (host, name)
