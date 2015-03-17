@@ -31,46 +31,49 @@ def fetch_file(args, frompath, topath, _hosts):
 
 def gatherkeys(args):
     # client.admin
-    keyring = '/etc/ceph/{cluster}.client.admin.keyring'.format(
-        cluster=args.cluster)
-    r = fetch_file(
-        args=args,
-        frompath=keyring,
-        topath='{cluster}.client.admin.keyring'.format(
-            cluster=args.cluster),
-        _hosts=args.mon,
-        )
-    if not r:
-        raise exc.KeyNotFoundError(keyring, args.mon)
-
-    # mon.
-    keyring = '/var/lib/ceph/mon/{cluster}-{{hostname}}/keyring'.format(
-        cluster=args.cluster)
-    r = fetch_file(
-        args=args,
-        frompath=keyring,
-        topath='{cluster}.mon.keyring'.format(cluster=args.cluster),
-        _hosts=args.mon,
-        )
-    if not r:
-        raise exc.KeyNotFoundError(keyring, args.mon)
-
-    # bootstrap
-    for what in ['osd', 'mds']:
-        keyring = '/var/lib/ceph/bootstrap-{what}/{cluster}.keyring'.format(
-            what=what,
+    oldmask = os.umask(077)
+    try:
+        keyring = '/etc/ceph/{cluster}.client.admin.keyring'.format(
             cluster=args.cluster)
         r = fetch_file(
             args=args,
             frompath=keyring,
-            topath='{cluster}.bootstrap-{what}.keyring'.format(
-                cluster=args.cluster,
-                what=what),
+            topath='{cluster}.client.admin.keyring'.format(
+                cluster=args.cluster),
             _hosts=args.mon,
             )
         if not r:
             raise exc.KeyNotFoundError(keyring, args.mon)
 
+        # mon.
+        keyring = '/var/lib/ceph/mon/{cluster}-{{hostname}}/keyring'.format(
+            cluster=args.cluster)
+        r = fetch_file(
+            args=args,
+            frompath=keyring,
+            topath='{cluster}.mon.keyring'.format(cluster=args.cluster),
+            _hosts=args.mon,
+            )
+        if not r:
+            raise exc.KeyNotFoundError(keyring, args.mon)
+
+        # bootstrap
+        for what in ['osd', 'mds']:
+            keyring = '/var/lib/ceph/bootstrap-{what}/{cluster}.keyring'.format(
+                what=what,
+                cluster=args.cluster)
+            r = fetch_file(
+                args=args,
+                frompath=keyring,
+                topath='{cluster}.bootstrap-{what}.keyring'.format(
+                    cluster=args.cluster,
+                    what=what),
+                _hosts=args.mon,
+                )
+            if not r:
+                raise exc.KeyNotFoundError(keyring, args.mon)
+    finally:
+        os.umask(oldmask)
 
 @priority(40)
 def make(parser):
