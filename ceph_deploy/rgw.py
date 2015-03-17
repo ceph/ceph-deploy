@@ -29,7 +29,7 @@ def get_bootstrap_rgw_key(cluster):
 def create_rgw(distro, name, cluster, init):
     conn = distro.conn
 
-    path = '/var/lib/ceph/rgw/{cluster}-{name}'.format(
+    path = '/var/lib/ceph/radosgw/{cluster}-{name}'.format(
         cluster=cluster,
         name=name
         )
@@ -89,7 +89,7 @@ def create_rgw(distro, name, cluster, init):
             [
                 'initctl',
                 'emit',
-                'ceph-rgw',
+                'radosgw',
                 'cluster={cluster}'.format(cluster=cluster),
                 'id={name}'.format(name=name),
             ],
