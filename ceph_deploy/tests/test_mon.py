@@ -23,16 +23,6 @@ def make_fake_conn(receive_returns=None):
 
 class TestGetMonInitialMembers(object):
 
-    def list_and_size_checker(self, chk_item, flag):
-        if isinstance(chk_item, list):
-            if len(chk_item) == 1 and flag == 'single':
-                return True
-            if len(chk_item) > 1 and flag == 'multiple':
-                return True
-        else:
-            raise AssertionError('Return value is invalid! (isList:%s, List size:%d)' %
-                                    (isinstance(chk_item, list), len(chk_item)))
-
     def test_assert_if_mon_none_and_empty_True(self):
         cfg = make_fake_conf()
         with pytest.raises(exc.NeedHostError):
@@ -41,23 +31,21 @@ class TestGetMonInitialMembers(object):
     def test_return_if_mon_none_and_empty_false(self):
         cfg = make_fake_conf()
         mon_initial_members = mon.get_mon_initial_members(Mock(), False, cfg)
-        if mon_initial_members is None:
-            return True
-        raise AssertionError("Return value is invalid! (Should be None)")
+        assert mon_initial_members is None
 
     def test_single_item_if_mon_not_none(self):
         cfg = make_fake_conf()
         cfg.add_section('global')
         cfg.set('global', 'mon initial members', 'AAAA')
         mon_initial_members = mon.get_mon_initial_members(Mock(), False, cfg)
-        self.list_and_size_checker(mon_initial_members, 'single')
+        assert set(mon_initial_members) == set(['AAAA'])
 
     def test_multiple_item_if_mon_not_none(self):
         cfg = make_fake_conf()
         cfg.add_section('global')
         cfg.set('global', 'mon initial members', 'AAAA, BBBB')
         mon_initial_members = mon.get_mon_initial_members(Mock(), False, cfg)
-        self.list_and_size_checker(mon_initial_members, 'multiple')
+        assert set(mon_initial_members) == set(['AAAA', 'BBBB'])
 
 
 class TestCatchCommonErrors(object):
