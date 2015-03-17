@@ -6,6 +6,7 @@ def uninstall(conn, purge=False):
         'ceph',
         'ceph-release',
         'ceph-common',
+        'radosgw',
         ]
 
     pkg_managers.yum_remove(

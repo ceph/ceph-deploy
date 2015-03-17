@@ -7,6 +7,7 @@ def uninstall(conn, purge=False):
         'ceph-mds',
         'ceph-common',
         'ceph-fs-common',
+        'radosgw',
         ]
     pkg_managers.apt_remove(
         conn,
