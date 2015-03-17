@@ -69,7 +69,11 @@ def gatherkeys(args):
             _hosts=args.mon,
             )
         if not r:
-            raise exc.KeyNotFoundError(keyring, args.mon)
+            if what in ['osd', 'mds']:
+                raise exc.KeyNotFoundError(keyring, args.mon)
+            else:
+                LOG.warning(("No RGW bootstrap key found. Will not be able to "
+                             "deploy RGW daemons"))
 
 
 @priority(40)
