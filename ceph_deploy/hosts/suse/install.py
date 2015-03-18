@@ -80,6 +80,7 @@ def install(distro, version_kind, version, adjust_repos):
             '--quiet',
             'install',
             'ceph',
+            'radosgw',
             ],
         )
 

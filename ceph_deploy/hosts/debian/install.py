@@ -91,6 +91,7 @@ def install(distro, version_kind, version, adjust_repos):
             'ceph-mds',
             'ceph-common',
             'ceph-fs-common',
+            'radosgw',
             # ceph only recommends gdisk, make sure we actually have
             # it; only really needed for osds, but minimal collateral
             'gdisk',
