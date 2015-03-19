@@ -1,8 +1,11 @@
 Changelog
 =========
 
+1.5
+---
+
 1.5.22
-------
+^^^^^^
 09-Mar-2015
 
 * Enable ``check_obsoletes`` in Yum priorities plugin when deploying
@@ -11,7 +14,7 @@ Changelog
 * Uninstall ``ceph-common`` on Fedora
 
 1.5.21
-------
+^^^^^^
 10-Dec-2014
 
 * Fix distro detection for CentOS and Scientific Linux, which was
@@ -21,34 +24,34 @@ Changelog
   keys were not found.
 
 1.5.20
-------
+^^^^^^
 13-Nov-2014
 
 * log stderr and stdout in the same order as they happen remotely.
 
 1.5.19
-------
+^^^^^^
 29-Oct-2014
 
 * Create temporary ceph.conf files in ``/etc/ceph`` to avoid issues with
   SELinux.
 
 1.5.18
-------
+^^^^^^
 09-Oct-2014
 
 * Fix issue for enabling the OSD service in el-like distros.
 * Create a monitor keyring if it doesn't exist.
 
 1.5.17
-------
+^^^^^^
 06-Oct-2014
 
 * Do not ask twice for passwords when calling ``new``.
 * Ensure priorities are installed and enforced for custom repositories.
 
 1.5.16
-------
+^^^^^^
 30-Sep-2014
 
 * Enable services on ``el`` distros when deploying Ceph daemons.
@@ -58,20 +61,20 @@ Changelog
   detection.
 
 1.5.15
-------
+^^^^^^
 12-Sep-2014
 
 * If ``wget`` is installed don't try to install it regardless.
 
 1.5.14
-------
+^^^^^^
 09-Sep-2014
 
 * Do not override environment variables on remote hosts, preserve them and
   extend the ``$PATH`` if not explicitly told not to.
 
 1.5.13
-------
+^^^^^^
 03-Sep-2014
 
 * Fix missing priority plugin in YUM for Fedora when installing
@@ -79,7 +82,7 @@ Changelog
 * Fixed an issue where errors before the logger was setup would be silenced.
 
 1.5.12
-------
+^^^^^^
 25-Aug-2014
 
 * Better traceback reporting with logging.
@@ -89,14 +92,14 @@ Changelog
 * Be able to concatenate and seed keyring files with ``--keyrings``
 
 1.5.11
-------
+^^^^^^
 25-Aug-2014
 
 *  Fix a problem where CentOS7 is not matched correctly against repos (Thanks
   Tom Walsh)
 
 1.5.10
-------
+^^^^^^
 31-Jul-2014
 
 * Use ``ceph-disk`` with high verbosity
@@ -108,7 +111,7 @@ Changelog
 * Work with inconsistent repo sections for Emperor when setting priorities
 
 1.5.9
------
+^^^^^
 14-Jul-2014
 
 * Allow to optionally set the ``fsid`` when calling ``new``
@@ -117,7 +120,7 @@ Changelog
 * Fix new naming scheme for CentOS platforms that prevented CentOS 7 installs
 
 1.5.8
------
+^^^^^
 09-Jul-2014
 
 * Create a flake8/pep8/linting job so that we prevent Undefined errors
@@ -127,27 +130,27 @@ Changelog
 * Fix an ``AttributeError`` in execnet (see https://github.com/alfredodeza/execnet/issues/1)
 
 1.5.7
------
+^^^^^
 01-Jul-2014
 
 * Fix ``NameError`` on osd.py from an undefined variable
 * Fix a calamari connect problem when installing on multiple hosts
 
 1.5.6
------
+^^^^^
 01-Jul-2014
 
 * Optionally avoid vendoring libraries for upstream package maintainers.
 * Fix RHEL7 installation issue that was pulling ``el6`` packages (Thanks David Vossel)
 
 1.5.5
------
+^^^^^
 10-Jun-2014
 
 * Normalize repo file header calls. Fixes breakage on Calamari repos.
 
 1.5.4
------
+^^^^^
 10-Jun-2014
 
 * Improve help by adding online doc link
@@ -156,7 +159,7 @@ Changelog
 * set the right priority for ceph.repo and warn about this
 
 1.5.3
------
+^^^^^
 30-May-2014
 
 * Another fix for IPV6: write correct ``mon_host`` in ceph.conf
@@ -167,21 +170,21 @@ Changelog
 * Use the correct URL repo when installing for RHEL
 
 1.5.2
------
+^^^^^
 09-May-2014
 
 * Remove ``--`` from the command to install packages. (Thanks Vincenzo Pii)
 * Default to Firefly as the latest, stable Ceph version
 
 1.5.1
------
+^^^^^
 01-May-2014
 
 * Fixes a broken ``osd`` command that had the wrong attribute in the conn
   object
 
 1.5.0
------
+^^^^^
 28-Apr-2014
 
 * Warn if ``requiretty`` is causing issues
@@ -194,8 +197,11 @@ Changelog
 * Implement ``osd list`` to list remote osds
 * Fix install issues on Suse (Thanks Owen Synge)
 
-1.4.0
+1.4
 -----
+
+1.4.0
+^^^^^
 * uninstall ceph-release and clean cache in CentOS
 * Add ability to add monitors to an existing cluster
 * Deprecate use of ``--stable`` for releases, introduce ``--release``
@@ -203,8 +209,11 @@ Changelog
 * Enable default ceph-deploy configurations for repo handling
 * Fix wrong URL for rpm installs with ``--testing`` flag
 
+1.3
+---
+
 1.3.5
------
+^^^^^
 * Support Debian SID for installs
 * Error nicely when hosts cannot be resolved
 * Return a non-zero exit status when monitors have not formed quorum
@@ -215,7 +224,7 @@ Changelog
 * remove dry-run flag that did nothing
 
 1.3.4
------
+^^^^^
 * ``/etc/ceph`` now gets completely removed when using ``purgedata``.
 * Refuse to perform ``purgedata`` if ceph is installed
 * Add more details when a given platform is not supported
@@ -225,7 +234,7 @@ Changelog
 
 
 1.3.3
------
+^^^^^
 * Add repo mirror support with ``--repo-url`` and ``--gpg-url``
 * Remove dependency on the ``which`` command
 * Fix problem when removing ``/var/lib/ceph`` and OSDs are still mounted
@@ -235,20 +244,20 @@ Changelog
 
 
 1.3.2
------
+^^^^^
 * ``ceph-deploy new`` will now attempt to copy SSH keys if necessary unless it
   it disabled.
 * Default to Emperor version of ceph when installing.
 
 1.3.1
------
+^^^^^
 * Use ``shutil.move`` to overwrite files from temporary ones (Thanks Mark
   Kirkwood)
 * Fix failure to ``wget`` GPG keys on Debian and Debian-based distros when
   installing
 
-1.3
----
+1.3.0
+^^^^^
 * Major refactoring for all the remote connections in ceph-deploy. With global
   and granular timeouts.
 * Raise the log level for missing keyrings
@@ -259,8 +268,11 @@ Changelog
 * Fix lack of ``--cluster`` usage on monitor error checks
 * ensure we correctly detect Debian releases
 
+1.2
+---
+
 1.2.7
------
+^^^^^
 * Ensure local calls to ceph-deploy do not attempt to ssh.
 * ``mon create-initial`` command to deploy all defined mons, wait for them to
   form quorum and finally to gatherkeys.
@@ -279,17 +291,17 @@ Changelog
   remote hosts.
 
 1.2.6
------
+^^^^^
 * Fixes a problem witha closed connection for Debian distros when creating
   a mon.
 
 1.2.5
------
+^^^^^
 * Fix yet another hanging problem when starting monitors. Closing the
   connection now before we even start them.
 
 1.2.4
------
+^^^^^
 * Improve ``osd help`` menu with path information
 * Really discourage the use of ``ceph-deploy new [IP]``
 * Fix hanging remote requests
@@ -308,7 +320,7 @@ Changelog
 * Fix hanging problem on remote hosts
 
 1.2.3
------
+^^^^^
 * Fix non-working ``disk list``
 * ``check_call`` utility fixes ``$PATH`` issues.
 * Use proper exit codes from the ``main()`` CLI function
@@ -317,7 +329,7 @@ Changelog
 * Report nicely when ``HOST:DISK`` is not used when zapping.
 
 1.2.2
------
+^^^^^
 * Do not force usage of lsb_release, fallback to
   ``platform.linux_distribution()``
 * Ease installation in CentOS/Scientific by adding the EPEL repo
@@ -327,7 +339,7 @@ Changelog
 * Honor the usage of ``--cluster`` when calling osd prepare.
 
 1.2.1
------
+^^^^^
 * Print the help when no arguments are passed
 * Add a ``--version`` flag
 * Show the version in the help menu
@@ -336,9 +348,8 @@ Changelog
 * default to ``dumpling`` for installs
 * halt execution on remote exceptions
 
-
-1.2
----
+1.2.0
+^^^^^
 * Better logging output
 * Remote logging for individual actions for ``install`` and ``mon create``
 * Install ``ca-certificates`` on all Debian-based distros
