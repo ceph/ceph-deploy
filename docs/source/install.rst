@@ -1,7 +1,7 @@
 
 .. _install:
 
-``install``
+install
 ===========
 A few different distributions are supported with some flags to allow some
 customization for installing ceph on remote nodes.
