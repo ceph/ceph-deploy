@@ -673,9 +673,8 @@ def make(parser):
             'create',
             'prepare',
             'activate',
-            'destroy',
             ],
-        help='list, create (prepare+activate), prepare, activate, or destroy',
+        help='list, create (prepare+activate), prepare, or activate',
         )
     parser.add_argument(
         'disk',

@@ -194,9 +194,8 @@ def make(parser):
         metavar='SUBCOMMAND',
         choices=[
             'create',
-            'destroy',
             ],
-        help='create or destroy',
+        help='create an MDS',
         )
     parser.add_argument(
         'mds',
