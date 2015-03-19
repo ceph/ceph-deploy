@@ -12,3 +12,4 @@ Content Index
    new.rst
    conf.rst
    rgw.rst
+   mds.rst
