@@ -63,7 +63,7 @@ both by external client-facing hosts and internal cluster daemons.
 
 
 --cluster-network --public-network
-==========================================
+----------------------------------
 Are used to provide subnets so that nodes can communicate within that
 network. If passed, validation will occur by looking at the remote IP addresses
 and making sure that at least one of those addresses is valid for the given
