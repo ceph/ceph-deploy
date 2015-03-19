@@ -11,3 +11,4 @@ Content Index
    mon.rst
    new.rst
    conf.rst
+   rgw.rst
