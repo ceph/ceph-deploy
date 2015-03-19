@@ -1,13 +1,13 @@
 .. _mon:
 
-``mon``
+mon
 =======
 The ``mon`` subcommand provides an interface to interact with a cluster's
 monitors. The tool makes a few assumptions that are needed to implement the
 most common scenarios. Monitors are usually very particular in what they need
 to work correctly.
 
-``create-initial``
+create-initial
 ------------------
 Will deploy for monitors defined in ``mon initial members``, wait until
 they form quorum and then ``gatherkeys``, reporting the monitor status along
@@ -23,7 +23,7 @@ along the way.
     ceph-deploy mon create-initial
 
 
-``create``
+create
 ----------
 Deploy monitors by specifying directly like::
 
@@ -36,7 +36,7 @@ Please note that if this is an initial monitor deployment, the preferred way
 is to use ``create-initial``.
 
 
-``add``
+add
 -------
 Add a monitor to an existing cluster::
 
@@ -67,7 +67,7 @@ of the provided host.
 .. versionadded:: 1.4.0
 
 
-``destroy``
+destroy
 -----------
 Completely remove monitors on a remote host. Requires hostname(s) as
 arguments::
@@ -75,7 +75,7 @@ arguments::
     ceph-deploy mon destroy node1
 
 
-``--keyrings``
+--keyrings
 --------------
 Both ``create`` and ``create-initial`` subcommands can be used with the
 ``--keyrings`` flag that accepts a path to search for keyring files.

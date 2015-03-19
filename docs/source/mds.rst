@@ -1,11 +1,11 @@
 .. _mds:
 
-``mds``
+mds
 =======
 The ``mds`` subcommand provides an interface to interact with a cluster's
 CephFS Metadata servers.
 
-``create``
+create
 ----------
 Deploy MDS instances by specifying directly like::
 

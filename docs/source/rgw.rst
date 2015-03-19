@@ -1,11 +1,11 @@
 .. _rgw:
 
-``rgw``
+rgw
 =======
 The ``rgw`` subcommand provides an interface to interact with a cluster's
 RADOS Gateway instances.
 
-``create``
+create
 ----------
 Deploy RGW instances by specifying directly like::
 
