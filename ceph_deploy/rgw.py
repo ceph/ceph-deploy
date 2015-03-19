@@ -192,9 +192,8 @@ def make(parser):
         metavar='SUBCOMMAND',
         choices=[
             'create',
-            'destroy',
             ],
-        help='create or destroy',
+        help='create an RGW instance',
         )
     parser.add_argument(
         'rgw',
