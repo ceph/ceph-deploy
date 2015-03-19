@@ -3,6 +3,8 @@ Changelog
 
 1.5.22
 ------
+09-Mar-2015
+
 * Enable ``check_obsoletes`` in Yum priorities plugin when deploying
   upstream Ceph on RPM-based distros
 * Require ``--release`` flag to install upstream Ceph on RHEL
@@ -10,6 +12,8 @@ Changelog
 
 1.5.21
 ------
+10-Dec-2014
+
 * Fix distro detection for CentOS and Scientific Linux, which was
   preventing installation of EPEL repo as a prerequisite.
 * Default to Giant on install.
@@ -18,25 +22,35 @@ Changelog
 
 1.5.20
 ------
+13-Nov-2014
+
 * log stderr and stdout in the same order as they happen remotely.
 
 1.5.19
 ------
+29-Oct-2014
+
 * Create temporary ceph.conf files in ``/etc/ceph`` to avoid issues with
   SELinux.
 
 1.5.18
 ------
+09-Oct-2014
+
 * Fix issue for enabling the OSD service in el-like distros.
 * Create a monitor keyring if it doesn't exist.
 
 1.5.17
 ------
+06-Oct-2014
+
 * Do not ask twice for passwords when calling ``new``.
 * Ensure priorities are installed and enforced for custom repositories.
 
 1.5.16
 ------
+30-Sep-2014
+
 * Enable services on ``el`` distros when deploying Ceph daemons.
 * Smarter detection of ``sudo`` need on remote nodes (prevents issues when
   running ceph-deploy as ``root`` or with ``sudo``.
@@ -45,21 +59,29 @@ Changelog
 
 1.5.15
 ------
+12-Sep-2014
+
 * If ``wget`` is installed don't try to install it regardless.
 
 1.5.14
 ------
+09-Sep-2014
+
 * Do not override environment variables on remote hosts, preserve them and
   extend the ``$PATH`` if not explicitly told not to.
 
 1.5.13
 ------
+03-Sep-2014
+
 * Fix missing priority plugin in YUM for Fedora when installing
 * Implement --public-network and --cluster-network with remote IP validation
 * Fixed an issue where errors before the logger was setup would be silenced.
 
 1.5.12
 ------
+25-Aug-2014
+
 * Better traceback reporting with logging.
 * Close stderr/stdout when ceph-deploy completes operations (silences odd
   tracebacks)
@@ -68,11 +90,15 @@ Changelog
 
 1.5.11
 ------
-* Fix a problem where CentOS7 is not matched correctly against repos (Thanks
+25-Aug-2014
+
+*  Fix a problem where CentOS7 is not matched correctly against repos (Thanks
   Tom Walsh)
 
 1.5.10
 ------
+31-Jul-2014
+
 * Use ``ceph-disk`` with high verbosity
 * Don't require ``ceph-common`` on EL distros
 * Use ``ceph-disk zap`` instead of re-implementing it
@@ -83,6 +109,8 @@ Changelog
 
 1.5.9
 -----
+14-Jul-2014
+
 * Allow to optionally set the ``fsid`` when calling ``new``
 * Correctly select sysvinit or systemd for Suse versions (Thanks Owen Synge)
 * Use correct version of remoto (``0.0.19``) that holds the ``None`` global fix
@@ -90,6 +118,8 @@ Changelog
 
 1.5.8
 -----
+09-Jul-2014
+
 * Create a flake8/pep8/linting job so that we prevent Undefined errors
 * Add partprobe/partx calls when zapping disks
 * Fix RHEL7 installation issues (url was using el6 incorrectly) (Thanks David Vossel)
@@ -98,20 +128,28 @@ Changelog
 
 1.5.7
 -----
+01-Jul-2014
+
 * Fix ``NameError`` on osd.py from an undefined variable
 * Fix a calamari connect problem when installing on multiple hosts
 
 1.5.6
 -----
+01-Jul-2014
+
 * Optionally avoid vendoring libraries for upstream package maintainers.
 * Fix RHEL7 installation issue that was pulling ``el6`` packages (Thanks David Vossel)
 
 1.5.5
 -----
+10-Jun-2014
+
 * Normalize repo file header calls. Fixes breakage on Calamari repos.
 
 1.5.4
 -----
+10-Jun-2014
+
 * Improve help by adding online doc link
 * allow cephdeploy.conf to set priorities in repos
 * install priorities plugin for yum distros
@@ -119,6 +157,8 @@ Changelog
 
 1.5.3
 -----
+30-May-2014
+
 * Another fix for IPV6: write correct ``mon_host`` in ceph.conf
 * Support ``proxy`` settings for repo files in YUM
 * Better error message when ceph.conf is not found
@@ -128,16 +168,22 @@ Changelog
 
 1.5.2
 -----
+09-May-2014
+
 * Remove ``--`` from the command to install packages. (Thanks Vincenzo Pii)
 * Default to Firefly as the latest, stable Ceph version
 
 1.5.1
 -----
+01-May-2014
+
 * Fixes a broken ``osd`` command that had the wrong attribute in the conn
   object
 
 1.5.0
 -----
+28-Apr-2014
+
 * Warn if ``requiretty`` is causing issues
 * Support IPV6 host resolution (Thanks Frode Nordahl)
 * Fix incorrect paths for local cephdeploy.conf
