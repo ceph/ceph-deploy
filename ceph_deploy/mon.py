@@ -58,7 +58,7 @@ def catch_mon_errors(conn, logger, hostname, cfg, args):
     and warn apropriately about it.
     """
     monmap = mon_status_check(conn, logger, hostname, args).get('monmap', {})
-    mon_initial_members = cfg.safe_get('global', 'mon_initial_members')
+    mon_initial_members = get_mon_initial_members(args, _cfg=cfg)
     public_addr = cfg.safe_get('global', 'public_addr')
     public_network = cfg.safe_get('global', 'public_network')
     mon_in_monmap = [
@@ -232,14 +232,9 @@ def mon_add(args):
 
 
 def mon_create(args):
-
     cfg = conf.ceph.load(args)
     if not args.mon:
-        mon_initial_members = cfg.safe_get('global', 'mon_initial_members')
-        args.mon = re.split(r'[,\s]+', mon_initial_members)
-
-    if not args.mon:
-        raise exc.NeedHostError()
+        args.mon = get_mon_initial_members(args, error_on_empty=True, _cfg=cfg)
 
     if args.keyrings:
         monitor_keyring = concatenate_keyrings(args)
@@ -398,11 +393,7 @@ def mon_destroy(args):
 
 
 def mon_create_initial(args):
-    cfg = conf.ceph.load(args)
-    cfg_initial_members = cfg.safe_get('global', 'mon_initial_members')
-    if cfg_initial_members is None:
-        raise RuntimeError('No `mon initial members` defined in config')
-    mon_initial_members = re.split(r'[,\s]+', cfg_initial_members)
+    mon_initial_members = get_mon_initial_members(args, error_on_empty=True)
 
     # create them normally through mon_create
     mon_create(args)
@@ -534,6 +525,27 @@ def make(parser):
 #
 # Helpers
 #
+
+
+def get_mon_initial_members(args, error_on_empty=False, _cfg=None):
+    """
+    Read the ceph config file and return the value of mon_initial_members
+
+    Optionally, a NeedHostError can be raised if the value is None.
+    """
+    if _cfg:
+        cfg = _cfg
+    else:
+        cfg = conf.ceph.load(args)
+    mon_initial_members = cfg.safe_get('global', 'mon_initial_members')
+    if not mon_initial_members:
+        if error_on_empty:
+            raise exc.NeedHostError(
+                'could not find `mon initial members` defined in ceph.conf'
+            )
+    else:
+        mon_initial_members = re.split(r'[,\s]+', mon_initial_members)
+    return mon_initial_members
 
 
 def is_running(conn, args):
