@@ -14,29 +14,29 @@ from ceph_deploy.cliutil import priority
 LOG = logging.getLogger(__name__)
 
 
-def get_bootstrap_mds_key(cluster):
+def get_bootstrap_rgw_key(cluster):
     """
-    Read the bootstrap-mds key for `cluster`.
+    Read the bootstrap-rgw key for `cluster`.
     """
-    path = '{cluster}.bootstrap-mds.keyring'.format(cluster=cluster)
+    path = '{cluster}.bootstrap-rgw.keyring'.format(cluster=cluster)
     try:
         with file(path, 'rb') as f:
             return f.read()
     except IOError:
-        raise RuntimeError('bootstrap-mds keyring not found; run \'gatherkeys\'')
+        raise RuntimeError('bootstrap-rgw keyring not found; run \'gatherkeys\'')
 
 
-def create_mds(distro, name, cluster, init):
+def create_rgw(distro, name, cluster, init):
     conn = distro.conn
 
-    path = '/var/lib/ceph/mds/{cluster}-{name}'.format(
+    path = '/var/lib/ceph/radosgw/{cluster}-{name}'.format(
         cluster=cluster,
         name=name
         )
 
     conn.remote_module.safe_mkdir(path)
 
-    bootstrap_keyring = '/var/lib/ceph/bootstrap-mds/{cluster}.keyring'.format(
+    bootstrap_keyring = '/var/lib/ceph/bootstrap-rgw/{cluster}.keyring'.format(
         cluster=cluster
         )
 
@@ -47,12 +47,11 @@ def create_mds(distro, name, cluster, init):
         [
             'ceph',
             '--cluster', cluster,
-            '--name', 'client.bootstrap-mds',
+            '--name', 'client.bootstrap-rgw',
             '--keyring', bootstrap_keyring,
-            'auth', 'get-or-create', 'mds.{name}'.format(name=name),
+            'auth', 'get-or-create', 'client.{name}'.format(name=name),
             'osd', 'allow rwx',
-            'mds', 'allow',
-            'mon', 'allow profile mds',
+            'mon', 'allow rw',
             '-o',
             os.path.join(keypath),
         ]
@@ -64,19 +63,18 @@ def create_mds(distro, name, cluster, init):
             # yes stdout as err because this is an error
             conn.logger.error(line)
         conn.logger.error('exit code from command was: %s' % returncode)
-        raise RuntimeError('could not create mds')
+        raise RuntimeError('could not create rgw')
 
         remoto.process.check(
             conn,
             [
                 'ceph',
                 '--cluster', cluster,
-                '--name', 'client.bootstrap-mds',
+                '--name', 'client.bootstrap-rgw',
                 '--keyring', bootstrap_keyring,
-                'auth', 'get-or-create', 'mds.{name}'.format(name=name),
+                'auth', 'get-or-create', 'client.{name}'.format(name=name),
                 'osd', 'allow *',
-                'mds', 'allow',
-                'mon', 'allow rwx',
+                'mon', 'allow *',
                 '-o',
                 os.path.join(keypath),
             ]
@@ -91,7 +89,7 @@ def create_mds(distro, name, cluster, init):
             [
                 'initctl',
                 'emit',
-                'ceph-mds',
+                'radosgw',
                 'cluster={cluster}'.format(cluster=cluster),
                 'id={name}'.format(name=name),
             ],
@@ -104,7 +102,7 @@ def create_mds(distro, name, cluster, init):
                 'service',
                 'ceph',
                 'start',
-                'mds.{name}'.format(name=name),
+                'rgw.{name}'.format(name=name),
             ],
             timeout=7
         )
@@ -113,22 +111,22 @@ def create_mds(distro, name, cluster, init):
         system.enable_service(distro.conn)
 
 
-def mds_create(args):
+def rgw_create(args):
     cfg = conf.ceph.load(args)
     LOG.debug(
-        'Deploying mds, cluster %s hosts %s',
+        'Deploying rgw, cluster %s hosts %s',
         args.cluster,
-        ' '.join(':'.join(x or '' for x in t) for t in args.mds),
+        ' '.join(':'.join(x or '' for x in t) for t in args.rgw),
         )
 
-    if not args.mds:
+    if not args.rgw:
         raise exc.NeedHostError()
 
-    key = get_bootstrap_mds_key(cluster=args.cluster)
+    key = get_bootstrap_rgw_key(cluster=args.cluster)
 
     bootstrapped = set()
     errors = 0
-    for hostname, name in args.mds:
+    for hostname, name in args.rgw:
         try:
             distro = hosts.get(hostname, username=args.username)
             rlogger = distro.conn.logger
@@ -142,7 +140,7 @@ def mds_create(args):
 
             if hostname not in bootstrapped:
                 bootstrapped.add(hostname)
-                LOG.debug('deploying mds bootstrap to %s', hostname)
+                LOG.debug('deploying rgw bootstrap to %s', hostname)
                 conf_data = StringIO()
                 cfg.write(conf_data)
                 distro.conn.remote_module.write_conf(
@@ -151,34 +149,34 @@ def mds_create(args):
                     args.overwrite_conf,
                 )
 
-                path = '/var/lib/ceph/bootstrap-mds/{cluster}.keyring'.format(
+                path = '/var/lib/ceph/bootstrap-rgw/{cluster}.keyring'.format(
                     cluster=args.cluster,
                 )
 
                 if not distro.conn.remote_module.path_exists(path):
-                    rlogger.warning('mds keyring does not exist yet, creating one')
+                    rlogger.warning('rgw keyring does not exist yet, creating one')
                     distro.conn.remote_module.write_keyring(path, key)
 
-            create_mds(distro, name, args.cluster, distro.init)
+            create_rgw(distro, name, args.cluster, distro.init)
             distro.conn.exit()
         except RuntimeError as e:
             LOG.error(e)
             errors += 1
 
     if errors:
-        raise exc.GenericError('Failed to create %d MDSs' % errors)
+        raise exc.GenericError('Failed to create %d RGWs' % errors)
 
 
-def mds(args):
+def rgw(args):
     if args.subcommand == 'create':
-        mds_create(args)
+        rgw_create(args)
     else:
         LOG.error('subcommand %s not implemented', args.subcommand)
 
 
 def colon_separated(s):
     host = s
-    name = s
+    name = 'rgw.' + s
     if s.count(':') == 1:
         (host, name) = s.split(':')
     return (host, name)
@@ -187,7 +185,7 @@ def colon_separated(s):
 @priority(30)
 def make(parser):
     """
-    Deploy ceph MDS on remote hosts.
+    Deploy ceph RGW on remote hosts.
     """
     parser.add_argument(
         'subcommand',
@@ -195,15 +193,15 @@ def make(parser):
         choices=[
             'create',
             ],
-        help='create an MDS',
+        help='create an RGW instance',
         )
     parser.add_argument(
-        'mds',
+        'rgw',
         metavar='HOST[:NAME]',
         nargs='*',
         type=colon_separated,
         help='host (and optionally the daemon name) to deploy on',
         )
     parser.set_defaults(
-        func=mds,
+        func=rgw,
         )

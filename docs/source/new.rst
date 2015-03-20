@@ -1,6 +1,6 @@
 .. _new:
 
-``new``
+new
 =======
 This subcommand is used to generate a working ``ceph.conf`` file that will
 contain important information for provisioning nodes and/or adding them to
@@ -62,8 +62,8 @@ contact to authenticate to the cluster, and they need to be reachable
 both by external client-facing hosts and internal cluster daemons.
 
 
-``--cluster-network`` ``--public-network``
-==========================================
+--cluster-network --public-network
+----------------------------------
 Are used to provide subnets so that nodes can communicate within that
 network. If passed, validation will occur by looking at the remote IP addresses
 and making sure that at least one of those addresses is valid for the given

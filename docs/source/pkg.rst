@@ -1,7 +1,7 @@
 
 .. _pkg:
 
-``pkg``
+pkg
 =======
 Provides a simple interface to install or remove packages on a remote host (or
 a number of remote hosts).
@@ -16,7 +16,7 @@ than one package in the argument.
 
 .. _pkg-install:
 
-``--install``
+--install
 -------------
 This flag will use the package (or packages) passed in to perform an installation using
 the distribution package manager in a non-interactive way. Package managers
@@ -38,7 +38,7 @@ An example call to install a few packages on 2 hosts (with hostnames like
 
 .. _pkg-remove:
 
-``--remove``
+--remove
 ------------
 This flag will use the package (or packages) passed in to remove them using
 the distribution package manager in a non-interactive way. Package managers

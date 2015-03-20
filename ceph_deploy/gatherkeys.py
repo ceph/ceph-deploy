@@ -30,9 +30,9 @@ def fetch_file(args, frompath, topath, _hosts):
 
 
 def gatherkeys(args):
-    # client.admin
     oldmask = os.umask(077)
     try:
+        # client.admin
         keyring = '/etc/ceph/{cluster}.client.admin.keyring'.format(
             cluster=args.cluster)
         r = fetch_file(
@@ -58,7 +58,7 @@ def gatherkeys(args):
             raise exc.KeyNotFoundError(keyring, args.mon)
 
         # bootstrap
-        for what in ['osd', 'mds']:
+        for what in ['osd', 'mds', 'rgw']:
             keyring = '/var/lib/ceph/bootstrap-{what}/{cluster}.keyring'.format(
                 what=what,
                 cluster=args.cluster)
@@ -71,9 +71,14 @@ def gatherkeys(args):
                 _hosts=args.mon,
                 )
             if not r:
-                raise exc.KeyNotFoundError(keyring, args.mon)
+                if what in ['osd', 'mds']:
+                    raise exc.KeyNotFoundError(keyring, args.mon)
+                else:
+                    LOG.warning(("No RGW bootstrap key found. Will not be able to "
+                                 "deploy RGW daemons"))
     finally:
         os.umask(oldmask)
+
 
 @priority(40)
 def make(parser):

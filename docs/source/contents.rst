@@ -5,9 +5,11 @@ Content Index
    :maxdepth: 2
 
    index.rst
-   changelog.rst
-   install.rst
-   pkg.rst
-   mon.rst
    new.rst
+   install.rst
+   mon.rst
+   rgw.rst
+   mds.rst
    conf.rst
+   pkg.rst
+   changelog.rst
