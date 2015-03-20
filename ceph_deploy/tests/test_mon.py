@@ -1,6 +1,7 @@
-from ceph_deploy import mon
+from ceph_deploy import exc, mon
 from ceph_deploy.conf.ceph import CephConf
 from mock import Mock
+import pytest
 
 
 def make_fake_conf():
@@ -18,6 +19,33 @@ def make_fake_conn(receive_returns=None):
     conn.gateway.remote_exec = conn.receive
     conn.result = Mock(return_value=conn)
     return conn
+
+
+class TestGetMonInitialMembers(object):
+
+    def test_assert_if_mon_none_and_empty_True(self):
+        cfg = make_fake_conf()
+        with pytest.raises(exc.NeedHostError):
+            mon.get_mon_initial_members(Mock(), True, cfg)
+
+    def test_return_if_mon_none_and_empty_false(self):
+        cfg = make_fake_conf()
+        mon_initial_members = mon.get_mon_initial_members(Mock(), False, cfg)
+        assert mon_initial_members is None
+
+    def test_single_item_if_mon_not_none(self):
+        cfg = make_fake_conf()
+        cfg.add_section('global')
+        cfg.set('global', 'mon initial members', 'AAAA')
+        mon_initial_members = mon.get_mon_initial_members(Mock(), False, cfg)
+        assert set(mon_initial_members) == set(['AAAA'])
+
+    def test_multiple_item_if_mon_not_none(self):
+        cfg = make_fake_conf()
+        cfg.add_section('global')
+        cfg.set('global', 'mon initial members', 'AAAA, BBBB')
+        mon_initial_members = mon.get_mon_initial_members(Mock(), False, cfg)
+        assert set(mon_initial_members) == set(['AAAA', 'BBBB'])
 
 
 class TestCatchCommonErrors(object):

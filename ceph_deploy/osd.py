@@ -9,7 +9,7 @@ from textwrap import dedent
 
 from cStringIO import StringIO
 
-from ceph_deploy import conf, exc, hosts
+from ceph_deploy import conf, exc, hosts, mon
 from ceph_deploy.util import constants, system
 from ceph_deploy.cliutil import priority
 from ceph_deploy.lib import remoto
@@ -466,16 +466,7 @@ def disk_list(args, cfg):
 
 
 def osd_list(args, cfg):
-    # FIXME: this portion should probably be abstracted. We do the same in
-    # mon.py
-    cfg = conf.ceph.load(args)
-    mon_initial_members = cfg.safe_get('global', 'mon_initial_members')
-    monitors = re.split(r'[,\s]+', mon_initial_members)
-
-    if not monitors:
-        raise exc.NeedHostError(
-            'could not find `mon initial members` defined in ceph.conf'
-        )
+    monitors = mon.get_mon_initial_members(args, error_on_empty=True, _cfg=cfg)
 
     # get the osd tree from a monitor host
     mon_host = monitors[0]
