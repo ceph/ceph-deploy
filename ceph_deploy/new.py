@@ -211,18 +211,21 @@ def new_mon_keyring(args):
     keypath = '{name}.mon.keyring'.format(
         name=args.cluster,
         )
-
+    oldmask = os.umask(077)
     LOG.debug('Writing monitor keyring to %s...', keypath)
-    tmp = '%s.tmp' % keypath
-    with file(tmp, 'w') as f:
-        f.write(mon_keyring)
     try:
-        os.rename(tmp, keypath)
-    except OSError as e:
-        if e.errno == errno.EEXIST:
-            raise exc.ClusterExistsError(keypath)
-        else:
-            raise
+        tmp = '%s.tmp' % keypath
+        with open(tmp, 'w', 0600) as f:
+            f.write(mon_keyring)
+        try:
+            os.rename(tmp, keypath)
+        except OSError as e:
+            if e.errno == errno.EEXIST:
+                raise exc.ClusterExistsError(keypath)
+            else:
+                raise
+    finally:
+        os.umask(oldmask)
 
 
 @priority(10)
