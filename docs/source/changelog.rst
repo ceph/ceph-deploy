@@ -96,7 +96,7 @@ Changelog
 25-Aug-2014
 
 *  Fix a problem where CentOS7 is not matched correctly against repos (Thanks
-  Tom Walsh)
+   Tom Walsh)
 
 1.5.10
 ^^^^^^
