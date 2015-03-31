@@ -233,7 +233,7 @@ def install_repo(args):
             distro.codename
         )
 
-        return custom_repo(distro, args, cd_conf, rlogger, install_ceph=False)
+        custom_repo(distro, args, cd_conf, rlogger, install_ceph=False)
 
 
 def uninstall(args):
