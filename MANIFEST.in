@@ -2,4 +2,4 @@ include *.rst
 include LICENSE
 include scripts/ceph-deploy
 include vendor.py
-prune ceph_deploy/test
+include tox.ini
