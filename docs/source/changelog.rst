@@ -4,14 +4,27 @@ Changelog
 1.5
 ---
 
+1.5.23
+^^^^^^
+07-Apr-2015
+
+* Default to Hammer on install.
+* Add ``rgw`` command to easily create rgw instances.
+* Automatically install the radosgw package.
+* Remove unimplemented subcommands from CLI and help.
+* Fix an issue where keyring permissions were world readable
+  (thanks Owen Synge).
+* Fix an issue preventing all but the first host given to
+  ``install --repo`` from being used.
+
 1.5.22
 ^^^^^^
 09-Mar-2015
 
 * Enable ``check_obsoletes`` in Yum priorities plugin when deploying
-  upstream Ceph on RPM-based distros
-* Require ``--release`` flag to install upstream Ceph on RHEL
-* Uninstall ``ceph-common`` on Fedora
+  upstream Ceph on RPM-based distros.
+* Require ``--release`` flag to install upstream Ceph on RHEL.
+* Uninstall ``ceph-common`` on Fedora.
 
 1.5.21
 ^^^^^^
