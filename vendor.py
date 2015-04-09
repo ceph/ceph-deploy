@@ -31,6 +31,8 @@ def run(cmd):
     if result.wait():
         print_error(result.stdout.readlines(), result.stderr.readlines())
 
+    return result.returncode
+
 
 def print_error(stdout, stderr):
     print '*'*80
