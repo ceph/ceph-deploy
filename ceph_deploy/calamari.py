@@ -33,7 +33,7 @@ def connect(args):
         raise RuntimeError('no calamari-minion repo found')
 
     for hostname in args.hosts:
-        distro = hosts.get(hostname, username=args.username)
+        distro = hosts.get(hostname, username=args.username, use_rhceph=True)
         if not distro_is_supported(distro.normalized_name):
             raise exc.UnsupportedPlatform(
                 distro.distro_name,
