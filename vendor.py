@@ -67,7 +67,7 @@ def vendor_library(name, version, cmd=None):
 
     if not path.exists(vendor_dest):
         rc = run(['git', 'clone', 'git://ceph.com/%s' % name])
-        if (rc):
+        if rc:
             print "%s: git clone failed using ceph.com url with rc %s, trying github.com" % (path.basename(__file__), rc)
             run(['git', 'clone', 'https://github.com/ceph/%s.git' % name])
         os.chdir(vendor_src)
