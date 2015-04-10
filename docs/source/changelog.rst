@@ -12,8 +12,8 @@ Changelog
 * Add ``rgw`` command to easily create rgw instances.
 * Automatically install the radosgw package.
 * Remove unimplemented subcommands from CLI and help.
-* Fix an issue where keyring permissions were world readable
-  (thanks Owen Synge).
+* **CVE-2015-3010**: Fix an issue where keyring permissions were
+  world readable (thanks Owen Synge).
 * Fix an issue preventing all but the first host given to
   ``install --repo`` from being used.
 
