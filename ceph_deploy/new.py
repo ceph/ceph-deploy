@@ -215,7 +215,7 @@ def new_mon_keyring(args):
     LOG.debug('Writing monitor keyring to %s...', keypath)
     try:
         tmp = '%s.tmp' % keypath
-        with file(tmp, 'w') as f:
+        with file(tmp, 'w', 0600) as f:
             f.write(mon_keyring)
         try:
             os.rename(tmp, keypath)
