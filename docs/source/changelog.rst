@@ -4,6 +4,13 @@ Changelog
 1.5
 ---
 
+1.5.24
+^^^^^^
+**UNRELEASED**
+
+* Use version 0.0.25 of `remoto` that fixes an issue where output would be cut
+  (https://github.com/alfredodeza/remoto/issues/15).
+
 1.5.23
 ^^^^^^
 07-Apr-2015
