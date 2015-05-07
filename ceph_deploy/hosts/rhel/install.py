@@ -2,12 +2,15 @@ from ceph_deploy.util import pkg_managers, templates
 from ceph_deploy.lib import remoto
 
 
-def install(distro, version_kind, version, adjust_repos):
+def install(distro, version_kind, version, adjust_repos, **kw):
+    packages = kw.get('components', ['ceph', 'ceph-mon', 'ceph-osd'])
     pkg_managers.yum_clean(distro.conn)
-    pkg_managers.yum(distro.conn, ['ceph', 'ceph-mon', 'ceph-osd'])
+    pkg_managers.yum(distro.conn, packages)
 
 
-def mirror_install(distro, repo_url, gpg_url, adjust_repos, extra_installs=True):
+def mirror_install(distro, repo_url,
+                   gpg_url, adjust_repos, extra_installs=True, **kw):
+    packages = kw.get('components', ['ceph', 'ceph-mon', 'ceph-osd'])
     repo_url = repo_url.strip('/')  # Remove trailing slashes
     gpg_url_path = gpg_url.split('file://')[-1]  # Remove file if present
 
@@ -31,10 +34,14 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos, extra_installs=True)
         distro.conn.remote_module.write_yum_repo(ceph_repo_content)
 
     if extra_installs:
-        pkg_managers.yum(distro.conn, ['ceph', 'ceph-mon', 'ceph-osd'])
+        pkg_managers.yum(distro.conn, packages)
 
 
 def repo_install(distro, reponame, baseurl, gpgkey, **kw):
+    # do we have specific components to install?
+    # removed them from `kw` so that we don't mess with other defauls
+    packages = kw.pop('components', ['ceph', 'ceph-mon', 'ceph-osd'])
+
     # Get some defaults
     name = kw.pop('name', '%s repo' % reponame)
     enabled = kw.pop('enabled', 1)
@@ -75,4 +82,4 @@ def repo_install(distro, reponame, baseurl, gpgkey, **kw):
 
     # Some custom repos do not need to install ceph
     if install_ceph:
-        pkg_managers.yum(distro.conn, ['ceph', 'ceph-mon', 'ceph-osd', 'radosgw'])
+        pkg_managers.yum(distro.conn, packages)
