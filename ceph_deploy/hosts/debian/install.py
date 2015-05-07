@@ -4,7 +4,9 @@ from ceph_deploy.lib import remoto
 from ceph_deploy.util import pkg_managers
 
 
-def install(distro, version_kind, version, adjust_repos):
+def install(distro, version_kind, version, adjust_repos, **kw):
+    # note: when split packages for ceph land for Debian/Ubuntu,
+    # `kw['components']` will have those. Unused for now.
     codename = distro.codename
     machine = distro.machine_type
 
@@ -99,7 +101,9 @@ def install(distro, version_kind, version, adjust_repos):
         )
 
 
-def mirror_install(distro, repo_url, gpg_url, adjust_repos):
+def mirror_install(distro, repo_url, gpg_url, adjust_repos, **kw):
+    # note: when split packages for ceph land for Debian/Ubuntu,
+    # `kw['components']` will have those. Unused for now.
     repo_url = repo_url.strip('/')  # Remove trailing slashes
     gpg_path = gpg_url.split('file://')[-1]
 
@@ -148,6 +152,11 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos):
 
 
 def repo_install(distro, repo_name, baseurl, gpgkey, **kw):
+    # do we have specific components to install?
+    # removed them from `kw` so that we don't mess with other defauls
+    # note: when split packages for ceph land for CentOS, `packages`
+    # can be used. Unused for now.
+    packages = kw.pop('components', ['ceph', 'ceph-mon', 'ceph-osd'])  # noqa
     # Get some defaults
     safe_filename = '%s.list' % repo_name.replace(' ', '-')
     install_ceph = kw.pop('install_ceph', False)
