@@ -28,6 +28,23 @@ def sanitize_args(args):
     return args
 
 
+def detect_components(args):
+    """
+    Since the package split, now there are various different ceph components to
+    install like:
+
+    * ceph
+    * ceph-mon
+    * ceph-osd
+    * ceph-mds
+
+    This helper function should parse the args that may contain specifics about
+    these flags and return the default if none are passed in (which is, install
+    everything)
+    """
+    pass
+
+
 def install(args):
     args = sanitize_args(args)
     if args.repo:
