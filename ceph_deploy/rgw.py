@@ -176,9 +176,10 @@ def rgw(args):
 
 def colon_separated(s):
     host = s
-    name = 'rgw.' + s
+    name = s
     if s.count(':') == 1:
         (host, name) = s.split(':')
+    name = 'rgw.' + name
     return (host, name)
 
 
@@ -200,7 +201,8 @@ def make(parser):
         metavar='HOST[:NAME]',
         nargs='*',
         type=colon_separated,
-        help='host (and optionally the daemon name) to deploy on',
+        help='host (and optionally the daemon name) to deploy on. \
+                NAME is automatically prefixed with \'rgw.\'',
         )
     parser.set_defaults(
         func=rgw,
