@@ -7,7 +7,7 @@ def uninstall(conn, purge=False):
         'libcephfs1',
         'librados2',
         'librbd1',
-        'radosgw',
+        'ceph-radosgw',
         ]
     cmd = [
         'zypper',

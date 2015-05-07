@@ -80,6 +80,6 @@ def install(distro, version_kind, version, adjust_repos):
             '-q',
             'install',
             'ceph',
-            'radosgw',
+            'ceph-radosgw',
         ],
     )
