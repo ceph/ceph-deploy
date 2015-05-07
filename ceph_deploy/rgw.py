@@ -34,7 +34,7 @@ def create_rgw(distro, name, cluster, init):
         name=name
         )
 
-    conn.remote_module.safe_mkdir(path)
+    conn.remote_module.safe_makedirs(path)
 
     bootstrap_keyring = '/var/lib/ceph/bootstrap-rgw/{cluster}.keyring'.format(
         cluster=cluster
