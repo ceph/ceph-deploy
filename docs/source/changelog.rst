@@ -10,6 +10,7 @@ Changelog
 
 * Use version 0.0.25 of `remoto` that fixes an issue where output would be cut
   (https://github.com/alfredodeza/remoto/issues/15).
+* Automatically prefix custom RGW daemon names with 'rgw.'
 
 1.5.23
 ^^^^^^
