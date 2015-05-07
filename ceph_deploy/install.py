@@ -423,6 +423,41 @@ def make(parser):
     )
 
     version.add_argument(
+        '--mon',
+        dest='install_mon',
+        action='store_true',
+        help='install install the mon component only',
+    )
+
+    version.add_argument(
+        '--mds',
+        dest='install_mds',
+        action='store_true',
+        help='install install the mds component only',
+    )
+
+    version.add_argument(
+        '--rgw',
+        dest='install_rgw',
+        action='store_true',
+        help='install the rgw component only',
+    )
+
+    version.add_argument(
+        '--osd',
+        dest='install_osd',
+        action='store_true',
+        help='install the osd component only',
+    )
+
+    version.add_argument(
+        '--all',
+        dest='install_all',
+        action='store_true',
+        help='install all ceph components (e.g. mon,osd,mds,rgw)',
+    )
+
+    version.add_argument(
         '--adjust-repos',
         dest='adjust_repos',
         action='store_true',
