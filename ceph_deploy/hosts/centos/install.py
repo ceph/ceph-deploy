@@ -34,7 +34,9 @@ def repository_url_part(distro):
     return 'el6'
 
 
-def install(distro, version_kind, version, adjust_repos):
+def install(distro, version_kind, version, adjust_repos, **kw):
+    # note: when split packages for ceph land for CentOS, `kw['components']`
+    # will have those. Unused for now.
     logger = distro.conn.logger
     release = distro.release
     machine = distro.machine_type
@@ -124,7 +126,9 @@ def install_epel(distro):
         pkg_managers.yum(distro.conn, 'epel-release')
 
 
-def mirror_install(distro, repo_url, gpg_url, adjust_repos, extra_installs=True):
+def mirror_install(distro, repo_url, gpg_url, adjust_repos, extra_installs=True, **kw):
+    # note: when split packages for ceph land for CentOS, `kw['components']`
+    # will have those. Unused for now.
     repo_url = repo_url.strip('/')  # Remove trailing slashes
     gpg_url_path = gpg_url.split('file://')[-1]  # Remove file if present
 
@@ -157,6 +161,11 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos, extra_installs=True)
 
 
 def repo_install(distro, reponame, baseurl, gpgkey, **kw):
+    # do we have specific components to install?
+    # removed them from `kw` so that we don't mess with other defauls
+    # note: when split packages for ceph land for CentOS, `packages`
+    # can be used. Unused for now.
+    packages = kw.pop('components', ['ceph', 'ceph-mon', 'ceph-osd'])  # noqa
     logger = distro.conn.logger
     # Get some defaults
     name = kw.pop('name', '%s repo' % reponame)
