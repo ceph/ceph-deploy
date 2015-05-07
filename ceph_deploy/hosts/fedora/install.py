@@ -4,7 +4,7 @@ from ceph_deploy.hosts.util import install_yum_priorities
 
 
 def install(distro, version_kind, version, adjust_repos, **kw):
-    # note: when split packages for ceph land for Debian/Ubuntu,
+    # note: when split packages for ceph land for Fedora,
     # `kw['components']` will have those. Unused for now.
     logger = distro.conn.logger
     release = distro.release
