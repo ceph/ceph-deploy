@@ -102,7 +102,6 @@ def create_rgw(distro, name, cluster, init):
                 'service',
                 'ceph-radosgw',
                 'start',
-                '{name}'.format(name=name),
             ],
             timeout=7
         )
