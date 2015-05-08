@@ -42,7 +42,21 @@ def detect_components(args):
     these flags and return the default if none are passed in (which is, install
     everything)
     """
-    pass
+    flags = {
+        'install_osd': 'ceph-osd',
+        'install_rgw': 'ceph-radosgw',
+        'install_mds': 'ceph-mds',
+        'install_mon': 'ceph-mon',
+        'install_ceph': 'ceph',
+    }
+    if args.install_all:
+        return ['ceph', 'ceph-osd', 'ceph-mds', 'ceph-mon', 'ceph-radosgw']
+    else:
+        components = []
+        for k, v in flags.items():
+            if getattr(args, k, False):
+                components.append(v)
+        return components
 
 
 def install(args):
