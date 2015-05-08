@@ -296,6 +296,17 @@ def safe_mkdir(path):
             raise
 
 
+def safe_makedirs(path):
+    """ create path recursively if it doesn't exist """
+    try:
+        os.makedirs(path)
+    except OSError, e:
+        if e.errno == errno.EEXIST:
+            pass
+        else:
+            raise
+
+
 def zeroing(dev):
     """ zeroing last few blocks of device """
     # this kills the crab
