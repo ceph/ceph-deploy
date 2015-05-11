@@ -13,3 +13,12 @@ mon_path = join(base_path, 'mon')
 mds_path = join(base_path, 'mds')
 
 osd_path = join(base_path, 'osd')
+
+# Default package components to install
+default_components = (
+    'ceph-osd',
+    'ceph-radosgw',
+    'ceph-mds',
+    'ceph-mon',
+    'ceph',
+)
