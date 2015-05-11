@@ -154,8 +154,8 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos, **kw):
 
 def repo_install(distro, repo_name, baseurl, gpgkey, **kw):
     # do we have specific components to install?
-    # removed them from `kw` so that we don't mess with other defauls
-    # note: when split packages for ceph land for CentOS, `packages`
+    # removed them from `kw` so that we don't mess with other defaults
+    # note: when split packages for ceph land for Debian/Ubuntu, `packages`
     # can be used. Unused for now.
     packages = kw.pop('components', default_components) or default_components
     # Get some defaults

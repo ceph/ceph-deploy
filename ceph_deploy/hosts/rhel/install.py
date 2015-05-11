@@ -40,7 +40,7 @@ def mirror_install(distro, repo_url,
 
 def repo_install(distro, reponame, baseurl, gpgkey, **kw):
     # do we have specific components to install?
-    # removed them from `kw` so that we don't mess with other defauls
+    # removed them from `kw` so that we don't mess with other defaults
     packages = kw.pop('components', default_components) or default_components
 
     # Get some defaults

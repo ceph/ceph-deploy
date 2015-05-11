@@ -52,10 +52,10 @@ class TestDetectComponents(object):
 
     def test_install_all_returns_all_packages(self):
         self.args.install_all = True
-        result = install.detect_components(self.args)
-        assert result == [
+        result = sorted(install.detect_components(self.args))
+        assert result == sorted([
             'ceph', 'ceph-osd', 'ceph-mds', 'ceph-mon', 'ceph-radosgw'
-        ]
+        ])
 
     def test_install_all_with_other_options_returns_all_packages(self):
         self.args.install_all = True
