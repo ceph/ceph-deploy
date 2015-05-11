@@ -5,7 +5,7 @@ import os
 from ceph_deploy import hosts
 from ceph_deploy.cliutil import priority
 from ceph_deploy.lib import remoto
-
+from ceph_deploy.util.constants import default_components
 
 LOG = logging.getLogger(__name__)
 
@@ -50,7 +50,7 @@ def detect_components(args):
         'install_ceph': 'ceph',
     }
     if args.install_all:
-        return ['ceph', 'ceph-osd', 'ceph-mds', 'ceph-mon', 'ceph-radosgw']
+        return default_components
     else:
         components = []
         for k, v in flags.items():
