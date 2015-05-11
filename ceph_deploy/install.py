@@ -61,6 +61,8 @@ def detect_components(args):
 
 def install(args):
     args = sanitize_args(args)
+    components = detect_components(arg)
+
     if args.repo:
         return install_repo(args)
 
@@ -145,7 +147,8 @@ def install(args):
                 distro,
                 repo_url,
                 gpg_url,
-                args.adjust_repos
+                args.adjust_repos,
+                components=components,
             )
 
         # Detect and install custom repos here if needed
@@ -158,7 +161,8 @@ def install(args):
                 distro,
                 args.version_kind,
                 version,
-                args.adjust_repos
+                args.adjust_repos,
+                components=components,
             )
 
         # Check the ceph version we just installed
@@ -193,6 +197,7 @@ def custom_repo(distro, args, cd_conf, rlogger, install_ceph=None):
     used.
     """
     default_repo = cd_conf.get_default_repo()
+    components = detect_components(args)
     if args.release in cd_conf.get_repos():
         LOG.info('will use repository from conf: %s' % args.release)
         default_repo = args.release
@@ -215,6 +220,7 @@ def custom_repo(distro, args, cd_conf, rlogger, install_ceph=None):
                 default_repo,
                 options.pop('baseurl'),
                 options.pop('gpgkey'),
+                components=components,
                 **options
             )
         except KeyError as err:
@@ -229,6 +235,7 @@ def custom_repo(distro, args, cd_conf, rlogger, install_ceph=None):
                     xrepo,
                     options.pop('baseurl'),
                     options.pop('gpgkey'),
+                    components=components,
                     **options
                 )
             except KeyError as err:
