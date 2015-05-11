@@ -75,5 +75,5 @@ class TestDetectComponents(object):
     def test_install_a_couple_of_components(self):
         self.args.install_osd = True
         self.args.install_mds = True
-        result = install.detect_components(self.args)
-        assert result == ['ceph-osd', 'ceph-mds']
+        result = sorted(install.detect_components(self.args))
+        assert result == sorted(['ceph-osd', 'ceph-mds'])
