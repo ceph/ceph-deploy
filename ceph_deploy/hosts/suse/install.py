@@ -1,6 +1,8 @@
 from ceph_deploy.util import templates, pkg_managers
 from ceph_deploy.lib import remoto
+from ceph_deploy.util.constants import default_components
 import logging
+
 LOG = logging.getLogger(__name__)
 
 
@@ -128,7 +130,7 @@ def repo_install(distro, reponame, baseurl, gpgkey, **kw):
     # removed them from `kw` so that we don't mess with other defauls
     # note: when split packages for ceph land for CentOS, `packages`
     # can be used. Unused for now.
-    packages = kw.pop('components', ['ceph', 'ceph-mon', 'ceph-osd'])  # noqa
+    packages = kw.pop('components', default_components) or default_components  # noqa
     # Get some defaults
     name = kw.get('name', '%s repo' % reponame)
     enabled = kw.get('enabled', 1)

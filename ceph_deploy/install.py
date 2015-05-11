@@ -61,7 +61,7 @@ def detect_components(args):
 
 def install(args):
     args = sanitize_args(args)
-    components = detect_components(arg)
+    components = detect_components(args)
 
     if args.repo:
         return install_repo(args)
