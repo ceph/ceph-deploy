@@ -34,7 +34,7 @@ def create_mds(distro, name, cluster, init):
         name=name
         )
 
-    conn.remote_module.safe_mkdir(path)
+    conn.remote_module.makedir(path, [errno.EEXIST])
 
     bootstrap_keyring = '/var/lib/ceph/bootstrap-mds/{cluster}.keyring'.format(
         cluster=cluster
