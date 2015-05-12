@@ -1,4 +1,5 @@
 from os.path import join
+from collections import namedtuple
 
 # Base Path for ceph
 base_path = '/var/lib/ceph'
@@ -15,10 +16,16 @@ mds_path = join(base_path, 'mds')
 osd_path = join(base_path, 'osd')
 
 # Default package components to install
-default_components = (
+_base_components = [
     'ceph-osd',
-    'ceph-radosgw',
     'ceph-mds',
     'ceph-mon',
     'ceph',
-)
+]
+
+default_components = namedtuple('DefaultComponents', ['rpm', 'deb'])
+
+# the difference here is because RPMs currently name the radosgw differently than DEBs.
+# TODO: This needs to get unified once the packaging naming gets consistent
+default_components.rpm = tuple(_base_components.append('ceph-radosgw'))
+default_components.deb = tuple(_base_components.append('radosgw'))
