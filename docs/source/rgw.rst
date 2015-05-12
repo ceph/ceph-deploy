@@ -17,6 +17,13 @@ corresponding service. The daemon will listen on the default port of 7480.
 The RGW instances will default to having a name corresponding to the hostname
 where it runs.  For example, ``rgw.node1``.
 
+If a custom name is desired for the RGW daemon, it can be specific like::
+
+    ceph-deploy rgw create node1:foo
+
+Custom names are automatically prefixed with "rgw.", so the resulting daemon
+name would be "rgw.foo".
+
 .. note:: If an error is presented about the ``bootstrap-rgw`` keyring not being
           found, that is because the ``bootstrap-rgw`` only been auto-created on
           new clusters starting with the Hammer release.
