@@ -47,7 +47,6 @@ def detect_components(args, distro):
         'install_rgw': 'ceph-radosgw',
         'install_mds': 'ceph-mds',
         'install_mon': 'ceph-mon',
-        'install_ceph': 'ceph',
     }
 
     if distro.is_rpm:
