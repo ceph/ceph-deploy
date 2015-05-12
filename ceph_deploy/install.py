@@ -464,14 +464,14 @@ def make(parser):
         '--mon',
         dest='install_mon',
         action='store_true',
-        help='install install the mon component only',
+        help='install the mon component only',
     )
 
     version.add_argument(
         '--mds',
         dest='install_mds',
         action='store_true',
-        help='install install the mds component only',
+        help='install the mds component only',
     )
 
     version.add_argument(
@@ -492,7 +492,7 @@ def make(parser):
         '--all',
         dest='install_all',
         action='store_true',
-        help='install all ceph components (e.g. mon,osd,mds,rgw)',
+        help='install all ceph components (e.g. mon,osd,mds,rgw). This is the default',
     )
 
     version.add_argument(
