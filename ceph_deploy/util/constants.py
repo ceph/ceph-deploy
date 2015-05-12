@@ -20,7 +20,6 @@ _base_components = [
     'ceph-osd',
     'ceph-mds',
     'ceph-mon',
-    'ceph',
 ]
 
 default_components = namedtuple('DefaultComponents', ['rpm', 'deb'])
