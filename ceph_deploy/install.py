@@ -28,7 +28,7 @@ def sanitize_args(args):
     return args
 
 
-def detect_components(args):
+def detect_components(args, distro):
     """
     Since the package split, now there are various different ceph components to
     install like:
@@ -49,8 +49,16 @@ def detect_components(args):
         'install_mon': 'ceph-mon',
         'install_ceph': 'ceph',
     }
+
+    if distro.is_rpm:
+        defaults = default_components.rpm
+    else:
+        defaults = default_components.deb
+        # different naming convention for deb than rpm for radosgw
+        flags['install_rgw'] = 'radosgw'
+
     if args.install_all:
-        return default_components
+        return defaults
     else:
         components = []
         for k, v in flags.items():
