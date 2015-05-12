@@ -69,7 +69,6 @@ def detect_components(args, distro):
 
 def install(args):
     args = sanitize_args(args)
-    components = detect_components(args)
 
     if args.repo:
         return install_repo(args)
@@ -99,8 +98,8 @@ def install(args):
             # upstream. If default_release is True, it means that the user is
             # trying to install on a RHEL machine and should expect to get RHEL
             # packages. Otherwise, it will need to specify either a specific
-            # version, or repo, or a development branch. Other distro users should
-            # not see any differences.
+            # version, or repo, or a development branch. Other distro users
+            # should not see any differences.
             use_rhceph=args.default_release,
             )
         LOG.info(
@@ -110,6 +109,7 @@ def install(args):
             distro.codename
         )
 
+        components = detect_components(args, distro)
         if distro.init == 'sysvinit' and args.cluster != 'ceph':
             LOG.error('refusing to install on host: %s, with custom cluster name: %s' % (
                     hostname,
@@ -205,7 +205,7 @@ def custom_repo(distro, args, cd_conf, rlogger, install_ceph=None):
     used.
     """
     default_repo = cd_conf.get_default_repo()
-    components = detect_components(args)
+    components = detect_components(args, distro)
     if args.release in cd_conf.get_repos():
         LOG.info('will use repository from conf: %s' % args.release)
         default_repo = args.release
