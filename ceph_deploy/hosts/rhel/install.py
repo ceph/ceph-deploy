@@ -3,14 +3,14 @@ from ceph_deploy.lib import remoto
 
 
 def install(distro, version_kind, version, adjust_repos, **kw):
-    packages = kw.get('components', default_components) or default_components
+    packages = kw.get('components', [])
     pkg_managers.yum_clean(distro.conn)
     pkg_managers.yum(distro.conn, packages)
 
 
 def mirror_install(distro, repo_url,
                    gpg_url, adjust_repos, extra_installs=True, **kw):
-    packages = kw.get('components', default_components) or default_components
+    packages = kw.get('components', [])
     repo_url = repo_url.strip('/')  # Remove trailing slashes
     gpg_url_path = gpg_url.split('file://')[-1]  # Remove file if present
 
@@ -40,7 +40,7 @@ def mirror_install(distro, repo_url,
 def repo_install(distro, reponame, baseurl, gpgkey, **kw):
     # do we have specific components to install?
     # removed them from `kw` so that we don't mess with other defaults
-    packages = kw.pop('components', default_components) or default_components
+    packages = kw.pop('components', [])
 
     # Get some defaults
     name = kw.pop('name', '%s repo' % reponame)
