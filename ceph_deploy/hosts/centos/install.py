@@ -1,7 +1,6 @@
 from ceph_deploy.util import pkg_managers, templates
 from ceph_deploy.lib import remoto
 from ceph_deploy.hosts.util import install_yum_priorities
-from ceph_deploy.util.constants import default_components
 
 
 def rpm_dist(distro):

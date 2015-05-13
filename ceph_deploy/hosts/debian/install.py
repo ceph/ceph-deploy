@@ -2,7 +2,6 @@ from urlparse import urlparse
 
 from ceph_deploy.lib import remoto
 from ceph_deploy.util import pkg_managers
-from ceph_deploy.util.constants import default_components
 
 
 def install(distro, version_kind, version, adjust_repos, **kw):

@@ -1,6 +1,5 @@
 from ceph_deploy.util import templates, pkg_managers
 from ceph_deploy.lib import remoto
-from ceph_deploy.util.constants import default_components
 import logging
 
 LOG = logging.getLogger(__name__)
