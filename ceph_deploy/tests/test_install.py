@@ -49,7 +49,13 @@ class TestDetectComponents(object):
         self.args.install_osd = False
         self.args.install_rgw = False
         self.args.install_ceph = False
+        self.args.repo = False
         self.distro = Mock()
+
+    def test_install_with_repo_option_returns_no_packages(self):
+        self.args.repo = True
+        result = install.detect_components(self.args, self.distro)
+        assert result == []
 
     def test_install_all_returns_all_packages_deb(self):
         self.args.install_all = True
@@ -71,7 +77,6 @@ class TestDetectComponents(object):
         assert result == sorted([
             'ceph-osd', 'ceph-mds', 'ceph-mon', 'radosgw'
         ])
-
 
     def test_install_all_returns_all_packages_rpm(self):
         self.args.install_all = True
@@ -100,3 +105,9 @@ class TestDetectComponents(object):
         self.args.install_mds = True
         result = sorted(install.detect_components(self.args, self.distro))
         assert result == sorted(['ceph-osd', 'ceph-mds'])
+
+    def test_install_all_should_be_default_when_no_options_passed(self):
+        result = sorted(install.detect_components(self.args, self.distro))
+        assert result == sorted([
+            'ceph-osd', 'ceph-mds', 'ceph-mon', 'ceph-radosgw'
+        ])
