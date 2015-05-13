@@ -75,4 +75,4 @@ def repo_install(distro, reponame, baseurl, gpgkey, **kw):
 
     # Some custom repos do not need to install ceph
     if install_ceph:
-        pkg_managers.yum(distro.conn, ['ceph', 'ceph-mon', 'ceph-osd', 'radosgw'])
+        pkg_managers.yum(distro.conn, ['ceph', 'ceph-mon', 'ceph-osd', 'ceph-radosgw'])
