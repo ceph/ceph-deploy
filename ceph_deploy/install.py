@@ -5,7 +5,7 @@ import os
 from ceph_deploy import hosts
 from ceph_deploy.cliutil import priority
 from ceph_deploy.lib import remoto
-
+from ceph_deploy.util.constants import default_components
 
 LOG = logging.getLogger(__name__)
 
@@ -28,8 +28,57 @@ def sanitize_args(args):
     return args
 
 
+def detect_components(args, distro):
+    """
+    Since the package split, now there are various different ceph components to
+    install like:
+
+    * ceph
+    * ceph-mon
+    * ceph-osd
+    * ceph-mds
+
+    This helper function should parse the args that may contain specifics about
+    these flags and return the default if none are passed in (which is, install
+    everything)
+    """
+    # the flag that prevents all logic here is the `--repo` flag which is used
+    # when no packages should be installed, just the repo files, so check for
+    # that here and return an empty list (which is equivalent to say 'no
+    # packages should be installed')
+    if args.repo:
+        return []
+
+    flags = {
+        'install_osd': 'ceph-osd',
+        'install_rgw': 'ceph-radosgw',
+        'install_mds': 'ceph-mds',
+        'install_mon': 'ceph-mon',
+    }
+
+    if distro.is_rpm:
+        defaults = default_components.rpm
+    else:
+        defaults = default_components.deb
+        # different naming convention for deb than rpm for radosgw
+        flags['install_rgw'] = 'radosgw'
+
+    if args.install_all:
+        return defaults
+    else:
+        components = []
+        for k, v in flags.items():
+            if getattr(args, k, False):
+                components.append(v)
+        # if we have some components selected from flags then return that,
+        # otherwise return defaults because no flags and no `--repo` means we
+        # should get all of them by default
+        return components or defaults
+
+
 def install(args):
     args = sanitize_args(args)
+
     if args.repo:
         return install_repo(args)
 
@@ -58,8 +107,8 @@ def install(args):
             # upstream. If default_release is True, it means that the user is
             # trying to install on a RHEL machine and should expect to get RHEL
             # packages. Otherwise, it will need to specify either a specific
-            # version, or repo, or a development branch. Other distro users should
-            # not see any differences.
+            # version, or repo, or a development branch. Other distro users
+            # should not see any differences.
             use_rhceph=args.default_release,
             )
         LOG.info(
@@ -69,6 +118,7 @@ def install(args):
             distro.codename
         )
 
+        components = detect_components(args, distro)
         if distro.init == 'sysvinit' and args.cluster != 'ceph':
             LOG.error('refusing to install on host: %s, with custom cluster name: %s' % (
                     hostname,
@@ -114,7 +164,8 @@ def install(args):
                 distro,
                 repo_url,
                 gpg_url,
-                args.adjust_repos
+                args.adjust_repos,
+                components=components,
             )
 
         # Detect and install custom repos here if needed
@@ -127,7 +178,8 @@ def install(args):
                 distro,
                 args.version_kind,
                 version,
-                args.adjust_repos
+                args.adjust_repos,
+                components=components,
             )
 
         # Check the ceph version we just installed
@@ -162,6 +214,7 @@ def custom_repo(distro, args, cd_conf, rlogger, install_ceph=None):
     used.
     """
     default_repo = cd_conf.get_default_repo()
+    components = detect_components(args, distro)
     if args.release in cd_conf.get_repos():
         LOG.info('will use repository from conf: %s' % args.release)
         default_repo = args.release
@@ -184,6 +237,7 @@ def custom_repo(distro, args, cd_conf, rlogger, install_ceph=None):
                 default_repo,
                 options.pop('baseurl'),
                 options.pop('gpgkey'),
+                components=components,
                 **options
             )
         except KeyError as err:
@@ -198,6 +252,7 @@ def custom_repo(distro, args, cd_conf, rlogger, install_ceph=None):
                     xrepo,
                     options.pop('baseurl'),
                     options.pop('gpgkey'),
+                    components=components,
                     **options
                 )
             except KeyError as err:
@@ -420,6 +475,41 @@ def make(parser):
         metavar='BRANCH_OR_TAG',
         help='install a bleeding edge build from Git branch\
                 or tag (default: %(default)s)',
+    )
+
+    version.add_argument(
+        '--mon',
+        dest='install_mon',
+        action='store_true',
+        help='install the mon component only',
+    )
+
+    version.add_argument(
+        '--mds',
+        dest='install_mds',
+        action='store_true',
+        help='install the mds component only',
+    )
+
+    version.add_argument(
+        '--rgw',
+        dest='install_rgw',
+        action='store_true',
+        help='install the rgw component only',
+    )
+
+    version.add_argument(
+        '--osd',
+        dest='install_osd',
+        action='store_true',
+        help='install the osd component only',
+    )
+
+    version.add_argument(
+        '--all',
+        dest='install_all',
+        action='store_true',
+        help='install all ceph components (e.g. mon,osd,mds,rgw). This is the default',
     )
 
     version.add_argument(

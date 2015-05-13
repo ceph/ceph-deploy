@@ -36,3 +36,78 @@ class TestSanitizeArgs(object):
         self.args.release = 'dumpling'
         result = install.sanitize_args(self.args)
         assert result.stable is None
+
+
+class TestDetectComponents(object):
+
+    def setup(self):
+        self.args = Mock()
+        # default values for install_* flags
+        self.args.install_all = False
+        self.args.install_mds = False
+        self.args.install_mon = False
+        self.args.install_osd = False
+        self.args.install_rgw = False
+        self.args.install_ceph = False
+        self.args.repo = False
+        self.distro = Mock()
+
+    def test_install_with_repo_option_returns_no_packages(self):
+        self.args.repo = True
+        result = install.detect_components(self.args, self.distro)
+        assert result == []
+
+    def test_install_all_returns_all_packages_deb(self):
+        self.args.install_all = True
+        self.distro.is_rpm = False
+        self.distro.is_deb = True
+        result = sorted(install.detect_components(self.args, self.distro))
+        assert result == sorted([
+            'ceph-osd', 'ceph-mds', 'ceph-mon', 'radosgw'
+        ])
+
+    def test_install_all_with_other_options_returns_all_packages_deb(self):
+        self.distro.is_rpm = False
+        self.distro.is_deb = True
+        self.args.install_all = True
+        self.args.install_mds = True
+        self.args.install_mon = True
+        self.args.install_osd = True
+        result = sorted(install.detect_components(self.args, self.distro))
+        assert result == sorted([
+            'ceph-osd', 'ceph-mds', 'ceph-mon', 'radosgw'
+        ])
+
+    def test_install_all_returns_all_packages_rpm(self):
+        self.args.install_all = True
+        result = sorted(install.detect_components(self.args, self.distro))
+        assert result == sorted([
+            'ceph-osd', 'ceph-mds', 'ceph-mon', 'ceph-radosgw'
+        ])
+
+    def test_install_all_with_other_options_returns_all_packages_rpm(self):
+        self.args.install_all = True
+        self.args.install_mds = True
+        self.args.install_mon = True
+        self.args.install_osd = True
+        result = sorted(install.detect_components(self.args, self.distro))
+        assert result == sorted([
+            'ceph-osd', 'ceph-mds', 'ceph-mon', 'ceph-radosgw'
+        ])
+
+    def test_install_only_one_component(self):
+        self.args.install_osd = True
+        result = install.detect_components(self.args, self.distro)
+        assert result == ['ceph-osd']
+
+    def test_install_a_couple_of_components(self):
+        self.args.install_osd = True
+        self.args.install_mds = True
+        result = sorted(install.detect_components(self.args, self.distro))
+        assert result == sorted(['ceph-osd', 'ceph-mds'])
+
+    def test_install_all_should_be_default_when_no_options_passed(self):
+        result = sorted(install.detect_components(self.args, self.distro))
+        assert result == sorted([
+            'ceph-osd', 'ceph-mds', 'ceph-mon', 'ceph-radosgw'
+        ])
