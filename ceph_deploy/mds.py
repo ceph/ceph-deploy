@@ -128,6 +128,8 @@ def mds_create(args):
 
     bootstrapped = set()
     errors = 0
+    failed_on_rhel = False
+
     for hostname, name in args.mds:
         try:
             distro = hosts.get(hostname, username=args.username)
@@ -138,6 +140,7 @@ def mds_create(args):
                 distro.release,
                 distro.codename
             )
+
             LOG.debug('remote host will use %s', distro.init)
 
             if hostname not in bootstrapped:
@@ -162,10 +165,19 @@ def mds_create(args):
             create_mds(distro, name, args.cluster, distro.init)
             distro.conn.exit()
         except RuntimeError as e:
+            if distro.normalized_name == 'redhat':
+                LOG.error('this feature may not yet available for %s %s' % (distro.name, distro.release))
+                failed_on_rhel = True
             LOG.error(e)
             errors += 1
 
     if errors:
+        if failed_on_rhel:
+            # because users only read the last few lines :(
+            LOG.error(
+                'RHEL RHCS systems do not have the ability to deploy MDS yet'
+            )
+
         raise exc.GenericError('Failed to create %d MDSs' % errors)
 
 
