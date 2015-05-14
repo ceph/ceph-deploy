@@ -20,18 +20,6 @@ def distro_is_supported(distro_name):
 
 
 def connect(args):
-    cd_conf = getattr(args, 'cd_conf', None)
-    if not cd_conf:
-        raise RuntimeError(
-            'a ceph-deploy configuration is required but was not found'
-        )
-
-    repo_name = args.release or 'calamari-minion'
-    has_minion_repo = cd_conf.has_section(repo_name)
-
-    if not has_minion_repo:
-        raise RuntimeError('no calamari-minion repo found')
-
     for hostname in args.hosts:
         distro = hosts.get(hostname, username=args.username)
         if not distro_is_supported(distro.normalized_name):
@@ -47,37 +35,10 @@ def connect(args):
             distro.release,
             distro.codename
         )
-
-        # We rely on the default for repo installs that does not install ceph
-        # unless specified otherwise. We define the `options` dictionary here
-        # because ceph-deploy pops items iternally and that causes issues when
-        # those items need to be available for every host
-        options = dict(cd_conf.items(repo_name))
+        LOG.info('assuming that a repository with Calamari packages is already configured.')
+        LOG.info('Refer to the docs for examples (http://ceph.com/ceph-deploy/docs/conf.html)')
 
         rlogger = logging.getLogger(hostname)
-        if distro.name in ('debian', 'ubuntu'):
-            rlogger.info('ensuring proxy is disabled for calamari minions repo')
-            distro.conn.remote_module.write_file(
-                '/etc/apt/apt.conf.d/99ceph',
-                'Acquire::http::Proxy::%s DIRECT;' % args.master,
-            )
-        rlogger.info('installing calamari-minion package on %s' % hostname)
-        rlogger.info('adding custom repository file')
-        try:
-            distro.repo_install(
-                distro,
-                repo_name,
-                options.pop('baseurl'),
-                options.pop('gpgkey', ''),  # will probably not use a gpgkey
-                **options
-            )
-        except KeyError as err:
-            raise RuntimeError(
-                'missing required key: %s in config section: %s' % (
-                    err,
-                    repo_name
-                )
-            )
 
         # Emplace minion config prior to installation so that it is present
         # when the minion first starts.
@@ -119,7 +80,9 @@ def calamari(args):
 
 def make(parser):
     """
-    Install and configure Calamari nodes
+    Install and configure Calamari nodes. Assumes that a repository with
+    Calamari packages is already configured. Refer to the docs for examples
+    (http://ceph.com/ceph-deploy/docs/conf.html)
     """
     parser.add_argument(
         'subcommand',
@@ -127,16 +90,6 @@ def make(parser):
             'connect',
             ],
         )
-
-    parser.add_argument(
-        '--release',
-        nargs='?',
-        metavar='CODENAME',
-        help="Use a given release from repositories\
-                defined in ceph-deploy's configuration. Defaults to\
-                'calamari-minion'",
-
-    )
 
     parser.add_argument(
         '--master',
