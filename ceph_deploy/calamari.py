@@ -92,16 +92,6 @@ def make(parser):
         )
 
     parser.add_argument(
-        '--release',
-        nargs='?',
-        metavar='CODENAME',
-        help="Use a given release from repositories\
-                defined in ceph-deploy's configuration. Defaults to\
-                'calamari-minion'",
-
-    )
-
-    parser.add_argument(
         '--master',
         nargs='?',
         metavar='MASTER SERVER',
