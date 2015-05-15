@@ -54,6 +54,7 @@ def detect_components(args, distro):
         'install_rgw': 'ceph-radosgw',
         'install_mds': 'ceph-mds',
         'install_mon': 'ceph-mon',
+        'install_common': 'ceph-common',
     }
 
     if distro.is_rpm:
@@ -503,6 +504,13 @@ def make(parser):
         dest='install_osd',
         action='store_true',
         help='install the osd component only',
+    )
+
+    version.add_argument(
+        '--cli', '--common',
+        dest='install_common',
+        action='store_true',
+        help='install the common component only',
     )
 
     version.add_argument(
