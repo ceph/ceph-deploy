@@ -49,7 +49,6 @@ class TestDetectComponents(object):
         self.args.install_osd = False
         self.args.install_rgw = False
         self.args.install_common = False
-        self.args.install_ceph = False
         self.args.repo = False
         self.distro = Mock()
 
