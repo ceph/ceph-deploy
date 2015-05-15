@@ -108,6 +108,16 @@ def create_mds(distro, name, cluster, init):
             ],
             timeout=7
         )
+    elif init == 'systemd':
+        remoto.process.run(
+            conn,
+            [
+                'systemctl',
+                'enable',
+                'ceph-mds@{name}'.format(name=name),
+            ],
+            timeout=7
+        )
 
     if distro.is_el:
         system.enable_service(distro.conn)
