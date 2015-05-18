@@ -6,12 +6,22 @@ Changelog
 
 1.5.24
 ^^^^^^
-**UNRELEASED**
+18-May-2015
 
 * Use version 0.0.25 of `remoto` that fixes an issue where output would be cut
   (https://github.com/alfredodeza/remoto/issues/15).
 * Automatically prefix custom RGW daemon names with 'rgw.'
-* Log an error message when deploying MDS in RHEL distros fails as it may not be supported.
+* Log an error message when deploying MDS in RHEL distros fails as it may not
+  be supported.
+* More robust vendor.py script (tries ceph.com and GitHub)
+* Create /var/lib/ceph/radosgw directory on remote host if not present
+* Enable/start ceph-radosgw service on RPM systems instead of radosgw
+* Add flags to support install of specific daemons (OSD, MON, RGW, MDS) only
+  Note that the packaging changes for this in upstream Ceph are still pending
+* removing installation of 'calamari-minions' repo upon
+  'ceph-deploy calamari connect'
+* enable ceph-mds service correctly on systemd
+* Check for sysvinit and custom cluster name on 'ceph-deploy new' command
 
 1.5.23
 ^^^^^^
