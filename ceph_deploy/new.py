@@ -143,6 +143,14 @@ def new(args):
         # Now get the non-local IPs from the remote node
         distro = hosts.get(host, username=args.username)
         remote_ips = net.ip_addresses(distro.conn)
+
+        # custom cluster names on sysvinit hosts won't work
+        if distro.init == 'sysvinit' and args.cluster != 'ceph':
+            LOG.error('custom cluster names are not supported on sysvinit hosts')
+            raise exc.ClusterNameError(
+                'host %s does not support custom cluster names' % host
+            )
+
         distro.conn.exit()
 
         # Validate subnets if we received any
