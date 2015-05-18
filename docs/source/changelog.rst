@@ -11,6 +11,7 @@ Changelog
 * Use version 0.0.25 of `remoto` that fixes an issue where output would be cut
   (https://github.com/alfredodeza/remoto/issues/15).
 * Automatically prefix custom RGW daemon names with 'rgw.'
+* Log an error message when deploying MDS in RHEL distros fails as it may not be supported.
 
 1.5.23
 ^^^^^^
