@@ -97,6 +97,17 @@ class GenericError(DeployError):
         return self.message
 
 
+class ClusterNameError(DeployError):
+    """
+    Problem encountered with custom cluster name
+    """
+    def __init__(self, message):
+        self.message = message
+
+    def __str__(self):
+        return self.message
+
+
 class KeyNotFoundError(DeployError):
     """
     Could not find keyring file
