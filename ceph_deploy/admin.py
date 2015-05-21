@@ -27,7 +27,6 @@ def admin(args):
         LOG.debug('Pushing admin keys and conf to %s', hostname)
         try:
             distro = hosts.get(hostname, username=args.username)
-            hostname = distro.conn.remote_module.shortname()
 
             distro.conn.remote_module.write_conf(
                 args.cluster,
