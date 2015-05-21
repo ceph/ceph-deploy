@@ -58,7 +58,7 @@ def make(parser):
     parser.add_argument(
         'client',
         metavar='HOST',
-        nargs='*',
+        nargs='+',
         help='host to configure for ceph administration',
         )
     parser.set_defaults(
