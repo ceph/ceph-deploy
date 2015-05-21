@@ -398,6 +398,28 @@ def mon_create_initial(args):
 
     # create them normally through mon_create
     mon_create(args)
+    # Make host keys
+    for host in mon_initial_members:
+        rlogger = logging.getLogger(host)
+        distro = hosts.get(host, username=args.username)
+        hostname = distro.conn.remote_module.shortname()
+        if not distro.conn.remote_module.path_exists('/etc/ceph/ceph.client.admin.keyring'):
+            out, err, code = remoto.process.check(
+                distro.conn,
+                    [
+                        'ceph-create-keys',
+                        '-i',
+                        hostname
+                    ]
+                )
+            if code != 0:
+                rlogger.error('"ceph-create-keys -i %s" returned %s' % (hostname, code))
+                for line in err:
+                    rlogger.debug(line)
+                raise SystemExit('ceph-create-keys failed')
+        distro.conn.exit()
+
+
 
     # make the sets to be able to compare late
     mon_in_quorum = set([])
