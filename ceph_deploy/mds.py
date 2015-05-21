@@ -122,6 +122,8 @@ def create_mds(distro, name, cluster, init):
     if distro.is_el:
         system.enable_service(distro.conn)
 
+    if distro.distro == 'suse':
+        system.enable_service(distro.conn, 'ceph')
 
 def mds_create(args):
     cfg = conf.ceph.load(args)
