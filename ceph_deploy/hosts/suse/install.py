@@ -77,6 +77,15 @@ def install(distro, version_kind, version, adjust_repos):
         [
             'zypper',
             '--non-interactive',
+            'refresh'
+            ],
+        )
+
+    remoto.process.run(
+        distro.conn,
+        [
+            'zypper',
+            '--non-interactive',
             '--quiet',
             'install',
             'ceph',
@@ -106,6 +115,14 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos):
         distro.conn.remote_module.write_file(
             '/etc/zypp/repos.d/ceph.repo',
             ceph_repo_content)
+        remoto.process.run(
+            distro.conn,
+            [
+                'zypper',
+                '--non-interactive',
+                'refresh'
+            ]
+        )
 
     remoto.process.run(
         distro.conn,
