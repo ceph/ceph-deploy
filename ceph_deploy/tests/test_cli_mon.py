@@ -1,11 +1,12 @@
 import argparse
 import collections
-import mock
-import pytest
 import subprocess
 
-from ..cli import main
-from .directory import directory
+import pytest
+from mock import Mock, patch, NonCallableMock
+
+from ceph_deploy.cli import _main as main
+from ceph_deploy.tests.directory import directory
 
 
 def test_help(tmpdir, cli):
@@ -45,9 +46,6 @@ def test_bad_no_mon(tmpdir, cli):
     assert err.value.status == 2
 
 
-from mock import Mock, patch
-
-
 def make_fake_connection(platform_information=None):
     get_connection = Mock()
     get_connection.return_value = get_connection
@@ -65,11 +63,11 @@ mon initial members = host1
 """)
 
     ns = argparse.Namespace()
-    ns.pushy = mock.Mock()
-    conn = mock.NonCallableMock(name='PushyClient')
+    ns.pushy = Mock()
+    conn = NonCallableMock(name='PushyClient')
     ns.pushy.return_value = conn
 
-    mock_compiled = collections.defaultdict(mock.Mock)
+    mock_compiled = collections.defaultdict(Mock)
     conn.compile.side_effect = mock_compiled.__getitem__
 
     MON_SECRET = 'AQBWDj5QAP6LHhAAskVBnUkYHJ7eYREmKo5qKA=='
@@ -81,9 +79,9 @@ mon initial members = host1
     fake_ip_addresses = lambda x: ['10.0.0.1']
     try:
         with patch('ceph_deploy.new.net.ip_addresses', fake_ip_addresses):
-            with mock.patch('ceph_deploy.new.net.get_nonlocal_ip', lambda x: '10.0.0.1'):
-                with mock.patch('ceph_deploy.new.arg_validators.Hostname', lambda: lambda x: x):
-                    with mock.patch('ceph_deploy.new.hosts'):
+            with patch('ceph_deploy.new.net.get_nonlocal_ip', lambda x: '10.0.0.1'):
+                with patch('ceph_deploy.new.arg_validators.Hostname', lambda: lambda x: x):
+                    with patch('ceph_deploy.new.hosts'):
                         with directory(str(tmpdir)):
                             main(
                                 args=['-v', 'new', '--no-ssh-copykey', 'host1'],
