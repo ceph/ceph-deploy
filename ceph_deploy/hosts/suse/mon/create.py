@@ -4,6 +4,7 @@ from ceph_deploy.lib import remoto
 
 def create(distro, args, monitor_keyring):
     hostname = distro.conn.remote_module.shortname()
+    systemd_defaults_clustername(distro.conn, args.cluster)
     common.mon_create(distro, args, monitor_keyring, hostname)
 
     remoto.process.run(
