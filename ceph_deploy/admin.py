@@ -36,7 +36,8 @@ def admin(args):
 
             distro.conn.remote_module.write_file(
                 '/etc/ceph/%s.client.admin.keyring' % args.cluster,
-                keyring
+                keyring,
+                0600,
             )
 
             distro.conn.exit()
