@@ -1,11 +1,12 @@
-from mock import patch
 import re
 import subprocess
 import uuid
 
-from .. import conf
-from ..cli import main
-from .directory import directory
+from mock import patch
+
+from ceph_deploy import conf
+from ceph_deploy.cli import _main as main
+from ceph_deploy.tests.directory import directory
 
 
 def test_help(tmpdir, cli):
