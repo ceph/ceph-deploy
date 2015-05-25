@@ -35,4 +35,5 @@ def test_bad_no_disk(tmpdir, cli):
             ) as p:
             result = p.stderr.read()
     assert 'usage: ceph-deploy osd' in result
+    assert 'too few arguments' in result
     assert err.value.status == 2
