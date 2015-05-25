@@ -2,6 +2,7 @@ import re
 import subprocess
 import uuid
 
+import pytest
 from mock import patch
 
 from ceph_deploy import conf
@@ -18,6 +19,18 @@ def test_help(tmpdir, cli):
     assert 'usage: ceph-deploy new' in result
     assert 'positional arguments' in result
     assert 'optional arguments' in result
+
+
+def test_bad_no_mon(tmpdir, cli):
+    with pytest.raises(cli.Failed) as err:
+        with cli(
+            args=['ceph-deploy', 'new'],
+            stderr=subprocess.PIPE,
+            ) as p:
+            result = p.stderr.read()
+    assert 'usage: ceph-deploy new' in result
+    assert 'too few arguments' in result
+    assert err.value.status == 2
 
 
 def test_write_global_conf_section(tmpdir, cli):
