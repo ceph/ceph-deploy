@@ -26,8 +26,6 @@ def test_bad_subcommand(tmpdir, cli):
 
 
 def test_bad_no_disk(tmpdir, cli):
-    with tmpdir.join('ceph.conf').open('w'):
-        pass
     with pytest.raises(cli.Failed) as err:
         with cli(
             args=['ceph-deploy', 'osd'],
