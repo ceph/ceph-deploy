@@ -15,9 +15,7 @@ def test_help(tmpdir, cli):
     assert 'optional arguments' in result
 
 
-def test_bad_no_conf(tmpdir, cli):
-    with tmpdir.join('ceph.conf').open('w'):
-        pass
+def test_bad_no_hosts(tmpdir, cli):
     with pytest.raises(cli.Failed) as err:
         with cli(
             args=['ceph-deploy', 'rgw'],
@@ -25,6 +23,7 @@ def test_bad_no_conf(tmpdir, cli):
             ) as p:
             result = p.stderr.read()
     assert 'usage: ceph-deploy rgw' in result
+    assert 'too few arguments' in result
     assert err.value.status == 2
 
 
