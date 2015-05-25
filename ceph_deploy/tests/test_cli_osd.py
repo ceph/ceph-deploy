@@ -13,7 +13,7 @@ def test_help(tmpdir, cli):
     assert 'optional arguments' in result
 
 
-def test_bad_no_conf(tmpdir, cli):
+def test_bad_subcommand(tmpdir, cli):
     with pytest.raises(cli.Failed) as err:
         with cli(
             args=['ceph-deploy', 'osd', 'fakehost:/does-not-exist'],
