@@ -200,8 +200,12 @@ def write_monitor_keyring(keyring, monitor_keyring):
     write_file(keyring, monitor_keyring)
 
 
-def write_file(path, content):
-    with file(path, 'w') as f:
+def write_file(path, content, mode=0644, directory=None):
+    if directory:
+        if path.startswith("/"):
+            path = path[1:]
+        path = os.path.join(directory, path)
+    with os.fdopen(os.open(path, os.O_WRONLY | os.O_CREAT, mode), 'w') as f:
         f.write(content)
 
 

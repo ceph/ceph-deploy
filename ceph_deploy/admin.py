@@ -27,7 +27,6 @@ def admin(args):
         LOG.debug('Pushing admin keys and conf to %s', hostname)
         try:
             distro = hosts.get(hostname, username=args.username)
-            hostname = distro.conn.remote_module.shortname()
 
             distro.conn.remote_module.write_conf(
                 args.cluster,
@@ -37,7 +36,8 @@ def admin(args):
 
             distro.conn.remote_module.write_file(
                 '/etc/ceph/%s.client.admin.keyring' % args.cluster,
-                keyring
+                keyring,
+                0600,
             )
 
             distro.conn.exit()
@@ -58,7 +58,7 @@ def make(parser):
     parser.add_argument(
         'client',
         metavar='HOST',
-        nargs='*',
+        nargs='+',
         help='host to configure for ceph administration',
         )
     parser.set_defaults(
