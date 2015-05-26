@@ -1,3 +1,9 @@
+ceph-deploy (1.5.25) stable; urgency=low
+
+  * New upstream release
+
+ -- Travis Rhoden <trhoden@redhat.com>  Tue, 26 May 2015 10:38:53 -0700
+
 ceph-deploy (1.5.24) stable; urgency=low
 
   * New upstream release
