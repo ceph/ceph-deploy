@@ -4,6 +4,16 @@ Changelog
 1.5
 ---
 
+1.5.25
+^^^^^^
+26-May-2015
+
+* **CVE-2015-4053**: Make sure that the admin keyring is mode 0600 after being
+  pushed with the ``ceph-deploy admin`` command.
+* Improved SUSE install and purge.
+* Make sure that package name 'ceph-radosgw' is used everywhere for RPM systems
+  instead of 'radosgw'.
+
 1.5.24
 ^^^^^^
 18-May-2015
