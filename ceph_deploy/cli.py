@@ -27,6 +27,14 @@ Full documentation can be found at: http://ceph.com/ceph-deploy/docs
 """ % ceph_deploy.__version__)
 
 
+def log_flags(args, logger=None):
+    logger = logger or LOG
+    logger.info('ceph-deploy options:')
+
+    for k, v in args.__dict__.items():
+        logger.info(' %-30s: %s' % (k, v))
+
+
 def get_parser():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -158,6 +166,7 @@ def _main(args=None, namespace=None):
         ceph_deploy.__version__,
         join(sys.argv, " "))
     )
+    log_flags(args)
 
     return args.func(args)
 
