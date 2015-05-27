@@ -1,5 +1,6 @@
 from cStringIO import StringIO
 from textwrap import dedent
+import pytest
 from mock import Mock, patch
 from ceph_deploy import conf
 from ceph_deploy.tests import fakes
@@ -147,6 +148,10 @@ class TestConfGetList(object):
         assert cfg.get_default_repo() is False
 
 
+truthy_values = ['yes', 'true', 'on']
+falsy_values = ['no', 'false', 'off']
+
+
 class TestSetOverrides(object):
 
     def setup(self):
@@ -167,3 +172,21 @@ class TestSetOverrides(object):
         self.conf.items = Mock(return_value=(('bar', 1),))
         arg_obj = conf.cephdeploy.set_overrides(self.args, self.conf)
         assert arg_obj.bar == 1
+
+    @pytest.mark.parametrize('value', truthy_values)
+    def test_override_truthy_values(self, value):
+        self.conf.sections = Mock(
+            return_value=['ceph-deploy-global', 'ceph-deploy-install']
+        )
+        self.conf.items = Mock(return_value=(('bar', value),))
+        arg_obj = conf.cephdeploy.set_overrides(self.args, self.conf)
+        assert arg_obj.bar is True
+
+    @pytest.mark.parametrize('value', falsy_values)
+    def test_override_falsy_values(self, value):
+        self.conf.sections = Mock(
+            return_value=['ceph-deploy-global', 'ceph-deploy-install']
+        )
+        self.conf.items = Mock(return_value=(('bar', value),))
+        arg_obj = conf.cephdeploy.set_overrides(self.args, self.conf)
+        assert arg_obj.bar is False
