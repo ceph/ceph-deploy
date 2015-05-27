@@ -63,7 +63,7 @@ def install(distro, version_kind, version, adjust_repos, **kw):
                 [
                     'rpm',
                     '--import',
-                    "https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc".format(key=key)
+                    "https://git.ceph.com/?p=ceph.git;a=blob_plain;f=keys/{key}.asc".format(key=key)
                 ]
             )
 
@@ -94,7 +94,7 @@ def install(distro, version_kind, version, adjust_repos, **kw):
                     release=release.split(".", 1)[0],
                     machine=machine,
                     version=version),
-                "https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc".format(key=key),
+                "https://git.ceph.com/?p=ceph.git;a=blob_plain;f=keys/{key}.asc".format(key=key),
                 adjust_repos=True,
                 extra_installs=False
             )

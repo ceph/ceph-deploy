@@ -36,7 +36,7 @@ def install(distro, version_kind, version, adjust_repos, **kw):
                 'wget',
                 '-O',
                 '{key}.asc'.format(key=key),
-                'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc'.format(key=key),
+                'https://git.ceph.com/?p=ceph.git;a=blob_plain;f=keys/{key}.asc'.format(key=key),
             ],
             stop_on_nonzero=False,
         )

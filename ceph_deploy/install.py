@@ -137,7 +137,7 @@ def install(args):
         # custom repo arguments
         repo_url = os.environ.get('CEPH_DEPLOY_REPO_URL') or args.repo_url
         gpg_url = os.environ.get('CEPH_DEPLOY_GPG_URL') or args.gpg_url
-        gpg_fallback = 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc'
+        gpg_fallback = 'https://git.ceph.com/?p=ceph.git;a=blob_plain;f=keys/release.asc'
 
         if gpg_url is None and repo_url:
             LOG.warning('--gpg-url was not used, will fallback')

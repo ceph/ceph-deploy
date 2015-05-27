@@ -37,7 +37,7 @@ cd_conf_template = """
 # enabled=1
 # gpgcheck=1
 # type=rpm-md
-# gpgkey=https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/autobuild.asc
+# gpgkey=https://git.ceph.com/?p=ceph.git;a=blob_plain;f=keys/release.asc
 
 # apt repos:
 # [myrepo]
@@ -48,7 +48,7 @@ cd_conf_template = """
 #
 # [cephrepo]
 # baseurl=http://ceph.com/rpm-emperor/el6/noarch
-# gpgkey=https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/autobuild.asc
+# gpgkey=https://git.ceph.com/?p=ceph.git;a=blob_plain;f=keys/release.asc
 """
 
 

@@ -40,7 +40,7 @@ def install(distro, version_kind, version, adjust_repos, **kw):
             [
                 'rpm',
                 '--import',
-                "{protocol}://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc".format(
+                "{protocol}://git.ceph.com/?p=ceph.git;a=blob_plain;f=keys/{key}.asc".format(
                     key=key,
                     protocol=protocol)
             ]
