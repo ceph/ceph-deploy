@@ -101,6 +101,7 @@ def set_overrides(args, _conf=None):
     subcommand = args.func.__name__
     command_section = 'ceph-deploy-%s' % subcommand
     conf = _conf or load()
+
     for section_name in conf.sections():
         if section_name in ['ceph-deploy-global', command_section]:
             override_subcommand(
@@ -121,8 +122,22 @@ def override_subcommand(section_name, section_items, args):
     """
     # XXX We are not coercing here any int-like values, so if ArgParse
     # does that in the CLI we are totally non-compliant with that expectation
+    # but we will try and infer a few boolean values
+
+    # acceptable boolean states for flags
+    _boolean_states = {'yes': True, 'true': True, 'on': True,
+                       'no': False, 'false': False, 'off': False}
+
     for k, v, in section_items:
-        setattr(args, k, v)
+        # get the lower case value of `v`, fallback to the booleanized
+        # (original) value of `v`
+        try:
+            normalized_value = v.lower()
+        except AttributeError:
+            # probably not a string object that has .lower
+            normalized_value = v
+        value = _boolean_states.get(normalized_value, v)
+        setattr(args, k, value)
     return args
 
 
