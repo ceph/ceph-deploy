@@ -80,6 +80,25 @@ a repository.
 Repositories can be very complex to describe and most of the time (specially
 for yum repositories) they can be very verbose too.
 
+Setting Default Flags or Values
+-------------------------------
+Because the configuration loading allows specifying the same flags as in the
+CLI it is possible to set defaults. For example, assuming that a user always
+wants to install Ceph the following way (that doesn't create/modify remote repo
+files)::
+
+    ceph-deploy install --no-adjust-repos {nodes}
+
+This can be the default behavior by setting it in the right section in the
+configuration file, which should look like this::
+
+    [ceph-deploy-install]
+    adjust_repos = False
+
+The default for ``adjust_repos`` is ``True``, but because we are changing this
+to ``False`` the CLI will now have this behavior changed without the need to
+pass any flag.
+
 Repository Sections
 -------------------
 Keys will depend on the type of package manager that will use it. Certain keys
