@@ -1,5 +1,6 @@
 from ceph_deploy.util import templates, pkg_managers
 from ceph_deploy.lib import remoto
+from ceph_deploy.util.paths import gpg
 import logging
 
 LOG = logging.getLogger(__name__)
@@ -40,9 +41,7 @@ def install(distro, version_kind, version, adjust_repos, **kw):
             [
                 'rpm',
                 '--import',
-                "{protocol}://git.ceph.com/?p=ceph.git;a=blob_plain;f=keys/{key}.asc".format(
-                    key=key,
-                    protocol=protocol)
+                gpg.url(key, protocol=protocol)
             ]
         )
 
