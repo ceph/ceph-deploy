@@ -18,4 +18,11 @@ def generate_ips(start_ip, end_ip):
     return ip_range
 
 
-
+class Empty(object):
+    """
+    A bare class, with explicit behavior for key/value items to be set at
+    instantiation.
+    """
+    def __init__(self, **kw):
+        for k, v in kw.items():
+            setattr(self, k, v)
