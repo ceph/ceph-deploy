@@ -1,6 +1,7 @@
 from ceph_deploy.util import pkg_managers, templates
 from ceph_deploy.lib import remoto
 from ceph_deploy.hosts.util import install_yum_priorities
+from ceph_deploy.util.paths import gpg
 
 
 def rpm_dist(distro):
@@ -63,7 +64,7 @@ def install(distro, version_kind, version, adjust_repos, **kw):
                 [
                     'rpm',
                     '--import',
-                    "https://git.ceph.com/?p=ceph.git;a=blob_plain;f=keys/{key}.asc".format(key=key)
+                    gpg.url(key)
                 ]
             )
 
@@ -94,7 +95,7 @@ def install(distro, version_kind, version, adjust_repos, **kw):
                     release=release.split(".", 1)[0],
                     machine=machine,
                     version=version),
-                "https://git.ceph.com/?p=ceph.git;a=blob_plain;f=keys/{key}.asc".format(key=key),
+                gpg.url(key),
                 adjust_repos=True,
                 extra_installs=False
             )

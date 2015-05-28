@@ -2,6 +2,7 @@ from urlparse import urlparse
 
 from ceph_deploy.lib import remoto
 from ceph_deploy.util import pkg_managers
+from ceph_deploy.util.paths import gpg
 
 
 def install(distro, version_kind, version, adjust_repos, **kw):
@@ -36,7 +37,7 @@ def install(distro, version_kind, version, adjust_repos, **kw):
                 'wget',
                 '-O',
                 '{key}.asc'.format(key=key),
-                'https://git.ceph.com/?p=ceph.git;a=blob_plain;f=keys/{key}.asc'.format(key=key),
+                gpg.url(key),
             ],
             stop_on_nonzero=False,
         )
