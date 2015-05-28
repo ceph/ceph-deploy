@@ -1,6 +1,7 @@
 from ceph_deploy.lib import remoto
 from ceph_deploy.hosts.centos.install import repo_install, mirror_install  # noqa
 from ceph_deploy.hosts.util import install_yum_priorities
+from ceph_deploy.util.paths import gpg
 
 
 def install(distro, version_kind, version, adjust_repos, **kw):
@@ -26,7 +27,7 @@ def install(distro, version_kind, version, adjust_repos, **kw):
                 [
                     'rpm',
                     '--import',
-                    "https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc".format(key=key)
+                    gpg.url(key)
                 ]
             )
 
@@ -64,7 +65,7 @@ def install(distro, version_kind, version, adjust_repos, **kw):
                     release=release.split(".", 1)[0],
                     machine=machine,
                     version=version),
-                "https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/{key}.asc".format(key=key),
+                gpg.url(key),
                 adjust_repos=True,
                 extra_installs=False
             )

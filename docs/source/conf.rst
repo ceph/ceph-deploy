@@ -52,7 +52,7 @@ This is how a default configuration file would look like::
     # enabled=1
     # gpgcheck=1
     # type=rpm-md
-    # gpgkey=https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/autobuild.asc
+    # gpgkey=https://git.ceph.com/?p=ceph.git;a=blob_plain;f=keys/release.asc
 
     # apt repos:
     # [myrepo]
@@ -63,7 +63,7 @@ This is how a default configuration file would look like::
     #
     # [cephrepo]
     # baseurl=http://ceph.com/rpm-emperor/el6/noarch
-    # gpgkey=https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/autobuild.asc
+    # gpgkey=https://git.ceph.com/?p=ceph.git;a=blob_plain;f=keys/release.asc
 
 .. conf_sections:
 
@@ -165,7 +165,7 @@ configuration file demonstrates)::
     enabled=1
     gpgcheck=1
     type=rpm-md
-    gpgkey=https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/autobuild.asc
+    gpgkey=https://git.ceph.com/?p=ceph.git;a=blob_plain;f=keys/release.asc
 
 In this case, the repository called ``myrepo`` defines the ``extra-repos`` key
 with just one extra one: ``cephrepo``.
