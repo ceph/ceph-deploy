@@ -32,6 +32,8 @@ def log_flags(args, logger=None):
     logger.info('ceph-deploy options:')
 
     for k, v in args.__dict__.items():
+        if k.startswith('_'):
+            continue
         logger.info(' %-30s: %s' % (k, v))
 
 
