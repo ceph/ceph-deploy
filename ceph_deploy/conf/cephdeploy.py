@@ -4,6 +4,8 @@ import os
 from os import path
 import re
 
+from ceph_deploy.util.paths import gpg
+
 logger = logging.getLogger('ceph_deploy.conf')
 
 cd_conf_template = """
@@ -37,7 +39,7 @@ cd_conf_template = """
 # enabled=1
 # gpgcheck=1
 # type=rpm-md
-# gpgkey=https://git.ceph.com/?p=ceph.git;a=blob_plain;f=keys/release.asc
+# gpgkey={gpgurl}
 
 # apt repos:
 # [myrepo]
@@ -48,8 +50,8 @@ cd_conf_template = """
 #
 # [cephrepo]
 # baseurl=http://ceph.com/rpm-emperor/el6/noarch
-# gpgkey=https://git.ceph.com/?p=ceph.git;a=blob_plain;f=keys/release.asc
-"""
+# gpgkey={gpgurl}
+""".format(gpgurl=gpg.url('release'))
 
 
 def location():
