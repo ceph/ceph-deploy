@@ -31,13 +31,17 @@ def install(distro, version_kind, version, adjust_repos, **kw):
     )
 
     if adjust_repos:
+        # Wheezy does not like the git.ceph.com SSL cert
+        protocol = 'https'
+        if codename == 'wheezy':
+            protocol = 'http'
         remoto.process.run(
             distro.conn,
             [
                 'wget',
                 '-O',
                 '{key}.asc'.format(key=key),
-                gpg.url(key),
+                gpg.url(key, protocol=protocol),
             ],
             stop_on_nonzero=False,
         )
