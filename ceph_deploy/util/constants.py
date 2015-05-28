@@ -28,3 +28,5 @@ default_components = namedtuple('DefaultComponents', ['rpm', 'deb'])
 # TODO: This needs to get unified once the packaging naming gets consistent
 default_components.rpm = tuple(_base_components + ['ceph-radosgw'])
 default_components.deb = tuple(_base_components + ['radosgw'])
+
+gpg_key_base_url = "https://git.ceph.com/?p=ceph.git;a=blob_plain;f=keys/"
