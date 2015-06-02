@@ -19,6 +19,10 @@ class TestNormalized(object):
         result = hosts._normalized_distro_name('Ubuntu')
         assert result == 'ubuntu'
 
+    def test_get_mint(self):
+        result = hosts._normalized_distro_name('LinuxMint')
+        assert result == 'ubuntu'
+
     def test_get_suse(self):
         result = hosts._normalized_distro_name('SUSE LINUX')
         assert result == 'suse'
@@ -398,4 +402,8 @@ class TestGetDistro(object):
 
     def test_get_fallback(self):
         result = hosts._get_distro('Solaris', 'Debian')
+        assert result.__name__.endswith('debian')
+
+    def test_get_mint(self):
+        result = hosts._get_distro('LinuxMint')
         assert result.__name__.endswith('debian')

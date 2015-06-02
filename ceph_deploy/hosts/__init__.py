@@ -103,6 +103,8 @@ def _normalized_distro_name(distro):
         return 'suse'
     elif distro.startswith('centos'):
         return 'centos'
+    elif distro.startswith('linuxmint'):
+        return 'ubuntu'
     return distro
 
 
