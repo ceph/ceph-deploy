@@ -185,8 +185,11 @@ def install(args):
                 components=components,
             )
 
-        # Check the ceph version we just installed
-        hosts.common.ceph_version(distro.conn)
+        # If ceph was installed, then log the version
+        if (('ceph-osd' in components)
+         or ('ceph-mds' in components)
+         or ('ceph-mon' in components)):
+            hosts.common.ceph_version(distro.conn)
         distro.conn.exit()
 
 
