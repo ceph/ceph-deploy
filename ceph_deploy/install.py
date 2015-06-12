@@ -56,6 +56,7 @@ def detect_components(args, distro):
         'install_mds': 'ceph-mds',
         'install_mon': 'ceph-mon',
         'install_common': 'ceph-common',
+        'install_iscsi': 'targetcli',
     }
 
     if distro.is_rpm:
@@ -519,6 +520,13 @@ def make(parser):
         dest='install_all',
         action='store_true',
         help='install all ceph components (e.g. mon,osd,mds,rgw). This is the default',
+    )
+
+    version.add_argument(
+        '--iscsi',
+        dest='install_iscsi',
+        action='store_true',
+        help='install the LIO iSCSI target utility only',
     )
 
     version.add_argument(
