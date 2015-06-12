@@ -4,6 +4,7 @@ from ceph_deploy.lib import remoto
 def uninstall(conn, purge=False):
     packages = [
         'ceph',
+        'ceph-common',
         'libcephfs1',
         'librados2',
         'librbd1',
