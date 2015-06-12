@@ -24,16 +24,15 @@ def map_components(components):
 
 
 def install(distro, version_kind, version, adjust_repos, **kw):
-    # note: when split packages for ceph land for SUSE,
-    # `kw['components']` will have those. Unused for now.
-    packages = ['ceph', 'ceph-radosgw']
+    packages = map_components(kw.get('components', []))
+
     pkg_managers.zypper_refresh(distro.conn)
-    pkg_managers.zypper(distro.conn, packages)
+    if len(packages):
+        pkg_managers.zypper(distro.conn, packages)
 
 
 def mirror_install(distro, repo_url, gpg_url, adjust_repos, **kw):
-    # note: when split packages for ceph land for SUSE,
-    # `kw['components']` will have those. Unused for now.
+    packages = map_components(kw.get('components', []))
     repo_url = repo_url.strip('/')  # Remove trailing slashes
     gpg_url_path = gpg_url.split('file://')[-1]  # Remove file if present
 
@@ -56,15 +55,14 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos, **kw):
             ceph_repo_content)
         pkg_managers.zypper_refresh(distro.conn)
 
-    pkg_managers.zypper(distro.conn, 'ceph')
+    if len(packages):
+        pkg_managers.zypper(distro.conn, packages)
 
 
 def repo_install(distro, reponame, baseurl, gpgkey, **kw):
     # do we have specific components to install?
     # removed them from `kw` so that we don't mess with other defaults
-    # note: when split packages for ceph land for Suse, `packages`
-    # can be used. Unused for now.
-    packages = kw.pop('components', [])  # noqa
+    packages = map_components(kw.pop('components', []))  # noqa
     # Get some defaults
     name = kw.get('name', '%s repo' % reponame)
     enabled = kw.get('enabled', 1)
@@ -101,8 +99,5 @@ def repo_install(distro, reponame, baseurl, gpgkey, **kw):
     )
 
     # Some custom repos do not need to install ceph
-    if install_ceph:
-        # Before any install, make sure we have `wget`
-        pkg_managers.zypper(distro.conn, 'wget')
-
-        pkg_managers.zypper(distro.conn, 'ceph')
+    if install_ceph and len(packages):
+        pkg_managers.zypper(distro.conn, packages)
