@@ -14,7 +14,7 @@ def install(distro, version_kind, version, adjust_repos, **kw):
 
 
 def mirror_install(distro, repo_url, gpg_url, adjust_repos, **kw):
-    # note: when split packages for ceph land for Suse,
+    # note: when split packages for ceph land for SUSE,
     # `kw['components']` will have those. Unused for now.
     repo_url = repo_url.strip('/')  # Remove trailing slashes
     gpg_url_path = gpg_url.split('file://')[-1]  # Remove file if present
@@ -36,25 +36,9 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos, **kw):
         distro.conn.remote_module.write_file(
             '/etc/zypp/repos.d/ceph.repo',
             ceph_repo_content)
-        remoto.process.run(
-            distro.conn,
-            [
-                'zypper',
-                '--non-interactive',
-                'refresh'
-            ]
-        )
+        pkg_managers.zypper_refresh(distro.conn)
 
-    remoto.process.run(
-        distro.conn,
-        [
-            'zypper',
-            '--non-interactive',
-            '--quiet',
-            'install',
-            'ceph',
-            ],
-        )
+    pkg_managers.zypper(distro.conn, 'ceph')
 
 
 def repo_install(distro, reponame, baseurl, gpgkey, **kw):
