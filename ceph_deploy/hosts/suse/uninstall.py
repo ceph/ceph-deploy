@@ -1,3 +1,4 @@
+from ceph_deploy.util import pkg_managers
 from ceph_deploy.lib import remoto
 
 
@@ -10,12 +11,4 @@ def uninstall(conn, purge=False):
         'librbd1',
         'ceph-radosgw',
         ]
-    cmd = [
-        'zypper',
-        '--non-interactive',
-        '--quiet',
-        'remove',
-        ]
-
-    cmd.extend(packages)
-    remoto.process.run(conn, cmd)
+    pkg_managers.zypper_remove(conn, packages)
