@@ -62,7 +62,8 @@ nor overridden in the command-line it will fall-back to resolving the address
 of the provided host.
 
 .. warning:: If the monitor host has multiple addresses you should specify
-             the address directly to ensure the right IP is used.
+             the address directly to ensure the right IP is used. Please
+             note, only one node can be added at a time.
 
 .. versionadded:: 1.4.0
 

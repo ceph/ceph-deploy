@@ -175,6 +175,8 @@ def mon_add(args):
 
     if not args.mon:
         raise exc.NeedHostError()
+    elif len(args.mon) > 1:
+        raise exc.GenericError('Only one node can be added at a time')
     mon_host = args.mon[0]
 
     try:
@@ -482,7 +484,8 @@ def make(parser):
 
       If the section for the monitor exists and defines a `mon addr` that
       will be used, otherwise it will fallback by resolving the hostname to an
-      IP. If `--address` is used it will override all other options.
+      IP. If `--address` is used it will override all other options. Please
+      note that only one node can be added at a time.
 
     destroy
       Completely remove monitors on a remote host. Requires hostname(s) as
