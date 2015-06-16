@@ -73,7 +73,7 @@ destroy
 Completely remove monitors on a remote host. Requires hostname(s) as
 arguments::
 
-    ceph-deploy mon destroy node1
+    ceph-deploy mon destroy node1 node2 node3
 
 
 --keyrings
