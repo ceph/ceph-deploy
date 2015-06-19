@@ -98,9 +98,6 @@ def get_parser():
             description=fn.__doc__,
             help=fn.__doc__,
             )
-        # ugly kludge but i really want to have a nice way to access
-        # the program name, with subcommand, later
-        p.set_defaults(prog=p.prog)
         if not os.environ.get('CEPH_DEPLOY_TEST'):
             p.set_defaults(cd_conf=ceph_deploy.conf.cephdeploy.load())
 
@@ -108,8 +105,6 @@ def get_parser():
         p.set_defaults(default_release=False)
         fn(p)
     parser.set_defaults(
-        # we want to hold on to this, for later
-        prog=parser.prog,
         cluster='ceph',
         )
 
