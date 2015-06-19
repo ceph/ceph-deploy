@@ -1,6 +1,8 @@
 import pytest
 import subprocess
 
+import ceph_deploy
+
 
 def test_help(tmpdir, cli):
     with cli(
@@ -35,3 +37,12 @@ def test_bad_cluster(tmpdir, cli):
     assert 'usage: ceph-deploy' in result
     assert err.value.status == 2
     assert [f.basename for f in tmpdir.listdir()] == []
+
+
+def test_version(tmpdir, cli):
+    with cli(
+        args=['ceph-deploy', '--version'],
+        stderr=subprocess.PIPE,
+    ) as p:
+        result = p.stderr.read().strip()
+        assert result == ceph_deploy.__version__

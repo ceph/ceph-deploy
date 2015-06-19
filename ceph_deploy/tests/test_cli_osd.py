@@ -13,7 +13,7 @@ def test_help(tmpdir, cli):
     assert 'optional arguments' in result
 
 
-def test_bad_no_conf(tmpdir, cli):
+def test_bad_subcommand(tmpdir, cli):
     with pytest.raises(cli.Failed) as err:
         with cli(
             args=['ceph-deploy', 'osd', 'fakehost:/does-not-exist'],
@@ -26,8 +26,6 @@ def test_bad_no_conf(tmpdir, cli):
 
 
 def test_bad_no_disk(tmpdir, cli):
-    with tmpdir.join('ceph.conf').open('w'):
-        pass
     with pytest.raises(cli.Failed) as err:
         with cli(
             args=['ceph-deploy', 'osd'],
@@ -35,4 +33,5 @@ def test_bad_no_disk(tmpdir, cli):
             ) as p:
             result = p.stderr.read()
     assert 'usage: ceph-deploy osd' in result
+    assert 'too few arguments' in result
     assert err.value.status == 2
