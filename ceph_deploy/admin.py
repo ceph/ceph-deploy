@@ -59,7 +59,7 @@ def make(parser):
         'client',
         metavar='HOST',
         nargs='+',
-        help='host to configure for ceph administration',
+        help='host to configure for Ceph administration',
         )
     parser.set_defaults(
         func=admin,
