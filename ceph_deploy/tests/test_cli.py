@@ -25,15 +25,3 @@ def test_bad_command(tmpdir, cli):
     assert 'usage: ceph-deploy' in result
     assert err.value.status == 2
     assert [f.basename for f in tmpdir.listdir()] == []
-
-
-def test_bad_cluster(tmpdir, cli):
-    with pytest.raises(cli.Failed) as err:
-        with cli(
-            args=['ceph-deploy', '--cluster=/evil-this-should-not-be-created', 'new'],
-            stderr=subprocess.PIPE,
-            ) as p:
-            result = p.stderr.read()
-    assert 'usage: ceph-deploy' in result
-    assert err.value.status == 2
-    assert [f.basename for f in tmpdir.listdir()] == []
