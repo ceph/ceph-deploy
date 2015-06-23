@@ -8,7 +8,7 @@ from ceph_deploy.cli import _main as main
 from ceph_deploy.tests.directory import directory
 
 
-def test_write_global_conf_section(tmpdir, cli):
+def test_write_global_conf_section(tmpdir):
     fake_ip_addresses = lambda x: ['10.0.0.1']
 
     with patch('ceph_deploy.new.hosts'):
