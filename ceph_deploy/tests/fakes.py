@@ -23,4 +23,5 @@ def mock_open(mock=None, data=None):
     return mock
 
 
-
+def fake_arg_val_hostname(self, host):
+    return host
