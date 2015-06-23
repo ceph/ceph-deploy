@@ -99,3 +99,11 @@ class TestParserMain(object):
             self.parser.parse_args('bork'.split())
         out, err = capsys.readouterr()
         assert 'invalid choice' in err
+
+    def test_help(self, capsys):
+        with pytest.raises(SystemExit):
+            self.parser.parse_args('--help'.split())
+        out, err = capsys.readouterr()
+        assert 'usage: ceph-deploy' in out
+        assert 'optional arguments:' in out
+        assert 'commands:' in out
