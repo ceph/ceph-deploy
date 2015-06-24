@@ -110,3 +110,24 @@ class TestParserMON(object):
     def test_mon_add_multi_host_raises_err(self):
         with pytest.raises(SystemExit):
             self.parser.parse_args('mon add test1 test2'.split())
+
+    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12151")
+    def test_mon_destroy_help(self, capsys):
+        with pytest.raises(SystemExit):
+            self.parser.parse_args('mon destroy --help'.split())
+        out, err = capsys.readouterr()
+        assert 'usage: ceph-deploy mon destroy' in out
+
+    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12151")
+    def test_mon_destroy_no_host_raises_err(self):
+        with pytest.raises(SystemExit):
+            self.parser.parse_args('mon destroy'.split())
+
+    def test_mon_destroy_one_host_okay(self):
+        args = self.parser.parse_args('mon destroy test1'.split())
+        assert args.mon == ["test1"]
+
+    def test_mon_destroy_multi_host(self):
+        hosts = ['host1', 'host2', 'host3']
+        args = self.parser.parse_args('mon destroy'.split() + hosts)
+        assert args.mon == hosts
