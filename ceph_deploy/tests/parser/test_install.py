@@ -125,3 +125,35 @@ class TestParserInstall(object):
         args = self.parser.parse_args('install --release firefly --no-adjust-repos host1'.split())
         assert args.release == "firefly"
         assert not args.adjust_repos
+
+    def test_install_repo_default_is_false(self):
+        args = self.parser.parse_args('install host1'.split())
+        assert not args.repo
+
+    def test_install_repo_true(self):
+        args = self.parser.parse_args('install --repo host1'.split())
+        assert args.repo
+
+    def test_install_local_mirror_default_is_none(self):
+        args = self.parser.parse_args('install host1'.split())
+        assert args.local_mirror is None
+
+    def test_install_local_mirror_custom_path(self):
+        args = self.parser.parse_args('install --local-mirror /mnt/mymirror host1'.split())
+        assert args.local_mirror == "/mnt/mymirror"
+
+    def test_install_repo_url_default_is_none(self):
+        args = self.parser.parse_args('install host1'.split())
+        assert args.repo_url is None
+
+    def test_install_repo_url_custom_path(self):
+        args = self.parser.parse_args('install --repo-url https://ceph.com host1'.split())
+        assert args.repo_url == "https://ceph.com"
+
+    def test_install_gpg_url_default_is_none(self):
+        args = self.parser.parse_args('install host1'.split())
+        assert args.gpg_url is None
+
+    def test_install_gpg_url_custom_path(self):
+        args = self.parser.parse_args('install --gpg-url https://ceph.com/key host1'.split())
+        assert args.gpg_url == "https://ceph.com/key"
