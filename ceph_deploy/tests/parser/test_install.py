@@ -2,6 +2,10 @@ import pytest
 
 from ceph_deploy.cli import get_parser
 
+COMP_FLAGS = [
+    'mon', 'mds', 'rgw', 'osd', 'common', 'all'
+]
+
 
 class TestParserInstall(object):
 
@@ -91,3 +95,19 @@ class TestParserInstall(object):
             self.parser.parse_args('install --testing --dev master host1'.split())
         out, err = capsys.readouterr()
         assert 'not allowed with argument' in err
+
+    @pytest.mark.parametrize('comp', COMP_FLAGS)
+    def test_install_component_default_is_false(self, comp):
+        args = self.parser.parse_args('install host1'.split())
+        assert getattr(args, 'install_%s' % comp) is False
+
+    @pytest.mark.parametrize('comp', COMP_FLAGS)
+    def test_install_component_true(self, comp):
+        args = self.parser.parse_args(('install --%s host1' % comp).split())
+        assert getattr(args, 'install_%s' % comp) is True
+
+    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12147")
+    def test_install_multi_component(self):
+        args = self.parser.parse_args(('install --mon --rgw host1').split())
+        assert args.install_mon
+        assert args.install_rgw
