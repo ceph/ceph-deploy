@@ -1,5 +1,6 @@
 import pytest
 
+import ceph_deploy
 from ceph_deploy.cli import get_parser
 
 
@@ -29,3 +30,9 @@ class TestParserMain(object):
             self.parser.parse_args('--verbose --quiet forgetkeys'.split())
         out, err = capsys.readouterr()
         assert 'not allowed with argument' in err
+
+    def test_version(self, capsys):
+        with pytest.raises(SystemExit):
+            self.parser.parse_args('--version'.split())
+        out, err = capsys.readouterr()
+        assert err.strip() == ceph_deploy.__version__
