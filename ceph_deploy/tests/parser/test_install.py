@@ -34,6 +34,7 @@ class TestParserInstall(object):
     def test_install_release_default_is_none(self):
         args = self.parser.parse_args('install host1'.split())
         assert args.release is None
+        assert args.version_kind == "stable"
 
     def test_install_release(self):
         args = self.parser.parse_args('install --release hammer host1'.split())
@@ -44,4 +45,49 @@ class TestParserInstall(object):
     def test_install_release_bad_codename(self):
         args = self.parser.parse_args('install --release cephalopod host1'.split())
         assert args.release != "cephalopod"
-        
+
+    def test_install_testing_default_is_none(self):
+        args = self.parser.parse_args('install host1'.split())
+        assert args.testing is None
+        assert args.version_kind == "stable"
+
+    def test_install_testing_true(self):
+        args = self.parser.parse_args('install --testing host1'.split())
+        assert len(args.testing) == 0
+        assert args.version_kind == "testing"
+
+    def test_install_dev_disabled_by_default(self):
+        args = self.parser.parse_args('install host1'.split())
+        # dev defaults to master, but version_kind nullifies it
+        assert args.dev == "master"
+        assert args.version_kind == "stable"
+
+    def test_install_dev_custom_version(self):
+        args = self.parser.parse_args('install --dev v0.80.8 host1'.split())
+        assert args.dev == "v0.80.8"
+        assert args.version_kind == "dev"
+
+    @pytest.mark.skipif(reason="test reflects desire, but not code reality")
+    def test_install_dev_option_default_is_master(self):
+        # I don't think this is the way argparse works.
+        args = self.parser.parse_args('install --dev host1'.split())
+        assert args.dev == "master"
+        assert args.version_kind == "dev"
+
+    def test_install_release_testing_mutex(self, capsys):
+        with pytest.raises(SystemExit):
+            self.parser.parse_args('install --release hammer --testing host1'.split())
+        out, err = capsys.readouterr()
+        assert 'not allowed with argument' in err
+
+    def test_install_release_dev_mutex(self, capsys):
+        with pytest.raises(SystemExit):
+            self.parser.parse_args('install --release hammer --dev master host1'.split())
+        out, err = capsys.readouterr()
+        assert 'not allowed with argument' in err
+
+    def test_install_testing_dev_mutex(self, capsys):
+        with pytest.raises(SystemExit):
+            self.parser.parse_args('install --testing --dev master host1'.split())
+        out, err = capsys.readouterr()
+        assert 'not allowed with argument' in err
