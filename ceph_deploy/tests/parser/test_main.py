@@ -3,6 +3,12 @@ import pytest
 import ceph_deploy
 from ceph_deploy.cli import get_parser
 
+SUBCMDS_WITH_ARGS = [
+    'new', 'install', 'rgw', 'mds', 'mon', 'gatherkeys', 'disk', 'osd',
+    'admin', 'config', 'uninstall', 'purgedata', 'purge', 'pkg', 'calamari'
+]
+SUBCMDS_WITHOUT_ARGS = ['forgetkeys']
+
 
 class TestParserMain(object):
 
@@ -68,3 +74,21 @@ class TestParserMain(object):
     def test_custom_ceph_conf(self):
         args = self.parser.parse_args('--ceph-conf /tmp/ceph.conf forgetkeys'.split())
         assert args.ceph_conf == '/tmp/ceph.conf'
+
+    @pytest.mark.parametrize('cmd', SUBCMDS_WITH_ARGS)
+    def test_valid_subcommands_with_args(self, cmd, capsys):
+        with pytest.raises(SystemExit):
+            self.parser.parse_args(['%s' % cmd])
+        out, err = capsys.readouterr()
+        assert 'too few arguments' in err
+        assert 'invalid choice' not in err
+
+    @pytest.mark.parametrize('cmd', SUBCMDS_WITHOUT_ARGS)
+    def test_valid_subcommands_without_args(self, cmd, capsys):
+        self.parser.parse_args(['%s' % cmd])
+
+    def test_invalid_subcommand(self, capsys):
+        with pytest.raises(SystemExit):
+            self.parser.parse_args('bork'.split())
+        out, err = capsys.readouterr()
+        assert 'invalid choice' in err
