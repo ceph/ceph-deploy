@@ -36,3 +36,35 @@ class TestParserMain(object):
             self.parser.parse_args('--version'.split())
         out, err = capsys.readouterr()
         assert err.strip() == ceph_deploy.__version__
+
+    def test_custom_username(self):
+        args = self.parser.parse_args('--username trhoden forgetkeys'.split())
+        assert args.username == 'trhoden'
+
+    def test_default_username_is_none(self):
+        args = self.parser.parse_args('forgetkeys'.split())
+        assert args.username is None
+
+    def test_overwrite_conf_default_false(self):
+        args = self.parser.parse_args('forgetkeys'.split())
+        assert not args.overwrite_conf
+
+    def test_overwrite_conf_true(self):
+        args = self.parser.parse_args('--overwrite-conf forgetkeys'.split())
+        assert args.overwrite_conf
+
+    def test_default_cluster_name(self):
+        args = self.parser.parse_args('forgetkeys'.split())
+        assert args.cluster == 'ceph'
+
+    def test_custom_cluster_name(self):
+        args = self.parser.parse_args('--cluster myhugecluster forgetkeys'.split())
+        assert args.cluster == 'myhugecluster'
+
+    def test_default_ceph_conf_is_none(self):
+        args = self.parser.parse_args('forgetkeys'.split())
+        assert args.ceph_conf is None
+
+    def test_custom_ceph_conf(self):
+        args = self.parser.parse_args('--ceph-conf /tmp/ceph.conf forgetkeys'.split())
+        assert args.ceph_conf == '/tmp/ceph.conf'
