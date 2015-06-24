@@ -111,3 +111,17 @@ class TestParserInstall(object):
         args = self.parser.parse_args(('install --mon --rgw host1').split())
         assert args.install_mon
         assert args.install_rgw
+
+    def test_install_adjust_repos_default_is_true(self):
+        args = self.parser.parse_args('install host1'.split())
+        assert args.adjust_repos
+
+    def test_install_adjust_repos_false(self):
+        args = self.parser.parse_args('install --no-adjust-repos host1'.split())
+        assert not args.adjust_repos
+
+    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12147")
+    def test_install_adjust_repos_false_with_custom_release(self):
+        args = self.parser.parse_args('install --release firefly --no-adjust-repos host1'.split())
+        assert args.release == "firefly"
+        assert not args.adjust_repos
