@@ -1,8 +1,6 @@
 import re
-import subprocess
 import uuid
 
-import pytest
 from mock import patch
 
 from ceph_deploy import conf
@@ -10,30 +8,7 @@ from ceph_deploy.cli import _main as main
 from ceph_deploy.tests.directory import directory
 
 
-def test_help(tmpdir, cli):
-    with cli(
-        args=['ceph-deploy', 'new', '--help'],
-        stdout=subprocess.PIPE,
-        ) as p:
-        result = p.stdout.read()
-    assert 'usage: ceph-deploy new' in result
-    assert 'positional arguments' in result
-    assert 'optional arguments' in result
-
-
-def test_bad_no_mon(tmpdir, cli):
-    with pytest.raises(cli.Failed) as err:
-        with cli(
-            args=['ceph-deploy', 'new'],
-            stderr=subprocess.PIPE,
-            ) as p:
-            result = p.stderr.read()
-    assert 'usage: ceph-deploy new' in result
-    assert 'too few arguments' in result
-    assert err.value.status == 2
-
-
-def test_write_global_conf_section(tmpdir, cli):
+def test_write_global_conf_section(tmpdir):
     fake_ip_addresses = lambda x: ['10.0.0.1']
 
     with patch('ceph_deploy.new.hosts'):

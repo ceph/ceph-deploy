@@ -9,17 +9,7 @@ from ceph_deploy.cli import _main as main
 from ceph_deploy.tests.directory import directory
 
 
-def test_help(tmpdir, cli):
-    with cli(
-        args=['ceph-deploy', 'mon', '--help'],
-        stdout=subprocess.PIPE,
-        ) as p:
-        result = p.stdout.read()
-    assert 'usage: ceph-deploy' in result
-    assert 'positional arguments:' in result
-    assert 'optional arguments:' in result
-
-
+#TODO: This test does check that things fail if the .conf file is missing
 def test_bad_no_conf(tmpdir, cli):
     with pytest.raises(cli.Failed) as err:
         with cli(
@@ -28,20 +18,6 @@ def test_bad_no_conf(tmpdir, cli):
             ) as p:
             result = p.stderr.read()
     assert 'usage: ceph-deploy' in result
-    assert 'too few arguments' in result
-    assert err.value.status == 2
-
-
-def test_bad_no_mon(tmpdir, cli):
-    with tmpdir.join('ceph.conf').open('w'):
-        pass
-    with pytest.raises(cli.Failed) as err:
-        with cli(
-            args=['ceph-deploy', 'mon'],
-            stderr=subprocess.PIPE,
-            ) as p:
-            result = p.stderr.read()
-    assert 'usage: ceph-deploy mon' in result
     assert 'too few arguments' in result
     assert err.value.status == 2
 

@@ -39,6 +39,7 @@ def log_flags(args, logger=None):
 
 def get_parser():
     parser = argparse.ArgumentParser(
+        prog='ceph-deploy',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description='Easy Ceph deployment\n\n%s' % __header__,
         )
