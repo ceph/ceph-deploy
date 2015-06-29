@@ -164,3 +164,16 @@ def zypper_remove(conn, packages, *a, **kw):
         *a,
         **kw
     )
+
+
+def zypper_refresh(conn):
+    cmd = [
+        'zypper',
+        '--non-interactive',
+        'refresh',
+        ]
+
+    return remoto.process.run(
+        conn,
+        cmd
+    )
