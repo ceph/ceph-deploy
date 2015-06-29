@@ -1,13 +1,12 @@
-import argparse
 import json
 import logging
 import re
 import os
-from textwrap import dedent
 import time
 
 from ceph_deploy import conf, exc, admin
 from ceph_deploy.cliutil import priority
+from ceph_deploy.util.help_formatters import ToggleRawTextHelpFormatter
 from ceph_deploy.util import paths, net, files
 from ceph_deploy.lib import remoto
 from ceph_deploy.new import new_mon_keyring
@@ -454,51 +453,21 @@ def mon(args):
 @priority(30)
 def make(parser):
     """
-    Deploy ceph monitor on remote hosts.
+    Ceph MON Daemon management
     """
-    sub_command_help = dedent("""
-    Subcommands:
-
-    create-initial
-      Will deploy for monitors defined in `mon initial members`, wait until
-      they form quorum and then gatherkeys, reporting the monitor status along
-      the process. If monitors don't form quorum the command will eventually
-      time out.
-
-    create
-      Deploy monitors by specifying them like:
-
-        ceph-deploy mon create node1 node2 node3
-
-      If no hosts are passed it will default to use the `mon initial members`
-      defined in the configuration.
-
-    add
-      Add a monitor to an existing cluster:
-
-        ceph-deploy mon add node1
-
-      Or:
-
-        ceph-deploy mon add node1 --address 192.168.1.10
-
-      If the section for the monitor exists and defines a `mon addr` that
-      will be used, otherwise it will fallback by resolving the hostname to an
-      IP. If `--address` is used it will override all other options. Please
-      note that only one node can be added at a time.
-
-    destroy
-      Completely remove monitors on a remote host. Requires hostname(s) as
-      arguments.
-    """)
-    parser.formatter_class = argparse.RawDescriptionHelpFormatter
-    parser.description = sub_command_help
+    parser.formatter_class = ToggleRawTextHelpFormatter
 
     mon_parser = parser.add_subparsers(dest='subcommand')
 
     mon_add = mon_parser.add_parser(
-            'add',
-            help='Add a new Ceph MON to an existing cluster'
+        'add',
+        help=('R|Add a monitor to an existing cluster:\n'
+              '\tceph-deploy mon add node1\n'
+              'Or:\n'
+              '\tceph-deploy mon add --address 192.168.1.10 node1\n'
+              'If the section for the monitor exists and defines a `mon addr` that\n'
+              'will be used, otherwise it will fallback by resolving the hostname to an\n'
+              'IP. If `--address` is used it will override all other options.')
     )
     mon_add.add_argument(
         '--address',
@@ -510,8 +479,11 @@ def make(parser):
     )
 
     mon_create = mon_parser.add_parser(
-            'create',
-            help='Deploy new Ceph MON(s) as part of creating a new cluster'
+        'create',
+        help=('R|Deploy monitors by specifying them like:\n'
+              '\tceph-deploy mon create node1 node2 node3\n'
+              'If no hosts are passed it will default to use the\n'
+              '`mon initial members` defined in the configuration.')
     )
     mon_create.add_argument(
         '--keyrings',
@@ -525,7 +497,10 @@ def make(parser):
 
     mon_create_initial = mon_parser.add_parser(
         'create-initial',
-        help='Deploy new Ceph MON(s) from ceph.conf and ensure quorum'
+        help=('Will deploy for monitors defined in `mon initial members`, '
+              'wait until they form quorum and then gatherkeys, reporting '
+              'the monitor status along the process. If monitors don\'t form '
+              'quorum the command will eventually time out.')
     )
     mon_create_initial.add_argument(
         '--keyrings',
