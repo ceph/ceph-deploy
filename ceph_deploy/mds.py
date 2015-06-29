@@ -209,17 +209,15 @@ def colon_separated(s):
 @priority(30)
 def make(parser):
     """
-    Deploy ceph MDS on remote hosts.
+    Ceph MDS daemon management
     """
-    parser.add_argument(
-        'subcommand',
-        metavar='SUBCOMMAND',
-        choices=[
-            'create',
-            ],
-        help='create an MDS',
-        )
-    parser.add_argument(
+    mds_parser = parser.add_subparsers(dest='subcommand')
+
+    mds_create = mds_parser.add_parser(
+        'create',
+        help='Deploy Ceph MDS on remote host(s)'
+    )
+    mds_create.add_argument(
         'mds',
         metavar='HOST[:NAME]',
         nargs='*',
