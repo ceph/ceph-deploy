@@ -84,21 +84,19 @@ def make(parser):
     Calamari packages is already configured. Refer to the docs for examples
     (http://ceph.com/ceph-deploy/docs/conf.html)
     """
-    parser.add_argument(
-        'subcommand',
-        choices=[
-            'connect',
-            ],
-        )
+    calamari_parser = parser.add_subparsers(dest='subcommand')
 
-    parser.add_argument(
+    calamari_connect = calamari_parser.add_parser(
+        'connect',
+        help='Configure host(s) to connect to Calamari master'
+    )
+    calamari_connect.add_argument(
         '--master',
         nargs='?',
         metavar='MASTER SERVER',
         help="The domain for the Calamari master server"
     )
-
-    parser.add_argument(
+    calamari_connect.add_argument(
         'hosts',
         nargs='+',
     )
