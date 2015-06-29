@@ -82,20 +82,28 @@ def make(parser):
     """
     Push configuration file to a remote host.
     """
-    parser.add_argument(
-        'subcommand',
-        metavar='SUBCOMMAND',
-        choices=[
-            'push',
-            'pull',
-            ],
-        help='push or pull',
+    config_parser = parser.add_subparsers(dest='subcommand')
+
+    config_push = config_parser.add_parser(
+        'push',
+        help='push Ceph config file to one or more remote hosts'
         )
-    parser.add_argument(
+    config_push.add_argument(
         'client',
         metavar='HOST',
         nargs='*',
-        help='host to push/pull the config to/from',
+        help='host(s) to push the config file to',
+        )
+
+    config_pull = config_parser.add_parser(
+        'pull',
+        help='pull Ceph config file from one or more remote hosts'
+        )
+    config_pull.add_argument(
+        'client',
+        metavar='HOST',
+        nargs='*',
+        help='host(s) to pull the config file from',
         )
     parser.set_defaults(
         func=config,
