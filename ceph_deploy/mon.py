@@ -494,30 +494,50 @@ def make(parser):
     parser.formatter_class = argparse.RawDescriptionHelpFormatter
     parser.description = sub_command_help
 
-    parser.add_argument(
-        'subcommand',
-        choices=[
-            'add',
-            'create',
-            'create-initial',
-            'destroy',
-            ],
-        )
+    mon_parser = parser.add_subparsers(dest='subcommand')
 
-    parser.add_argument(
+    mon_add = mon_parser.add_parser(
+            'add',
+            help='Add a new Ceph MON to an existing cluster'
+    )
+    mon_add.add_argument(
         '--address',
         nargs='?',
-        dest='address',
+    )
+    mon_add.add_argument(
+        'mon',
+        nargs='*',
     )
 
-    parser.add_argument(
+    mon_create = mon_parser.add_parser(
+            'create',
+            help='Deploy new Ceph MON(s) as part of creating a new cluster'
+    )
+    mon_create.add_argument(
         '--keyrings',
         nargs='?',
-        dest='keyrings',
+        help='concatenate multiple keyrings to be seeded on new monitors',
+    )
+    mon_create.add_argument(
+        'mon',
+        nargs='*',
+    )
+
+    mon_create_initial = mon_parser.add_parser(
+        'create-initial',
+        help='Deploy new Ceph MON(s) from ceph.conf and ensure quorum'
+    )
+    mon_create_initial.add_argument(
+        '--keyrings',
+        nargs='?',
         help='concatenate multiple keyrings to be seeded on new monitors',
     )
 
-    parser.add_argument(
+    mon_destroy = mon_parser.add_parser(
+        'destroy',
+        help='Completely remove Ceph MON from remote host(s)'
+    )
+    mon_destroy.add_argument(
         'mon',
         nargs='*',
     )
