@@ -38,7 +38,6 @@ class TestParserMON(object):
         out, err = capsys.readouterr()
         assert 'invalid choice' in err
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12151")
     def test_mon_create_initial_help(self, capsys):
         with pytest.raises(SystemExit):
             self.parser.parse_args('mon create-initial --help'.split())
@@ -53,12 +52,10 @@ class TestParserMON(object):
         args = self.parser.parse_args('mon create-initial --keyrings /tmp/keys'.split())
         assert args.keyrings == "/tmp/keys"
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12151")
     def test_mon_create_initial_keyrings_host_raises_err(self):
         with pytest.raises(SystemExit):
             self.parser.parse_args('mon create-initial test1'.split())
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12151")
     def test_mon_create_help(self, capsys):
         with pytest.raises(SystemExit):
             self.parser.parse_args('mon create --help'.split())
@@ -82,7 +79,6 @@ class TestParserMON(object):
         args = self.parser.parse_args('mon create'.split() + hosts)
         assert args.mon == hosts
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12151")
     def test_mon_add_help(self, capsys):
         with pytest.raises(SystemExit):
             self.parser.parse_args('mon add --help'.split())
@@ -97,7 +93,7 @@ class TestParserMON(object):
         args = self.parser.parse_args('mon add test1 --address 10.10.0.1'.split())
         assert args.address == '10.10.0.1'
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12151")
+    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12150")
     def test_mon_add_no_host_raises_err(self):
         with pytest.raises(SystemExit):
             self.parser.parse_args('mon add'.split())
@@ -106,19 +102,18 @@ class TestParserMON(object):
         args = self.parser.parse_args('mon add test1'.split())
         assert args.mon == ["test1"]
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12151")
+    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12150")
     def test_mon_add_multi_host_raises_err(self):
         with pytest.raises(SystemExit):
             self.parser.parse_args('mon add test1 test2'.split())
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12151")
     def test_mon_destroy_help(self, capsys):
         with pytest.raises(SystemExit):
             self.parser.parse_args('mon destroy --help'.split())
         out, err = capsys.readouterr()
         assert 'usage: ceph-deploy mon destroy' in out
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12151")
+    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12150")
     def test_mon_destroy_no_host_raises_err(self):
         with pytest.raises(SystemExit):
             self.parser.parse_args('mon destroy'.split())
