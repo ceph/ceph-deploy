@@ -28,7 +28,6 @@ class TestParserOSD(object):
         out, err = capsys.readouterr()
         assert 'invalid choice' in err
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12151")
     def test_osd_list_help(self, capsys):
         with pytest.raises(SystemExit):
             self.parser.parse_args('osd list --help'.split())
@@ -52,7 +51,6 @@ class TestParserOSD(object):
         hosts = [x[0] for x in args.disk]
         assert hosts == hostnames
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12151")
     def test_osd_create_help(self, capsys):
         with pytest.raises(SystemExit):
             self.parser.parse_args('osd create --help'.split())
@@ -93,7 +91,6 @@ class TestParserOSD(object):
         args = self.parser.parse_args('osd create --fs-type ext4 host1:sdb'.split())
         assert args.fs_type == "ext4"
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12151")
     def test_osd_create_fstype_invalid(self, capsys):
         with pytest.raises(SystemExit):
             self.parser.parse_args('osd create --fs-type bork host1:sdb'.split())
@@ -117,7 +114,6 @@ class TestParserOSD(object):
         args = self.parser.parse_args('osd create --dmcrypt --dmcrypt-key-dir /tmp/keys host1:sdb'.split())
         assert args.dmcrypt_key_dir == "/tmp/keys"
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12151")
     def test_osd_prepare_help(self, capsys):
         with pytest.raises(SystemExit):
             self.parser.parse_args('osd prepare --help'.split())
@@ -141,7 +137,6 @@ class TestParserOSD(object):
         args = self.parser.parse_args('osd prepare --fs-type ext4 host1:sdb'.split())
         assert args.fs_type == "ext4"
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12151")
     def test_osd_prepare_fstype_invalid(self, capsys):
         with pytest.raises(SystemExit):
             self.parser.parse_args('osd prepare --fs-type bork host1:sdb'.split())
@@ -182,7 +177,6 @@ class TestParserOSD(object):
         hosts = [x[0] for x in args.disk]
         assert hosts == hostnames
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12151")
     def test_osd_activate_help(self, capsys):
         with pytest.raises(SystemExit):
             self.parser.parse_args('osd activate --help'.split())
