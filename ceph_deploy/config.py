@@ -91,7 +91,7 @@ def make(parser):
     config_push.add_argument(
         'client',
         metavar='HOST',
-        nargs='*',
+        nargs='+',
         help='host(s) to push the config file to',
         )
 
@@ -102,7 +102,7 @@ def make(parser):
     config_pull.add_argument(
         'client',
         metavar='HOST',
-        nargs='*',
+        nargs='+',
         help='host(s) to pull the config file from',
         )
     parser.set_defaults(

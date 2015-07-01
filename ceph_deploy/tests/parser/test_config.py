@@ -28,7 +28,6 @@ class TestParserConfig(object):
         out, err = capsys.readouterr()
         assert 'invalid choice' in err
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12150")
     def test_config_push_host_required(self, capsys):
         with pytest.raises(SystemExit):
             self.parser.parse_args('config push'.split())
@@ -44,7 +43,6 @@ class TestParserConfig(object):
         args = self.parser.parse_args('config push'.split() + hostnames)
         assert args.client == hostnames
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12150")
     def test_config_pull_host_required(self, capsys):
         with pytest.raises(SystemExit):
             self.parser.parse_args('config pull'.split())
