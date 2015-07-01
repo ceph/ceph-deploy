@@ -80,7 +80,7 @@ def config(args):
 @priority(70)
 def make(parser):
     """
-    Push configuration file to a remote host.
+    Copy ceph.conf to/from remote host(s)
     """
     config_parser = parser.add_subparsers(dest='subcommand')
 
