@@ -93,7 +93,6 @@ class TestParserMON(object):
         args = self.parser.parse_args('mon add test1 --address 10.10.0.1'.split())
         assert args.address == '10.10.0.1'
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12150")
     def test_mon_add_no_host_raises_err(self):
         with pytest.raises(SystemExit):
             self.parser.parse_args('mon add'.split())
@@ -102,7 +101,6 @@ class TestParserMON(object):
         args = self.parser.parse_args('mon add test1'.split())
         assert args.mon == ["test1"]
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12150")
     def test_mon_add_multi_host_raises_err(self):
         with pytest.raises(SystemExit):
             self.parser.parse_args('mon add test1 test2'.split())

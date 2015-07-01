@@ -172,10 +172,7 @@ def concatenate_keyrings(args):
 def mon_add(args):
     cfg = conf.ceph.load(args)
 
-    if not args.mon:
-        raise exc.NeedHostError()
-    elif len(args.mon) > 1:
-        raise exc.GenericError('Only one node can be added at a time')
+    # args.mon is a list with only one entry
     mon_host = args.mon[0]
 
     try:
@@ -475,7 +472,7 @@ def make(parser):
     )
     mon_add.add_argument(
         'mon',
-        nargs='*',
+        nargs=1,
     )
 
     mon_create = mon_parser.add_parser(
