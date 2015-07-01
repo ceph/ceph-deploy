@@ -207,8 +207,6 @@ def prepare_disk(
         ]
     if zap:
         args.append('--zap-disk')
-    if fs_type:
-        args.extend(['--fs-type', fs_type])
     if dmcrypt:
         args.append('--dmcrypt')
         if dmcrypt_dir is not None:
@@ -217,6 +215,8 @@ def prepare_disk(
     args.extend([
         '--cluster',
         cluster,
+        '--fs-type',
+        fs_type,
         '--',
         disk,
     ])
