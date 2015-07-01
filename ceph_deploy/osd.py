@@ -208,9 +208,6 @@ def prepare_disk(
     if zap:
         args.append('--zap-disk')
     if fs_type:
-        if fs_type not in ('btrfs', 'ext4', 'xfs'):
-            raise argparse.ArgumentTypeError(
-                "FS_TYPE must be one of 'btrfs', 'ext4' or 'xfs'")
         args.extend(['--fs-type', fs_type])
     if dmcrypt:
         args.append('--dmcrypt')
