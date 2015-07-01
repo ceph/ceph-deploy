@@ -185,7 +185,7 @@ def mon_add(args):
         )
 
     LOG.info('ensuring configuration of new mon host: %s', mon_host)
-    args.client = [mon_host]
+    args.client = args.mon
     admin.admin(args)
     LOG.debug(
         'Adding mon to cluster %s, host %s',
