@@ -2,7 +2,7 @@ import pytest
 
 from ceph_deploy.cli import get_parser
 
-SUBCMDS_WITH_ARGS = ['add', 'destroy']
+SUBCMDS_WITH_ARGS = ['add', 'destroy', 'create']
 SUBCMDS_WITHOUT_ARGS = ['create', 'create-initial']
 
 
@@ -19,18 +19,15 @@ class TestParserMON(object):
         assert 'positional arguments:' in out
         assert 'optional arguments:' in out
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12150")
     @pytest.mark.parametrize('cmd', SUBCMDS_WITH_ARGS)
     def test_mon_valid_subcommands_with_args(self, cmd, capsys):
-        with pytest.raises(SystemExit):
-            self.parser.parse_args(['mon'] + ['%s' % cmd] + ['host1'])
-        out, err = capsys.readouterr()
-        assert 'too few arguments' in err
-        assert 'invalid choice' not in err
+        args = self.parser.parse_args(['mon'] + ['%s' % cmd] + ['host1'])
+        assert args.subcommand == cmd
 
     @pytest.mark.parametrize('cmd', SUBCMDS_WITHOUT_ARGS)
     def test_mon_valid_subcommands_without_args(self, cmd, capsys):
-        self.parser.parse_args(['mon'] + ['%s' % cmd])
+        args = self.parser.parse_args(['mon'] + ['%s' % cmd])
+        assert args.subcommand == cmd
 
     def test_mon_invalid_subcommand(self, capsys):
         with pytest.raises(SystemExit):
@@ -111,7 +108,6 @@ class TestParserMON(object):
         out, err = capsys.readouterr()
         assert 'usage: ceph-deploy mon destroy' in out
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12150")
     def test_mon_destroy_no_host_raises_err(self):
         with pytest.raises(SystemExit):
             self.parser.parse_args('mon destroy'.split())

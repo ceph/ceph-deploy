@@ -511,7 +511,7 @@ def make(parser):
     )
     mon_destroy.add_argument(
         'mon',
-        nargs='*',
+        nargs='+',
     )
 
     parser.set_defaults(
