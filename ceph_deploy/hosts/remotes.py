@@ -123,7 +123,7 @@ def write_conf(cluster, conf, overwrite):
         raise RuntimeError(err_msg)
 
 
-def write_keyring(path, key):
+def write_keyring(path, key, uid=-1, gid=-1):
     """ create a keyring file """
     # Note that we *require* to avoid deletion of the temp file
     # otherwise we risk not being able to copy the contents from
@@ -133,27 +133,30 @@ def write_keyring(path, key):
     tmp_file.close()
     keyring_dir = os.path.dirname(path)
     if not path_exists(keyring_dir):
-        makedir(keyring_dir)
+        makedir(keyring_dir, uid, gid)
     shutil.move(tmp_file.name, path)
 
 
-def create_mon_path(path):
+def create_mon_path(path, uid=-1, gid=-1):
     """create the mon path if it does not exist"""
     if not os.path.exists(path):
         os.makedirs(path)
+        os.chown(path, uid, gid);
 
 
-def create_done_path(done_path):
+def create_done_path(done_path, uid=-1, gid=-1):
     """create a done file to avoid re-doing the mon deployment"""
     with file(done_path, 'w'):
         pass
+    os.chown(done_path, uid, gid);
 
 
-def create_init_path(init_path):
+def create_init_path(init_path, uid=-1, gid=-1):
     """create the init path if it does not exist"""
     if not os.path.exists(init_path):
         with file(init_path, 'w'):
             pass
+        os.chown(init_path, uid, gid);
 
 
 def append_to_file(file_path, contents):
@@ -161,6 +164,11 @@ def append_to_file(file_path, contents):
     with open(file_path, 'a') as f:
         f.write(contents)
 
+def path_getuid(path):
+    return os.stat(path).st_uid
+
+def path_getgid(path):
+    return os.stat(path).st_gid
 
 def readline(path):
     with open(path) as _file:
@@ -179,7 +187,7 @@ def listdir(path):
     return os.listdir(path)
 
 
-def makedir(path, ignored=None):
+def makedir(path, ignored=None, uid=-1, gid=-1):
     ignored = ignored or []
     try:
         os.makedirs(path)
@@ -189,24 +197,27 @@ def makedir(path, ignored=None):
         else:
             # re-raise the original exception
             raise
+    else:
+        os.chown(path, uid, gid);
 
 
 def unlink(_file):
     os.unlink(_file)
 
 
-def write_monitor_keyring(keyring, monitor_keyring):
+def write_monitor_keyring(keyring, monitor_keyring, uid=-1, gid=-1):
     """create the monitor keyring file"""
-    write_file(keyring, monitor_keyring)
+    write_file(keyring, monitor_keyring, 0600, None, uid, gid)
 
 
-def write_file(path, content, mode=0644, directory=None):
+def write_file(path, content, mode=0644, directory=None, uid=-1, gid=-1):
     if directory:
         if path.startswith("/"):
             path = path[1:]
         path = os.path.join(directory, path)
     with os.fdopen(os.open(path, os.O_WRONLY | os.O_CREAT, mode), 'w') as f:
         f.write(content)
+    os.chown(path, uid, gid)
 
 
 def touch_file(path):
@@ -289,7 +300,7 @@ def make_mon_removed_dir(path, file_name):
     shutil.move(path, os.path.join('/var/lib/ceph/mon-removed/', file_name))
 
 
-def safe_mkdir(path):
+def safe_mkdir(path, uid=-1, gid=-1):
     """ create path if it doesn't exist """
     try:
         os.mkdir(path)
@@ -298,9 +309,10 @@ def safe_mkdir(path):
             pass
         else:
             raise
+    else:
+        os.chown(path, uid, gid)
 
-
-def safe_makedirs(path):
+def safe_makedirs(path, uid=-1, gid=-1):
     """ create path recursively if it doesn't exist """
     try:
         os.makedirs(path)
@@ -309,6 +321,8 @@ def safe_makedirs(path):
             pass
         else:
             raise
+    else:
+        os.chown(path, uid, gid)
 
 
 def zeroing(dev):

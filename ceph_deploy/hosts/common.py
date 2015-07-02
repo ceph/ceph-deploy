@@ -2,6 +2,7 @@ from ceph_deploy.util import paths
 from ceph_deploy import conf
 from ceph_deploy.lib import remoto
 from StringIO import StringIO
+from ceph_deploy.util import constants
 
 
 def ceph_version(conn):
@@ -15,6 +16,8 @@ def mon_create(distro, args, monitor_keyring, hostname):
     logger = distro.conn.logger
     logger.debug('remote hostname: %s' % hostname)
     path = paths.mon.path(args.cluster, hostname)
+    uid = distro.conn.remote_module.path_getuid(constants.base_path)
+    gid = distro.conn.remote_module.path_getgid(constants.base_path)
     done_path = paths.mon.done(args.cluster, hostname)
     init_path = paths.mon.init(args.cluster, hostname, distro.init)
 
@@ -30,7 +33,7 @@ def mon_create(distro, args, monitor_keyring, hostname):
     )
 
     # if the mon path does not exist, create it
-    distro.conn.remote_module.create_mon_path(path)
+    distro.conn.remote_module.create_mon_path(path, uid, gid)
 
     logger.debug('checking for done path: %s' % done_path)
     if not distro.conn.remote_module.path_exists(done_path):
@@ -44,8 +47,14 @@ def mon_create(distro, args, monitor_keyring, hostname):
         distro.conn.remote_module.write_monitor_keyring(
             keyring,
             monitor_keyring,
+            uid, gid,
         )
 
+        user_args = []
+        if uid != 0:
+            user_args = user_args + [ '--setuser', str(uid) ]
+        if gid != 0:
+            user_args = user_args + [ '--setgroup', str(gid) ]
         remoto.process.run(
             distro.conn,
             [
@@ -54,23 +63,25 @@ def mon_create(distro, args, monitor_keyring, hostname):
                 '--mkfs',
                 '-i', hostname,
                 '--keyring', keyring,
-            ],
+            ] + user_args
         )
 
         logger.info('unlinking keyring file %s' % keyring)
         distro.conn.remote_module.unlink(keyring)
 
     # create the done file
-    distro.conn.remote_module.create_done_path(done_path)
+    distro.conn.remote_module.create_done_path(done_path, uid, gid)
 
     # create init path
-    distro.conn.remote_module.create_init_path(init_path)
+    distro.conn.remote_module.create_init_path(init_path, uid, gid)
 
 
 def mon_add(distro, args, monitor_keyring):
     hostname = distro.conn.remote_module.shortname()
     logger = distro.conn.logger
     path = paths.mon.path(args.cluster, hostname)
+    uid = distro.conn.remote_module.path_getuid(constants.base_path)
+    gid = distro.conn.remote_module.path_getgid(constants.base_path)
     monmap_path = paths.mon.monmap(args.cluster, hostname)
     done_path = paths.mon.done(args.cluster, hostname)
     init_path = paths.mon.init(args.cluster, hostname, distro.init)
@@ -87,7 +98,7 @@ def mon_add(distro, args, monitor_keyring):
     )
 
     # if the mon path does not exist, create it
-    distro.conn.remote_module.create_mon_path(path)
+    distro.conn.remote_module.create_mon_path(path, uid, gid)
 
     logger.debug('checking for done path: %s' % done_path)
     if not distro.conn.remote_module.path_exists(done_path):
@@ -101,6 +112,7 @@ def mon_add(distro, args, monitor_keyring):
         distro.conn.remote_module.write_monitor_keyring(
             keyring,
             monitor_keyring,
+            uid, gid,
         )
 
         # get the monmap
@@ -116,6 +128,11 @@ def mon_add(distro, args, monitor_keyring):
         )
 
         # now use it to prepare the monitor's data dir
+        user_args = []
+        if uid != 0:
+            user_args = user_args + [ '--setuser', str(uid) ]
+        if gid != 0:
+            user_args = user_args + [ '--setgroup', str(gid) ]
         remoto.process.run(
             distro.conn,
             [
@@ -126,7 +143,7 @@ def mon_add(distro, args, monitor_keyring):
                 '--monmap',
                 monmap_path,
                 '--keyring', keyring,
-            ],
+            ] + user_args
         )
 
         # add it
@@ -145,10 +162,10 @@ def mon_add(distro, args, monitor_keyring):
         distro.conn.remote_module.unlink(keyring)
 
     # create the done file
-    distro.conn.remote_module.create_done_path(done_path)
+    distro.conn.remote_module.create_done_path(done_path, uid, gid)
 
     # create init path
-    distro.conn.remote_module.create_init_path(init_path)
+    distro.conn.remote_module.create_init_path(init_path, uid, gid)
 
     # start the mon using the address
     remoto.process.run(
