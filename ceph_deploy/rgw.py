@@ -185,17 +185,14 @@ def colon_separated(s):
 @priority(30)
 def make(parser):
     """
-    Deploy ceph RGW on remote hosts.
+    Ceph RGW daemon management
     """
-    parser.add_argument(
-        'subcommand',
-        metavar='SUBCOMMAND',
-        choices=[
-            'create',
-            ],
-        help='create an RGW instance',
+    rgw_parser = parser.add_subparsers(dest='subcommand')
+    rgw_create = rgw_parser.add_parser(
+        'create',
+        help='Create an RGW instance'
         )
-    parser.add_argument(
+    rgw_create.add_argument(
         'rgw',
         metavar='HOST[:NAME]',
         nargs='*',

@@ -16,6 +16,14 @@ class TestParserCalamari(object):
         assert 'positional arguments:' in out
         assert 'optional arguments:' in out
 
+    def test_calamari_connect_help(self, capsys):
+        with pytest.raises(SystemExit):
+            self.parser.parse_args('calamari connect --help'.split())
+        out, err = capsys.readouterr()
+        assert 'usage: ceph-deploy calamari connect' in out
+        assert 'positional arguments:' in out
+        assert 'optional arguments:' in out
+
     def test_calamari_connect_host_required(self, capsys):
         with pytest.raises(SystemExit):
             self.parser.parse_args('calamari connect'.split())

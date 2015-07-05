@@ -28,7 +28,6 @@ class TestParserDisk(object):
         out, err = capsys.readouterr()
         assert 'invalid choice' in err
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12151")
     def test_disk_list_help(self, capsys):
         with pytest.raises(SystemExit):
             self.parser.parse_args('disk list --help'.split())
@@ -52,7 +51,6 @@ class TestParserDisk(object):
         hosts = [x[0] for x in args.disk]
         assert hosts == hostnames
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12151")
     def test_disk_prepare_help(self, capsys):
         with pytest.raises(SystemExit):
             self.parser.parse_args('disk prepare --help'.split())
@@ -76,7 +74,6 @@ class TestParserDisk(object):
         args = self.parser.parse_args('disk prepare --fs-type ext4 host1:sdb'.split())
         assert args.fs_type == "ext4"
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12151")
     def test_disk_prepare_fstype_invalid(self, capsys):
         with pytest.raises(SystemExit):
             self.parser.parse_args('disk prepare --fs-type bork host1:sdb'.split())
@@ -117,7 +114,6 @@ class TestParserDisk(object):
         hosts = [x[0] for x in args.disk]
         assert hosts == hostnames
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12151")
     def test_disk_activate_help(self, capsys):
         with pytest.raises(SystemExit):
             self.parser.parse_args('disk activate --help'.split())
@@ -141,7 +137,6 @@ class TestParserDisk(object):
         hosts = [x[0] for x in args.disk]
         assert hosts == hostnames
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12151")
     def test_disk_zap_help(self, capsys):
         with pytest.raises(SystemExit):
             self.parser.parse_args('disk zap --help'.split())
