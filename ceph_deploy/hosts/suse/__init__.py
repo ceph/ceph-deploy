@@ -29,3 +29,12 @@ def choose_init(module):
 
 def get_packager(module):
     return pkg_managers.Zypper(module)
+
+
+def service_mapping(service):
+    """
+    Select the service name
+    """
+    service_mapping = { "apache" : "apache2",
+        "ceph-rgw" : "ceph-rgw" }
+    return service_mapping.get(service,service)
