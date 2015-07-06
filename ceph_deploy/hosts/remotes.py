@@ -5,7 +5,8 @@ import os
 import shutil
 import tempfile
 import platform
-
+import pwd
+import grp
 
 def platform_information(_linux_distribution=None):
     """ detect platform information from remote host """
@@ -148,6 +149,16 @@ def create_done_path(done_path):
     with file(done_path, 'w'):
         pass
 
+def chmod(path, mode):
+    """change file access mode"""
+    os.chmod(path, mode)
+
+
+def chown(path, username, groupname):
+    """change file ownership"""
+    uid = pwd.getpwnam(username).pw_uid
+    gid = grp.getgrnam(groupname).gr_gid
+    os.chown(path, uid, gid)
 
 def create_init_path(init_path):
     """create the init path if it does not exist"""
