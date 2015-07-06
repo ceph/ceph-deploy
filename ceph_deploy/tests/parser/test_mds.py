@@ -16,7 +16,6 @@ class TestParserMDS(object):
         assert 'positional arguments:' in out
         assert 'optional arguments:' in out
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12150")
     def test_mds_create_host_required(self, capsys):
         with pytest.raises(SystemExit):
             self.parser.parse_args('mds create'.split())

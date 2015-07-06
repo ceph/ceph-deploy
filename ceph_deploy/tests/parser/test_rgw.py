@@ -16,7 +16,6 @@ class TestParserRGW(object):
         assert 'positional arguments:' in out
         assert 'optional arguments:' in out
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12150")
     def test_rgw_create_host_required(self, capsys):
         with pytest.raises(SystemExit):
             self.parser.parse_args('rgw create'.split())

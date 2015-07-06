@@ -118,9 +118,6 @@ def rgw_create(args):
         ' '.join(':'.join(x or '' for x in t) for t in args.rgw),
         )
 
-    if not args.rgw:
-        raise exc.NeedHostError()
-
     key = get_bootstrap_rgw_key(cluster=args.cluster)
 
     bootstrapped = set()
@@ -195,7 +192,7 @@ def make(parser):
     rgw_create.add_argument(
         'rgw',
         metavar='HOST[:NAME]',
-        nargs='*',
+        nargs='+',
         type=colon_separated,
         help='host (and optionally the daemon name) to deploy on. \
                 NAME is automatically prefixed with \'rgw.\'',

@@ -131,9 +131,6 @@ def mds_create(args):
         ' '.join(':'.join(x or '' for x in t) for t in args.mds),
         )
 
-    if not args.mds:
-        raise exc.NeedHostError()
-
     key = get_bootstrap_mds_key(cluster=args.cluster)
 
     bootstrapped = set()
@@ -220,7 +217,7 @@ def make(parser):
     mds_create.add_argument(
         'mds',
         metavar='HOST[:NAME]',
-        nargs='*',
+        nargs='+',
         type=colon_separated,
         help='host (and optionally the daemon name) to deploy on',
         )
