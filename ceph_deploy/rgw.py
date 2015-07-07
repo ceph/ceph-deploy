@@ -9,7 +9,7 @@ from ceph_deploy import hosts
 from ceph_deploy.util import system
 from ceph_deploy.lib import remoto
 from ceph_deploy.cliutil import priority
-
+from ceph_deploy.mdl_loader import mdl_controler
 
 LOG = logging.getLogger(__name__)
 
@@ -28,7 +28,6 @@ def get_bootstrap_rgw_key(cluster):
 
 def create_rgw(distro, name, cluster, init):
     conn = distro.conn
-
     path = '/var/lib/ceph/radosgw/{cluster}-{name}'.format(
         cluster=cluster,
         name=name
@@ -111,7 +110,11 @@ def create_rgw(distro, name, cluster, init):
 
 
 def rgw_create(args):
+    model_control = mdl_controler(args)
     cfg = conf.ceph.load(args)
+    model_control.cfg_update(cfg)
+    model_control.mon_update()
+
     LOG.debug(
         'Deploying rgw, cluster %s hosts %s',
         args.cluster,
