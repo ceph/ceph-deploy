@@ -479,6 +479,13 @@ def make(parser):
                 or tag (default: %(default)s)',
     )
 
+    version.set_defaults(
+        stable=None,  # XXX deprecated in favor of release
+        release=None,  # Set the default release in sanitize_args()
+        dev='master',
+        version_kind='stable',
+    )
+
     parser.add_argument(
         '--mon',
         dest='install_mon',
@@ -535,15 +542,6 @@ def make(parser):
         help='install packages without modifying source repos',
     )
 
-    parser.set_defaults(
-        func=install,
-        stable=None,  # XXX deprecated in favor of release
-        release=None,  # Set the default release in sanitize_args()
-        dev='master',
-        version_kind='stable',
-        adjust_repos=True,
-    )
-
     parser.add_argument(
         '--repo',
         action='store_true',
@@ -582,6 +580,7 @@ def make(parser):
 
     parser.set_defaults(
         func=install,
+        adjust_repos=True,
     )
 
 
