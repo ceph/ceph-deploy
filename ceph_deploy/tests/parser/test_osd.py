@@ -74,7 +74,6 @@ class TestParserOSD(object):
         hosts = [x[0] for x in args.disk]
         assert hosts == hostnames
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12168")
     def test_osd_create_zap_default_false(self):
         args = self.parser.parse_args('osd create host1:sdb'.split())
         assert args.zap_disk is False
@@ -97,7 +96,6 @@ class TestParserOSD(object):
         out, err = capsys.readouterr()
         assert 'invalid choice' in err
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12168")
     def test_osd_create_dmcrypt_default_false(self):
         args = self.parser.parse_args('osd create host1:sdb'.split())
         assert args.dmcrypt is False
@@ -120,7 +118,6 @@ class TestParserOSD(object):
         out, err = capsys.readouterr()
         assert 'usage: ceph-deploy osd prepare' in out
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12168")
     def test_osd_prepare_zap_default_false(self):
         args = self.parser.parse_args('osd prepare host1:sdb'.split())
         assert args.zap_disk is False
@@ -143,7 +140,6 @@ class TestParserOSD(object):
         out, err = capsys.readouterr()
         assert 'invalid choice' in err
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12168")
     def test_osd_prepare_dmcrypt_default_false(self):
         args = self.parser.parse_args('osd prepare host1:sdb'.split())
         assert args.dmcrypt is False
