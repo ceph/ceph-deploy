@@ -50,16 +50,16 @@ def make(parser):
     Manage packages on remote hosts.
     """
 
-    parser.add_argument(
+    action = parser.add_mutually_exclusive_group()
+
+    action.add_argument(
         '--install',
-        nargs='?',
         metavar='PKG(s)',
         help='Comma-separated package(s) to install',
     )
 
-    parser.add_argument(
+    action.add_argument(
         '--remove',
-        nargs='?',
         metavar='PKG(s)',
         help='Comma-separated package(s) to remove',
     )
