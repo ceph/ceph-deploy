@@ -479,63 +479,63 @@ def make(parser):
                 or tag (default: %(default)s)',
     )
 
-    version.add_argument(
+    parser.add_argument(
         '--mon',
         dest='install_mon',
         action='store_true',
         help='install the mon component only',
     )
 
-    version.add_argument(
+    parser.add_argument(
         '--mds',
         dest='install_mds',
         action='store_true',
         help='install the mds component only',
     )
 
-    version.add_argument(
+    parser.add_argument(
         '--rgw',
         dest='install_rgw',
         action='store_true',
         help='install the rgw component only',
     )
 
-    version.add_argument(
+    parser.add_argument(
         '--osd',
         dest='install_osd',
         action='store_true',
         help='install the osd component only',
     )
 
-    version.add_argument(
+    parser.add_argument(
         '--cli', '--common',
         dest='install_common',
         action='store_true',
         help='install the common component only',
     )
 
-    version.add_argument(
+    parser.add_argument(
         '--all',
         dest='install_all',
         action='store_true',
         help='install all ceph components (e.g. mon,osd,mds,rgw). This is the default',
     )
 
-    version.add_argument(
+    parser.add_argument(
         '--adjust-repos',
         dest='adjust_repos',
         action='store_true',
         help='install packages modifying source repos',
     )
 
-    version.add_argument(
+    parser.add_argument(
         '--no-adjust-repos',
         dest='adjust_repos',
         action='store_false',
         help='install packages without modifying source repos',
     )
 
-    version.set_defaults(
+    parser.set_defaults(
         func=install,
         stable=None,  # XXX deprecated in favor of release
         release=None,  # Set the default release in sanitize_args()
