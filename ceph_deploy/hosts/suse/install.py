@@ -1,104 +1,37 @@
 from ceph_deploy.util import templates, pkg_managers
 from ceph_deploy.lib import remoto
-from ceph_deploy.util.paths import gpg
 import logging
 
 LOG = logging.getLogger(__name__)
 
 
+def map_components(components):
+    # SUSE distributions don't offer the same granularity of packages as
+    # used by ceph-deploy, so we need to do some mapping.
+    packages = []
+
+    if (('ceph-osd' in components)
+     or ('ceph-mds' in components)
+     or ('ceph-mon' in components)):
+        packages.append('ceph')
+    if 'ceph-common' in components:
+        packages.append('ceph-common')
+    if 'ceph-radosgw' in components:
+        packages.append('ceph-radosgw')
+
+    return packages
+
+
 def install(distro, version_kind, version, adjust_repos, **kw):
-    # note: when split packages for ceph land for Suse,
-    # `kw['components']` will have those. Unused for now.
-    release = distro.release
-    machine = distro.machine_type
+    packages = map_components(kw.get('components', []))
 
-    if version_kind in ['stable', 'testing']:
-        key = 'release'
-    else:
-        key = 'autobuild'
-
-
-    distro_name = None
-    if distro.codename == 'Mantis':
-        distro_name = 'opensuse12.2'
-
-    if (distro.name == "SUSE Linux Enterprise Server") and (str(distro.release) == "11"):
-        distro_name = 'sles11'
-
-    if distro_name == None:
-        LOG.warning('Untested version of %s: assuming compatible with SUSE Linux Enterprise Server 11', distro.name)
-        distro_name = 'sles11'
-
-
-    if adjust_repos:
-        # Work around code due to bug in SLE 11
-        # https://bugzilla.novell.com/show_bug.cgi?id=875170
-        protocol = "https"
-        if distro_name == 'sles11':
-            protocol = "http"
-        remoto.process.run(
-            distro.conn,
-            [
-                'rpm',
-                '--import',
-                gpg.url(key, protocol=protocol)
-            ]
-        )
-
-        if version_kind == 'stable':
-            url = 'http://ceph.com/rpm-{version}/{distro}/'.format(
-                version=version,
-                distro=distro_name,
-                )
-        elif version_kind == 'testing':
-            url = 'http://ceph.com/rpm-testing/{distro}/'.format(distro=distro_name)
-        elif version_kind == 'dev':
-            url = 'http://gitbuilder.ceph.com/ceph-rpm-{distro}{release}-{machine}-basic/ref/{version}/'.format(
-                distro=distro_name,
-                release=release.split(".", 1)[0],
-                machine=machine,
-                version=version,
-                )
-
-        remoto.process.run(
-            distro.conn,
-            [
-                'rpm',
-                '-Uvh',
-                '--replacepkgs',
-                '--force',
-                '--quiet',
-                '{url}ceph-release-1-0.noarch.rpm'.format(
-                    url=url,
-                    ),
-                ]
-            )
-
-    remoto.process.run(
-        distro.conn,
-        [
-            'zypper',
-            '--non-interactive',
-            'refresh'
-            ],
-        )
-
-    remoto.process.run(
-        distro.conn,
-        [
-            'zypper',
-            '--non-interactive',
-            '--quiet',
-            'install',
-            'ceph',
-            'ceph-radosgw',
-            ],
-        )
+    pkg_managers.zypper_refresh(distro.conn)
+    if len(packages):
+        pkg_managers.zypper(distro.conn, packages)
 
 
 def mirror_install(distro, repo_url, gpg_url, adjust_repos, **kw):
-    # note: when split packages for ceph land for Suse,
-    # `kw['components']` will have those. Unused for now.
+    packages = map_components(kw.get('components', []))
     repo_url = repo_url.strip('/')  # Remove trailing slashes
     gpg_url_path = gpg_url.split('file://')[-1]  # Remove file if present
 
@@ -119,33 +52,16 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos, **kw):
         distro.conn.remote_module.write_file(
             '/etc/zypp/repos.d/ceph.repo',
             ceph_repo_content)
-        remoto.process.run(
-            distro.conn,
-            [
-                'zypper',
-                '--non-interactive',
-                'refresh'
-            ]
-        )
+        pkg_managers.zypper_refresh(distro.conn)
 
-    remoto.process.run(
-        distro.conn,
-        [
-            'zypper',
-            '--non-interactive',
-            '--quiet',
-            'install',
-            'ceph',
-            ],
-        )
+    if len(packages):
+        pkg_managers.zypper(distro.conn, packages)
 
 
 def repo_install(distro, reponame, baseurl, gpgkey, **kw):
     # do we have specific components to install?
     # removed them from `kw` so that we don't mess with other defaults
-    # note: when split packages for ceph land for Suse, `packages`
-    # can be used. Unused for now.
-    packages = kw.pop('components', [])  # noqa
+    packages = map_components(kw.pop('components', []))  # noqa
     # Get some defaults
     name = kw.get('name', '%s repo' % reponame)
     enabled = kw.get('enabled', 1)
@@ -182,8 +98,5 @@ def repo_install(distro, reponame, baseurl, gpgkey, **kw):
     )
 
     # Some custom repos do not need to install ceph
-    if install_ceph:
-        # Before any install, make sure we have `wget`
-        pkg_managers.zypper(distro.conn, 'wget')
-
-        pkg_managers.zypper(distro.conn, 'ceph')
+    if install_ceph and len(packages):
+        pkg_managers.zypper(distro.conn, packages)
