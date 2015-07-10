@@ -57,7 +57,6 @@ class TestParserDisk(object):
         out, err = capsys.readouterr()
         assert 'usage: ceph-deploy disk prepare' in out
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12168")
     def test_disk_prepare_zap_default_false(self):
         args = self.parser.parse_args('disk prepare host1:sdb'.split())
         assert args.zap_disk is False
@@ -80,7 +79,6 @@ class TestParserDisk(object):
         out, err = capsys.readouterr()
         assert 'invalid choice' in err
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12168")
     def test_disk_prepare_dmcrypt_default_false(self):
         args = self.parser.parse_args('disk prepare host1:sdb'.split())
         assert args.dmcrypt is False

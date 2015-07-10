@@ -673,7 +673,7 @@ def make(parser):
         )
     osd_create.add_argument(
         '--zap-disk',
-        action='store_true', default=None,
+        action='store_true',
         help='destroy existing partition table and content for DISK',
         )
     osd_create.add_argument(
@@ -688,7 +688,7 @@ def make(parser):
         )
     osd_create.add_argument(
         '--dmcrypt',
-        action='store_true', default=None,
+        action='store_true',
         help='use dm-crypt on DISK',
         )
     osd_create.add_argument(
@@ -711,7 +711,7 @@ def make(parser):
         )
     osd_prepare.add_argument(
         '--zap-disk',
-        action='store_true', default=None,
+        action='store_true',
         help='destroy existing partition table and content for DISK',
         )
     osd_prepare.add_argument(
@@ -726,7 +726,7 @@ def make(parser):
         )
     osd_prepare.add_argument(
         '--dmcrypt',
-        action='store_true', default=None,
+        action='store_true',
         help='use dm-crypt on DISK',
         )
     osd_prepare.add_argument(
@@ -796,7 +796,7 @@ def make_disk(parser):
         )
     disk_prepare.add_argument(
         '--zap-disk',
-        action='store_true', default=None,
+        action='store_true',
         help='destroy existing partition table and content for DISK',
         )
     disk_prepare.add_argument(
@@ -811,7 +811,7 @@ def make_disk(parser):
         )
     disk_prepare.add_argument(
         '--dmcrypt',
-        action='store_true', default=None,
+        action='store_true',
         help='use dm-crypt on DISK',
         )
     disk_prepare.add_argument(
