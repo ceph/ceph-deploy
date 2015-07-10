@@ -528,25 +528,31 @@ def make(parser):
         help='install all ceph components (e.g. mon,osd,mds,rgw). This is the default',
     )
 
-    parser.add_argument(
+    repo = parser.add_mutually_exclusive_group()
+
+    repo.add_argument(
         '--adjust-repos',
         dest='adjust_repos',
         action='store_true',
         help='install packages modifying source repos',
     )
 
-    parser.add_argument(
+    repo.add_argument(
         '--no-adjust-repos',
         dest='adjust_repos',
         action='store_false',
         help='install packages without modifying source repos',
     )
 
-    parser.add_argument(
+    repo.add_argument(
         '--repo',
         action='store_true',
         help='install repo files only (skips package installation)',
-        )
+    )
+
+    repo.set_defaults(
+        adjust_repos=True,
+    )
 
     parser.add_argument(
         'host',
@@ -580,7 +586,6 @@ def make(parser):
 
     parser.set_defaults(
         func=install,
-        adjust_repos=True,
     )
 
 
