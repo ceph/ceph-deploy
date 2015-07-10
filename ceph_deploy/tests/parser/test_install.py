@@ -106,7 +106,6 @@ class TestParserInstall(object):
         args = self.parser.parse_args(('install --%s host1' % comp).split())
         assert getattr(args, 'install_%s' % comp) is True
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12147")
     def test_install_multi_component(self):
         args = self.parser.parse_args(('install --mon --rgw host1').split())
         assert args.install_mon
@@ -120,7 +119,6 @@ class TestParserInstall(object):
         args = self.parser.parse_args('install --no-adjust-repos host1'.split())
         assert not args.adjust_repos
 
-    @pytest.mark.skipif(reason="http://tracker.ceph.com/issues/12147")
     def test_install_adjust_repos_false_with_custom_release(self):
         args = self.parser.parse_args('install --release firefly --no-adjust-repos host1'.split())
         assert args.release == "firefly"
