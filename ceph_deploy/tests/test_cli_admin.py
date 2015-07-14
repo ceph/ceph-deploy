@@ -44,7 +44,7 @@ def test_write_keyring(tmpdir):
 
     distro = MagicMock()
     distro.conn = MagicMock()
-    remotes.write_file.func_defaults = (str(tmpdir),)
+    remotes.write_file.func_defaults = (0644, str(tmpdir), -1, -1)
     distro.conn.remote_module = remotes
     distro.conn.remote_module.write_conf = Mock()
 
