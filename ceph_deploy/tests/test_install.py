@@ -48,6 +48,7 @@ class TestDetectComponents(object):
         self.args.install_mon = False
         self.args.install_osd = False
         self.args.install_rgw = False
+        self.args.install_iscsi = False
         self.args.install_common = False
         self.args.repo = False
         self.distro = Mock()
@@ -111,3 +112,8 @@ class TestDetectComponents(object):
         assert result == sorted([
             'ceph-osd', 'ceph-mds', 'ceph-mon', 'ceph-radosgw'
         ])
+
+    def test_install_only_iscsi(self):
+        self.args.install_iscsi = True
+        result = install.detect_components(self.args, self.distro)
+        assert result == ['targetcli']
