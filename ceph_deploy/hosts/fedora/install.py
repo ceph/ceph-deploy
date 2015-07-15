@@ -2,6 +2,7 @@ from ceph_deploy.lib import remoto
 from ceph_deploy.hosts.centos.install import repo_install, mirror_install  # noqa
 from ceph_deploy.hosts.util import install_yum_priorities
 from ceph_deploy.util.paths import gpg
+from ceph_deploy.util import pkg_managers
 
 
 def install(distro, version_kind, version, adjust_repos, **kw):
@@ -10,6 +11,11 @@ def install(distro, version_kind, version, adjust_repos, **kw):
     logger = distro.conn.logger
     release = distro.release
     machine = distro.machine_type
+
+    if distro.normalized_release.int_major >= 22:
+        packager = pkg_managers.DNF(distro)
+    else:
+        packager = pkg_managers.Yum(distro)
 
     if version_kind in ['stable', 'testing']:
         key = 'release'
@@ -75,14 +81,9 @@ def install(distro, version_kind, version, adjust_repos, **kw):
         distro.conn.remote_module.set_repo_priority(['Ceph', 'Ceph-noarch', 'ceph-source'])
         logger.warning('altered ceph.repo priorities to contain: priority=1')
 
-    remoto.process.run(
-        distro.conn,
+    packager.install(
         [
-            'yum',
-            '-y',
-            '-q',
-            'install',
             'ceph',
-            'ceph-radosgw',
-        ],
+            'ceph-radosgw'
+        ]
     )
