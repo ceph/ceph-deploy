@@ -1,6 +1,3 @@
-from ceph_deploy.util import pkg_managers
-
-
 def uninstall(distro, purge=False):
     packages = [
         'ceph',
@@ -8,8 +5,4 @@ def uninstall(distro, purge=False):
         'ceph-radosgw',
         ]
 
-    pkg_managers.yum_remove(
-        distro.conn,
-        packages,
-    )
-
+    distro.packager.remove(packages)
