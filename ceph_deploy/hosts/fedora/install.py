@@ -1,6 +1,5 @@
 from ceph_deploy.lib import remoto
 from ceph_deploy.hosts.centos.install import repo_install, mirror_install  # noqa
-from ceph_deploy.hosts.util import install_yum_priorities
 from ceph_deploy.util.paths import gpg
 from ceph_deploy.util import pkg_managers
 
@@ -23,7 +22,8 @@ def install(distro, version_kind, version, adjust_repos, **kw):
         key = 'autobuild'
 
     if adjust_repos:
-        install_yum_priorities(distro)
+        packager.install_priorities_plugin()
+        # haven't been able to determine necessity of check_obsoletes with DNF
         distro.conn.remote_module.enable_yum_priority_obsoletes()
         logger.warning('check_obsoletes has been enabled for Yum priorities plugin')
 
