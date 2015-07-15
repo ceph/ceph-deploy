@@ -1,7 +1,7 @@
 from ceph_deploy.util import pkg_managers
 
 
-def uninstall(conn, purge=False):
+def uninstall(distro, purge=False):
     packages = [
         'ceph',
         'ceph-common',
@@ -11,8 +11,8 @@ def uninstall(conn, purge=False):
         ]
 
     pkg_managers.yum_remove(
-        conn,
+        distro.conn,
         packages,
     )
 
-    pkg_managers.yum_clean(conn)
+    pkg_managers.yum_clean(distro.conn)

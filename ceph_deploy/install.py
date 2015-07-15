@@ -312,7 +312,7 @@ def uninstall(args):
         LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
         rlogger = logging.getLogger(hostname)
         rlogger.info('uninstalling ceph on %s' % hostname)
-        distro.uninstall(distro.conn)
+        distro.uninstall(distro)
         distro.conn.exit()
 
 
@@ -337,7 +337,7 @@ def purge(args):
         LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
         rlogger = logging.getLogger(hostname)
         rlogger.info('purging host ... %s' % hostname)
-        distro.uninstall(distro.conn, purge=True)
+        distro.uninstall(distro, purge=True)
         distro.conn.exit()
 
 

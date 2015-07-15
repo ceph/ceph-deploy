@@ -1,7 +1,7 @@
 from ceph_deploy.util import pkg_managers
 
 
-def uninstall(conn, purge=False):
+def uninstall(distro, purge=False):
     packages = [
         'ceph',
         'ceph-mds',
@@ -10,7 +10,7 @@ def uninstall(conn, purge=False):
         'radosgw',
         ]
     pkg_managers.apt_remove(
-        conn,
+        distro.conn,
         packages,
         purge=purge,
     )
