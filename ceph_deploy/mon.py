@@ -395,6 +395,7 @@ def mon_create_initial(args):
     mon_initial_members = get_mon_initial_members(args, error_on_empty=True)
 
     # create them normally through mon_create
+    args.mon = mon_initial_members
     mon_create(args)
 
     # make the sets to be able to compare late
