@@ -155,6 +155,12 @@ def rgw_create(args):
 
             create_rgw(distro, name, args.cluster, distro.init)
             distro.conn.exit()
+            LOG.info(
+                ('The Ceph Object Gateway (RGW) is now running on host %s and '
+                 'default port %s'),
+                hostname,
+                '7480'
+            )
         except RuntimeError as e:
             LOG.error(e)
             errors += 1
