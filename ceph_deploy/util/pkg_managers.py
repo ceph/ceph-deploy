@@ -177,3 +177,102 @@ def zypper_refresh(conn):
         conn,
         cmd
     )
+
+
+class PackageManager(object):
+    """
+    Base class for all Package Managers
+    """
+
+    def __init__(self, remote_conn):
+        self.remote_info = remote_conn
+        self.remote_conn = remote_conn.conn
+
+    def _run(self, cmd):
+        return remoto.process.run(
+            self.remote_conn,
+            cmd
+        )
+
+    def install(self, packages):
+        """Install packages on remote node"""
+        raise NotImplementedError()
+
+    def remove(self, packages):
+        """Uninstall packages on remote node"""
+        raise NotImplementedError()
+
+    def clean(self):
+        """Clean metadata/cache"""
+        raise NotImplementedError()
+
+
+class RPMManagerBase(PackageManager):
+    """
+    Base class to hold common pieces of Yum and DNF
+    """
+
+    executable = None
+
+    def install(self, packages):
+        if isinstance(packages, str):
+            packages = [packages]
+
+        cmd = [
+            self.executable,
+            '-y',
+            'install',
+        ]
+        cmd.extend(packages)
+        return self._run(cmd)
+
+    def remove(self, packages):
+        if isinstance(packages, str):
+            packages = [packages]
+
+        cmd = [
+            self.executable,
+            '-y',
+            '-q',
+            'remove',
+        ]
+        cmd.extend(packages)
+        return self._run(cmd)
+
+    def clean(self, item=None):
+        item = item or 'all'
+        cmd = [
+            self.executable,
+            'clean',
+            item,
+        ]
+
+        return self._run(cmd)
+
+
+class DNF(RPMManagerBase):
+    """
+    The DNF Package manager
+    """
+
+    executable = 'dnf'
+
+    def install_priorities_plugin(self):
+        # DNF supports priorities natively
+        pass
+
+
+class Yum(RPMManagerBase):
+    """
+    The Yum Package manager
+    """
+
+    executable = 'yum'
+
+    def install_priorities_plugin(self):
+        package_name = 'yum-plugin-priorities'
+
+        if self.remote_info.normalized_name == 'centos':
+            if self.remote_info.normalized_release.int_major != 6:
+                package_name = 'yum-priorities'
+        self.install(package_name)
