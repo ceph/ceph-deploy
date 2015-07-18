@@ -1,6 +1,5 @@
 from ceph_deploy.lib import remoto
 from ceph_deploy.hosts.centos.install import repo_install, mirror_install  # noqa
-from ceph_deploy.hosts.util import install_yum_priorities
 from ceph_deploy.util.paths import gpg
 
 
@@ -17,7 +16,8 @@ def install(distro, version_kind, version, adjust_repos, **kw):
         key = 'autobuild'
 
     if adjust_repos:
-        install_yum_priorities(distro)
+        distro.packager.install_priorities_plugin()
+        # haven't been able to determine necessity of check_obsoletes with DNF
         distro.conn.remote_module.enable_yum_priority_obsoletes()
         logger.warning('check_obsoletes has been enabled for Yum priorities plugin')
 
@@ -75,14 +75,9 @@ def install(distro, version_kind, version, adjust_repos, **kw):
         distro.conn.remote_module.set_repo_priority(['Ceph', 'Ceph-noarch', 'ceph-source'])
         logger.warning('altered ceph.repo priorities to contain: priority=1')
 
-    remoto.process.run(
-        distro.conn,
+    distro.packager.install(
         [
-            'yum',
-            '-y',
-            '-q',
-            'install',
             'ceph',
-            'ceph-radosgw',
-        ],
+            'ceph-radosgw'
+        ]
     )

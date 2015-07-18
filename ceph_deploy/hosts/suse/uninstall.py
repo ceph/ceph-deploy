@@ -1,7 +1,7 @@
 from ceph_deploy.util import pkg_managers
 
 
-def uninstall(conn, purge=False):
+def uninstall(distro, purge=False):
     packages = [
         'ceph',
         'ceph-common',
@@ -10,4 +10,4 @@ def uninstall(conn, purge=False):
         'librbd1',
         'ceph-radosgw',
         ]
-    pkg_managers.zypper_remove(conn, packages)
+    pkg_managers.zypper_remove(distro.conn, packages)
