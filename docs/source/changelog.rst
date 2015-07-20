@@ -4,6 +4,23 @@ Changelog
 1.5
 ---
 
+1.5.26
+^^^^^^
+20-Jul-2015
+
+* Make parsing of boolean values in config file overrides work.
+* Output value of all ceph-deploy options upon invocation.
+* Point to git.ceph.com for GPG keys.
+* Make GPG key fetching work on Debian Wheezy.
+* Allow ceph-deploy to work on Mint distro.
+* Improved help menu output during subcommand context.
+* Point to SUSE downstream packages by default on SUSE distros since
+  ceph.com does not host packages for SUSE anymore..
+* Some initial groundwork for installing Ceph daemons that will no longer
+  run as root user.
+* Add support for DNF package manager (Fedora >= 22 only).
+* Echo RGW default port number after ``ceph-deploy rgw create``.
+
 1.5.25
 ^^^^^^
 26-May-2015
