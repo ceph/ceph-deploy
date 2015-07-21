@@ -174,16 +174,26 @@ class init_system_systemd():
             self.connection,
             [
                 'systemctl',
-                'status',
+                'show',
+                '--property',
+                'ActiveState',
                 systemctl_name,
-                '--output',
-                'json'
             ],
             timeout=7
         )
         if rc != 0:
-            raise init_exception_service("failed to get status")
-        return True
+            raise init_exception_service("failed to query state from %s" % (systemctl_name))
+        running = None
+        for item in stdout:
+            key, value = item.split('=')
+            if key == "ActiveState":
+                if value == "active":
+                    running = True
+                if value == "inactive":
+                    running = False
+        if running == None:
+            raise init_exception_service("failed to get ActiveState from %s" % (systemctl_name))
+        return running
 
     def start(self, service_name, paramters = []):
         systemctl_name = self._get_systemctl_name(service_name, paramters)
