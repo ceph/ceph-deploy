@@ -149,6 +149,12 @@ class init_system(object):
             self.service_name_mapping(service_name),
             paramters)
 
+    def restart(self, service_name, paramters = []):
+        self._check_properties()
+        return self._init_type_implementation.restart(
+            self.service_name_mapping(service_name),
+            paramters)
+
     def enable(self, service_name, paramters = []):
         self._check_properties()
         return self._init_type_implementation.enable(
@@ -222,7 +228,22 @@ class init_system_systemd():
             timeout=7
         )
         if rc != 0:
-            raise init_exception_service("failed to get status")
+            raise init_exception_service("failed to stop %s" % (service_name))
+        return True
+
+    def restart(self, service_name, paramters = []):
+        systemctl_name = self._get_systemctl_name(service_name, paramters)
+        stdout, stderr, rc = remoto.process.check(
+            self.connection,
+            [
+                'systemctl',
+                'restart',
+                systemctl_name
+            ],
+            timeout=7
+        )
+        if rc != 0:
+            raise init_exception_service("failed to restart %s" % (service_name))
         return True
 
 
@@ -271,6 +292,18 @@ class init_system_sysV():
                 'service',
                 service_name,
                 'stop'
+
+            ],
+            timeout=7
+        )
+
+    def restart(self, service_name, paramters = []):
+        remoto.process.run(
+            self.connection,
+            [
+                'service',
+                service_name,
+                'restart'
 
             ],
             timeout=7
