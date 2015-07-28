@@ -1,4 +1,5 @@
 from ceph_deploy.hosts import common
+from ceph_deploy.util import system
 from ceph_deploy.lib import remoto
 
 
@@ -24,8 +25,22 @@ def create(distro, args, monitor_keyring):
             timeout=7,
         )
 
-    elif distro.init == 'sysvinit':  # Debian uses sysvinit
+    elif distro.init == 'systemd':  # Debian >= 8 uses systemd
+        system.enable_service(
+            distro.conn,
+            service="ceph-mon",
+        )
+        remoto.process.run(
+            distro.conn,
+            [
+                'systemctl',
+                'start',
+                'ceph-mon',
+            ],
+            timeout=7,
+        )
 
+    elif distro.init == 'sysvinit':  # Debian < 8 uses sysvinit
         remoto.process.run(
             distro.conn,
             [
@@ -38,5 +53,6 @@ def create(distro, args, monitor_keyring):
             ],
             timeout=7,
         )
+
     else:
         raise RuntimeError('create cannot use init %s' % distro.init)
