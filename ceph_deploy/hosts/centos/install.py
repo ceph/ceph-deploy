@@ -1,6 +1,5 @@
-from ceph_deploy.util import pkg_managers, templates
+from ceph_deploy.util import templates
 from ceph_deploy.lib import remoto
-from ceph_deploy.hosts.util import install_yum_priorities
 from ceph_deploy.hosts.common import map_components
 from ceph_deploy.util.paths import gpg
 
@@ -50,12 +49,12 @@ def install(distro, version_kind, version, adjust_repos, **kw):
     repo_part = repository_url_part(distro)
     dist = rpm_dist(distro)
 
-    pkg_managers.yum_clean(distro.conn)
+    distro.packager.clean()
 
     # Get EPEL installed before we continue:
     if adjust_repos:
-        install_epel(distro)
-        install_yum_priorities(distro)
+        distro.packager.install('epel-release')
+        distro.packager.install_priorities_plugin()
         distro.conn.remote_module.enable_yum_priority_obsoletes()
         logger.warning('check_obsoletes has been enabled for Yum priorities plugin')
     if version_kind in ['stable', 'testing']:
@@ -111,27 +110,8 @@ def install(distro, version_kind, version, adjust_repos, **kw):
         distro.conn.remote_module.set_repo_priority(['Ceph', 'Ceph-noarch', 'ceph-source'])
         logger.warning('altered ceph.repo priorities to contain: priority=1')
 
-    if len(packages):
-        cmd = [
-            'yum',
-            '-y',
-            'install',
-        ]
-        cmd.extend(packages)
-        remoto.process.run(
-            distro.conn,
-            cmd,
-        )
-
-
-def install_epel(distro):
-    """
-    CentOS and Scientific need the EPEL repo, otherwise Ceph cannot be
-    installed.
-    """
-    if distro.normalized_name in ['centos', 'scientific']:
-        distro.conn.logger.info('adding EPEL repository')
-        pkg_managers.yum(distro.conn, 'epel-release')
+    if packages:
+        distro.packager.install(packages)
 
 
 def mirror_install(distro, repo_url, gpg_url, adjust_repos, extra_installs=True, **kw):
@@ -142,7 +122,7 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos, extra_installs=True,
     repo_url = repo_url.strip('/')  # Remove trailing slashes
     gpg_url_path = gpg_url.split('file://')[-1]  # Remove file if present
 
-    pkg_managers.yum_clean(distro.conn)
+    distro.packager.clean()
 
     if adjust_repos:
         remoto.process.run(
@@ -161,13 +141,13 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos, extra_installs=True,
 
         distro.conn.remote_module.write_yum_repo(ceph_repo_content)
         # set the right priority
-        install_yum_priorities(distro)
+        distro.packager.install_priorities_plugin()
         distro.conn.remote_module.set_repo_priority(['Ceph', 'Ceph-noarch', 'ceph-source'])
         distro.conn.logger.warning('alter.d ceph.repo priorities to contain: priority=1')
 
 
-    if extra_installs:
-        pkg_managers.yum(distro.conn, packages)
+    if extra_installs and packages:
+        distro.packager.install(packages)
 
 
 def repo_install(distro, reponame, baseurl, gpgkey, **kw):
@@ -185,7 +165,7 @@ def repo_install(distro, reponame, baseurl, gpgkey, **kw):
     _type = 'repo-md'
     baseurl = baseurl.strip('/')  # Remove trailing slashes
 
-    pkg_managers.yum_clean(distro.conn)
+    distro.packager.clean()
 
     if gpgkey:
         remoto.process.run(
@@ -218,7 +198,7 @@ def repo_install(distro, reponame, baseurl, gpgkey, **kw):
 
     # set the right priority
     if kw.get('priority'):
-        install_yum_priorities(distro)
+        distro.packager.install_priorities_plugin()
         logger.warning(
             'ensuring that {repo_path} contains a high priority'.format(
                 repo_path=repo_path)
@@ -230,5 +210,5 @@ def repo_install(distro, reponame, baseurl, gpgkey, **kw):
         )
 
     # Some custom repos do not need to install ceph
-    if install_ceph:
-        pkg_managers.yum(distro.conn, packages)
+    if install_ceph and packages:
+        distro.packager.install(packages)
