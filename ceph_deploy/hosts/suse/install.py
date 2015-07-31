@@ -18,6 +18,8 @@ def map_components(components):
         packages.append('ceph-common')
     if 'ceph-radosgw' in components:
         packages.append('ceph-radosgw')
+    if 'targetcli' in components:
+        packages.append('targetcli')
 
     return packages
 
