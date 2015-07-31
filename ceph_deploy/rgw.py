@@ -105,10 +105,14 @@ def create_rgw(distro, name, cluster, init):
             ],
             timeout=7
         )
+    elif init == 'systemd':
+        system.enable_service(
+            distro.conn,
+            service='ceph-radosgw@{name}'.format(name=name)
+        )
 
     if distro.is_el:
-        system.enable_service(distro.conn, service="ceph-radosgw")
-
+        system.enable_service(distro.conn, service='ceph-radosgw')
 
 def rgw_create(args):
     cfg = conf.ceph.load(args)
