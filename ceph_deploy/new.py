@@ -116,7 +116,7 @@ def get_public_network_ip(ips, public_subnet):
 
 def new(args):
     if args.ceph_conf:
-        raise RuntimeError('will not create a ceph conf file if attemtping to re-use with `--ceph-conf` flag')
+        raise RuntimeError('will not create a Ceph conf file if attemtping to re-use with `--ceph-conf` flag')
     LOG.debug('Creating new cluster named %s', args.cluster)
     cfg = conf.ceph.CephConf()
     cfg.add_section('global')

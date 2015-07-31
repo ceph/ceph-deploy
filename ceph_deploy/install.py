@@ -31,7 +31,7 @@ def sanitize_args(args):
 
 def detect_components(args, distro):
     """
-    Since the package split, now there are various different ceph components to
+    Since the package split, now there are various different Ceph components to
     install like:
 
     * ceph
@@ -131,7 +131,7 @@ def install(args):
             continue
 
         rlogger = logging.getLogger(hostname)
-        rlogger.info('installing ceph on %s' % hostname)
+        rlogger.info('installing Ceph on %s' % hostname)
 
         cd_conf = getattr(args, 'cd_conf', None)
 
@@ -264,7 +264,7 @@ def custom_repo(distro, args, cd_conf, rlogger, install_ceph=None):
 def install_repo(args):
     """
     For a user that only wants to install the repository only (and avoid
-    installing ceph and its dependencies).
+    installing Ceph and its dependencies).
     """
     cd_conf = getattr(args, 'cd_conf', None)
 
@@ -273,7 +273,7 @@ def install_repo(args):
         distro = hosts.get(
             hostname,
             username=args.username,
-            # XXX this should get removed once ceph packages are split for
+            # XXX this should get removed once Ceph packages are split for
             # upstream. If default_release is True, it means that the user is
             # trying to install on a RHEL machine and should expect to get RHEL
             # packages. Otherwise, it will need to specify either a specific
@@ -311,7 +311,7 @@ def uninstall(args):
             use_rhceph=True)
         LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
         rlogger = logging.getLogger(hostname)
-        rlogger.info('uninstalling ceph on %s' % hostname)
+        rlogger.info('uninstalling Ceph on %s' % hostname)
         distro.uninstall(distro)
         distro.conn.exit()
 
@@ -357,8 +357,8 @@ def purgedata(args):
         distro.conn.exit()
 
     if installed_hosts:
-        LOG.error("ceph is still installed on: %s", installed_hosts)
-        raise RuntimeError("refusing to purge data while ceph is still installed")
+        LOG.error("Ceph is still installed on: %s", installed_hosts)
+        raise RuntimeError("refusing to purge data while Ceph is still installed")
 
     for hostname in args.host:
         distro = hosts.get(hostname, username=args.username)
@@ -525,7 +525,7 @@ def make(parser):
         '--all',
         dest='install_all',
         action='store_true',
-        help='install all ceph components (e.g. mon,osd,mds,rgw). This is the default',
+        help='install all Ceph components (e.g. mon,osd,mds,rgw). This is the default',
     )
 
     repo = parser.add_mutually_exclusive_group()
@@ -573,7 +573,7 @@ def make(parser):
         '--repo-url',
         nargs='?',
         dest='repo_url',
-        help='specify a repo URL that mirrors/contains ceph packages',
+        help='specify a repo URL that mirrors/contains Ceph packages',
     )
 
     parser.add_argument(

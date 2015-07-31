@@ -526,7 +526,7 @@ def make(parser):
 
 def get_mon_initial_members(args, error_on_empty=False, _cfg=None):
     """
-    Read the ceph config file and return the value of mon_initial_members
+    Read the Ceph config file and return the value of mon_initial_members
     Optionally, a NeedHostError can be raised if the value is None.
     """
     if _cfg:
