@@ -69,7 +69,7 @@ def get(hostname,
     module.conn = conn
     module.machine_type = machine_type
     module.init = module.choose_init()
-    if module.normalized_name in ['fedora', 'centos']:
+    if module.normalized_name in ['fedora', 'centos', 'redhat']:
         module.packager = module.get_packager(module)
     return module
 
