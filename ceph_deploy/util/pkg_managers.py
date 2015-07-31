@@ -276,3 +276,51 @@ class Yum(RPMManagerBase):
             if self.remote_info.normalized_release.int_major != 6:
                 package_name = 'yum-priorities'
         self.install(package_name)
+
+
+class Apt(PackageManager):
+    """
+    Apt package management
+    """
+
+    executable = [
+        'env',
+        'DEBIAN_FRONTEND=noninteractive',
+        'DEBIAN_PRIORITY=critical',
+        'apt-get',
+        '--assume-yes',
+        '-q',
+    ]
+
+    def install(self, packages, force_confnew=False):
+        if isinstance(packages, str):
+            packages = [packages]
+
+        cmd = self.executable + [
+            '--no-install-recommends',
+            'install'
+        ]
+
+        if force_confnew:
+            cmd.extend(['-o', 'Dpkg::Options::=--force-confnew'])
+        cmd.extend(packages)
+        return self._run(cmd)
+
+    def remove(self, packages, purge=False):
+        if isinstance(packages, str):
+            packages = [packages]
+
+        cmd = self.executable + [
+            '-f',
+            '--force-yes',
+            'remove'
+        ]
+
+        if purge:
+            cmd.append('--purge')
+        cmd.extend(packages)
+        return self._run(cmd)
+
+    def clean(self):
+        cmd = self.executable + ['update']
+        return self._run(cmd)
