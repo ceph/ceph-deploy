@@ -99,9 +99,6 @@ def install(distro, version_kind, version, adjust_repos, **kw):
             'ceph-common',
             'ceph-fs-common',
             'radosgw',
-            # ceph only recommends gdisk, make sure we actually have
-            # it; only really needed for osds, but minimal collateral
-            'gdisk',
             ],
         )
 
@@ -147,9 +144,6 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos, **kw):
         'ceph-mds',
         'ceph-common',
         'ceph-fs-common',
-        # ceph only recommends gdisk, make sure we actually have
-        # it; only really needed for osds, but minimal collateral
-        'gdisk',
     )
 
     pkg_managers.apt(distro.conn, packages)
@@ -208,9 +202,6 @@ def repo_install(distro, repo_name, baseurl, gpgkey, **kw):
             'ceph-mds',
             'ceph-common',
             'ceph-fs-common',
-            # ceph only recommends gdisk, make sure we actually have
-            # it; only really needed for osds, but minimal collateral
-            'gdisk',
         )
 
         pkg_managers.apt(distro.conn, packages)
