@@ -1,6 +1,3 @@
-from ceph_deploy.util import pkg_managers
-
-
 def uninstall(distro, purge=False):
     packages = [
         'ceph',
@@ -9,8 +6,7 @@ def uninstall(distro, purge=False):
         'ceph-fs-common',
         'radosgw',
         ]
-    pkg_managers.apt_remove(
-        distro.conn,
+    distro.packager.remove(
         packages,
         purge=purge,
     )
