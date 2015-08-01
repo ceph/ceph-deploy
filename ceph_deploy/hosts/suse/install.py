@@ -1,6 +1,6 @@
 import logging
 
-from ceph_deploy.util import templates, pkg_managers
+from ceph_deploy.util import templates
 from ceph_deploy.lib import remoto
 from ceph_deploy.hosts.common import map_components
 
@@ -15,9 +15,9 @@ def install(distro, version_kind, version, adjust_repos, **kw):
         kw.get('components', [])
     )
 
-    pkg_managers.zypper_refresh(distro.conn)
-    if len(packages):
-        pkg_managers.zypper(distro.conn, packages)
+    distro.packager.clean()
+    if packages:
+        distro.packager.install(packages)
 
 
 def mirror_install(distro, repo_url, gpg_url, adjust_repos, **kw):
@@ -45,10 +45,10 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos, **kw):
         distro.conn.remote_module.write_file(
             '/etc/zypp/repos.d/ceph.repo',
             ceph_repo_content)
-        pkg_managers.zypper_refresh(distro.conn)
+        distro.packager.clean()
 
-    if len(packages):
-        pkg_managers.zypper(distro.conn, packages)
+    if packages:
+        distro.packager.install(packages)
 
 
 def repo_install(distro, reponame, baseurl, gpgkey, **kw):
@@ -92,5 +92,5 @@ def repo_install(distro, reponame, baseurl, gpgkey, **kw):
     )
 
     # Some custom repos do not need to install ceph
-    if install_ceph and len(packages):
-        pkg_managers.zypper(distro.conn, packages)
+    if install_ceph and packages:
+        distro.packager.install(packages)

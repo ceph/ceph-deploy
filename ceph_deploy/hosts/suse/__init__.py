@@ -4,6 +4,8 @@ from install import install, mirror_install, repo_install  # noqa
 from uninstall import uninstall  # noqa
 import logging
 
+from ceph_deploy.util import pkg_managers
+
 # Allow to set some information about this distro
 #
 
@@ -24,3 +26,7 @@ def choose_init():
         '13.1' : 'systemd',             # openSUSE_13.1
         }
     return init_mapping.get(release, 'sysvinit')
+
+
+def get_packager(module):
+    return pkg_managers.Zypper(module)
