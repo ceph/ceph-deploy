@@ -324,3 +324,35 @@ class Apt(PackageManager):
     def clean(self):
         cmd = self.executable + ['update']
         return self._run(cmd)
+
+
+class Zypper(PackageManager):
+    """
+    Zypper package management
+    """
+
+    executable = [
+        'zypper',
+        '--non-interactive',
+        '--quiet'
+    ]
+
+    def install(self, packages):
+        if isinstance(packages, str):
+            packages = [packages]
+
+        cmd = self.executable + ['install']
+        cmd.extend(packages)
+        return self._run(cmd)
+
+    def remove(self, packages):
+        if isinstance(packages, str):
+            packages = [packages]
+
+        cmd = self.executable + ['remove']
+        cmd.extend(packages)
+        return self._run(cmd)
+
+    def clean(self):
+        cmd = self.executable + ['refresh']
+        return self._run(cmd)
