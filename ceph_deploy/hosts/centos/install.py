@@ -64,14 +64,7 @@ def install(distro, version_kind, version, adjust_repos, **kw):
 
     if adjust_repos:
         if version_kind != 'dev':
-            remoto.process.run(
-                distro.conn,
-                [
-                    'rpm',
-                    '--import',
-                    gpg.url(key)
-                ]
-            )
+            distro.packager.add_repo_gpg_key(gpg.url(key))
 
             if version_kind == 'stable':
                 url = 'http://ceph.com/rpm-{version}/{repo}/'.format(
@@ -120,19 +113,11 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos, extra_installs=True,
         kw.pop('components', [])
     )
     repo_url = repo_url.strip('/')  # Remove trailing slashes
-    gpg_url_path = gpg_url.split('file://')[-1]  # Remove file if present
 
     distro.packager.clean()
 
     if adjust_repos:
-        remoto.process.run(
-            distro.conn,
-            [
-                'rpm',
-                '--import',
-                gpg_url_path,
-            ]
-        )
+        distro.packager.add_repo_gpg_key(gpg_url)
 
         ceph_repo_content = templates.ceph_repo.format(
             repo_url=repo_url,
@@ -168,14 +153,7 @@ def repo_install(distro, reponame, baseurl, gpgkey, **kw):
     distro.packager.clean()
 
     if gpgkey:
-        remoto.process.run(
-            distro.conn,
-            [
-                'rpm',
-                '--import',
-                gpgkey,
-            ]
-        )
+        distro.packager.add_repo_gpg_key(gpgkey)
 
     repo_content = templates.custom_repo(
         reponame=reponame,
