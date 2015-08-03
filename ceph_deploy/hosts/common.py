@@ -178,3 +178,23 @@ def mon_add(distro, args, monitor_keyring):
             args.address,
         ],
     )
+
+
+def map_components(notsplit_packages, components):
+    """
+    Returns a list of packages to install based on component names
+
+    This is done by checking if a component is in notsplit_packages,
+    if it is, we know we need to install 'ceph' instead of the
+    raw component name.  Essentially, this component hasn't been
+    'split' from the master 'ceph' package yet.
+    """
+    packages = set()
+
+    for c in components:
+        if c in notsplit_packages:
+            packages.add('ceph')
+        else:
+            packages.add(c)
+
+    return list(packages)

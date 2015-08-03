@@ -1,29 +1,19 @@
+import logging
+
 from ceph_deploy.util import templates, pkg_managers
 from ceph_deploy.lib import remoto
-import logging
+from ceph_deploy.hosts.common import map_components
 
 LOG = logging.getLogger(__name__)
 
-
-def map_components(components):
-    # SUSE distributions don't offer the same granularity of packages as
-    # used by ceph-deploy, so we need to do some mapping.
-    packages = []
-
-    if (('ceph-osd' in components)
-     or ('ceph-mds' in components)
-     or ('ceph-mon' in components)):
-        packages.append('ceph')
-    if 'ceph-common' in components:
-        packages.append('ceph-common')
-    if 'ceph-radosgw' in components:
-        packages.append('ceph-radosgw')
-
-    return packages
+NON_SPLIT_PACKAGES = ['ceph-osd', 'ceph-mon', 'ceph-mds']
 
 
 def install(distro, version_kind, version, adjust_repos, **kw):
-    packages = map_components(kw.get('components', []))
+    packages = map_components(
+        NON_SPLIT_PACKAGES,
+        kw.get('components', [])
+    )
 
     pkg_managers.zypper_refresh(distro.conn)
     if len(packages):
@@ -31,7 +21,10 @@ def install(distro, version_kind, version, adjust_repos, **kw):
 
 
 def mirror_install(distro, repo_url, gpg_url, adjust_repos, **kw):
-    packages = map_components(kw.get('components', []))
+    packages = map_components(
+        NON_SPLIT_PACKAGES,
+        kw.get('components', [])
+    )
     repo_url = repo_url.strip('/')  # Remove trailing slashes
     gpg_url_path = gpg_url.split('file://')[-1]  # Remove file if present
 
@@ -59,9 +52,10 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos, **kw):
 
 
 def repo_install(distro, reponame, baseurl, gpgkey, **kw):
-    # do we have specific components to install?
-    # removed them from `kw` so that we don't mess with other defaults
-    packages = map_components(kw.pop('components', []))  # noqa
+    packages = map_components(
+        NON_SPLIT_PACKAGES,
+        kw.pop('components', [])
+    )
     # Get some defaults
     name = kw.get('name', '%s repo' % reponame)
     enabled = kw.get('enabled', 1)

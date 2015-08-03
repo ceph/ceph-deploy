@@ -1,7 +1,11 @@
 from ceph_deploy.util import pkg_managers, templates
 from ceph_deploy.lib import remoto
 from ceph_deploy.hosts.util import install_yum_priorities
+from ceph_deploy.hosts.common import map_components
 from ceph_deploy.util.paths import gpg
+
+
+NON_SPLIT_PACKAGES = ['ceph-osd', 'ceph-mon', 'ceph-mds']
 
 
 def rpm_dist(distro):
@@ -36,8 +40,10 @@ def repository_url_part(distro):
 
 
 def install(distro, version_kind, version, adjust_repos, **kw):
-    # note: when split packages for ceph land for CentOS, `kw['components']`
-    # will have those. Unused for now.
+    packages = map_components(
+        NON_SPLIT_PACKAGES,
+        kw.pop('components', [])
+    )
     logger = distro.conn.logger
     release = distro.release
     machine = distro.machine_type
@@ -105,16 +111,17 @@ def install(distro, version_kind, version, adjust_repos, **kw):
         distro.conn.remote_module.set_repo_priority(['Ceph', 'Ceph-noarch', 'ceph-source'])
         logger.warning('altered ceph.repo priorities to contain: priority=1')
 
-    remoto.process.run(
-        distro.conn,
-        [
+    if len(packages):
+        cmd = [
             'yum',
             '-y',
             'install',
-            'ceph',
-            'ceph-radosgw',
-        ],
-    )
+        ]
+        cmd.extend(packages)
+        remoto.process.run(
+            distro.conn,
+            cmd,
+        )
 
 
 def install_epel(distro):
@@ -128,8 +135,10 @@ def install_epel(distro):
 
 
 def mirror_install(distro, repo_url, gpg_url, adjust_repos, extra_installs=True, **kw):
-    # note: when split packages for ceph land for CentOS, `kw['components']`
-    # will have those. Unused for now.
+    packages = map_components(
+        NON_SPLIT_PACKAGES,
+        kw.pop('components', [])
+    )
     repo_url = repo_url.strip('/')  # Remove trailing slashes
     gpg_url_path = gpg_url.split('file://')[-1]  # Remove file if present
 
@@ -158,15 +167,14 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos, extra_installs=True,
 
 
     if extra_installs:
-        pkg_managers.yum(distro.conn, 'ceph')
+        pkg_managers.yum(distro.conn, packages)
 
 
 def repo_install(distro, reponame, baseurl, gpgkey, **kw):
-    # do we have specific components to install?
-    # removed them from `kw` so that we don't mess with other defaults
-    # note: when split packages for ceph land for CentOS, `packages`
-    # can be used. Unused for now.
-    packages = kw.pop('components', [])  # noqa
+    packages = map_components(
+        NON_SPLIT_PACKAGES,
+        kw.pop('components', [])
+    )
     logger = distro.conn.logger
     # Get some defaults
     name = kw.pop('name', '%s repo' % reponame)
@@ -223,4 +231,4 @@ def repo_install(distro, reponame, baseurl, gpgkey, **kw):
 
     # Some custom repos do not need to install ceph
     if install_ceph:
-        pkg_managers.yum(distro.conn, 'ceph')
+        pkg_managers.yum(distro.conn, packages)
