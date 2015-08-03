@@ -1,7 +1,6 @@
 from urlparse import urlparse
 
 from ceph_deploy.lib import remoto
-from ceph_deploy.util import pkg_managers
 from ceph_deploy.util.paths import gpg
 from ceph_deploy.hosts.common import map_components
 
@@ -22,19 +21,7 @@ def install(distro, version_kind, version, adjust_repos, **kw):
     else:
         key = 'autobuild'
 
-    # Make sure ca-certificates is installed
-    remoto.process.run(
-        distro.conn,
-        [
-            'env',
-            'DEBIAN_FRONTEND=noninteractive',
-            'apt-get',
-            '-q',
-            'install',
-            '--assume-yes',
-            'ca-certificates',
-        ]
-    )
+    distro.packager.install('ca-certificates')
 
     if adjust_repos:
         # Wheezy does not like the git.ceph.com SSL cert
@@ -81,30 +68,11 @@ def install(distro, version_kind, version, adjust_repos, **kw):
         distro.conn.remote_module.set_apt_priority(fqdn)
         distro.conn.remote_module.write_sources_list(url, codename)
 
-    remoto.process.run(
-        distro.conn,
-        ['apt-get', '-q', 'update'],
-        )
+    distro.packager.clean()
 
     # TODO this does not downgrade -- should it?
-    if len(packages):
-        cmd = [
-            'env',
-            'DEBIAN_FRONTEND=noninteractive',
-            'DEBIAN_PRIORITY=critical',
-            'apt-get',
-            '-q',
-            '-o', 'Dpkg::Options::=--force-confnew',
-            '--no-install-recommends',
-            '--assume-yes',
-            'install',
-            '--',
-        ]
-        cmd.extend(packages)
-        remoto.process.run(
-            distro.conn,
-            cmd
-        )
+    if packages:
+        distro.packager.install(packages, force_confnew=True)
 
 
 def mirror_install(distro, repo_url, gpg_url, adjust_repos, **kw):
@@ -144,8 +112,9 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos, **kw):
 
         distro.conn.remote_module.write_sources_list(repo_url, distro.codename)
 
-    pkg_managers.apt_update(distro.conn)
-    pkg_managers.apt(distro.conn, packages)
+    if packages:
+        distro.packager.clean()
+        distro.packager.install(packages)
 
 
 def repo_install(distro, repo_name, baseurl, gpgkey, **kw):
@@ -190,7 +159,7 @@ def repo_install(distro, repo_name, baseurl, gpgkey, **kw):
     distro.conn.remote_module.set_apt_priority(fqdn)
 
     # repo is not operable until an update
-    pkg_managers.apt_update(distro.conn)
+    distro.packager.clean()
 
-    if install_ceph:
-        pkg_managers.apt(distro.conn, packages)
+    if install_ceph and packages:
+        distro.packager.install(packages)

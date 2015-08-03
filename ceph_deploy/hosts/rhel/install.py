@@ -1,11 +1,11 @@
-from ceph_deploy.util import pkg_managers, templates
+from ceph_deploy.util import templates
 from ceph_deploy.lib import remoto
 
 
 def install(distro, version_kind, version, adjust_repos, **kw):
     packages = kw.get('components', [])
-    pkg_managers.yum_clean(distro.conn)
-    pkg_managers.yum(distro.conn, packages)
+    distro.packager.clean()
+    distro.packager.install(packages)
 
 
 def mirror_install(distro, repo_url,
@@ -14,7 +14,7 @@ def mirror_install(distro, repo_url,
     repo_url = repo_url.strip('/')  # Remove trailing slashes
     gpg_url_path = gpg_url.split('file://')[-1]  # Remove file if present
 
-    pkg_managers.yum_clean(distro.conn)
+    distro.packager.clean()
 
     if adjust_repos:
         remoto.process.run(
@@ -33,8 +33,8 @@ def mirror_install(distro, repo_url,
 
         distro.conn.remote_module.write_yum_repo(ceph_repo_content)
 
-    if extra_installs:
-        pkg_managers.yum(distro.conn, packages)
+    if extra_installs and packages:
+        distro.packager.install(packages)
 
 
 def repo_install(distro, reponame, baseurl, gpgkey, **kw):
@@ -51,7 +51,7 @@ def repo_install(distro, reponame, baseurl, gpgkey, **kw):
     _type = 'repo-md'
     baseurl = baseurl.strip('/')  # Remove trailing slashes
 
-    pkg_managers.yum_clean(distro.conn)
+    distro.packager.clean()
 
     if gpgkey:
         remoto.process.run(
@@ -81,5 +81,5 @@ def repo_install(distro, reponame, baseurl, gpgkey, **kw):
     )
 
     # Some custom repos do not need to install ceph
-    if install_ceph:
-        pkg_managers.yum(distro.conn, packages)
+    if install_ceph and packages:
+        distro.packager.install(packages)
