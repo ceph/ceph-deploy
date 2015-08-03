@@ -188,10 +188,11 @@ class PackageManager(object):
         self.remote_info = remote_conn
         self.remote_conn = remote_conn.conn
 
-    def _run(self, cmd):
+    def _run(self, cmd, **kw):
         return remoto.process.run(
             self.remote_conn,
-            cmd
+            cmd,
+            **kw
         )
 
     def install(self, packages):
