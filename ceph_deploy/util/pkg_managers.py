@@ -258,6 +258,15 @@ class RPMManagerBase(PackageManager):
 
         return self._run(cmd)
 
+    def add_repo_gpg_key(self, url):
+        cmd = ['rpmkeys', '--import', url]
+        self._run(cmd)
+
+    def add_repo(self, name, url, **kw):
+        gpg_url = kw.pop('gpg_url', None)
+        if gpg_url:
+            self.add_repo_gpg_key(gpg_url)
+
 
 class DNF(RPMManagerBase):
     """
