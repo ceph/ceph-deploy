@@ -1,6 +1,5 @@
 from urlparse import urlparse
 
-from ceph_deploy.lib import remoto
 from ceph_deploy.util.paths import gpg
 from ceph_deploy.hosts.common import map_components
 
@@ -28,25 +27,7 @@ def install(distro, version_kind, version, adjust_repos, **kw):
         protocol = 'https'
         if codename == 'wheezy':
             protocol = 'http'
-        remoto.process.run(
-            distro.conn,
-            [
-                'wget',
-                '-O',
-                '{key}.asc'.format(key=key),
-                gpg.url(key, protocol=protocol),
-            ],
-            stop_on_nonzero=False,
-        )
-
-        remoto.process.run(
-            distro.conn,
-            [
-                'apt-key',
-                'add',
-                '{key}.asc'.format(key=key)
-            ]
-        )
+        distro.packager.add_repo_gpg_key(gpg.url(key, protocol=protocol))
 
         if version_kind == 'stable':
             url = 'http://ceph.com/debian-{version}/'.format(
@@ -81,30 +62,9 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos, **kw):
         kw.pop('components', [])
     )
     repo_url = repo_url.strip('/')  # Remove trailing slashes
-    gpg_path = gpg_url.split('file://')[-1]
 
     if adjust_repos:
-        if not gpg_url.startswith('file://'):
-            remoto.process.run(
-                distro.conn,
-                [
-                    'wget',
-                    '-O',
-                    'release.asc',
-                    gpg_url,
-                ],
-                stop_on_nonzero=False,
-            )
-
-        gpg_file = 'release.asc' if not gpg_url.startswith('file://') else gpg_path
-        remoto.process.run(
-            distro.conn,
-            [
-                'apt-key',
-                'add',
-                gpg_file,
-            ]
-        )
+        distro.packager.add_repo_gpg_key(gpg_url)
 
         # set the repo priority for the right domain
         fqdn = urlparse(repo_url).hostname
@@ -127,26 +87,7 @@ def repo_install(distro, repo_name, baseurl, gpgkey, **kw):
     install_ceph = kw.pop('install_ceph', False)
     baseurl = baseurl.strip('/')  # Remove trailing slashes
 
-    if gpgkey:
-        remoto.process.run(
-            distro.conn,
-            [
-                'wget',
-                '-O',
-                'release.asc',
-                gpgkey,
-            ],
-            stop_on_nonzero=False,
-        )
-
-    remoto.process.run(
-        distro.conn,
-        [
-            'apt-key',
-            'add',
-            'release.asc'
-        ]
-    )
+    distro.packager.add_repo_gpg_key(gpgkey)
 
     distro.conn.remote_module.write_sources_list(
         baseurl,
