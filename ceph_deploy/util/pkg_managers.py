@@ -207,6 +207,14 @@ class PackageManager(object):
         """Clean metadata/cache"""
         raise NotImplementedError()
 
+    def add_repo_gpg_key(self, url):
+        """Add given GPG key for repo verification"""
+        raise NotImplementedError()
+
+    def add_repo(self, name, url, **kw):
+        """Add/rewrite a repo file"""
+        raise NotImplementedError()
+
 
 class RPMManagerBase(PackageManager):
     """
@@ -325,6 +333,27 @@ class Apt(PackageManager):
     def clean(self):
         cmd = self.executable + ['update']
         return self._run(cmd)
+
+    def add_repo_gpg_key(self, url):
+        gpg_path = url.split('file://')[-1]
+        if not url.startswith('file://'):
+            cmd = ['wget', '-O', 'release.asc', url ]
+            self._run(cmd, stop_on_nonzero=False)
+        gpg_file = 'release.asc' if not url.startswith('file://') else gpg_path
+        cmd = ['apt-key', 'add', gpg_file]
+        self._run(cmd)
+
+    def add_repo(self, name, url, **kw):
+        gpg_url = kw.pop('gpg_url', None)
+        if gpg_url:
+            self.add_repo_gpg_key(gpg_url)
+
+        safe_filename = '%s.list' % name.replace(' ', '-')
+        self.remote_conn.remote_module.write_sources_list(
+            url,
+            self.remote_info.codename,
+            safe_filename
+        )
 
 
 class Zypper(PackageManager):
