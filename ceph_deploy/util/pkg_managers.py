@@ -400,10 +400,17 @@ class Apt(PackageManager):
             self.add_repo_gpg_key(gpg_url)
 
         safe_filename = '%s.list' % name.replace(' ', '-')
+        mode = 0644
+        if urlparse(url).password:
+            mode = 0600
+            self.remote_conn.logger.info(
+                "Creating repo file with mode 0600 due to presence of password"
+            )
         self.remote_conn.remote_module.write_sources_list(
             url,
             self.remote_info.codename,
-            safe_filename
+            safe_filename,
+            mode
         )
 
         # Add package pinning for this repo
