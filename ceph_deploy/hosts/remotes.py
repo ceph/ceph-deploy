@@ -42,7 +42,7 @@ def machine_type():
 
 
 def write_sources_list(url, codename, filename='ceph.list'):
-    """add deb repo to sources.list"""
+    """add deb repo to /etc/apt/sources.list.d/"""
     repo_path = os.path.join('/etc/apt/sources.list.d', filename)
     with file(repo_path, 'w') as f:
         f.write('deb {url} {codename} main\n'.format(
@@ -52,7 +52,7 @@ def write_sources_list(url, codename, filename='ceph.list'):
 
 
 def write_yum_repo(content, filename='ceph.repo'):
-    """set the contents of repo file to /etc/yum.repos.d/"""
+    """add yum repo file in /etc/yum.repos.d/"""
     repo_path = os.path.join('/etc/yum.repos.d', filename)
     write_file(repo_path, content)
 
