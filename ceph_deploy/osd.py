@@ -379,6 +379,8 @@ def activate(args, cfg):
         time.sleep(5)
         catch_osd_errors(distro.conn, distro.conn.logger, args)
 
+        system.systemd_defaults_clustername(distro.conn, args.cluster)
+
         if distro.is_el:
             system.enable_service(distro.conn)
 
