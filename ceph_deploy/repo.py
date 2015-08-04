@@ -1,5 +1,6 @@
 import logging
 
+from ceph_deploy import hosts
 from ceph_deploy.cliutil import priority
 
 
@@ -7,7 +8,26 @@ LOG = logging.getLogger(__name__)
 
 
 def repo(args):
-    pass
+    cd_conf = getattr(args, 'cd_conf', None)
+
+    for hostname in args.host:
+        LOG.debug('Detecting platform for host %s ...', hostname)
+        distro = hosts.get(
+            hostname,
+            username=args.username
+        )
+        rlogger = logging.getLogger(hostname)
+
+        LOG.info(
+            'Distro info: %s %s %s',
+            distro.name,
+            distro.release,
+            distro.codename
+        )
+
+        if args.remove:
+            distro.packager.remove_repo(args.repo_name)
+
 
 
 @priority(70)

@@ -1,3 +1,5 @@
+import os
+
 from ceph_deploy.lib import remoto
 
 
@@ -215,6 +217,10 @@ class PackageManager(object):
         """Add/rewrite a repo file"""
         raise NotImplementedError()
 
+    def remove_repo(self, name):
+        """Remove a repo definition"""
+        raise NotImplementedError()
+
 
 class RPMManagerBase(PackageManager):
     """
@@ -266,6 +272,13 @@ class RPMManagerBase(PackageManager):
         gpg_url = kw.pop('gpg_url', None)
         if gpg_url:
             self.add_repo_gpg_key(gpg_url)
+
+    def remove_repo(self, name):
+        filename = os.path.join(
+            '/etc/yum.repos.d',
+            '%s.repo' % name
+        )
+        self.remote_conn.remote_module.unlink(filename)
 
 
 class DNF(RPMManagerBase):
@@ -363,6 +376,14 @@ class Apt(PackageManager):
             self.remote_info.codename,
             safe_filename
         )
+
+    def remove_repo(self, name):
+        safe_filename = '%s.list' % name.replace(' ', '-')
+        filename = os.path.join(
+            '/etc/apt/sources.list.d',
+            safe_filename
+        )
+        self.remote_conn.remote_module.unlink(filename)
 
 
 class Zypper(PackageManager):
