@@ -18,7 +18,7 @@ def choose_init():
 
     Returns the name of a init system (upstart, sysvinit ...).
     """
-    return 'sysvinit'
+    return 'systemd'
 
 
 def get_packager(module):

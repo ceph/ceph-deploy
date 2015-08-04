@@ -105,9 +105,36 @@ def create_rgw(distro, name, cluster, init):
             ],
             timeout=7
         )
-
-    if distro.is_el:
-        system.enable_service(distro.conn, service="ceph-radosgw")
+        if distro.is_el:
+            system.enable_service(distro.conn, service='ceph-radosgw')
+    elif init == 'systemd':
+        remoto.process.run(
+            conn,
+            [
+                'systemctl',
+                'enable',
+                'ceph-radosgw@{name}'.format(name=name),
+            ],
+            timeout=7
+        )
+        remoto.process.run(
+            conn,
+            [
+                'systemctl',
+                'start',
+                'ceph-radosgw@{name}'.format(name=name),
+            ],
+            timeout=7
+        )
+        remoto.process.run(
+            conn,
+            [
+                'systemctl',
+                'enable',
+                'ceph.target',
+            ],
+            timeout=7
+        )
 
 
 def rgw_create(args):
