@@ -1,4 +1,5 @@
 import os
+from urlparse import urlparse
 
 from ceph_deploy.lib import remoto
 from ceph_deploy.util import templates
@@ -404,6 +405,10 @@ class Apt(PackageManager):
             self.remote_info.codename,
             safe_filename
         )
+
+        # Add package pinning for this repo
+        fqdn = urlparse(url).hostname
+        self.remote_conn.remote_module.set_apt_priority(fqdn)
 
     def remove_repo(self, name):
         safe_filename = '%s.list' % name.replace(' ', '-')
