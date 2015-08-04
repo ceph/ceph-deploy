@@ -28,14 +28,7 @@ def install(distro, version_kind, version, adjust_repos, **kw):
         logger.warning('check_obsoletes has been enabled for Yum priorities plugin')
 
         if version_kind != 'dev':
-            remoto.process.run(
-                distro.conn,
-                [
-                    'rpm',
-                    '--import',
-                    gpg.url(key)
-                ]
-            )
+            distro.packager.add_repo_gpg_key(gpg.url(key))
 
             if version_kind == 'stable':
                 url = 'http://ceph.com/rpm-{version}/fc{release}/'.format(

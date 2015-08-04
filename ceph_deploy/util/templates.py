@@ -1,7 +1,6 @@
 
 
-ceph_repo = """
-[ceph]
+ceph_repo = """[ceph]
 name=Ceph packages for $basearch
 baseurl={repo_url}/$basearch
 enabled=1

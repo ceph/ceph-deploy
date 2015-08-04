@@ -41,18 +41,18 @@ def machine_type():
     return platform.machine()
 
 
-def write_sources_list(url, codename, filename='ceph.list'):
-    """add deb repo to sources.list"""
+def write_sources_list(url, codename, filename='ceph.list', mode=0644):
+    """add deb repo to /etc/apt/sources.list.d/"""
     repo_path = os.path.join('/etc/apt/sources.list.d', filename)
-    with file(repo_path, 'w') as f:
-        f.write('deb {url} {codename} main\n'.format(
-                url=url,
-                codename=codename,
-                ))
+    content = 'deb {url} {codename} main\n'.format(
+        url=url,
+        codename=codename,
+    )
+    write_file(repo_path, content, mode)
 
 
 def write_yum_repo(content, filename='ceph.repo'):
-    """set the contents of repo file to /etc/yum.repos.d/"""
+    """add yum repo file in /etc/yum.repos.d/"""
     repo_path = os.path.join('/etc/yum.repos.d', filename)
     write_file(repo_path, content)
 
@@ -215,6 +215,9 @@ def write_file(path, content, mode=0644, directory=None, uid=-1, gid=-1):
         if path.startswith("/"):
             path = path[1:]
         path = os.path.join(directory, path)
+    if os.path.exists(path):
+        # Delete file in case we are changing its mode
+        os.unlink(path)
     with os.fdopen(os.open(path, os.O_WRONLY | os.O_CREAT, mode), 'w') as f:
         f.write(content)
     os.chown(path, uid, gid)
