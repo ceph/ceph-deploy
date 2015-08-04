@@ -1,3 +1,4 @@
+import os
 import logging
 
 from ceph_deploy import hosts
@@ -20,8 +21,8 @@ def install_repo(distro, args, cd_conf, rlogger):
                 'missing required key: %s in config section: %s' % (err, args.repo_name)
             )
     else:
-        repo_url = args.repo_url
-        gpg_url = args.gpg_url
+        repo_url = os.environ.get('CEPH_DEPLOY_REPO_URL') or args.repo_url
+        gpg_url = os.environ.get('CEPH_DEPLOY_GPG_URL') or args.gpg_url
         extra_repos = []
 
     repo_url = repo_url.strip('/')  # Remove trailing slashes
