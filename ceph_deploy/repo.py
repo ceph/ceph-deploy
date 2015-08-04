@@ -7,6 +7,47 @@ from ceph_deploy.cliutil import priority
 LOG = logging.getLogger(__name__)
 
 
+def install_repo(distro, args, cd_conf, rlogger):
+    if args.repo_name in cd_conf.get_repos():
+        LOG.info('will use repository %s from ceph-deploy config', args.repo_name)
+        options = dict(cd_conf.items(args.repo_name))
+        extra_repos = cd_conf.get_list(args.repo_name, 'extra-repos')
+        try:
+            repo_url = options.pop('baseurl')
+            gpg_url = options.pop('gpgkey', None)
+        except KeyError as err:
+            raise RuntimeError(
+                'missing required key: %s in config section: %s' % (err, args.repo_name)
+            )
+    else:
+        repo_url = args.repo_url
+        gpg_url = args.gpg_url
+        extra_repos = []
+
+    repo_url = repo_url.strip('/')  # Remove trailing slashes
+    distro.packager.add_repo(
+        args.repo_name,
+        repo_url,
+        gpg_url=gpg_url
+    )
+
+    for xrepo in extra_repos:
+        rlogger.info('adding extra repo: %s' % xrepo)
+        options = dict(cd_conf.items(xrepo))
+        try:
+            repo_url = options.pop('baseurl')
+            gpg_url = options.pop('gpgkey', None)
+        except KeyError as err:
+            raise RuntimeError(
+                'missing required key: %s in config section: %s' % (err, xrepo)
+            )
+        distro.packager.add_repo(
+            args.repo_name,
+            repo_url,
+            gpg_url=gpg_url
+        )
+
+
 def repo(args):
     cd_conf = getattr(args, 'cd_conf', None)
 
@@ -27,7 +68,8 @@ def repo(args):
 
         if args.remove:
             distro.packager.remove_repo(args.repo_name)
-
+        else:
+            install_repo(distro, args, cd_conf, rlogger)
 
 
 @priority(70)
