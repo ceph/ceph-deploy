@@ -9,7 +9,7 @@ from ceph_deploy import hosts
 from ceph_deploy.util import system
 from ceph_deploy.lib import remoto
 from ceph_deploy.cliutil import priority
-
+from ceph_deploy.util import services
 
 LOG = logging.getLogger(__name__)
 
@@ -56,6 +56,7 @@ def create_rgw(distro, name, cluster, init):
             os.path.join(keypath),
         ]
     )
+    entity_name = 'client.bootstrap-rgw'
     if returncode > 0 and returncode != errno.EACCES:
         for line in stderr:
             conn.logger.error(line)
@@ -70,7 +71,7 @@ def create_rgw(distro, name, cluster, init):
             [
                 'ceph',
                 '--cluster', cluster,
-                '--name', 'client.bootstrap-rgw',
+                '--name', entity_name,
                 '--keyring', bootstrap_keyring,
                 'auth', 'get-or-create', 'client.{name}'.format(name=name),
                 'osd', 'allow *',
@@ -83,31 +84,13 @@ def create_rgw(distro, name, cluster, init):
     conn.remote_module.touch_file(os.path.join(path, 'done'))
     conn.remote_module.touch_file(os.path.join(path, init))
 
-    if init == 'upstart':
-        remoto.process.run(
-            conn,
-            [
-                'initctl',
-                'emit',
-                'radosgw',
-                'cluster={cluster}'.format(cluster=cluster),
-                'id={name}'.format(name=name),
-            ],
-            timeout=7
-        )
-    elif init == 'sysvinit':
-        remoto.process.run(
-            conn,
-            [
-                'service',
-                'ceph-radosgw',
-                'start',
-            ],
-            timeout=7
-        )
-
-    if distro.is_el:
-        system.enable_service(distro.conn, service="ceph-radosgw")
+    init_obj = init_system(connection = distro.conn,
+            init_type = distro.choose_init(),
+            service_name_mapping = distro.service_mapping)
+    try:
+        init_obj.start("rgw",[entity_name])
+    except init_exception_service:
+        LOG.error("Failed starting rgw:%s" % (entity_name))
 
 
 def rgw_create(args):
