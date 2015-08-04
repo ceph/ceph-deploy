@@ -215,6 +215,9 @@ def write_file(path, content, mode=0644, directory=None, uid=-1, gid=-1):
         if path.startswith("/"):
             path = path[1:]
         path = os.path.join(directory, path)
+    if os.path.exists(path):
+        # Delete file in case we are changing its mode
+        os.unlink(path)
     with os.fdopen(os.open(path, os.O_WRONLY | os.O_CREAT, mode), 'w') as f:
         f.write(content)
     os.chown(path, uid, gid)
