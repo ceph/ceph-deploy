@@ -259,10 +259,6 @@ class DNF(RPMManagerBase):
     executable = 'dnf'
     name = 'dnf'
 
-    def install_priorities_plugin(self):
-        # DNF supports priorities natively
-        pass
-
 
 class Yum(RPMManagerBase):
     """
@@ -271,14 +267,6 @@ class Yum(RPMManagerBase):
 
     executable = 'yum'
     name = 'yum'
-
-    def install_priorities_plugin(self):
-        package_name = 'yum-plugin-priorities'
-
-        if self.remote_info.normalized_name == 'centos':
-            if self.remote_info.normalized_release.int_major != 6:
-                package_name = 'yum-priorities'
-        self.install(package_name)
 
 
 class Apt(PackageManager):
