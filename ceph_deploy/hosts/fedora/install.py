@@ -56,6 +56,11 @@ def install(distro, version_kind, version, adjust_repos, **kw):
                 ]
             )
 
+            # set the right priority
+            logger.warning('ensuring that /etc/yum.repos.d/ceph.repo contains a high priority')
+            distro.conn.remote_module.set_repo_priority(['Ceph', 'Ceph-noarch', 'ceph-source'])
+            logger.warning('altered ceph.repo priorities to contain: priority=1')
+
         if version_kind == 'dev':
             logger.info('skipping install of ceph-release package')
             logger.info('repo file will be created manually')
@@ -69,11 +74,6 @@ def install(distro, version_kind, version, adjust_repos, **kw):
                 adjust_repos=True,
                 extra_installs=False
             )
-
-        # set the right priority
-        logger.warning('ensuring that /etc/yum.repos.d/ceph.repo contains a high priority')
-        distro.conn.remote_module.set_repo_priority(['Ceph', 'Ceph-noarch', 'ceph-source'])
-        logger.warning('altered ceph.repo priorities to contain: priority=1')
 
     distro.packager.install(
         packages

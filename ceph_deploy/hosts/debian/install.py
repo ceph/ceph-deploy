@@ -53,7 +53,10 @@ def install(distro, version_kind, version, adjust_repos, **kw):
 
     # TODO this does not downgrade -- should it?
     if packages:
-        distro.packager.install(packages, force_confnew=True)
+        distro.packager.install(
+            packages,
+            extra_install_flags=['-o', 'Dpkg::Options::=--force-confnew']
+        )
 
 
 def mirror_install(distro, repo_url, gpg_url, adjust_repos, **kw):
