@@ -360,7 +360,7 @@ class Apt(PackageManager):
     ]
     name = 'apt'
 
-    def install(self, packages, force_confnew=False, **kw):
+    def install(self, packages, **kw):
         if isinstance(packages, str):
             packages = [packages]
 
@@ -374,8 +374,6 @@ class Apt(PackageManager):
             if isinstance(extra_flags, str):
                 extra_flags = [extra_flags]
             cmd.extend(extra_flags)
-        if force_confnew:
-            cmd.extend(['-o', 'Dpkg::Options::=--force-confnew'])
         cmd.extend(packages)
         return self._run(cmd)
 
