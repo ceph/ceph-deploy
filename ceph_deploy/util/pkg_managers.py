@@ -213,6 +213,7 @@ class RPMManagerBase(PackageManager):
     """
 
     executable = None
+    name = None
 
     def install(self, packages):
         if isinstance(packages, str):
@@ -256,6 +257,7 @@ class DNF(RPMManagerBase):
     """
 
     executable = 'dnf'
+    name = 'dnf'
 
     def install_priorities_plugin(self):
         # DNF supports priorities natively
@@ -268,6 +270,7 @@ class Yum(RPMManagerBase):
     """
 
     executable = 'yum'
+    name = 'yum'
 
     def install_priorities_plugin(self):
         package_name = 'yum-plugin-priorities'
@@ -291,6 +294,7 @@ class Apt(PackageManager):
         '--assume-yes',
         '-q',
     ]
+    name = 'apt'
 
     def install(self, packages, force_confnew=False):
         if isinstance(packages, str):
@@ -336,6 +340,7 @@ class Zypper(PackageManager):
         '--non-interactive',
         '--quiet'
     ]
+    name = 'zypper'
 
     def install(self, packages):
         if isinstance(packages, str):
