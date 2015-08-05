@@ -203,7 +203,7 @@ class PackageManager(object):
         """Install packages on remote node"""
         raise NotImplementedError()
 
-    def remove(self, packages):
+    def remove(self, packages, **kw):
         """Uninstall packages on remote node"""
         raise NotImplementedError()
 
@@ -250,16 +250,21 @@ class RPMManagerBase(PackageManager):
         cmd.extend(packages)
         return self._run(cmd)
 
-    def remove(self, packages):
+    def remove(self, packages, **kw):
         if isinstance(packages, str):
             packages = [packages]
 
+        extra_flags = kw.pop('extra_remove_flags', None)
         cmd = [
             self.executable,
             '-y',
             '-q',
             'remove',
         ]
+        if extra_flags:
+            if isinstance(extra_flags, str):
+                extra_flags = [extra_flags]
+            cmd.extend(extra_flags)
         cmd.extend(packages)
         return self._run(cmd)
 
@@ -377,15 +382,20 @@ class Apt(PackageManager):
         cmd.extend(packages)
         return self._run(cmd)
 
-    def remove(self, packages, purge=False):
+    def remove(self, packages, purge=False, **kw):
         if isinstance(packages, str):
             packages = [packages]
 
+        extra_flags = kw.pop('extra_remove_flags', None)
         cmd = self.executable + [
             '-f',
             '--force-yes',
             'remove'
         ]
+        if extra_flags:
+            if isinstance(extra_flags, str):
+                extra_flags = [extra_flags]
+            cmd.extend(extra_flags)
 
         if purge:
             cmd.append('--purge')
@@ -462,11 +472,16 @@ class Zypper(PackageManager):
         cmd.extend(packages)
         return self._run(cmd)
 
-    def remove(self, packages):
+    def remove(self, packages, **kw):
         if isinstance(packages, str):
             packages = [packages]
 
+        extra_flags = kw.pop('extra_remove_flags', None)
         cmd = self.executable + ['remove']
+        if extra_flags:
+            if isinstance(extra_flags, str):
+                extra_flags = [extra_flags]
+            cmd.extend(extra_flags)
         cmd.extend(packages)
         return self._run(cmd)
 
