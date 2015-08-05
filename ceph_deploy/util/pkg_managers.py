@@ -325,6 +325,16 @@ class DNF(RPMManagerBase):
     executable = 'dnf'
     name = 'dnf'
 
+    def install(self, packages, **kw):
+        extra_install_flags = kw.pop('extra_install_flags', [])
+        if '--best' not in extra_install_flags:
+            extra_install_flags.append('--best')
+        super(DNF, self).install(
+            packages,
+            extra_install_flags=extra_install_flags,
+            **kw
+        )
+
 
 class Yum(RPMManagerBase):
     """
