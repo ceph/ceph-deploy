@@ -22,10 +22,11 @@ def install(distro, version_kind, version, adjust_repos, **kw):
         key = 'autobuild'
 
     if adjust_repos:
-        distro.packager.install_priorities_plugin()
-        # haven't been able to determine necessity of check_obsoletes with DNF
-        distro.conn.remote_module.enable_yum_priority_obsoletes()
-        logger.warning('check_obsoletes has been enabled for Yum priorities plugin')
+        if distro.packager.name == 'yum':
+            distro.packager.install('yum-plugin-priorities')
+            # haven't been able to determine necessity of check_obsoletes with DNF
+            distro.conn.remote_module.enable_yum_priority_obsoletes()
+            logger.warning('check_obsoletes has been enabled for Yum priorities plugin')
 
         if version_kind != 'dev':
             distro.packager.add_repo_gpg_key(gpg.url(key))

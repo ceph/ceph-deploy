@@ -230,6 +230,7 @@ class RPMManagerBase(PackageManager):
     """
 
     executable = None
+    name = None
 
     def install(self, packages):
         if isinstance(packages, str):
@@ -316,10 +317,7 @@ class DNF(RPMManagerBase):
     """
 
     executable = 'dnf'
-
-    def install_priorities_plugin(self):
-        # DNF supports priorities natively
-        pass
+    name = 'dnf'
 
 
 class Yum(RPMManagerBase):
@@ -328,14 +326,7 @@ class Yum(RPMManagerBase):
     """
 
     executable = 'yum'
-
-    def install_priorities_plugin(self):
-        package_name = 'yum-plugin-priorities'
-
-        if self.remote_info.normalized_name == 'centos':
-            if self.remote_info.normalized_release.int_major != 6:
-                package_name = 'yum-priorities'
-        self.install(package_name)
+    name = 'yum'
 
 
 class Apt(PackageManager):
@@ -351,6 +342,7 @@ class Apt(PackageManager):
         '--assume-yes',
         '-q',
     ]
+    name = 'apt'
 
     def install(self, packages, force_confnew=False):
         if isinstance(packages, str):
@@ -436,6 +428,7 @@ class Zypper(PackageManager):
         '--non-interactive',
         '--quiet'
     ]
+    name = 'zypper'
 
     def install(self, packages):
         if isinstance(packages, str):
