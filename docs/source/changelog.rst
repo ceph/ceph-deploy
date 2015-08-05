@@ -4,6 +4,17 @@ Changelog
 1.5
 ---
 
+1.5.27
+^^^^^^
+05-Aug-2015
+
+* New ``repo`` top-level command for adding and removing repos.
+* Ability to install subset of ceph packages based on CLI switches like
+  ``--cli``, ``--rgw``, etc.
+* Initial support for systemd.  Ceph on Fedora 22 only.
+* Fixed an issue that prevented package upgrades when using DNF
+* No longer installs yum-priorities-plugin when using DNF
+
 1.5.26
 ^^^^^^
 20-Jul-2015
@@ -35,7 +46,7 @@ Changelog
 ^^^^^^
 18-May-2015
 
-* Use version 0.0.25 of `remoto` that fixes an issue where output would be cut
+* Use version 0.0.25 of ``remoto`` that fixes an issue where output would be cut
   (https://github.com/alfredodeza/remoto/issues/15).
 * Automatically prefix custom RGW daemon names with 'rgw.'
 * Log an error message when deploying MDS in RHEL distros fails as it may not
