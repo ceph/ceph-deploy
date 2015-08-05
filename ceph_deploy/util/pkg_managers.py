@@ -382,7 +382,7 @@ class Apt(PackageManager):
         cmd.extend(packages)
         return self._run(cmd)
 
-    def remove(self, packages, purge=False, **kw):
+    def remove(self, packages, **kw):
         if isinstance(packages, str):
             packages = [packages]
 
@@ -397,8 +397,6 @@ class Apt(PackageManager):
                 extra_flags = [extra_flags]
             cmd.extend(extra_flags)
 
-        if purge:
-            cmd.append('--purge')
         cmd.extend(packages)
         return self._run(cmd)
 
