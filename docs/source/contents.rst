@@ -12,4 +12,5 @@ Content Index
    mds.rst
    conf.rst
    pkg.rst
+   repo.rst
    changelog.rst
