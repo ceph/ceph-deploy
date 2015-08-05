@@ -4,7 +4,7 @@ from ceph_deploy.util.paths import gpg
 from ceph_deploy.hosts.common import map_components
 
 
-NON_SPLIT_COMPONENTS = ['ceph-osd', 'ceph-mon']
+NON_SPLIT_COMPONENTS = ['ceph-osd', 'ceph-mon', 'ceph-mds']
 
 
 def install(distro, version_kind, version, adjust_repos, **kw):
