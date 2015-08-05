@@ -199,7 +199,7 @@ class PackageManager(object):
             **kw
         )
 
-    def install(self, packages):
+    def install(self, packages, **kw):
         """Install packages on remote node"""
         raise NotImplementedError()
 
@@ -232,15 +232,21 @@ class RPMManagerBase(PackageManager):
     executable = None
     name = None
 
-    def install(self, packages):
+    def install(self, packages, **kw):
         if isinstance(packages, str):
             packages = [packages]
 
+        extra_flags = kw.pop('extra_install_flags', None)
         cmd = [
             self.executable,
             '-y',
             'install',
         ]
+        if extra_flags:
+            if isinstance(extra_flags, str):
+                extra_flags = [extra_flags]
+            cmd.extend(extra_flags)
+
         cmd.extend(packages)
         return self._run(cmd)
 
@@ -344,15 +350,20 @@ class Apt(PackageManager):
     ]
     name = 'apt'
 
-    def install(self, packages, force_confnew=False):
+    def install(self, packages, force_confnew=False, **kw):
         if isinstance(packages, str):
             packages = [packages]
 
+        extra_flags = kw.pop('extra_install_flags', None)
         cmd = self.executable + [
             '--no-install-recommends',
             'install'
         ]
 
+        if extra_flags:
+            if isinstance(extra_flags, str):
+                extra_flags = [extra_flags]
+            cmd.extend(extra_flags)
         if force_confnew:
             cmd.extend(['-o', 'Dpkg::Options::=--force-confnew'])
         cmd.extend(packages)
@@ -430,11 +441,16 @@ class Zypper(PackageManager):
     ]
     name = 'zypper'
 
-    def install(self, packages):
+    def install(self, packages, **kw):
         if isinstance(packages, str):
             packages = [packages]
 
+        extra_flags = kw.pop('extra_install_flags', None)
         cmd = self.executable + ['install']
+        if extra_flags:
+            if isinstance(extra_flags, str):
+                extra_flags = [extra_flags]
+            cmd.extend(extra_flags)
         cmd.extend(packages)
         return self._run(cmd)
 
