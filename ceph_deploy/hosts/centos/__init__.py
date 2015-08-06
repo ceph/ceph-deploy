@@ -12,7 +12,7 @@ release = None
 codename = None
 
 
-def choose_init():    
+def choose_init(module):
     """
     Select a init system
 

@@ -68,7 +68,7 @@ def get(hostname,
     module.codename = codename
     module.conn = conn
     module.machine_type = machine_type
-    module.init = module.choose_init()
+    module.init = module.choose_init(module)
     module.packager = module.get_packager(module)
     return module
 
