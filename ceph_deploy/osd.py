@@ -379,8 +379,10 @@ def activate(args, cfg):
         time.sleep(5)
         catch_osd_errors(distro.conn, distro.conn.logger, args)
 
-        if distro.is_el:
-            system.enable_service(distro.conn)
+        if distro.init == 'systemd':
+            system.enable_service(distro.conn, "ceph.target")
+        elif distro.init == 'sysvinit':
+            system.enable_service(distro.conn, "ceph")
 
         distro.conn.exit()
 
