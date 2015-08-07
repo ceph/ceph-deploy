@@ -32,7 +32,7 @@ class TestApt(object):
     def test_install_single_package(self):
         fake_run = Mock()
         with patch(self.to_patch, fake_run):
-            pkg_managers.apt(Mock(), 'vim')
+            pkg_managers.Apt(Mock()).install('vim')
             result = fake_run.call_args_list[-1]
         assert 'install' in result[0][-1]
         assert result[0][-1][-1] == 'vim'
@@ -40,7 +40,7 @@ class TestApt(object):
     def test_install_multiple_packages(self):
         fake_run = Mock()
         with patch(self.to_patch, fake_run):
-            pkg_managers.apt(Mock(), ['vim', 'zsh'])
+            pkg_managers.Apt(Mock()).install(['vim', 'zsh'])
             result = fake_run.call_args_list[-1]
         assert 'install' in result[0][-1]
         assert result[0][-1][-2:] == ['vim', 'zsh']
@@ -48,7 +48,7 @@ class TestApt(object):
     def test_remove_single_package(self):
         fake_run = Mock()
         with patch(self.to_patch, fake_run):
-            pkg_managers.apt_remove(Mock(), 'vim')
+            pkg_managers.Apt(Mock()).remove('vim')
             result = fake_run.call_args_list[-1]
         assert 'remove' in result[0][-1]
         assert result[0][-1][-1] == 'vim'
@@ -56,7 +56,7 @@ class TestApt(object):
     def test_remove_multiple_packages(self):
         fake_run = Mock()
         with patch(self.to_patch, fake_run):
-            pkg_managers.apt_remove(Mock(), ['vim', 'zsh'])
+            pkg_managers.Apt(Mock()).remove(['vim', 'zsh'])
             result = fake_run.call_args_list[-1]
         assert 'remove' in result[0][-1]
         assert result[0][-1][-2:] == ['vim', 'zsh']
@@ -70,7 +70,7 @@ class TestYum(object):
     def test_install_single_package(self):
         fake_run = Mock()
         with patch(self.to_patch, fake_run):
-            pkg_managers.yum(Mock(), 'vim')
+            pkg_managers.Yum(Mock()).install('vim')
             result = fake_run.call_args_list[-1]
         assert 'install' in result[0][-1]
         assert result[0][-1][-1] == 'vim'
@@ -78,7 +78,7 @@ class TestYum(object):
     def test_install_multiple_packages(self):
         fake_run = Mock()
         with patch(self.to_patch, fake_run):
-            pkg_managers.yum(Mock(), ['vim', 'zsh'])
+            pkg_managers.Yum(Mock()).install(['vim', 'zsh'])
             result = fake_run.call_args_list[-1]
         assert 'install' in result[0][-1]
         assert result[0][-1][-2:] == ['vim', 'zsh']
@@ -86,7 +86,7 @@ class TestYum(object):
     def test_remove_single_package(self):
         fake_run = Mock()
         with patch(self.to_patch, fake_run):
-            pkg_managers.yum_remove(Mock(), 'vim')
+            pkg_managers.Yum(Mock()).remove('vim')
             result = fake_run.call_args_list[-1]
         assert 'remove' in result[0][-1]
         assert result[0][-1][-1] == 'vim'
@@ -94,7 +94,7 @@ class TestYum(object):
     def test_remove_multiple_packages(self):
         fake_run = Mock()
         with patch(self.to_patch, fake_run):
-            pkg_managers.yum_remove(Mock(), ['vim', 'zsh'])
+            pkg_managers.Yum(Mock()).remove(['vim', 'zsh'])
             result = fake_run.call_args_list[-1]
         assert 'remove' in result[0][-1]
         assert result[0][-1][-2:] == ['vim', 'zsh']
@@ -108,7 +108,7 @@ class TestZypper(object):
     def test_install_single_package(self):
         fake_run = Mock()
         with patch(self.to_patch, fake_run):
-            pkg_managers.zypper(Mock(), 'vim')
+            pkg_managers.Zypper(Mock()).install('vim')
             result = fake_run.call_args_list[-1]
         assert 'install' in result[0][-1]
         assert result[0][-1][-1] == 'vim'
@@ -116,7 +116,7 @@ class TestZypper(object):
     def test_install_multiple_packages(self):
         fake_run = Mock()
         with patch(self.to_patch, fake_run):
-            pkg_managers.zypper(Mock(), ['vim', 'zsh'])
+            pkg_managers.Zypper(Mock()).install(['vim', 'zsh'])
             result = fake_run.call_args_list[-1]
         assert 'install' in result[0][-1]
         assert result[0][-1][-2:] == ['vim', 'zsh']
@@ -124,7 +124,7 @@ class TestZypper(object):
     def test_remove_single_package(self):
         fake_run = Mock()
         with patch(self.to_patch, fake_run):
-            pkg_managers.zypper_remove(Mock(), 'vim')
+            pkg_managers.Zypper(Mock()).remove('vim')
             result = fake_run.call_args_list[-1]
         assert 'remove' in result[0][-1]
         assert result[0][-1][-1] == 'vim'
@@ -132,7 +132,7 @@ class TestZypper(object):
     def test_remove_multiple_packages(self):
         fake_run = Mock()
         with patch(self.to_patch, fake_run):
-            pkg_managers.zypper_remove(Mock(), ['vim', 'zsh'])
+            pkg_managers.Zypper(Mock()).remove(['vim', 'zsh'])
             result = fake_run.call_args_list[-1]
         assert 'remove' in result[0][-1]
         assert result[0][-1][-2:] == ['vim', 'zsh']
