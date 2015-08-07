@@ -137,3 +137,39 @@ class TestZypper(object):
         assert 'remove' in result[0][-1]
         assert result[0][-1][-2:] == ['vim', 'zsh']
 
+
+class TestDNF(object):
+
+    def setup(self):
+        self.to_patch = 'ceph_deploy.util.pkg_managers.remoto.process.run'
+
+    def test_install_single_package(self):
+        fake_run = Mock()
+        with patch(self.to_patch, fake_run):
+            pkg_managers.DNF(Mock()).install('vim')
+            result = fake_run.call_args_list[-1]
+        assert 'install' in result[0][-1]
+        assert result[0][-1][-1] == 'vim'
+
+    def test_install_multiple_packages(self):
+        fake_run = Mock()
+        with patch(self.to_patch, fake_run):
+            pkg_managers.DNF(Mock()).install(['vim', 'zsh'])
+            result = fake_run.call_args_list[-1]
+        assert 'install' in result[0][-1]
+        assert result[0][-1][-2:] == ['vim', 'zsh']
+
+    def test_remove_single_package(self):
+        fake_run = Mock()
+        with patch(self.to_patch, fake_run):
+            pkg_managers.DNF(Mock()).remove('vim')
+            result = fake_run.call_args_list[-1]
+        assert 'remove' in result[0][-1]
+        assert result[0][-1][-1] == 'vim'
+
+    def test_remove_multiple_packages(self):
+        fake_run = Mock()
+        with patch(self.to_patch, fake_run):
+            pkg_managers.DNF(Mock()).remove(['vim', 'zsh'])
+            result = fake_run.call_args_list[-1]
+        assert 'remove' in result[0][-1]
