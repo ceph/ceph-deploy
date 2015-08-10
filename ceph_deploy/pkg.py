@@ -17,7 +17,7 @@ def install(args):
         )
         rlogger = logging.getLogger(hostname)
         rlogger.info('installing packages on %s' % hostname)
-        distro.pkg.install(distro, packages)
+        distro.packager.install(packages)
         distro.conn.exit()
 
 
@@ -34,7 +34,7 @@ def remove(args):
 
         rlogger = logging.getLogger(hostname)
         rlogger.info('removing packages from %s' % hostname)
-        distro.pkg.remove(distro, packages)
+        distro.packager.remove(packages)
         distro.conn.exit()
 
 

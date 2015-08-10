@@ -56,7 +56,7 @@ def connect(args):
             'master: %s\n' % args.master
         )
 
-        distro.pkg.install(distro, 'salt-minion')
+        distro.packager.install('salt-minion')
 
         # redhat/centos need to get the service started
         if distro.normalized_name in ['redhat', 'centos']:
