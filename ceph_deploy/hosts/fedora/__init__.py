@@ -17,10 +17,11 @@ def choose_init(module):
 
     Returns the name of a init system (upstart, sysvinit ...).
     """
-    if module.normalized_release.int_major >= 22:
-        return 'systemd'
-    else:
+
+    if not module.conn.remote_module.path_exists("/usr/lib/systemd/system/ceph.target"):
         return 'sysvinit'
+
+    return 'systemd'
 
 def get_packager(module):
     if module.normalized_release.int_major >= 22:
