@@ -7,7 +7,7 @@ import time
 from ceph_deploy import conf, exc, admin
 from ceph_deploy.cliutil import priority
 from ceph_deploy.util.help_formatters import ToggleRawTextHelpFormatter
-from ceph_deploy.util import paths, net, files
+from ceph_deploy.util import paths, net, files, packages
 from ceph_deploy.lib import remoto
 from ceph_deploy.new import new_mon_keyring
 from ceph_deploy import hosts
@@ -208,7 +208,11 @@ def mon_add(args):
 
     try:
         LOG.debug('detecting platform for host %s ...', mon_host)
-        distro = hosts.get(mon_host, username=args.username)
+        distro = hosts.get(
+            mon_host,
+            username=args.username,
+            callbacks=[packages.ceph_is_installed]
+        )
         LOG.info('distro info: %s %s %s', distro.name, distro.release, distro.codename)
         rlogger = logging.getLogger(mon_host)
 
@@ -257,7 +261,7 @@ def mon_create(args):
         try:
             # TODO add_bootstrap_peer_hint
             LOG.debug('detecting platform for host %s ...', name)
-            distro = hosts.get(host, username=args.username)
+            distro = hosts.get(host, username=args.username, callbacks=[packages.ceph_is_installed])
             LOG.info('distro info: %s %s %s', distro.name, distro.release, distro.codename)
             rlogger = logging.getLogger(name)
 
@@ -373,7 +377,11 @@ def mon_destroy(args):
         try:
             LOG.debug('Removing mon from %s', name)
 
-            distro = hosts.get(host, username=args.username)
+            distro = hosts.get(
+                host,
+                username=args.username,
+                callbacks=[packages.ceph_is_installed]
+            )
             hostname = distro.conn.remote_module.shortname()
 
             destroy_mon(
@@ -408,7 +416,13 @@ def mon_create_initial(args):
         sleeps = [20, 20, 15, 10, 10, 5]
         tries = 5
         rlogger = logging.getLogger(host)
-        rconn = get_connection(host, username=args.username, logger=rlogger)
+        rconn = get_connection(
+            host,
+            username=args.username,
+            logger=rlogger,
+            callbacks=[packages.ceph_is_installed]
+        )
+
         while tries:
             status = mon_status_check(rconn, rlogger, host, args)
             has_reached_quorum = status.get('state', '') in ['peon', 'leader']
