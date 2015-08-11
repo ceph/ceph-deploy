@@ -101,7 +101,7 @@ class RPMManagerBase(PackageManager):
         return self._run(cmd)
 
     def add_repo_gpg_key(self, url):
-        cmd = ['rpmkeys', '--import', url]
+        cmd = ['rpm', '--import', url]
         self._run(cmd)
 
     def add_repo(self, name, url, **kw):
