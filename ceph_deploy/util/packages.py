@@ -57,3 +57,18 @@ class Ceph(object):
         :mod:``ceph_deploy.util.versions.NormalizedVersion``)
         """
         return versions.parse_version(self._get_version_output)
+
+
+# callback helpers
+
+def ceph_is_installed(module):
+    """
+    A helper callback to be executed after the connection is made to ensure
+    that Ceph is installed.
+    """
+    ceph_package = Ceph(module.conn)
+    if not ceph_package.installed:
+        host = module.conn.hostname
+        raise RuntimeError(
+            'ceph needs to be installed in remote host: %s' % host
+        )
