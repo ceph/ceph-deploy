@@ -17,7 +17,8 @@ def get(hostname,
         username=None,
         fallback=None,
         detect_sudo=True,
-        use_rhceph=False):
+        use_rhceph=False,
+        callbacks=None):
     """
     Retrieve the module that matches the distribution of a ``hostname``. This
     function will connect to that host and retrieve the distribution
@@ -36,6 +37,10 @@ def get(hostname,
     :param use_rhceph: Whether or not to install RH Ceph on a RHEL machine or
                        the community distro.  Changes what host module is
                        returned for RHEL.
+    :params callbacks: A list of callables that accept one argument (the actual
+                       module that contains the connection) that will be
+                       called, in order at the end of the instantiation of the
+                       module.
     """
     conn = get_connection(
         hostname,
@@ -71,6 +76,10 @@ def get(hostname,
     module.machine_type = machine_type
     module.init = module.choose_init(module)
     module.packager = module.get_packager(module)
+    # execute each callback if any
+    if callbacks:
+        for c in callbacks:
+            c(module)
     return module
 
 
