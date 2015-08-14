@@ -10,7 +10,7 @@ from textwrap import dedent
 from cStringIO import StringIO
 
 from ceph_deploy import conf, exc, hosts, mon
-from ceph_deploy.util import constants, system
+from ceph_deploy.util import constants, system, packages
 from ceph_deploy.cliutil import priority
 from ceph_deploy.lib import remoto
 
@@ -290,7 +290,11 @@ def prepare(args, cfg, activate_prepared_disk):
             if disk is None:
                 raise exc.NeedDiskError(hostname)
 
-            distro = hosts.get(hostname, username=args.username)
+            distro = hosts.get(
+                hostname,
+                username=args.username,
+                callbacks=[packages.ceph_is_installed]
+            )
             LOG.info(
                 'Distro info: %s %s %s',
                 distro.name,
@@ -352,7 +356,11 @@ def activate(args, cfg):
 
     for hostname, disk, journal in args.disk:
 
-        distro = hosts.get(hostname, username=args.username)
+        distro = hosts.get(
+            hostname,
+            username=args.username,
+            callbacks=[packages.ceph_is_installed]
+        )
         LOG.info(
             'Distro info: %s %s %s',
             distro.name,
@@ -393,7 +401,11 @@ def disk_zap(args):
         if not disk or not hostname:
             raise RuntimeError('zap command needs both HOSTNAME and DISK but got "%s %s"' % (hostname, disk))
         LOG.debug('zapping %s on %s', disk, hostname)
-        distro = hosts.get(hostname, username=args.username)
+        distro = hosts.get(
+            hostname,
+            username=args.username,
+            callbacks=[packages.ceph_is_installed]
+        )
         LOG.info(
             'Distro info: %s %s %s',
             distro.name,
@@ -444,7 +456,11 @@ def disk_zap(args):
 
 def disk_list(args, cfg):
     for hostname, disk, journal in args.disk:
-        distro = hosts.get(hostname, username=args.username)
+        distro = hosts.get(
+            hostname,
+            username=args.username,
+            callbacks=[packages.ceph_is_installed]
+        )
         LOG.info(
             'Distro info: %s %s %s',
             distro.name,
@@ -469,7 +485,12 @@ def osd_list(args, cfg):
 
     # get the osd tree from a monitor host
     mon_host = monitors[0]
-    distro = hosts.get(mon_host, username=args.username)
+    distro = hosts.get(
+        mon_host,
+        username=args.username,
+        callbacks=[packages.ceph_is_installed]
+    )
+
     tree = osd_tree(distro.conn, args.cluster)
     distro.conn.exit()
 
