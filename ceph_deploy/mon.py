@@ -12,7 +12,6 @@ from ceph_deploy.lib import remoto
 from ceph_deploy.new import new_mon_keyring
 from ceph_deploy import hosts
 from ceph_deploy.misc import mon_hosts
-from ceph_deploy.connection import get_connection
 from ceph_deploy import gatherkeys
 
 
@@ -416,15 +415,14 @@ def mon_create_initial(args):
         sleeps = [20, 20, 15, 10, 10, 5]
         tries = 5
         rlogger = logging.getLogger(host)
-        rconn = get_connection(
+        distro = hosts.get(
             host,
             username=args.username,
-            logger=rlogger,
             callbacks=[packages.ceph_is_installed]
         )
 
         while tries:
-            status = mon_status_check(rconn, rlogger, host, args)
+            status = mon_status_check(distro.conn, rlogger, host, args)
             has_reached_quorum = status.get('state', '') in ['peon', 'leader']
             if not has_reached_quorum:
                 LOG.warning('%s monitor is not yet in quorum, tries left: %s' % (mon_name, tries))
@@ -436,7 +434,7 @@ def mon_create_initial(args):
                 mon_in_quorum.add(host)
                 LOG.info('%s monitor has reached quorum!', mon_name)
                 break
-        rconn.exit()
+        distro.conn.exit()
 
     if mon_in_quorum == mon_members:
         LOG.info('all initial monitors are running and have formed quorum')
