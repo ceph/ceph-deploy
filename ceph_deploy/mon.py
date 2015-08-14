@@ -420,7 +420,6 @@ def mon_create_initial(args):
             host,
             username=args.username,
             logger=rlogger,
-            callbacks=[packages.ceph_is_installed]
         )
 
         while tries:
