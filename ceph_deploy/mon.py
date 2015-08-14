@@ -260,7 +260,11 @@ def mon_create(args):
         try:
             # TODO add_bootstrap_peer_hint
             LOG.debug('detecting platform for host %s ...', name)
-            distro = hosts.get(host, username=args.username, callbacks=[packages.ceph_is_installed])
+            distro = hosts.get(
+                host,
+                username=args.username,
+                callbacks=[packages.ceph_is_installed]
+            )
             LOG.info('distro info: %s %s %s', distro.name, distro.release, distro.codename)
             rlogger = logging.getLogger(name)
 
