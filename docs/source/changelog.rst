@@ -4,6 +4,18 @@ Changelog
 1.5
 ---
 
+1.5.28
+^^^^^^
+26-Aug-2015
+
+* Fix issue when importing GPG keys on Centos 6 introduced in 1.5.27.
+* Support systemd and sysvinit on RHEL, Fedora, and CentOS, when systemd
+  is present in the Ceph packages.
+* Simplify steps taken when adding a monitor with ``ceph-deploy mon add``.
+  Eliminates a 5-minute hang when moving from 1 monitor to 2.
+* Make sure that Ceph is installed on a remote node before trying to enable
+  a Ceph daemon.
+
 1.5.27
 ^^^^^^
 05-Aug-2015
@@ -12,8 +24,8 @@ Changelog
 * Ability to install subset of ceph packages based on CLI switches like
   ``--cli``, ``--rgw``, etc.
 * Initial support for systemd.  Ceph on Fedora 22 only.
-* Fixed an issue that prevented package upgrades when using DNF
-* No longer installs yum-priorities-plugin when using DNF
+* Fixed an issue that prevented package upgrades when using DNF.
+* No longer installs yum-priorities-plugin when using DNF.
 
 1.5.26
 ^^^^^^
