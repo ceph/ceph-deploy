@@ -478,6 +478,13 @@ def make(parser):
         help='install a bleeding edge build from Git branch\
                 or tag (default: %(default)s)',
     )
+    version.add_argument(
+        '--dev-commit',
+        nargs='?',
+        action=StoreVersion,
+        metavar='COMMIT',
+        help='install a bleeding edge build from Git commit',
+    )
 
     version.set_defaults(
         stable=None,  # XXX deprecated in favor of release
