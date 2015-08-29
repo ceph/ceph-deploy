@@ -28,7 +28,7 @@ def install(distro, version_kind, version, adjust_repos, **kw):
             distro.conn.remote_module.enable_yum_priority_obsoletes()
             logger.warning('check_obsoletes has been enabled for Yum priorities plugin')
 
-        if version_kind != 'dev':
+        if version_kind in ['stable', 'testing']:
             distro.packager.add_repo_gpg_key(gpg.url(key))
 
             if version_kind == 'stable':
@@ -61,19 +61,23 @@ def install(distro, version_kind, version, adjust_repos, **kw):
             distro.conn.remote_module.set_repo_priority(['Ceph', 'Ceph-noarch', 'ceph-source'])
             logger.warning('altered ceph.repo priorities to contain: priority=1')
 
-        if version_kind == 'dev':
+        elif version_kind in ['dev', 'dev_commit']:
             logger.info('skipping install of ceph-release package')
             logger.info('repo file will be created manually')
             mirror_install(
                 distro,
-                'http://gitbuilder.ceph.com/ceph-rpm-fc{release}-{machine}-basic/ref/{version}/'.format(
+                'http://gitbuilder.ceph.com/ceph-rpm-fc{release}-{machine}-basic/{sub}/{version}/'.format(
                     release=release.split(".", 1)[0],
                     machine=machine,
+                    sub='ref' if version_kind == 'dev' else 'sha1',
                     version=version),
                 gpg.url(key),
                 adjust_repos=True,
                 extra_installs=False
             )
+
+        else:
+            raise Exception('unrecognized version_kind %s' % version_kind)
 
     distro.packager.install(
         packages

@@ -35,10 +35,11 @@ def install(distro, version_kind, version, adjust_repos, **kw):
                 )
         elif version_kind == 'testing':
             url = 'http://ceph.com/debian-testing/'
-        elif version_kind == 'dev':
-            url = 'http://gitbuilder.ceph.com/ceph-deb-{codename}-{machine}-basic/ref/{version}'.format(
+        elif version_kind in ['dev', 'dev_commit']:
+            url = 'http://gitbuilder.ceph.com/ceph-deb-{codename}-{machine}-basic/{sub}/{version}'.format(
                 codename=codename,
                 machine=machine,
+                sub='ref' if version_kind == 'dev' else 'sha1',
                 version=version,
                 )
         else:
