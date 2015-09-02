@@ -56,6 +56,7 @@ def detect_components(args, distro):
         'install_mds': 'ceph-mds',
         'install_mon': 'ceph-mon',
         'install_common': 'ceph-common',
+        'install_tests': 'ceph-test',
     }
 
     if distro.is_rpm:
@@ -522,6 +523,13 @@ def make(parser):
     )
 
     parser.add_argument(
+        '--tests',
+        dest='install_tests',
+        action='store_true',
+        help='install the testing components',
+    )
+
+    parser.add_argument(
         '--cli', '--common',
         dest='install_common',
         action='store_true',
@@ -532,7 +540,7 @@ def make(parser):
         '--all',
         dest='install_all',
         action='store_true',
-        help='install all Ceph components (e.g. mon,osd,mds,rgw). This is the default',
+        help='install all Ceph components (mon, osd, mds, rgw) except tests. This is the default',
     )
 
     repo = parser.add_mutually_exclusive_group()

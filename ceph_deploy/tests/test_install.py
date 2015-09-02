@@ -48,6 +48,7 @@ class TestDetectComponents(object):
         self.args.install_mon = False
         self.args.install_osd = False
         self.args.install_rgw = False
+        self.args.install_tests = False
         self.args.install_common = False
         self.args.repo = False
         self.distro = Mock()
@@ -105,6 +106,11 @@ class TestDetectComponents(object):
         self.args.install_mds = True
         result = sorted(install.detect_components(self.args, self.distro))
         assert result == sorted(['ceph-osd', 'ceph-mds'])
+
+    def test_install_tests(self):
+        self.args.install_tests = True
+        result = sorted(install.detect_components(self.args, self.distro))
+        assert result == sorted(['ceph-test'])
 
     def test_install_all_should_be_default_when_no_options_passed(self):
         result = sorted(install.detect_components(self.args, self.distro))
