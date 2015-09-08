@@ -193,6 +193,7 @@ def prepare_disk(
         disk,
         journal,
         activate_prepared_disk,
+        init,
         zap,
         fs_type,
         dmcrypt,
@@ -230,6 +231,16 @@ def prepare_disk(
     )
 
     if activate_prepared_disk:
+        # we don't simply run activate here because we don't know
+        # which partition ceph-disk prepare created as the data
+        # volume.  instead, we rely on udev to do the activation and
+        # just give it a kick to ensure it wakes up.  we also enable
+        # ceph.target, the other key piece of activate.
+        if init == 'systemd':
+            system.enable_service(conn, "ceph.target")
+        elif init == 'sysvinit':
+            system.enable_service(conn, "ceph")
+        
         return remoto.process.run(
             conn,
             [
@@ -325,6 +336,7 @@ def prepare(args, cfg, activate_prepared_disk):
                 disk=disk,
                 journal=journal,
                 activate_prepared_disk=activate_prepared_disk,
+                init=distro.init,
                 zap=args.zap_disk,
                 fs_type=args.fs_type,
                 dmcrypt=args.dmcrypt,
