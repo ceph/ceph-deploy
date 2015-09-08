@@ -14,6 +14,7 @@ def forgetkeys(args):
         'client.admin',
         'bootstrap-osd',
         'bootstrap-mds',
+        'bootstrap-rgw',
         ]:
         try:
             os.unlink('{cluster}.{what}.keyring'.format(
