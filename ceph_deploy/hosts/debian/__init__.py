@@ -16,8 +16,11 @@ def choose_init(module):
 
     Returns the name of a init system (upstart, sysvinit ...).
     """
+    # fixme: newer ubuntu runs systemd
     if distro.lower() == 'ubuntu':
         return 'upstart'
+    if module.conn.remote_module.path_exists("/lib/systemd/system/ceph.target"):
+        return 'systemd'
     return 'sysvinit'
 
 
