@@ -1,31 +1,14 @@
 from ceph_deploy.hosts import common
+from ceph_deploy.util import system
 from ceph_deploy.lib import remoto
 
 
 def create(distro, args, monitor_keyring):
-    logger = distro.conn.logger
     hostname = distro.conn.remote_module.shortname()
     common.mon_create(distro, args, monitor_keyring, hostname)
-    service = distro.conn.remote_module.which_service()
 
-    if not service:
-        logger.warning('could not find `service` executable')
-
-    if distro.init == 'upstart':  # Ubuntu uses upstart
-        remoto.process.run(
-            distro.conn,
-            [
-                'initctl',
-                'emit',
-                'ceph-mon',
-                'cluster={cluster}'.format(cluster=args.cluster),
-                'id={hostname}'.format(hostname=hostname),
-            ],
-            timeout=7,
-        )
-
-    elif distro.init == 'sysvinit':  # Debian uses sysvinit
-
+    if distro.init == 'sysvinit':
+        service = distro.conn.remote_module.which_service()
         remoto.process.run(
             distro.conn,
             [
@@ -38,5 +21,49 @@ def create(distro, args, monitor_keyring):
             ],
             timeout=7,
         )
-    else:
-        raise RuntimeError('create cannot use init %s' % distro.init)
+
+        system.enable_service(distro.conn)
+    elif distro.init == 'upstart':
+        remoto.process.run(
+             distro.conn,
+             [
+                 'initctl',
+                 'emit',
+                 'ceph-mon',
+                 'cluster={cluster}'.format(cluster=args.cluster),
+                 'id={hostname}'.format(hostname=hostname),
+             ],
+             timeout=7,
+         )
+
+    elif distro.init == 'systemd':
+       # enable ceph target for this host (in case it isn't already enabled)
+        remoto.process.run(
+            distro.conn,
+            [
+                'systemctl',
+                'enable',
+                'ceph.target'
+            ],
+            timeout=7,
+        )
+
+        # enable and start this mon instance
+        remoto.process.run(
+            distro.conn,
+            [
+                'systemctl',
+                'enable',
+                'ceph-mon@{hostname}'.format(hostname=hostname),
+            ],
+            timeout=7,
+        )
+        remoto.process.run(
+            distro.conn,
+            [
+                'systemctl',
+                'start',
+                'ceph-mon@{hostname}'.format(hostname=hostname),
+            ],
+            timeout=7,
+        )
