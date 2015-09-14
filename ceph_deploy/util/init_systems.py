@@ -1,6 +1,14 @@
 from ceph_deploy.lib import remoto
 
 
+SYSV_SERVICES = {
+    'ceph-mon': 'mon',
+    'ceph-osd': 'osd',
+    'ceph-osd': 'osd',
+    'ceph-mds': 'mds'
+}
+
+
 class InitSystem(object):
     """
     Base class for all Init systems
@@ -34,6 +42,8 @@ class SysV(InitSystem):
     SysV Init System
     """
 
+    name = 'sysvinit'
+
     def __init__(self, remote_conn):
         super(SysV, self).__init__(remote_conn)
         self.service_exe = self.remote_conn.remote_module.which_service()
@@ -48,7 +58,7 @@ class SysV(InitSystem):
                 '/etc/ceph/{cluster}.conf'.format(cluster=cluster),
                 'start',
                 '{service}.{hostname}'.format(
-                    service=service,
+                    service=SYSV_SERVICES[service],
                     hostname=self.hostname
                 )
             ]
@@ -58,7 +68,7 @@ class SysV(InitSystem):
         self._run(
             [
                 'chkconfig',
-                '{service}'.format(service=service),
+                'ceph',
                 'on'
             ]
         )
@@ -68,6 +78,8 @@ class Upstart(InitSystem):
     """
     Upstart Init System
     """
+
+    name = 'upstart'
 
     def start(self, service, **kw):
         cluster = kw.pop('cluster', 'ceph')
@@ -89,6 +101,8 @@ class SystemD(InitSystem):
     """
     SystemD Init System
     """
+
+    name = 'systemd'
 
     def start(self, service, **kw):
         name = kw.pop('name', self.hostname)
