@@ -177,7 +177,7 @@ def catch_osd_errors(conn, logger, args):
 
 
 def prepare_disk(
-        conn,
+        distro,
         cluster,
         disk,
         journal,
@@ -191,7 +191,7 @@ def prepare_disk(
     """
     Run on osd node, prepares a data disk for use.
     """
-    ceph_disk_executable = system.executable_path(conn, 'ceph-disk')
+    ceph_disk_executable = system.executable_path(distro.conn, 'ceph-disk')
     args = [
         ceph_disk_executable,
         '-v',
@@ -219,7 +219,7 @@ def prepare_disk(
         args.append(journal)
 
     remoto.process.run(
-        conn,
+        distro.conn,
         args
     )
 
@@ -229,10 +229,7 @@ def prepare_disk(
         # volume.  instead, we rely on udev to do the activation and
         # just give it a kick to ensure it wakes up.  we also enable
         # ceph.target, the other key piece of activate.
-        if init == 'systemd':
-            system.enable_service(conn, "ceph.target")
-        elif init == 'sysvinit':
-            system.enable_service(conn, "ceph")
+        distro.init.enable('ceph-osd')
 
 
 def exceeds_max_osds(args, reasonable=20):
@@ -317,7 +314,7 @@ def prepare(args, cfg, activate_prepared_disk):
                 storetype = 'bluestore'
 
             prepare_disk(
-                distro.conn,
+                distro,
                 cluster=args.cluster,
                 disk=disk,
                 journal=journal,
@@ -368,7 +365,7 @@ def activate(args, cfg):
         )
 
         LOG.debug('activating host %s disk %s', hostname, disk)
-        LOG.debug('will use init type: %s', distro.init)
+        LOG.debug('will use init type: %s', distro.init.name)
 
         ceph_disk_executable = system.executable_path(distro.conn, 'ceph-disk')
         remoto.process.run(
@@ -378,7 +375,7 @@ def activate(args, cfg):
                 '-v',
                 'activate',
                 '--mark-init',
-                distro.init,
+                distro.init.name,
                 '--mount',
                 disk,
             ],
@@ -387,10 +384,7 @@ def activate(args, cfg):
         time.sleep(5)
         catch_osd_errors(distro.conn, distro.conn.logger, args)
 
-        if distro.init == 'systemd':
-            system.enable_service(distro.conn, "ceph.target")
-        elif distro.init == 'sysvinit':
-            system.enable_service(distro.conn, "ceph")
+        distro.init.enable('ceph-osd')
 
         distro.conn.exit()
 

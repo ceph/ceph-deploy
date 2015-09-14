@@ -124,7 +124,10 @@ class SystemD(InitSystem):
 
     def enable(self, service, **kw):
         name = kw.pop('name', self.hostname)
-        for instance in ['{service}@{name}'.format(service=service, name=name), 'ceph.target']:
+        services = ['ceph.target']
+        if service != "ceph-osd":
+            services.append('{service}@{name}'.format(service=service, name=name))
+        for instance in services:
             self._run(
                 [
                     'systemctl',
