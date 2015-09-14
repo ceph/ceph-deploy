@@ -1,4 +1,3 @@
-from . import mon  # noqa
 from .install import install, mirror_install, repo_install  # noqa
 from .uninstall import uninstall  # noqa
 from ceph_deploy.util import pkg_managers, init_systems
