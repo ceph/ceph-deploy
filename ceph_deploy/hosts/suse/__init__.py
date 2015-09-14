@@ -3,7 +3,7 @@ from .install import install, mirror_install, repo_install  # noqa
 from .uninstall import uninstall  # noqa
 import logging
 
-from ceph_deploy.util import pkg_managers
+from ceph_deploy.util import pkg_managers, init_systems
 
 # Allow to set some information about this distro
 #
@@ -20,11 +20,11 @@ def choose_init(module):
 
     Returns the name of a init system (upstart, sysvinit ...).
     """
-    init_mapping = { '11' : 'sysvinit', # SLE_11
-        '12' : 'systemd',               # SLE_12
-        '13.1' : 'systemd',             # openSUSE_13.1
+    init_mapping = { '11' : init_systems.SysV, # SLE_11
+        '12' : init_systems.SystemD,               # SLE_12
+        '13.1' : init_systems.SystemD,             # openSUSE_13.1
         }
-    return init_mapping.get(release, 'systemd')
+    return init_mapping.get(release, init_systems.SystemD)(module)
 
 
 def get_packager(module):

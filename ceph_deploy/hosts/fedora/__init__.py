@@ -2,7 +2,7 @@ from . import mon  # noqa
 from ceph_deploy.hosts.centos.install import repo_install  # noqa
 from .install import install, mirror_install  # noqa
 from .uninstall import uninstall  # noqa
-from ceph_deploy.util import pkg_managers
+from ceph_deploy.util import pkg_managers, init_systems
 
 # Allow to set some information about this distro
 #
@@ -19,9 +19,9 @@ def choose_init(module):
     """
 
     if not module.conn.remote_module.path_exists("/usr/lib/systemd/system/ceph.target"):
-        return 'sysvinit'
+        return init_systems.SysV(module)
 
-    return 'systemd'
+    return init_systems.SystemD(module)
 
 def get_packager(module):
     if module.normalized_release.int_major >= 22:
