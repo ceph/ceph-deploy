@@ -59,30 +59,3 @@ def is_upstart(conn):
     if b'upstart' in result_string:
         return True
     return False
-
-
-def enable_service(conn, service='ceph'):
-    """
-    Enable a service on a remote host depending on the type of init system.
-    Obviously, this should be done for RHEL/Fedora/CentOS systems.
-
-    This function does not do any kind of detection.
-    """
-    if is_systemd(conn):
-        remoto.process.run(
-            conn,
-            [
-                'systemctl',
-                'enable',
-                '{service}'.format(service=service),
-            ]
-        )
-    else:
-        remoto.process.run(
-            conn,
-            [
-                'chkconfig',
-                '{service}'.format(service=service),
-                'on',
-            ]
-        )

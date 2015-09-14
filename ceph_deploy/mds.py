@@ -5,7 +5,6 @@ import os
 from ceph_deploy import conf
 from ceph_deploy import exc
 from ceph_deploy import hosts
-from ceph_deploy.util import system
 from ceph_deploy.lib import remoto
 from ceph_deploy.cliutil import priority
 
