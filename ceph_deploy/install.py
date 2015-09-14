@@ -124,7 +124,7 @@ def install(args):
         )
 
         components = detect_components(args, distro)
-        if distro.init == 'sysvinit' and args.cluster != 'ceph':
+        if distro.init.name == 'sysvinit' and args.cluster != 'ceph':
             LOG.error('refusing to install on host: %s, with custom cluster name: %s' % (
                     hostname,
                     args.cluster,
