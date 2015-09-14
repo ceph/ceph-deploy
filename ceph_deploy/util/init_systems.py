@@ -3,9 +3,11 @@ from ceph_deploy.lib import remoto
 
 SYSV_SERVICES = {
     'ceph-mon': 'mon',
-    'ceph-osd': 'osd',
-    'ceph-osd': 'osd',
     'ceph-mds': 'mds'
+}
+
+UPSTART_SERVICES = {
+    'ceph-radosgw': 'radosgw'
 }
 
 
@@ -50,25 +52,28 @@ class SysV(InitSystem):
 
     def start(self, service, **kw):
         cluster = kw.pop('cluster', 'ceph')
+        name = kw.pop('name', self.hostname)
+        init_script = 'ceph-radosgw' if service == 'ceph-radosgw' else 'ceph'
         self._run(
             [
                 self.service_exe,
-                'ceph',
+                init_script,
                 '-c',
                 '/etc/ceph/{cluster}.conf'.format(cluster=cluster),
                 'start',
-                '{service}.{hostname}'.format(
-                    service=SYSV_SERVICES[service],
-                    hostname=self.hostname
+                '{service}.{name}'.format(
+                    service=SYSV_SERVICES.get(service, service),
+                    name=name
                 )
             ]
         )
 
     def enable(self, service, **kw):
+        init_script = 'ceph-radosgw' if service == 'ceph-radosgw' else 'ceph'
         self._run(
             [
                 'chkconfig',
-                'ceph',
+                init_script,
                 'on'
             ]
         )
@@ -83,13 +88,16 @@ class Upstart(InitSystem):
 
     def start(self, service, **kw):
         cluster = kw.pop('cluster', 'ceph')
+        name = kw.pop('name', self.hostname)
         self._run(
             [
                 'initctl',
                 'emit',
-                '{service}'.format(service=service),
+                '{service}'.format(
+                    service=UPSTART_SERVICES.get(service, service)
+                ),
                 'cluster={cluster}'.format(cluster=cluster),
-                'id={hostname}'.format(hostname=self.hostname)
+                'id={name}'.format(name=name)
             ]
         )
 

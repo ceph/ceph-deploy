@@ -80,60 +80,10 @@ def create_rgw(distro, name, cluster, init):
         )
 
     conn.remote_module.touch_file(os.path.join(path, 'done'))
-    conn.remote_module.touch_file(os.path.join(path, init))
+    conn.remote_module.touch_file(os.path.join(path, init.name))
 
-    if init == 'upstart':
-        remoto.process.run(
-            conn,
-            [
-                'initctl',
-                'emit',
-                'radosgw',
-                'cluster={cluster}'.format(cluster=cluster),
-                'id={name}'.format(name=name),
-            ],
-            timeout=7
-        )
-    elif init == 'sysvinit':
-        remoto.process.run(
-            conn,
-            [
-                'service',
-                'ceph-radosgw',
-                'start',
-            ],
-            timeout=7
-        )
-        if distro.is_el:
-            system.enable_service(distro.conn, service='ceph-radosgw')
-    elif init == 'systemd':
-        remoto.process.run(
-            conn,
-            [
-                'systemctl',
-                'enable',
-                'ceph-radosgw@{name}'.format(name=name),
-            ],
-            timeout=7
-        )
-        remoto.process.run(
-            conn,
-            [
-                'systemctl',
-                'start',
-                'ceph-radosgw@{name}'.format(name=name),
-            ],
-            timeout=7
-        )
-        remoto.process.run(
-            conn,
-            [
-                'systemctl',
-                'enable',
-                'ceph.target',
-            ],
-            timeout=7
-        )
+    distro.init.start('ceph-radosgw', name=name, cluster=cluster)
+    distro.init.enable('ceph-radosgw')
 
 
 def rgw_create(args):
