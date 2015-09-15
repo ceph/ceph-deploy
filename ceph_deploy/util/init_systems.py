@@ -1,6 +1,10 @@
 from ceph_deploy.lib import remoto
 
-
+# Provide mappings/translations for services depending
+# on Init system.  All services coming into the classes
+# here should be one of ceph-mon, ceph-osd, ceph-mds, or
+# ceph-radosgw. It's then up to the code here to Do The
+# Right Thing.
 SYSV_SERVICES = {
     'ceph-mon': 'mon',
     'ceph-mds': 'mds'
