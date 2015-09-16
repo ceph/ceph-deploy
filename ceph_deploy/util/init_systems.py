@@ -54,26 +54,46 @@ class SysV(InitSystem):
         super(SysV, self).__init__(remote_conn)
         self.service_exe = self.remote_conn.remote_module.which_service()
 
+    def _get_init_script(self, service):
+        return 'ceph-radosgw' if service == 'ceph-radosgw' else 'ceph'
+
+    def _build_service_command(
+        self, service, action, daemon_name, cluster_name=None
+    ):
+        init_script = self._get_init_script(service)
+        cmd = [
+            self.service_exe,
+            init_script,
+        ]
+        if action == 'start' and init_script == 'ceph':
+            cmd.extend(
+                [
+                    '-c',
+                    '/etc/ceph/{cluster}.conf'.format(cluster=cluster_name),
+                ]
+            )
+        cmd.append('{action}'.format(action=action))
+        if init_script == 'ceph':
+            cmd.extend(
+                [
+                    '{service}.{name}'.format(
+                        service=SYSV_SERVICES.get(service, service),
+                        name=daemon_name
+                    )
+                ]
+            )
+        return cmd
+
     def start(self, service, **kw):
         cluster = kw.pop('cluster', 'ceph')
         name = kw.pop('name', self.hostname)
-        init_script = 'ceph-radosgw' if service == 'ceph-radosgw' else 'ceph'
-        self._run(
-            [
-                self.service_exe,
-                init_script,
-                '-c',
-                '/etc/ceph/{cluster}.conf'.format(cluster=cluster),
-                'start',
-                '{service}.{name}'.format(
-                    service=SYSV_SERVICES.get(service, service),
-                    name=name
-                )
-            ]
+        cmd = self._build_service_command(
+                service, 'start', name, cluster_name=cluster
         )
+        self._run(cmd)
 
     def enable(self, service, **kw):
-        init_script = 'ceph-radosgw' if service == 'ceph-radosgw' else 'ceph'
+        init_script = self._get_init_script(service)
         self._run(
             [
                 'chkconfig',
