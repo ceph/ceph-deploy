@@ -30,14 +30,18 @@ def install(distro, version_kind, version, adjust_repos, **kw):
         distro.packager.add_repo_gpg_key(gpg.url(key, protocol=protocol))
 
         if version_kind == 'stable':
-            url = 'http://download.ceph.com/debian-{version}/'.format(
+            url = '{protocol}://download.ceph.com/debian-{version}/'.format(
+                protocol=protocol,
                 version=version,
                 )
         elif version_kind == 'testing':
-            url = 'http://download.ceph.com/debian-testing/'
+            url = '{protocol}://download.ceph.com/debian-testing/'.format(
+                protocol=protocol,
+                )
         elif version_kind in ['dev', 'dev_commit']:
-            url = 'http://gitbuilder.ceph.com/ceph-deb-{codename}-{machine}-basic/{sub}/{version}'.format(
+            url = '{protocol}://gitbuilder.ceph.com/ceph-deb-{codename}-{machine}-basic/{sub}/{version}'.format(
                 codename=codename,
+                protocol=protocol,
                 machine=machine,
                 sub='ref' if version_kind == 'dev' else 'sha1',
                 version=version,
