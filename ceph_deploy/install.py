@@ -293,12 +293,15 @@ def install_repo(args):
 
         custom_repo(distro, args, cd_conf, rlogger, install_ceph=False)
 
-
-def uninstall(args):
+def remove(args, purge):
     LOG.info('note that some dependencies *will not* be removed because they can cause issues with qemu-kvm')
     LOG.info('like: librbd1 and librados2')
+    remove_action = 'Uninstalling'
+    if purge:
+        remove_action = 'Purging'
     LOG.debug(
-        'Uninstalling on cluster %s hosts %s',
+        '%s on cluster %s hosts %s',
+        remove_action,
         args.cluster,
         ' '.join(args.host),
         )
@@ -312,35 +315,15 @@ def uninstall(args):
             use_rhceph=True)
         LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
         rlogger = logging.getLogger(hostname)
-        rlogger.info('uninstalling Ceph on %s' % hostname)
-        distro.uninstall(distro)
+        rlogger.info('%s Ceph on %s' % (remove_action, hostname))
+        distro.uninstall(distro, purge=purge)
         distro.conn.exit()
 
+def uninstall(args):
+    remove(args, False)
 
 def purge(args):
-    LOG.info('note that some dependencies *will not* be removed because they can cause issues with qemu-kvm')
-    LOG.info('like: librbd1 and librados2')
-
-    LOG.debug(
-        'Purging from cluster %s hosts %s',
-        args.cluster,
-        ' '.join(args.host),
-        )
-
-    for hostname in args.host:
-        LOG.debug('Detecting platform for host %s ...', hostname)
-
-        distro = hosts.get(
-            hostname,
-            username=args.username,
-            use_rhceph=True
-        )
-        LOG.info('Distro info: %s %s %s', distro.name, distro.release, distro.codename)
-        rlogger = logging.getLogger(hostname)
-        rlogger.info('purging host ... %s' % hostname)
-        distro.uninstall(distro, purge=True)
-        distro.conn.exit()
-
+    remove(args, True)
 
 def purgedata(args):
     LOG.debug(
