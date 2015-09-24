@@ -1,6 +1,9 @@
 import sys
 import py.test
-from mock import Mock, patch, call
+from mock import Mock, patch
+# the below import of mock again is to workaround a py.test issue:
+# https://github.com/pytest-dev/pytest/issues/1035
+import mock
 from ceph_deploy import mon
 from ceph_deploy.tests import fakes
 from ceph_deploy.hosts.common import mon_create
@@ -50,7 +53,7 @@ class TestCreateMon(object):
             mon_create(self.distro, args, Mock(), 'hostname')
 
         result = self.distro.conn.remote_module.create_mon_path.call_args_list[-1]
-        assert result == call('/var/lib/ceph/mon/cluster-hostname')
+        assert result ==mock.call('/var/lib/ceph/mon/cluster-hostname')
 
     def test_write_keyring(self):
         self.distro.sudo_conn.modules.os.path.exists = Mock(
@@ -99,10 +102,10 @@ class TestCreateMon(object):
                     'name3:1.2.3.6', 'name4:localhost.localdomain')):
             hosts.get(name, host)
 
-        expected = [call.get('name1', 'name1'),
-                    call.get('name2', 'name2.localdomain'),
-                    call.get('name3', '1.2.3.6'),
-                    call.get('name4', 'localhost.localdomain')]
+        expected = [mock.call.get('name1', 'name1'),
+                   mock.call.get('name2', 'name2.localdomain'),
+                   mock.call.get('name3', '1.2.3.6'),
+                   mock.call.get('name4', 'localhost.localdomain')]
         result = hosts.mock_calls
         assert result == expected
 
