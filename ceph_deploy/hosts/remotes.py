@@ -65,17 +65,25 @@ def set_apt_priority(fqdn, path='/etc/apt/preferences.d/ceph.pref'):
 
 
 def set_repo_priority(sections, path='/etc/yum.repos.d/ceph.repo', priority='1'):
+    set_repo_key_value(sections, path, 'priority', priority)
+
+
+def set_repo_gpgcheck(sections, path='/etc/yum.repos.d/ceph.repo', gpgcheck='1'):
+    set_repo_key_value(sections, path, 'gpgcheck', gpgcheck)
+
+
+def set_repo_key_value(sections, path, key, value):
     Config = ConfigParser.ConfigParser()
     Config.read(path)
     Config.sections()
     for section in sections:
         try:
-            Config.set(section, 'priority', priority)
+            Config.set(section, key, value)
         except ConfigParser.NoSectionError:
             # Emperor versions of Ceph used all lowercase sections
             # so lets just try again for the section that failed, maybe
             # we are able to find it if it is lower
-            Config.set(section.lower(), 'priority', priority)
+            Config.set(section.lower(), key, value)
 
     with open(path, 'wb') as fout:
         Config.write(fout)
