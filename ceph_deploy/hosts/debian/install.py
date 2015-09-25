@@ -36,11 +36,12 @@ def install(distro, version_kind, version, adjust_repos, **kw):
         elif version_kind == 'testing':
             url = 'http://download.ceph.com/debian-testing/'
         elif version_kind in ['dev', 'dev_commit']:
-            url = 'http://gitbuilder.ceph.com/ceph-deb-{codename}-{machine}-basic/{sub}/{version}'.format(
+            url = 'http://{gitbuilder_host}/ceph-deb-{codename}-{machine}-basic/{sub}/{version}'.format(
                 codename=codename,
                 machine=machine,
                 sub='ref' if version_kind == 'dev' else 'sha1',
                 version=version,
+                gitbuilder_host=kw['gitbuilder_host'],
                 )
         else:
             raise RuntimeError('Unknown version kind: %r' % version_kind)

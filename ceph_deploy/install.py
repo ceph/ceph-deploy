@@ -183,6 +183,8 @@ def install(args):
                 version,
                 args.adjust_repos,
                 components=components,
+                gitbuilder_host=args.gitbuilder_host,
+                no_check_packages_signatures=args.no_check_packages_signatures,
             )
 
         # Check the ceph version we just installed
@@ -592,11 +594,26 @@ def make(parser):
     )
 
     parser.add_argument(
+        '--gitbuilder-host',
+        nargs='?',
+        dest='gitbuilder_host',
+        default='gitbuilder.ceph.com',
+        help='specify a gitbuilder host that mirrors/contains Ceph packages,\
+                to use with --dev or --dev-commit exclusively.',
+    )
+
+    parser.add_argument(
         '--gpg-url',
         nargs='?',
         dest='gpg_url',
         help='specify a GPG key URL to be used with custom repos\
                 (defaults to ceph.com)'
+    )
+
+    repo.add_argument(
+        '--no-check-packages-signatures',
+        action='store_true',
+        help='do not check the package signatures',
     )
 
     parser.set_defaults(

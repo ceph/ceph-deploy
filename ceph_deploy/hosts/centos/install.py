@@ -89,11 +89,13 @@ def install(distro, version_kind, version, adjust_repos, **kw):
             logger.info('repo file will be created manually')
             mirror_install(
                 distro,
-                'http://gitbuilder.ceph.com/ceph-rpm-centos{release}-{machine}-basic/{sub}/{version}/'.format(
+                'http://{gitbuilder_host}/ceph-rpm-centos{release}-{machine}-basic/{sub}/{version}/'.format(
                     release=release.split(".", 1)[0],
                     machine=machine,
                     sub='ref' if version_kind == 'dev' else 'sha1',
-                    version=version),
+                    version=version,
+                    gitbuilder_host=kw['gitbuilder_host'],
+                ),
                 gpg.url(key),
                 adjust_repos=True,
                 extra_installs=False
@@ -105,6 +107,10 @@ def install(distro, version_kind, version, adjust_repos, **kw):
         # set the right priority
         logger.warning('ensuring that /etc/yum.repos.d/ceph.repo contains a high priority')
         distro.conn.remote_module.set_repo_priority(['Ceph', 'Ceph-noarch', 'ceph-source'])
+        if kw['no_check_packages_signatures']:
+            distro.conn.remote_module.set_repo_gpgcheck(['Ceph', 'Ceph-noarch', 'ceph-source'],
+                                                        '/etc/yum.repos.d/ceph.repo',
+                                                        '0')
         logger.warning('altered ceph.repo priorities to contain: priority=1')
 
     if packages:
