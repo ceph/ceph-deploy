@@ -183,6 +183,7 @@ def install(args):
                 version,
                 args.adjust_repos,
                 components=components,
+                no_check_packages_signatures=args.no_check_packages_signatures,
             )
 
         # Check the ceph version we just installed
@@ -597,6 +598,12 @@ def make(parser):
         dest='gpg_url',
         help='specify a GPG key URL to be used with custom repos\
                 (defaults to ceph.com)'
+    )
+
+    parser.add_argument(
+        '--no-check-packages-signatures',
+        action='store_true',
+        help='do not check the package signatures',
     )
 
     parser.set_defaults(
