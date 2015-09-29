@@ -57,6 +57,38 @@ class TestParserDisk(object):
         out, err = capsys.readouterr()
         assert 'usage: ceph-deploy disk prepare' in out
 
+    def test_disk_prepare_disk(self):
+        args = self.parser.parse_args('disk prepare host1:/dev/sdb'.split())
+        assert args.disk[0][1] == '/dev/sdb'
+
+    def test_disk_prepare_disk_short(self):
+        args = self.parser.parse_args('disk prepare host1:sdb'.split())
+        assert args.disk[0][1] == '/dev/sdb'
+
+    def test_disk_prepare_disk_dquote(self):
+        args = self.parser.parse_args('disk prepare host1:"/dev/disk/by-path/pci-0000:00:1f.2-ata-1.0"'.split())
+        assert args.disk[0][1] == '/dev/disk/by-path/pci-0000:00:1f.2-ata-1.0'
+
+    def test_disk_prepare_disk_squote(self):
+        args = self.parser.parse_args("disk prepare host1:'/dev/disk/by-path/pci-0000:00:1f.2-ata-1.0'".split())
+        assert args.disk[0][1] == '/dev/disk/by-path/pci-0000:00:1f.2-ata-1.0'
+
+    def test_disk_prepare_journal(self):
+        args = self.parser.parse_args('disk prepare host1:/dev/sdb:/dev/sdc'.split())
+        assert args.disk[0][2] == '/dev/sdc'
+
+    def test_disk_prepare_journal_short(self):
+        args = self.parser.parse_args('disk prepare host1:sdb:sdc'.split())
+        assert args.disk[0][2] == '/dev/sdc'
+
+    def test_disk_prepare_journal_dquote(self):
+        args = self.parser.parse_args('disk prepare host1:"/dev/disk/by-path/pci-0000:00:1f.2-ata-1.0":"/dev/disk/by-path/pci-0000:00:1f.2-ata-2.0"'.split())
+        assert args.disk[0][2] == '/dev/disk/by-path/pci-0000:00:1f.2-ata-2.0'
+
+    def test_disk_prepare_journal_squote(self):
+        args = self.parser.parse_args("disk prepare host1:'/dev/disk/by-path/pci-0000:00:1f.2-ata-1.0':'/dev/disk/by-path/pci-0000:00:1f.2-ata-2.0'".split())
+        assert args.disk[0][2] == '/dev/disk/by-path/pci-0000:00:1f.2-ata-2.0'
+
     def test_disk_prepare_zap_default_false(self):
         args = self.parser.parse_args('disk prepare host1:sdb'.split())
         assert args.zap_disk is False
