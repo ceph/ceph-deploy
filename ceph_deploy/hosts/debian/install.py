@@ -20,7 +20,7 @@ def install(distro, version_kind, version, adjust_repos, **kw):
     else:
         key = 'autobuild'
 
-    distro.packager.install('ca-certificates')
+    distro.packager.install(['ca-certificates', 'apt-transport-https'])
 
     if adjust_repos:
         # Wheezy does not like the git.ceph.com SSL cert
