@@ -39,9 +39,8 @@ def install(distro, version_kind, version, adjust_repos, **kw):
                 protocol=protocol,
                 )
         elif version_kind in ['dev', 'dev_commit']:
-            url = '{protocol}://gitbuilder.ceph.com/ceph-deb-{codename}-{machine}-basic/{sub}/{version}'.format(
+            url = 'http://gitbuilder.ceph.com/ceph-deb-{codename}-{machine}-basic/{sub}/{version}'.format(
                 codename=codename,
-                protocol=protocol,
                 machine=machine,
                 sub='ref' if version_kind == 'dev' else 'sha1',
                 version=version,
