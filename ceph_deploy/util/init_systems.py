@@ -23,7 +23,13 @@ class InitSystem(object):
     def __init__(self, remote_conn):
         self.remote_info = remote_conn
         self.remote_conn = remote_conn.conn
-        self.hostname = self.remote_conn.remote_module.shortname()
+        self._hostname = None
+
+    @property
+    def hostname(self):
+        if not self._hostname:
+            self._hostname = self.remote_conn.remote_module.shortname()
+        return self._hostname
 
     def _run(self, cmd, **kw):
         if 'timeout' not in kw:
@@ -52,7 +58,13 @@ class SysV(InitSystem):
 
     def __init__(self, remote_conn):
         super(SysV, self).__init__(remote_conn)
-        self.service_exe = self.remote_conn.remote_module.which_service()
+        self._service_exe = None
+
+    @property
+    def service_exe(self):
+        if not self._service_exe:
+            self._service_exe = self.remote_conn.remote_module.which_service()
+        return self._service_exe
 
     def _get_init_script(self, service):
         return 'ceph-radosgw' if service == 'ceph-radosgw' else 'ceph'
