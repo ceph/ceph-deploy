@@ -42,16 +42,6 @@ def create_osd(conn, cluster, key):
         logger.warning('osd keyring does not exist yet, creating one')
         conn.remote_module.write_keyring(path, key)
 
-    return remoto.process.run(
-        conn,
-        [
-            'udevadm',
-            'trigger',
-            '--subsystem-match=block',
-            '--action=add',
-        ],
-    )
-
 
 def osd_tree(conn, cluster):
     """
@@ -240,16 +230,6 @@ def prepare_disk(
             system.enable_service(conn, "ceph.target")
         elif init == 'sysvinit':
             system.enable_service(conn, "ceph")
-        
-        return remoto.process.run(
-            conn,
-            [
-                'udevadm',
-                'trigger',
-                '--subsystem-match=block',
-                '--action=add',
-            ],
-        )
 
 
 def exceeds_max_osds(args, reasonable=20):
