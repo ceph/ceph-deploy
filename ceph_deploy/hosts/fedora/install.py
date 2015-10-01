@@ -66,14 +66,15 @@ def install(distro, version_kind, version, adjust_repos, **kw):
             logger.info('repo file will be created manually')
             mirror_install(
                 distro,
-                'http://gitbuilder.ceph.com/ceph-rpm-fc{release}-{machine}-basic/{sub}/{version}/'.format(
+                'http://{gitbuilder_host}/ceph-rpm-fc{release}-{machine}-basic/{sub}/{version}/'.format(
                     release=release.split(".", 1)[0],
                     machine=machine,
                     sub='ref' if version_kind == 'dev' else 'sha1',
                     version=version),
                 gpg.url(key),
                 adjust_repos=True,
-                extra_installs=False
+                extra_installs=False,
+                gitbuilder_host=kw['gitbuilder_host'],
             )
 
         else:

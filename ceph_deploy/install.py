@@ -183,6 +183,7 @@ def install(args):
                 version,
                 args.adjust_repos,
                 components=components,
+                gitbuilder_host=args.gitbuilder_host,
             )
 
         # Check the ceph version we just installed
@@ -572,6 +573,15 @@ def make(parser):
         nargs='?',
         dest='repo_url',
         help='specify a repo URL that mirrors/contains Ceph packages',
+    )
+
+    parser.add_argument(
+        '--gitbuilder-host',
+        nargs='?',
+        dest='gitbuilder_host',
+        default='gitbuilder.ceph.com',
+        help='specify a gitbuilder host that mirrors/contains Ceph packages,\
+                to use with --dev or --dev-commit exclusively.',
     )
 
     parser.add_argument(
