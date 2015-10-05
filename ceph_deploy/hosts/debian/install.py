@@ -27,7 +27,8 @@ def install(distro, version_kind, version, adjust_repos, **kw):
         protocol = 'https'
         if codename == 'wheezy':
             protocol = 'http'
-        distro.packager.add_repo_gpg_key(gpg.url(key, protocol=protocol))
+        if not kw['no_check_packages_signatures']:
+            distro.packager.add_repo_gpg_key(gpg.url(key, protocol=protocol))
 
         if version_kind == 'stable':
             url = '{protocol}://download.ceph.com/debian-{version}/'.format(
@@ -57,9 +58,12 @@ def install(distro, version_kind, version, adjust_repos, **kw):
 
     # TODO this does not downgrade -- should it?
     if packages:
+        extra_install_flags=['-o', 'Dpkg::Options::=--force-confnew']
+        if kw['no_check_packages_signatures']:
+            extra_install_flags.append('--force-yes')
         distro.packager.install(
             packages,
-            extra_install_flags=['-o', 'Dpkg::Options::=--force-confnew']
+            extra_install_flags=extra_install_flags
         )
 
 
