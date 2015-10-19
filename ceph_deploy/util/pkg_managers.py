@@ -235,10 +235,21 @@ class Apt(PackageManager):
         cmd = ['apt-key', 'add', gpg_file]
         self._run(cmd)
 
+    def disable_signatures_check(self):
+        self.remote_conn.logger.info(
+            "Append APT::Get::AllowUnauthenticated 1 to /etc/apt/apt.conf"
+        )
+        self.remote_conn.remote_module.append_to_file(
+            '/etc/apt/apt.conf',
+            'APT::Get::AllowUnauthenticated 1;',
+        )
+
     def add_repo(self, name, url, **kw):
         gpg_url = kw.pop('gpg_url', None)
         if gpg_url:
             self.add_repo_gpg_key(gpg_url)
+        else:
+            self.disable_signatures_check()
 
         safe_filename = '%s.list' % name.replace(' ', '-')
         mode = 0644
