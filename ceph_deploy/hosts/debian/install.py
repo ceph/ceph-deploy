@@ -23,7 +23,7 @@ def install(distro, version_kind, version, adjust_repos, **kw):
     distro.packager.install(['ca-certificates', 'apt-transport-https'])
 
     if adjust_repos:
-        # Wheezy does not like the git.ceph.com SSL cert
+        # Wheezy does not like the download.ceph.com SSL cert
         protocol = 'https'
         if codename == 'wheezy':
             protocol = 'http'

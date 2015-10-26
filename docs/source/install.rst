@@ -133,7 +133,7 @@ trying to compose the right URL for the release being installed.
 It is strongly suggested that both flags be provided. However, the
 ``--gpg-url`` will default to the current one in the ceph repository::
 
-    https://git.ceph.com/?p=ceph.git;a=blob_plain;f=keys/release.asc
+    https://download.ceph.com/keys/release.asc
 
 .. versionadded:: 1.3.3
 
@@ -150,7 +150,7 @@ top of the directory that holds the repository files.
 That file is used by Ceph as the key for its signed packages and it is usually
 retrieved from::
 
-        https://git.ceph.com/?p=ceph.git;a=blob_plain;f=keys/release.asc
+        https://download.ceph.com/keys/release.asc
 
 This is how it would look the process to get Ceph installed from a local
 repository in an admin host::
