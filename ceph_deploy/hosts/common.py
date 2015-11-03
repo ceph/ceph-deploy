@@ -55,6 +55,7 @@ def mon_create(distro, args, monitor_keyring, hostname):
             user_args = user_args + [ '--setuser', str(uid) ]
         if gid != 0:
             user_args = user_args + [ '--setgroup', str(gid) ]
+
         remoto.process.run(
             distro.conn,
             [
@@ -133,6 +134,7 @@ def mon_add(distro, args, monitor_keyring):
             user_args = user_args + [ '--setuser', str(uid) ]
         if gid != 0:
             user_args = user_args + [ '--setgroup', str(gid) ]
+
         remoto.process.run(
             distro.conn,
             [
@@ -156,12 +158,14 @@ def mon_add(distro, args, monitor_keyring):
     distro.conn.remote_module.create_init_path(init_path, uid, gid)
 
     # start the mon using the address
+    pid_location = "/var/run/ceph/mon.%s.pid" % hostname
     remoto.process.run(
         distro.conn,
         [
             'ceph-mon',
             '-i',
             hostname,
+            '--pid-file', pid_location,
             '--public-addr',
             args.address,
         ],
