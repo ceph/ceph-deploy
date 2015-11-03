@@ -55,6 +55,8 @@ def mon_create(distro, args, monitor_keyring, hostname):
             user_args = user_args + [ '--setuser', str(uid) ]
         if gid != 0:
             user_args = user_args + [ '--setgroup', str(gid) ]
+
+        pid_location = "/var/run/ceph/mon.%s.pid" % hostname
         remoto.process.run(
             distro.conn,
             [
@@ -62,6 +64,7 @@ def mon_create(distro, args, monitor_keyring, hostname):
                 '--cluster', args.cluster,
                 '--mkfs',
                 '-i', hostname,
+                '--pid-file', pid_location,
                 '--keyring', keyring,
             ] + user_args
         )
@@ -133,6 +136,8 @@ def mon_add(distro, args, monitor_keyring):
             user_args = user_args + [ '--setuser', str(uid) ]
         if gid != 0:
             user_args = user_args + [ '--setgroup', str(gid) ]
+
+        pid_location = "/var/run/ceph/mon.%s.pid" % hostname
         remoto.process.run(
             distro.conn,
             [
@@ -140,6 +145,7 @@ def mon_add(distro, args, monitor_keyring):
                 '--cluster', args.cluster,
                 '--mkfs',
                 '-i', hostname,
+                '--pid-file', pid_location,
                 '--monmap',
                 monmap_path,
                 '--keyring', keyring,
