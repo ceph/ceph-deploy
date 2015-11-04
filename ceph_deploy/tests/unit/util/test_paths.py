@@ -47,4 +47,4 @@ class TestMonPaths(object):
 
     def test_gpg_url_http(self):
         result = paths.gpg.url('release', protocol="http")
-        assert result == "http://download.ceph.com/release.asc"
+        assert result == "http://download.ceph.com/keys/release.asc"
