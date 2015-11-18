@@ -365,10 +365,11 @@ def activate(args, cfg):
         LOG.debug('activating host %s disk %s', hostname, disk)
         LOG.debug('will use init type: %s', distro.init)
 
+        ceph_disk_executable = system.executable_path(distro.conn, 'ceph-disk')
         remoto.process.run(
             distro.conn,
             [
-                'ceph-disk',
+                ceph_disk_executable,
                 '-v',
                 'activate',
                 '--mark-init',
