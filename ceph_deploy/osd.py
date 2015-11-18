@@ -107,8 +107,9 @@ def osd_status_check(conn, cluster):
     Note how the booleans are actually strings, so we need to take that into
     account and fix it before returning the dictionary. Issue #8108
     """
+    ceph_executable = system.executable_path(conn, 'ceph')
     command = [
-        'ceph',
+        ceph_executable,
         '--cluster={cluster}'.format(cluster=cluster),
         'osd',
         'stat',
