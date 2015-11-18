@@ -193,7 +193,7 @@ def prepare_disk(
     Run on osd node, prepares a data disk for use.
     """
     
-    ceph_disk_executable = system.exectuable_path(conn, 'ceph-disk')
+    ceph_disk_executable = system.executable_path(conn, 'ceph-disk')
     args = [
         ceph_disk_executable,
         '-v',
