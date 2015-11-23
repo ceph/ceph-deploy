@@ -1,5 +1,6 @@
 import logging
 import sys
+import datetime
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 
@@ -16,8 +17,8 @@ RESET_SEQ = "\033[0m"
 COLOR_SEQ = "\033[1;%dm"
 BOLD_SEQ = "\033[1m"
 
-BASE_COLOR_FORMAT = "[$BOLD%(name)s$RESET][%(color_levelname)-17s] %(message)s"
-BASE_FORMAT = "[%(name)s][%(levelname)-6s] %(message)s"
+BASE_COLOR_FORMAT = "[%(timestamp)s][$BOLD%(name)s$RESET][%(color_levelname)-17s] %(message)s"
+BASE_FORMAT = "[%(timestamp)s][%(name)s][%(levelname)-6s] %(message)s"
 
 
 def supports_color():
@@ -53,6 +54,7 @@ class ColoredFormatter(logging.Formatter):
         truncated_level = record.levelname[:6]
         levelname_color = COLOR_SEQ % (30 + COLORS[levelname]) + truncated_level + RESET_SEQ
         record.color_levelname = levelname_color
+        record.timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
         return logging.Formatter.format(self, record)
 
 
