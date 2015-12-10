@@ -7,7 +7,7 @@ import time
 from ceph_deploy import conf, exc, admin
 from ceph_deploy.cliutil import priority
 from ceph_deploy.util.help_formatters import ToggleRawTextHelpFormatter
-from ceph_deploy.util import paths, net, files, packages
+from ceph_deploy.util import paths, net, files, packages, system
 from ceph_deploy.lib import remoto
 from ceph_deploy.new import new_mon_keyring
 from ceph_deploy import hosts
@@ -344,6 +344,14 @@ def destroy_mon(conn, cluster, hostname):
                 'status',
                 'mon.{hostname}'.format(hostname=hostname),
             ]
+        elif system.is_systemd(conn):
+            status_args = [
+                'systemctl',
+                'stop',
+                'ceph-mon@{hostname}.service'.format(hostname=hostname),
+            ]
+        else:
+            raise RuntimeError('unsupported init system detected, cannot continue')
 
         while retries:
             conn.logger.info('polling the daemon to verify it stopped')
