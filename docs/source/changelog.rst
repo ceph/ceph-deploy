@@ -4,6 +4,13 @@ Changelog
 1.5
 ---
 
+1.5.30
+^^^^^^
+11-Dec-2015
+
+* Default to the "infernalis" release.
+* Fix an issue when trying to destroy/stop monitors on systemd servers
+
 1.5.29
 ^^^^^^
 2-Dec-2015
