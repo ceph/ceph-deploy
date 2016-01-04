@@ -4,6 +4,13 @@ Changelog
 1.5
 ---
 
+1.5.31
+^^^^^^
+04-Jan-2016
+
+* Use the new remoto version (0.0.27) that fixes an error when dealing with
+  remote output.
+
 1.5.30
 ^^^^^^
 11-Dec-2015
