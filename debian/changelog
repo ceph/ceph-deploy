@@ -1,3 +1,9 @@
+ceph-deploy (1.5.31) stable; urgency=low
+
+  * New upstream release
+
+ -- Alfredo Deza <adeza@redhat.com>  Mon, 04 Jan 2016 18:46:26 +0000
+
 ceph-deploy (1.5.30) stable; urgency=low
 
   * New upstream release
