@@ -427,10 +427,11 @@ def disk_zap(args):
         if distro.normalized_name.startswith(('centos', 'red')):
             LOG.info('calling partx on zapped device %s', disk)
             LOG.info('re-reading known partitions will display errors')
+            partx_executable = system.executable_path(distro.conn, 'partx')
             remoto.process.run(
                 distro.conn,
                 [
-                    'partx',
+                    partx_executable,
                     '-a',
                     disk,
                 ],
@@ -438,10 +439,11 @@ def disk_zap(args):
 
         else:
             LOG.debug('Calling partprobe on zapped device %s', disk)
+            partprobe_executable = system.executable_path(distro.conn, 'partprobe')
             remoto.process.run(
                 distro.conn,
                 [
-                    'partprobe',
+                    partprobe_executable,
                     disk,
                 ],
             )
