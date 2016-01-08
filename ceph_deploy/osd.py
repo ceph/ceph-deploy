@@ -107,8 +107,9 @@ def osd_status_check(conn, cluster):
     Note how the booleans are actually strings, so we need to take that into
     account and fix it before returning the dictionary. Issue #8108
     """
+    ceph_executable = system.executable_path(conn, 'ceph')
     command = [
-        'ceph',
+        ceph_executable,
         '--cluster={cluster}'.format(cluster=cluster),
         'osd',
         'stat',
@@ -191,8 +192,9 @@ def prepare_disk(
     """
     Run on osd node, prepares a data disk for use.
     """
+    ceph_disk_executable = system.executable_path(conn, 'ceph-disk')
     args = [
-        'ceph-disk',
+        ceph_disk_executable,
         '-v',
         'prepare',
         ]
@@ -362,11 +364,12 @@ def activate(args, cfg):
 
         LOG.debug('activating host %s disk %s', hostname, disk)
         LOG.debug('will use init type: %s', distro.init)
-
+        
+        ceph_disk_executable = system.executable_path(distro.conn, 'ceph-disk')
         remoto.process.run(
             distro.conn,
             [
-                'ceph-disk',
+                ceph_disk_executable,
                 '-v',
                 'activate',
                 '--mark-init',
