@@ -78,7 +78,7 @@ This means, for example, that installing ``ceph-deploy`` from
 http://ceph.com/rpm-giant will install the same version as from
 http://ceph.com/rpm-firefly or http://ceph.com/rpm-testing.
 
-bootstraping
+bootstrapping
 ------------
 To get the source tree ready for use, run this once::
 
