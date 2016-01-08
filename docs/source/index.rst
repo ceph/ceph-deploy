@@ -79,7 +79,7 @@ http://ceph.com/rpm-giant will install the same version as from
 http://ceph.com/rpm-firefly or http://ceph.com/rpm-testing.
 
 bootstrapping
-------------
+-------------
 To get the source tree ready for use, run this once::
 
   ./bootstrap
