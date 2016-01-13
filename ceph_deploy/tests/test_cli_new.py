@@ -68,4 +68,3 @@ def test_defaults(newcfg):
     assert cfg.get('global', 'auth cluster required') == 'cephx'
     assert cfg.get('global', 'auth service required') == 'cephx'
     assert cfg.get('global', 'auth client required') == 'cephx'
-    assert cfg.get('global', 'filestore_xattr_use_omap') == 'true'
