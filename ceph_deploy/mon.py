@@ -328,7 +328,7 @@ def destroy_mon(conn, cluster, hostname):
         )
 
         # stop
-        if conn.remote_module.path_exists(os.path.join(path, 'upstart')):
+        if conn.remote_module.path_exists(os.path.join(path, 'upstart')) or system.is_upstart(conn):
             status_args = [
                 'initctl',
                 'status',
@@ -351,7 +351,7 @@ def destroy_mon(conn, cluster, hostname):
                 'ceph-mon@{hostname}.service'.format(hostname=hostname),
             ]
         else:
-            raise RuntimeError('unsupported init system detected, cannot continue')
+            raise RuntimeError('could not detect a supported init system, cannot continue')
 
         while retries:
             conn.logger.info('polling the daemon to verify it stopped')

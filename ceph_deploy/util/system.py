@@ -31,6 +31,36 @@ def is_systemd(conn):
     )
 
 
+def is_upstart(conn):
+    """
+    This helper should only used as a fallback (last resort) as it is not
+    guaranteed that it will be absolutely correct.
+    """
+    # it may be possible that we may be systemd and the caller never checked
+    # before so lets do that
+    if is_systemd(conn):
+        return False
+
+    # get the initctl executable, if it doesn't exist we can't proceed so we
+    # are probably not upstart
+    initctl = conn.remote_module.which('initctl')
+    if not initctl:
+        return False
+
+    # finally, try and get output from initctl that might hint this is an upstart
+    # system. On a Ubuntu 14.04.2 system this would look like:
+    # $ initctl version
+    # init (upstart 1.12.1)
+    stdout, stderr, _ = remoto.process.check(
+        conn,
+        [initctl, 'version'],
+    )
+    result_string = ' '.join(stdout)
+    if 'upstart' in result_string:
+        return True
+    return False
+
+
 def enable_service(conn, service='ceph'):
     """
     Enable a service on a remote host depending on the type of init system.
