@@ -17,6 +17,12 @@ def install(args):
         )
         rlogger = logging.getLogger(hostname)
         rlogger.info('installing packages on %s' % hostname)
+        # Do not timeout on package install. If you we this command to install
+        # e.g. ceph-selinux or some other package with long post script we can
+        # easily timeout in the 5 minutes that we use as a default timeout,
+        # turning off the timeout completely for the time we run the command
+        # should make this much more safe.
+        distro.conn.global_timeout = None
         distro.packager.install(packages)
         distro.conn.exit()
 
@@ -34,6 +40,12 @@ def remove(args):
 
         rlogger = logging.getLogger(hostname)
         rlogger.info('removing packages from %s' % hostname)
+        # Do not timeout on package removal. If we use this command to remove
+        # e.g. ceph-selinux or some other package with long post script we can
+        # easily timeout in the 5 minutes that we use as a default timeout,
+        # turning off the timeout completely for the time we run the command
+        # should make this much more safe.
+        distro.conn.global_timeout = None
         distro.packager.remove(packages)
         distro.conn.exit()
 
