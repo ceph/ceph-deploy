@@ -18,12 +18,15 @@ def choose_init(module):
 
     Returns the name of a init system (upstart, sysvinit ...).
     """
+    # Upstart checks first because when installing ceph, the
+    # `/lib/systemd/system/ceph.target` file may be created, fooling this
+    # detection mechanism.
+    if is_upstart(module.conn):
+        return 'upstart'
+
     if is_systemd(module.conn) or module.conn.remote_module.path_exists(
             "/lib/systemd/system/ceph.target"):
         return 'systemd'
-
-    if is_upstart(module.conn):
-        return 'upstart'
 
     return 'sysvinit'
 
