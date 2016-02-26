@@ -306,7 +306,15 @@ class Zypper(PackageManager):
                 extra_flags = [extra_flags]
             cmd.extend(extra_flags)
         cmd.extend(packages)
-        return self._run(cmd)
+        stdout, stderr, exitrc = remoto.process.check(
+            self.remote_conn,
+            cmd,
+            **kw
+        )
+        # exitrc is 104 when package(s) not installed.
+        if not exitrc in [0, 104]:
+            raise RuntimeError("Failed to execute command: %s" % " ".join(cmd))
+        return
 
     def clean(self):
         cmd = self.executable + ['refresh']
