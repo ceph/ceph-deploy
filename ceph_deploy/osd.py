@@ -188,7 +188,8 @@ def prepare_disk(
         zap,
         fs_type,
         dmcrypt,
-        dmcrypt_dir):
+        dmcrypt_dir,
+        storetype):
     """
     Run on osd node, prepares a data disk for use.
     """
@@ -205,6 +206,8 @@ def prepare_disk(
         if dmcrypt_dir is not None:
             args.append('--dmcrypt-key-dir')
             args.append(dmcrypt_dir)
+    if storetype:
+        args.append('--' + storetype)
     args.extend([
         '--cluster',
         cluster,
@@ -312,6 +315,10 @@ def prepare(args, cfg, activate_prepared_disk):
             LOG.debug('Preparing host %s disk %s journal %s activate %s',
                       hostname, disk, journal, activate_prepared_disk)
 
+            storetype = None
+            if args.bluestore:
+                storetype = 'bluestore'
+
             prepare_disk(
                 distro.conn,
                 cluster=args.cluster,
@@ -323,6 +330,7 @@ def prepare(args, cfg, activate_prepared_disk):
                 fs_type=args.fs_type,
                 dmcrypt=args.dmcrypt,
                 dmcrypt_dir=args.dmcrypt_key_dir,
+                storetype=storetype,
             )
 
             # give the OSD a few seconds to start
@@ -718,6 +726,11 @@ def make(parser):
         help='directory where dm-crypt keys are stored',
         )
     osd_create.add_argument(
+        '--bluestore',
+        action='store_true', default=None,
+        help='bluestore objectstore',
+        )
+    osd_create.add_argument(
         'disk',
         nargs='+',
         metavar='HOST:DISK[:JOURNAL]',
@@ -754,6 +767,11 @@ def make(parser):
         metavar='KEYDIR',
         default='/etc/ceph/dmcrypt-keys',
         help='directory where dm-crypt keys are stored',
+        )
+    osd_prepare.add_argument(
+        '--bluestore',
+        action='store_true', default=None,
+        help='bluestore objectstore',
         )
     osd_prepare.add_argument(
         'disk',
@@ -839,6 +857,11 @@ def make_disk(parser):
         metavar='KEYDIR',
         default='/etc/ceph/dmcrypt-keys',
         help='directory where dm-crypt keys are stored',
+        )
+    disk_prepare.add_argument(
+        '--bluestore',
+        action='store_true', default=None,
+        help='bluestore objectstore',
         )
     disk_prepare.add_argument(
         'disk',
