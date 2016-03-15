@@ -147,7 +147,7 @@ def _main(args=None, namespace=None):
     sh.setLevel(console_loglevel)
 
     # File Logger
-    fh = logging.FileHandler('{cluster}.log'.format(cluster=args.cluster))
+    fh = logging.FileHandler('ceph-deploy-{cluster}.log'.format(cluster=args.cluster))
     fh.setLevel(logging.DEBUG)
     fh.setFormatter(logging.Formatter(log.FILE_FORMAT))
 
