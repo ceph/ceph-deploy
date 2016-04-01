@@ -229,10 +229,14 @@ def rgw_create(args):
 def rgw_list(args):
     cfg = conf.ceph.load(args)
     for rgw_section in cfg.sections():
-        if not rgw_section.startswith('client.rgw'):
-            continue
         host = cfg.safe_get(rgw_section, 'host')
-        entity = rgw_section[7:]
+        entity = None
+        if rgw_section.startswith('client.rgw'):
+            entity = rgw_section[7:]
+        if rgw_section.startswith('client.radosgw.'):
+            entity = rgw_section[7:]
+        if entity is None:
+            continue
         print ("{host}:{entity}".format(host=host, entity=entity))
 
 
