@@ -244,11 +244,148 @@ def rgw_list(args):
         print ("{host}:{entity}".format(host=host, entity=entity))
 
 
+def rgw_stop(conn, name, cluster, init):
+    if init == 'upstart':
+        remoto.process.run(
+            conn,
+            [
+                'initctl',
+                'stop',
+                'radosgw',
+                'cluster={cluster}'.format(cluster=cluster),
+                'id={name}'.format(name=name),
+            ],
+            timeout=7
+        )
+    elif init == 'sysvinit':
+        remoto.process.run(
+            conn,
+            [
+                'service',
+                'ceph-radosgw',
+                'stop',
+            ],
+            timeout=7
+        )
+    elif init == 'systemd':
+        remoto.process.run(
+            conn,
+            [
+                'systemctl',
+                'disable',
+                'ceph-radosgw@{name}'.format(name=name),
+            ],
+            timeout=7
+        )
+        remoto.process.run(
+            conn,
+            [
+                'systemctl',
+                'stop',
+                'ceph-radosgw@{name}'.format(name=name),
+            ],
+            timeout=7
+        )
+
+
+def rgw_delete(args):
+    cfg = conf.ceph.load(args)
+    LOG.debug(
+        'Deploying rgw, cluster %s hosts %s',
+        args.cluster,
+        ' '.join(':'.join(x or '' for x in t) for t in args.rgw),
+        )
+    errors = 0
+
+    # Check if config needs to be changed
+    changed_cfg = False
+    for hostname, name in args.rgw:
+        enitity = 'client.{name}'.format(name=name)
+        port = 7480
+        if cfg.has_section(enitity) is True:
+            cfg.remove_section(enitity)
+            changed_cfg = True
+
+    # If config file will be changed
+    if changed_cfg is True:
+        cfg_path = args.ceph_conf or '{cluster}.conf'.format(cluster=args.cluster)
+        if args.overwrite_conf is False:
+            msg = "The local config file '%s' exists with content that must be changed; use --overwrite-conf to update" % (cfg_path)
+            LOG.error(msg)
+            raise RuntimeError(msg)
+
+    changed_cfg = False
+    for hostname, name in args.rgw:
+        try:
+            distro = hosts.get(hostname, username=args.username)
+            LOG.info(
+                'Distro info: %s %s %s',
+                distro.name,
+                distro.release,
+                distro.codename
+            )
+            LOG.debug('remote host will use %s', distro.init)
+            rgw_stop(distro.conn, name, args.cluster, distro.init)
+            path = '/var/lib/ceph/radosgw/{cluster}-{name}'.format(
+                cluster=args.cluster,
+                name=name
+            )
+            if distro.conn.remote_module.path_exists(path):
+                LOG.info("Found path %s" % (path))
+                files_to_del = distro.conn.remote_module.listdir(path)
+                for file_name in files_to_del:
+                    file_path = os.path.join(path, file_name)
+                    distro.conn.remote_module.unlink(file_path)
+            else:
+                LOG.info("Path '%s' not found"  % (path))
+
+            distro.conn.exit()
+            enitity = 'client.{name}'.format(name=name)
+            if cfg.has_section(enitity) is True:
+                cfg.remove_section(enitity)
+            changed_cfg = True
+            LOG.info('The Ceph Object Gateway (RGW) is deleted from host %s' % (hostname))
+        except RuntimeError as e:
+            LOG.error(e)
+            errors += 1
+
+    # If config file has been changed
+    if changed_cfg is True:
+        cfg_path = args.ceph_conf or '{cluster}.conf'.format(cluster=args.cluster)
+        with open(cfg_path, 'wb') as configfile:
+            cfg.write(configfile)
+        # now distribute
+        for hostname, name in args.rgw:
+            try:
+                distro = hosts.get(hostname, username=args.username)
+                LOG.info(
+                    'Distro info: %s %s %s',
+                    distro.name,
+                    distro.release,
+                    distro.codename
+                )
+                conf_data = conf.ceph.load_raw(args)
+                distro.conn.remote_module.write_conf(
+                    args.cluster,
+                    conf_data,
+                    args.overwrite_conf,
+                )
+
+            except RuntimeError as e:
+                LOG.error(e)
+                errors += 1
+
+    if errors:
+        raise exc.GenericError('Failed to create %d RGWs' % errors)
+
+
 def rgw(args):
     if args.subcommand == 'create':
         return rgw_create(args)
     if args.subcommand == 'list':
         return rgw_list(args)
+    if args.subcommand == 'delete':
+        return rgw_delete(args)
     LOG.error('subcommand %s not implemented', args.subcommand)
 
 
@@ -282,6 +419,17 @@ def make(parser):
     rgw_parser.add_parser(
         'list',
         help='list all rgw instances in local config'
+        )
+    rgw_delete = rgw_parser.add_parser(
+        'delete',
+        help='Create a rgw instance'
+        )
+    rgw_delete.add_argument(
+        'rgw',
+        metavar='HOST[:NAME]',
+        nargs='+',
+        type=colon_separated,
+        help='host (and optionally the daemon name) to deploy on.',
         )
     parser.set_defaults(
         func=rgw,
