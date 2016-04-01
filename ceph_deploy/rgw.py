@@ -152,6 +152,10 @@ def rgw_create(args):
     # Update the config file
     changed_cfg = False
     for hostname, name in args.rgw:
+        if not name.startswith('rgw.'):
+            msg = "rgw name '%s' does not start with 'rgw.'" % (name)
+            LOG.error(msg)
+            raise RuntimeError(msg)
         enitity = 'client.{name}'.format(name=name)
         port = 7480
         if cfg.has_section(enitity) is False:
@@ -250,10 +254,9 @@ def rgw(args):
 
 def colon_separated(s):
     host = s
-    name = s
+    name = 'rgw.' + s
     if s.count(':') == 1:
         (host, name) = s.split(':')
-    name = 'rgw.' + name
     return (host, name)
 
 
