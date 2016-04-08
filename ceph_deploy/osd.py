@@ -30,7 +30,7 @@ def get_bootstrap_osd_key(cluster):
         raise RuntimeError('bootstrap-osd keyring not found; run \'gatherkeys\'')
 
 
-def create_osd(conn, cluster, key):
+def create_osd_keyring(conn, cluster, key):
     """
     Run on osd node, writes the bootstrap key if not there yet.
     """
@@ -310,7 +310,7 @@ def prepare(args, cfg, activate_prepared_disk):
                     args.overwrite_conf
                 )
 
-                create_osd(distro.conn, args.cluster, key)
+                create_osd_keyring(distro.conn, args.cluster, key)
 
             LOG.debug('Preparing host %s disk %s journal %s activate %s',
                       hostname, disk, journal, activate_prepared_disk)
