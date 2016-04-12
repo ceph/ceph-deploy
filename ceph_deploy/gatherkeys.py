@@ -8,7 +8,7 @@ import time
 from ceph_deploy import hosts
 from ceph_deploy.cliutil import priority
 from ceph_deploy.lib import remoto
-
+import ceph_deploy.util.paths.mon
 
 LOG = logging.getLogger(__name__)
 
@@ -50,21 +50,6 @@ def keytype_path_to(args, keytype):
     return '{cluster}.bootstrap-{what}.keyring'.format(
             cluster=args.cluster,
             what=keytype)
-
-
-def keytype_path_from(args, keytype):
-    """
-    Get the remote file path for a keyring type
-    """
-    if keytype == "admin":
-        return '/etc/ceph/{cluster}.client.admin.keyring'.format(
-            cluster=args.cluster)
-    if keytype == "mon":
-        return '/var/lib/ceph/mon/{cluster}-{{hostname}}/keyring'.format(
-            cluster=args.cluster)
-    return '/var/lib/ceph/bootstrap-{what}/{cluster}.keyring'.format(
-                what=keytype,
-                cluster=args.cluster)
 
 
 def keytype_identity(keytype):
@@ -152,9 +137,8 @@ def gatherkeys_with_mon(args, host, dest_dir):
     Connect to mon and gather keys if mon is in quorum.
     """
     distro = hosts.get(host, username=args.username)
-    path_keytype_mon_template = keytype_path_from(args, 'mon')
-    path_keytype_mon = path_keytype_mon_template.format(
-            hostname=host)
+    dir_keytype_mon = ceph_deploy.util.paths.mon.path(args.cluster, host)
+    path_keytype_mon = "%s/keyring" % (dir_keytype_mon)
     mon_key = distro.conn.remote_module.get_file(path_keytype_mon)
     if mon_key is None:
         LOG.warning("No mon key found. Is '%s' a mon node" % (host))
@@ -164,6 +148,7 @@ def gatherkeys_with_mon(args, host, dest_dir):
     with file(mon_path_local, 'w') as f:
         f.write(mon_key)
     rlogger = logging.getLogger(host)
+    path_asok = ceph_deploy.util.paths.mon.asok(args.cluster, host)
     out, err, code = remoto.process.check(
         distro.conn,
             [
@@ -171,9 +156,8 @@ def gatherkeys_with_mon(args, host, dest_dir):
                 "--connect-timeout=25",
                 "--cluster={cluster}".format(
                     cluster=args.cluster),
-                "--admin-daemon=/var/run/ceph/{cluster}-mon.{hostname}.asok".format(
-                    hostname=host,
-                    cluster=args.cluster),
+                "--admin-daemon={asok}".format(
+                    asok=path_asok),
                 "mon_status"
             ]
         )
