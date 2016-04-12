@@ -13,7 +13,7 @@ from ceph_deploy.lib import remoto
 LOG = logging.getLogger(__name__)
 
 
-def _keyring_equivilent(keyring_one, keyring_two):
+def _keyring_equivalent(keyring_one, keyring_two):
     """
     Check two keyrings are identical
     """
@@ -242,7 +242,7 @@ def gatherkeys(args):
                     LOG.info("Storing %s" % (filename))
                     shutil.move(tmp_path, filename)
                     continue
-                if _keyring_equivilent(tmp_path, filename):
+                if _keyring_equivalent(tmp_path, filename):
                     LOG.info("keyring '%s' already exists" % (filename))
                     continue
                 backup_keyring = "%s-%s" % (filename, date_string)
