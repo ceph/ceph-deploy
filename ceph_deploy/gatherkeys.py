@@ -58,42 +58,37 @@ def keytype_identity(keytype):
 
     This is used in authentication with keyrings and generating keyrings.
     """
-    if keytype is 'admin':
-         return 'client.admin'
-    if keytype is 'mds':
-         return 'client.bootstrap-mds'
-    if keytype is 'osd':
-         return 'client.bootstrap-osd'
-    if keytype is 'rgw':
-         return 'client.bootstrap-rgw'
-    if keytype is 'mon':
-         return 'mon.'
-    raise RuntimeError('Unexpected keytype %s' % keytype)
+    ident_dict = {
+        'admin' : 'client.admin',
+        'mds' : 'client.bootstrap-mds',
+        'osd' : 'client.bootstrap-osd',
+        'rgw' : 'client.bootstrap-rgw',
+        'mon' : 'mon.'
+    }
+    return ident_dict.get(keytype, None)
 
 
 def keytype_capabilities(keytype):
     """
     Get the capabilities of a keyring from keyring type.
     """
-    if keytype is 'admin':
-        return [
+    cap_dict = {
+        'admin' : [
             'osd', 'allow *',
             'mds', 'allow *',
             'mon', 'allow *'
-        ]
-    if keytype is 'mds':
-        return [
+            ],
+        'mds' : [
             'mon', 'allow profile bootstrap-mds'
-        ]
-    if keytype is 'osd':
-        return [
+            ],
+        'osd' : [
             'mon', 'allow profile bootstrap-osd'
-        ]
-    if keytype is 'rgw':
-        return [
+            ],
+        'rgw': [
             'mon', 'allow profile bootstrap-rgw'
-        ]
-    raise RuntimeError('Unexpected keytype %s' % keytype)
+            ]
+        }
+    return cap_dict.get(keytype, None)
 
 
 def gatherkeys_missing(args, distro, rlogger, keypath, keytype, dest_dir):
@@ -112,8 +107,12 @@ def gatherkeys_missing(args, distro, rlogger, keypath, keytype, dest_dir):
         'auth', 'get-or-create',
         ]
     identity = keytype_identity(keytype)
+    if identity is None:
+        raise RuntimeError('Could not find identity for keytype:%s' % keytype)
     arguments.append(identity)
     capabilites = keytype_capabilities(keytype)
+    if capabilites is None:
+        raise RuntimeError('Could not find capabilites for keytype:%s' % keytype)
     arguments.extend(capabilites)
     out, err, code = remoto.process.check(
         distro.conn,
