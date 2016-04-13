@@ -4,6 +4,17 @@ Changelog
 1.5
 ---
 
+1.5.32
+^^^^^^
+13-Apr-2016
+
+* Improve systemd detection for Ubuntu releases.
+* Rename ceph-deploy log to include the cluster name
+* Bluestore support
+* Disable timeouts for pkg install/remove operations (they can take a long
+  time)
+* Remove deprecated ceph.conf configuration "filestore xattr use omap = true"
+
 1.5.31
 ^^^^^^
 04-Jan-2016
