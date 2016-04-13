@@ -165,7 +165,11 @@ def gatherkeys_with_mon(args, host, dest_dir):
         for line in err:
             rlogger.debug(line)
         return False
-    mon_status = json.loads("".join(out))
+    try:
+        mon_status = json.loads("".join(out))
+    except ValueError:
+        rlogger.error('"ceph mon_status %s" output was not json' % (host))
+        return False
     mon_number = None
     mon_map = mon_status.get('monmap')
     if mon_map is None:
