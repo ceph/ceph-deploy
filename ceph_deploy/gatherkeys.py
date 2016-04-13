@@ -179,7 +179,11 @@ def gatherkeys_with_mon(args, host, dest_dir):
     if mon_quorum is None:
         rlogger.error("could not find quorum for mons on '%s'" % (host))
         return False
-    for mon in mon_map.get('mons'):
+    mon_map_mons = mon_map.get('mons')
+    if mon_map_mons is None:
+        rlogger.error("could not find mons in monmap on '%s'" % (host))
+        return False
+    for mon in mon_map_mons:
         if mon.get('name') == host:
            mon_number = mon.get('rank')
            break
