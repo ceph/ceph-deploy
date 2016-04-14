@@ -1,9 +1,7 @@
-import argparse
-import collections
 import subprocess
 
 import pytest
-from mock import Mock, patch, NonCallableMock
+from mock import Mock, patch
 
 from ceph_deploy.cli import _main as main
 from ceph_deploy.tests.directory import directory
@@ -30,27 +28,13 @@ def make_fake_connection(platform_information=None):
     return get_connection
 
 
-def test_simple(tmpdir, capsys):
+def test_new(tmpdir, capsys):
     with tmpdir.join('ceph.conf').open('w') as f:
         f.write("""\
 [global]
 fsid = 6ede5564-3cf1-44b5-aa96-1c77b0c3e1d0
 mon initial members = host1
 """)
-
-    ns = argparse.Namespace()
-    ns.pushy = Mock()
-    conn = NonCallableMock(name='PushyClient')
-    ns.pushy.return_value = conn
-
-    mock_compiled = collections.defaultdict(Mock)
-    conn.compile.side_effect = mock_compiled.__getitem__
-
-    MON_SECRET = 'AQBWDj5QAP6LHhAAskVBnUkYHJ7eYREmKo5qKA=='
-
-    def _create_mon(cluster, get_monitor_secret):
-        secret = get_monitor_secret()
-        assert secret == MON_SECRET
 
     fake_ip_addresses = lambda x: ['10.0.0.1']
     try:
@@ -59,14 +43,7 @@ mon initial members = host1
                 with patch('ceph_deploy.new.arg_validators.Hostname', lambda: lambda x: x):
                     with patch('ceph_deploy.new.hosts'):
                         with directory(str(tmpdir)):
-                            main(
-                                args=['-v', 'new', '--no-ssh-copykey', 'host1'],
-                                namespace=ns,
-                                )
-                            main(
-                                args=['-v', 'mon', 'create', 'host1'],
-                                namespace=ns,
-                                )
+                            main(['-v', 'new', '--no-ssh-copykey', 'host1'])
     except SystemExit as e:
         raise AssertionError('Unexpected exit: %s', e)
     out, err = capsys.readouterr()
