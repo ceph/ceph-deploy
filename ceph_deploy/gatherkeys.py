@@ -193,12 +193,12 @@ def gatherkeys_with_mon(args, host, dest_dir):
     if not mon_number in mon_quorum:
         rlogger.error("Not yet quorum for '%s'" % (host))
         return False
-    got_all_keys = True
     for keytype in ["admin", "mds", "osd", "rgw"]:
-        rc = gatherkeys_missing(args, distro, rlogger, path_keytype_mon, keytype, dest_dir)
-        if not rc:
-            got_all_keys = False
-    return got_all_keys
+        if not gatherkeys_missing(args, distro, rlogger, path_keytype_mon, keytype, dest_dir):
+            # We will return failure if we fail to gather any key
+            rlogger.error("Failed to return '%s' key from host ", keytype, host)
+            return False
+    return True
 
 
 def gatherkeys(args):
