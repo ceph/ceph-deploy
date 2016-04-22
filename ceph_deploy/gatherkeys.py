@@ -237,7 +237,7 @@ def gatherkeys(args):
                     LOG.info("keyring '%s' already exists" % (filename))
                     continue
                 backup_keyring = "%s-%s" % (filename, date_string)
-                LOG.info("Replacing '%s' and backing up old key as '%s'" % (filename, date_string))
+                LOG.info("Replacing '%s' and backing up old key as '%s'", filename, backup_keyring)
                 shutil.copy(filename, backup_keyring)
                 shutil.move(tmp_path, filename)
             if had_error:
