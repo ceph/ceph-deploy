@@ -4,6 +4,12 @@ Changelog
 1.5
 ---
 
+1.5.33
+^^^^^^
+22-Apr-2016
+
+* Default to Jewel for releases
+
 1.5.32
 ^^^^^^
 13-Apr-2016
