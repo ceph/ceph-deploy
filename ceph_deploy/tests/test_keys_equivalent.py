@@ -55,7 +55,7 @@ class TestKeysEquivilent(object):
         write_key_mon_with_caps(key_path_01, secret_01)
         write_key_mon_with_caps(key_path_02, secret_01)
         same = gatherkeys._keyring_equivalent(key_path_01, key_path_02)
-        assert same == True
+        assert same is True
 
 
     def test_different_with_caps(self):
@@ -66,7 +66,7 @@ class TestKeysEquivilent(object):
         write_key_mon_with_caps(key_path_01, secret_01)
         write_key_mon_with_caps(key_path_02, secret_02)
         same = gatherkeys._keyring_equivalent(key_path_01, key_path_02)
-        assert same == False
+        assert same is False
 
 
     def test_identical_without_caps(self):
@@ -76,7 +76,7 @@ class TestKeysEquivilent(object):
         write_key_mon_without_caps(key_path_01, secret_01)
         write_key_mon_without_caps(key_path_02, secret_01)
         same = gatherkeys._keyring_equivalent(key_path_01, key_path_02)
-        assert same == True
+        assert same is True
 
 
     def test_different_without_caps(self):
@@ -87,7 +87,7 @@ class TestKeysEquivilent(object):
         write_key_mon_without_caps(key_path_01, secret_01)
         write_key_mon_without_caps(key_path_02, secret_02)
         same = gatherkeys._keyring_equivalent(key_path_01, key_path_02)
-        assert same == False
+        assert same is False
 
 
     def test_identical_mixed_caps(self):
@@ -97,7 +97,7 @@ class TestKeysEquivilent(object):
         write_key_mon_with_caps(key_path_01, secret_01)
         write_key_mon_without_caps(key_path_02, secret_01)
         same = gatherkeys._keyring_equivalent(key_path_01, key_path_02)
-        assert same == True
+        assert same is True
 
 
     def test_different_mixed_caps(self):
@@ -108,7 +108,7 @@ class TestKeysEquivilent(object):
         write_key_mon_with_caps(key_path_01, secret_01)
         write_key_mon_without_caps(key_path_02, secret_02)
         same = gatherkeys._keyring_equivalent(key_path_01, key_path_02)
-        assert same == False
+        assert same is False
 
 
     def test_identical_caps_mixed_tabs(self):
@@ -118,7 +118,7 @@ class TestKeysEquivilent(object):
         write_key_mon_with_caps(key_path_01, secret_01)
         write_key_mon_with_caps_with_tab(key_path_02, secret_01)
         same = gatherkeys._keyring_equivalent(key_path_01, key_path_02)
-        assert same == True
+        assert same is True
 
 
     def test_different_caps_mixed_tabs(self):
@@ -129,7 +129,7 @@ class TestKeysEquivilent(object):
         write_key_mon_with_caps(key_path_01, secret_01)
         write_key_mon_with_caps_with_tab(key_path_02, secret_02)
         same = gatherkeys._keyring_equivalent(key_path_01, key_path_02)
-        assert same == False
+        assert same is False
 
 
     def test_identical_caps_mixed_quote(self):
@@ -139,7 +139,7 @@ class TestKeysEquivilent(object):
         write_key_mon_with_caps_with_tab(key_path_01, secret_01)
         write_key_mon_with_caps_with_tab_quote(key_path_02, secret_01)
         same = gatherkeys._keyring_equivalent(key_path_01, key_path_02)
-        assert same == True
+        assert same is True
 
 
     def test_different_caps_mixed_quote(self):
@@ -150,7 +150,7 @@ class TestKeysEquivilent(object):
         write_key_mon_with_caps_with_tab(key_path_01, secret_01)
         write_key_mon_with_caps_with_tab_quote(key_path_02, secret_02)
         same = gatherkeys._keyring_equivalent(key_path_01, key_path_02)
-        assert same == False
+        assert same is False
 
 
     def test_missing_key_1(self):
