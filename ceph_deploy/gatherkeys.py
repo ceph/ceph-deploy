@@ -119,7 +119,7 @@ def gatherkeys_missing(args, distro, rlogger, keypath, keytype, dest_dir):
         arguments
         )
     if code != 0:
-        rlogger.error('"ceph auth get-or-create for keytype %s returned %s' % (keytype, code))
+        rlogger.error('"ceph auth get-or-create for keytype %s returned %s', keytype, code)
         for line in err:
             rlogger.debug(line)
         return False
@@ -161,39 +161,39 @@ def gatherkeys_with_mon(args, host, dest_dir):
             ]
         )
     if code != 0:
-        rlogger.error('"ceph mon_status %s" returned %s' % (host, code))
+        rlogger.error('"ceph mon_status %s" returned %s', host, code)
         for line in err:
             rlogger.debug(line)
         return False
     try:
         mon_status = json.loads("".join(out))
     except ValueError:
-        rlogger.error('"ceph mon_status %s" output was not json' , host)
+        rlogger.error('"ceph mon_status %s" output was not json', host)
         for line in out:
             rlogger.error(line)
         return False
     mon_number = None
     mon_map = mon_status.get('monmap')
     if mon_map is None:
-        rlogger.error("could not find mon map for mons on '%s'" % (host))
+        rlogger.error("could not find mon map for mons on '%s'", host)
         return False
     mon_quorum = mon_status.get('quorum')
     if mon_quorum is None:
-        rlogger.error("could not find quorum for mons on '%s'" % (host))
+        rlogger.error("could not find quorum for mons on '%s'" , host)
         return False
     mon_map_mons = mon_map.get('mons')
     if mon_map_mons is None:
-        rlogger.error("could not find mons in monmap on '%s'" % (host))
+        rlogger.error("could not find mons in monmap on '%s'", host)
         return False
     for mon in mon_map_mons:
         if mon.get('name') == host:
            mon_number = mon.get('rank')
            break
     if mon_number is None:
-        rlogger.error("could not find '%s' in monmap" % (host))
+        rlogger.error("could not find '%s' in monmap", host)
         return False
     if not mon_number in mon_quorum:
-        rlogger.error("Not yet quorum for '%s'" % (host))
+        rlogger.error("Not yet quorum for '%s'", host)
         return False
     for keytype in ["admin", "mds", "osd", "rgw"]:
         if not gatherkeys_missing(args, distro, rlogger, path_keytype_mon, keytype, dest_dir):
@@ -213,14 +213,14 @@ def gatherkeys(args):
     try:
         try:
             tmpd = tempfile.mkdtemp()
-            LOG.info("Storing keys in temp directory %s" %(tmpd))
+            LOG.info("Storing keys in temp directory %s", tmpd)
             sucess = False
             for host in args.mon:
                 sucess = gatherkeys_with_mon(args, host, tmpd)
                 if sucess:
                     break
             if not sucess:
-                LOG.error("Failed to connect to host:%s" % (', '.join(args.mon)))
+                LOG.error("Failed to connect to host:%s" ,', '.join(args.mon))
                 raise RuntimeError('Failed to connect any mon')
             had_error = False
             date_string = time.strftime("%Y%m%d%H%M%S")
@@ -228,7 +228,7 @@ def gatherkeys(args):
                 filename = keytype_path_to(args, keytype)
                 tmp_path = os.path.join(tmpd, filename)
                 if not os.path.exists(tmp_path):
-                    LOG.error("No key retrived for '%s'" % (keytype))
+                    LOG.error("No key retrived for '%s'" , keytype)
                     had_error = True
                     continue
                 if not os.path.exists(filename):
@@ -236,7 +236,7 @@ def gatherkeys(args):
                     shutil.move(tmp_path, filename)
                     continue
                 if _keyring_equivalent(tmp_path, filename):
-                    LOG.info("keyring '%s' already exists" % (filename))
+                    LOG.info("keyring '%s' already exists" , filename)
                     continue
                 backup_keyring = "%s-%s" % (filename, date_string)
                 LOG.info("Replacing '%s' and backing up old key as '%s'", filename, backup_keyring)
