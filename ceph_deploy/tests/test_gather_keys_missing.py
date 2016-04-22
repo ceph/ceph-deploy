@@ -1,9 +1,6 @@
 from ceph_deploy import gatherkeys
 from ceph_deploy import new
 import mock
-import json
-import copy
-import logging
 import tempfile
 import shutil
 import os
