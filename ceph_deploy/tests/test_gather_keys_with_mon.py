@@ -148,7 +148,7 @@ class TestGatherKeysWithMon(object):
     @mock.patch('ceph_deploy.hosts.get', mock_hosts_get_file_key_content)
     def test_success(self):
         rc = gatherkeys.gatherkeys_with_mon(self.args, self.host, self.test_dir)
-        assert rc == True
+        assert rc is True
 
 
     @mock.patch('ceph_deploy.gatherkeys.gatherkeys_missing', mock_gatherkeys_missing_success)
@@ -156,7 +156,7 @@ class TestGatherKeysWithMon(object):
     @mock.patch('ceph_deploy.hosts.get', mock_hosts_get_file_key_content_none)
     def test_monkey_none(self):
         rc = gatherkeys.gatherkeys_with_mon(self.args, self.host, self.test_dir)
-        assert rc == False
+        assert rc is False
 
 
     @mock.patch('ceph_deploy.gatherkeys.gatherkeys_missing', mock_gatherkeys_missing_fail)
@@ -164,7 +164,7 @@ class TestGatherKeysWithMon(object):
     @mock.patch('ceph_deploy.hosts.get', mock_hosts_get_file_key_content)
     def test_missing_fail(self):
         rc = gatherkeys.gatherkeys_with_mon(self.args, self.host, self.test_dir)
-        assert rc == False
+        assert rc is False
 
 
     @mock.patch('ceph_deploy.gatherkeys.gatherkeys_missing', mock_gatherkeys_missing_success)
@@ -172,7 +172,7 @@ class TestGatherKeysWithMon(object):
     @mock.patch('ceph_deploy.hosts.get', mock_hosts_get_file_key_content)
     def test_remoto_process_check_rc_error(self):
         rc = gatherkeys.gatherkeys_with_mon(self.args, self.host, self.test_dir)
-        assert rc == False
+        assert rc is False
 
 
     @mock.patch('ceph_deploy.gatherkeys.gatherkeys_missing', mock_gatherkeys_missing_success)
@@ -180,14 +180,14 @@ class TestGatherKeysWithMon(object):
     @mock.patch('ceph_deploy.hosts.get', mock_hosts_get_file_key_content)
     def test_remoto_process_check_out_not_json(self):
         rc = gatherkeys.gatherkeys_with_mon(self.args, self.host, self.test_dir)
-        assert rc == False
+        assert rc is False
 
     @mock.patch('ceph_deploy.gatherkeys.gatherkeys_missing', mock_gatherkeys_missing_success)
     @mock.patch('ceph_deploy.lib.remoto.process.check', mock_remoto_process_check_out_missing_quorum)
     @mock.patch('ceph_deploy.hosts.get', mock_hosts_get_file_key_content)
     def test_remoto_process_check_out_missing_quorum(self):
         rc = gatherkeys.gatherkeys_with_mon(self.args, self.host, self.test_dir)
-        assert rc == False
+        assert rc is False
 
 
     @mock.patch('ceph_deploy.gatherkeys.gatherkeys_missing', mock_gatherkeys_missing_success)
@@ -195,7 +195,7 @@ class TestGatherKeysWithMon(object):
     @mock.patch('ceph_deploy.hosts.get', mock_hosts_get_file_key_content)
     def test_remoto_process_check_out_missing_quorum_1(self):
         rc = gatherkeys.gatherkeys_with_mon(self.args, self.host, self.test_dir)
-        assert rc == False
+        assert rc is False
 
 
     @mock.patch('ceph_deploy.gatherkeys.gatherkeys_missing', mock_gatherkeys_missing_success)
@@ -203,7 +203,7 @@ class TestGatherKeysWithMon(object):
     @mock.patch('ceph_deploy.hosts.get', mock_hosts_get_file_key_content)
     def test_remoto_process_check_out_missing_mon(self):
         rc = gatherkeys.gatherkeys_with_mon(self.args, self.host, self.test_dir)
-        assert rc == False
+        assert rc is False
 
 
     @mock.patch('ceph_deploy.gatherkeys.gatherkeys_missing', mock_gatherkeys_missing_success)
@@ -211,4 +211,4 @@ class TestGatherKeysWithMon(object):
     @mock.patch('ceph_deploy.hosts.get', mock_hosts_get_file_key_content)
     def test_remoto_process_check_out_missing_monmap_host1(self):
         rc = gatherkeys.gatherkeys_with_mon(self.args, self.host, self.test_dir)
-        assert rc == False
+        assert rc is False
