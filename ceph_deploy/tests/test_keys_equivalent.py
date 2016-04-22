@@ -29,7 +29,7 @@ def write_key_mon_without_caps(path, secret):
         f.write(mon_keyring)
 
 
-class TestKeysEquivilent(object):
+class TestKeysEquivalent(object):
     """
     Since we are testing things that effect the content of the current working
     directory we should test in a clean empty directory.
