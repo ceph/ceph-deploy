@@ -418,7 +418,7 @@ def colon_separated(s):
         (host, name) = s.split(':')
     if delimiter_count == 2:
         (host, name, port) = s.split(':')
-    name = validate.alphanumeric(name)
+    name = validate.alphanumericdot(name)
     return (host, name, port)
 
 
