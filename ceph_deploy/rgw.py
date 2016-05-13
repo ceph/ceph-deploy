@@ -162,18 +162,39 @@ def rgw_create(args):
         if cfg.has_section(enitity) is False:
             cfg.add_section(enitity)
             changed_cfg = True
+        else:
+            # We have existing confg for the rgw
+            LOG.warning("existing configuration for rgw %s:%s" % (hostname, name))
         if cfg.has_option(enitity,'host') is False:
             cfg.set(enitity, 'host', hostname)
             changed_cfg = True
+        else:
+            existing_value = cfg.get(enitity, 'host')
+            if existing_value != hostname:
+                msg = "exisiting rgw '%s:%s' has a different hostname" % (hostname, name)
+                LOG.error(msg)
+                raise RuntimeError(msg)
+
         if cfg.has_option(enitity,'rgw_dns_name') is False:
-            # TODO this should be customizable
-            value = "%s:%s" % (hostname,port)
             cfg.set(enitity, 'rgw_dns_name', hostname)
             changed_cfg = True
+        else:
+            existing_value = cfg.get(enitity, 'rgw_dns_name')
+            if existing_value != hostname:
+                msg = "exisiting rgw '%s:%s' has a different rgw_dns_name" % (hostname, name)
+                LOG.error(msg)
+                raise RuntimeError(msg)
+        rgw_frontends_value = "civetweb port=%s" % (port)
         if cfg.has_option(enitity,'rgw frontends') is False:
             # TODO this should be customizable
-            cfg.set(enitity, 'rgw frontends', "civetweb port=%s" % (port))
+            cfg.set(enitity, 'rgw frontends', rgw_frontends_value)
             changed_cfg = True
+        else:
+            existing_value = cfg.get(enitity, 'rgw frontends')
+            if existing_value != rgw_frontends_value:
+                msg = "exisiting rgw '%s:%s' has a different 'rgw frontends'" % (hostname, name)
+                LOG.error(msg)
+                raise RuntimeError(msg)
 
     # If config file is changed save changes locally
     if changed_cfg is True:
