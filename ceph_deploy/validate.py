@@ -3,7 +3,7 @@ import re
 
 
 ALPHANUMERIC_RE = re.compile(r'^[a-zA-Z][a-zA-Z0-9]*$')
-ALPHANUMERICDOT_RE = re.compile(r'^[a-zA-Z][a-zA-Z0-9\.]*$')
+ALPHANUMERICDOT_RE = re.compile(r'^[a-zA-Z][a-zA-Z0-9\.\-\_]*$')
 
 
 def alphanumeric(s):
@@ -22,6 +22,6 @@ def alphanumericdot(s):
     """
     if not ALPHANUMERICDOT_RE.match(s):
         raise argparse.ArgumentTypeError(
-            'argument must start with a letter and contain only letters and numbers or dot',
+            'argument must start with a letter and contain only letters and numbers or [.-_]',
             )
     return s
