@@ -175,6 +175,19 @@ hosts, for example::
     https_proxy=http://host:port
 
 
+Creating a new configuration
+============================
+
+To create a new configuration file and secret key, decide what hosts
+will run ``ceph-mon``, and run::
+
+  ceph-deploy new MON [MON..]
+
+For detailed information on new instructions refer to the :ref:`new`
+section.
+
+For detailed information on ``new`` subcommand refer to the
+:ref:`mon` section.
 
 Deploying monitors
 ==================
@@ -187,10 +200,13 @@ Without explicit hosts listed, hosts in ``mon_initial_members`` in the
 config file are deployed. That is, the hosts you passed to
 ``ceph-deploy new`` are the default value here.
 
+For detailed information on ``mon`` subcommand refer to the
+:ref:`mon` section.
+
 Gather keys
 ===========
 
-To gather authenticate keys (for administering the cluster and
+To gather authentication keys (for administering the cluster and
 bootstrapping new nodes) to the local directory, run::
 
   ceph-deploy gatherkeys HOST [HOST...]
@@ -199,6 +215,23 @@ where ``HOST`` is one of the monitor hosts.
 
 Once these keys are in the local directory, you can provision new OSDs etc.
 
+For detailed information on ``gatherkeys`` subcommand refer to the
+:ref:`gatherkeys` section.
+
+Admin hosts
+===========
+
+To prepare a host with a ``ceph.conf`` and ``ceph.client.admin.keyring``
+keyring so that it can administer the cluster, run::
+
+  ceph-deploy admin HOST [HOST ...]
+
+Older versions of ceph-deploy automatically added the admin keyring to
+all mon nodes making them admin nodes. For detailed information on the
+admin command refer to the :ref:`admin` section.
+
+For detailed information on ``admin`` subcommand refer to the
+:ref:`admin` section.
 
 Deploying OSDs
 ==============
@@ -221,15 +254,6 @@ OSD, you can also do::
     ceph-deploy osd activate HOST:DIR[:JOURNAL] [...]
 
 This is useful when you are managing the mounting of volumes yourself.
-
-
-Admin hosts
-===========
-
-To prepare a host with a ``ceph.conf`` and ``ceph.client.admin.keyring``
-keyring so that it can administer the cluster, run::
-
-  ceph-deploy admin HOST [HOST ...]
 
 Forget keys
 ===========
