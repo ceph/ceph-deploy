@@ -7,6 +7,12 @@ monitors. The tool makes a few assumptions that are needed to implement the
 most common scenarios. Monitors are usually very particular in what they need
 to work correctly.
 
+.. note:: Before version v1.5.33 ceph-deploy relied upon ``ceph-create-keys``.
+          Using ``ceph-create-keys`` produced a side effect of deploying all
+          bootstrap keys on the mon node so making all mon nodes admin nodes.
+          This can be recreated by running the admin command on all mon nodes
+          see :ref:`admin` section.
+
 create-initial
 ------------------
 Will deploy for monitors defined in ``mon initial members``, wait until
