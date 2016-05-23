@@ -30,7 +30,7 @@ def fetch_file(args, frompath, topath, _hosts):
 
 
 def gatherkeys(args):
-    oldmask = os.umask(077)
+    oldmask = os.umask(0o77)
     try:
         # client.admin
         keyring = '/etc/ceph/{cluster}.client.admin.keyring'.format(

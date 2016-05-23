@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import subprocess
 import os
 from os import path
@@ -15,7 +17,7 @@ This means that it will *not* work as expected. Errors encountered:
 
 
 def run(cmd):
-    print '[vendoring] Running command: %s' % ' '.join(cmd)
+    print('[vendoring] Running command: %s' % ' '.join(cmd))
     try:
         result = subprocess.Popen(
             cmd,
@@ -35,13 +37,13 @@ def run(cmd):
 
 
 def print_error(stdout, stderr):
-    print '*'*80
-    print error_msg
+    print('*'*80)
+    print(error_msg)
     for line in stdout:
-        print line
+        print(line)
     for line in stderr:
-        print line
-    print '*'*80
+        print(line)
+    print('*'*80)
 
 
 def vendor_library(name, version, cmd=None):
@@ -68,7 +70,7 @@ def vendor_library(name, version, cmd=None):
     if not path.exists(vendor_dest):
         rc = run(['git', 'clone', 'git://git.ceph.com/%s' % name])
         if rc:
-            print "%s: git clone failed using ceph.com url with rc %s, trying github.com" % (path.basename(__file__), rc)
+            print("%s: git clone failed using ceph.com url with rc %s, trying github.com" % (path.basename(__file__), rc))
             run(['git', 'clone', 'https://github.com/ceph/%s.git' % name])
         os.chdir(vendor_src)
         run(['git', 'checkout', version])

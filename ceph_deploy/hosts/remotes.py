@@ -41,7 +41,7 @@ def machine_type():
     return platform.machine()
 
 
-def write_sources_list(url, codename, filename='ceph.list', mode=0644):
+def write_sources_list(url, codename, filename='ceph.list', mode=0o644):
     """add deb repo to /etc/apt/sources.list.d/"""
     repo_path = os.path.join('/etc/apt/sources.list.d', filename)
     content = 'deb {url} {codename} main\n'.format(
@@ -112,12 +112,12 @@ def write_conf(cluster, conf, overwrite):
         tmp_file.write(conf)
         tmp_file.close()
         shutil.move(tmp_file.name, path)
-        os.chmod(path, 0644)
+        os.chmod(path, 0o644)
         return
     if os.path.exists('/etc/ceph'):
         with open(path, 'w') as f:
             f.write(conf)
-        os.chmod(path, 0644)
+        os.chmod(path, 0o644)
     else:
         err_msg = '/etc/ceph/ does not exist - could not write config'
         raise RuntimeError(err_msg)
@@ -207,10 +207,10 @@ def unlink(_file):
 
 def write_monitor_keyring(keyring, monitor_keyring, uid=-1, gid=-1):
     """create the monitor keyring file"""
-    write_file(keyring, monitor_keyring, 0600, None, uid, gid)
+    write_file(keyring, monitor_keyring, 0o600, None, uid, gid)
 
 
-def write_file(path, content, mode=0644, directory=None, uid=-1, gid=-1):
+def write_file(path, content, mode=0o644, directory=None, uid=-1, gid=-1):
     if directory:
         if path.startswith("/"):
             path = path[1:]
@@ -297,7 +297,7 @@ def make_mon_removed_dir(path, file_name):
     """ move old monitor data """
     try:
         os.makedirs('/var/lib/ceph/mon-removed')
-    except OSError, e:
+    except OSError as e:
         if e.errno != errno.EEXIST:
             raise
     shutil.move(path, os.path.join('/var/lib/ceph/mon-removed/', file_name))
@@ -307,7 +307,7 @@ def safe_mkdir(path, uid=-1, gid=-1):
     """ create path if it doesn't exist """
     try:
         os.mkdir(path)
-    except OSError, e:
+    except OSError as e:
         if e.errno == errno.EEXIST:
             pass
         else:
@@ -319,7 +319,7 @@ def safe_makedirs(path, uid=-1, gid=-1):
     """ create path recursively if it doesn't exist """
     try:
         os.makedirs(path)
-    except OSError, e:
+    except OSError as e:
         if e.errno == errno.EEXIST:
             pass
         else:

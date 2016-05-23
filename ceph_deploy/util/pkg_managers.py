@@ -241,9 +241,9 @@ class Apt(PackageManager):
             self.add_repo_gpg_key(gpg_url)
 
         safe_filename = '%s.list' % name.replace(' ', '-')
-        mode = 0644
+        mode = 0o644
         if urlparse(url).password:
-            mode = 0600
+            mode = 0o600
             self.remote_conn.logger.info(
                 "Creating repo file with mode 0600 due to presence of password"
             )

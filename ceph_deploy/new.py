@@ -216,11 +216,11 @@ def new_mon_keyring(args):
     keypath = '{name}.mon.keyring'.format(
         name=args.cluster,
         )
-    oldmask = os.umask(077)
+    oldmask = os.umask(0o77)
     LOG.debug('Writing monitor keyring to %s...', keypath)
     try:
         tmp = '%s.tmp' % keypath
-        with open(tmp, 'w', 0600) as f:
+        with open(tmp, 'w', 0o600) as f:
             f.write(mon_keyring)
         try:
             os.rename(tmp, keypath)

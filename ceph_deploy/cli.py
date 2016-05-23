@@ -90,7 +90,7 @@ def get_parser():
         for ep in pkg_resources.iter_entry_points('ceph_deploy.cli')
         ]
     entry_points.sort(
-        key=lambda (name, fn): getattr(fn, 'priority', 100),
+        key=lambda name_fn: getattr(name_fn[1], 'priority', 100),
         )
     for (name, fn) in entry_points:
         p = sub.add_parser(
