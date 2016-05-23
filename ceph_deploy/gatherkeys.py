@@ -136,7 +136,8 @@ def gatherkeys_with_mon(args, host, dest_dir):
     Connect to mon and gather keys if mon is in quorum.
     """
     distro = hosts.get(host, username=args.username)
-    dir_keytype_mon = ceph_deploy.util.paths.mon.path(args.cluster, host)
+    remote_hostname = distro.conn.remote_module.shortname()
+    dir_keytype_mon = ceph_deploy.util.paths.mon.path(args.cluster, remote_hostname)
     path_keytype_mon = "%s/keyring" % (dir_keytype_mon)
     mon_key = distro.conn.remote_module.get_file(path_keytype_mon)
     if mon_key is None:
@@ -148,7 +149,7 @@ def gatherkeys_with_mon(args, host, dest_dir):
     with file(mon_path_local, 'w') as f:
         f.write(mon_key)
     rlogger = logging.getLogger(host)
-    path_asok = ceph_deploy.util.paths.mon.asok(args.cluster, host)
+    path_asok = ceph_deploy.util.paths.mon.asok(args.cluster, remote_hostname)
     out, err, code = remoto.process.check(
         distro.conn,
             [
@@ -187,11 +188,11 @@ def gatherkeys_with_mon(args, host, dest_dir):
         rlogger.error("could not find mons in monmap on '%s'", host)
         return False
     for mon in mon_map_mons:
-        if mon.get('name') == host:
+        if mon.get('name') == remote_hostname:
            mon_number = mon.get('rank')
            break
     if mon_number is None:
-        rlogger.error("could not find '%s' in monmap", host)
+        rlogger.error("could not find '%s' in monmap", remote_hostname)
         return False
     if not mon_number in mon_quorum:
         rlogger.error("Not yet quorum for '%s'", host)
