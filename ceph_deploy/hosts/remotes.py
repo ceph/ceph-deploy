@@ -1,4 +1,7 @@
-import ConfigParser
+try:
+    import configparser
+except ImportError:
+    import ConfigParser as configparser
 import errno
 import socket
 import os
@@ -65,13 +68,13 @@ def set_apt_priority(fqdn, path='/etc/apt/preferences.d/ceph.pref'):
 
 
 def set_repo_priority(sections, path='/etc/yum.repos.d/ceph.repo', priority='1'):
-    Config = ConfigParser.ConfigParser()
+    Config = configparser.ConfigParser()
     Config.read(path)
     Config.sections()
     for section in sections:
         try:
             Config.set(section, 'priority', priority)
-        except ConfigParser.NoSectionError:
+        except configparser.NoSectionError:
             # Emperor versions of Ceph used all lowercase sections
             # so lets just try again for the section that failed, maybe
             # we are able to find it if it is lower
@@ -347,7 +350,7 @@ def zeroing(dev):
 
 def enable_yum_priority_obsoletes(path="/etc/yum/pluginconf.d/priorities.conf"):
     """Configure Yum priorities to include obsoletes"""
-    config = ConfigParser.ConfigParser()
+    config = configparser.ConfigParser()
     config.read(path)
     config.set('main', 'check_obsoletes', '1')
     with open(path, 'wb') as fout:

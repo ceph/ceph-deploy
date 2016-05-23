@@ -1,4 +1,7 @@
-import ConfigParser
+try:
+    import configparser
+except ImportError:
+    import ConfigParser as configparser
 import contextlib
 
 from ceph_deploy import exc
@@ -13,7 +16,7 @@ class _TrimIndentFile(object):
         return line.lstrip(' \t')
 
 
-class CephConf(ConfigParser.RawConfigParser):
+class CephConf(configparser.RawConfigParser):
     def optionxform(self, s):
         s = s.replace('_', ' ')
         s = '_'.join(s.split())
@@ -28,9 +31,9 @@ class CephConf(ConfigParser.RawConfigParser):
         try:
             #Use full parent function so we can replace it in the class
             # if desired
-            return ConfigParser.RawConfigParser.get(self, section, key)
-        except (ConfigParser.NoSectionError,
-                ConfigParser.NoOptionError):
+            return configparser.RawConfigParser.get(self, section, key)
+        except (configparser.NoSectionError,
+                configparser.NoOptionError):
             return None
 
 

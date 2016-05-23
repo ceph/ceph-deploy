@@ -1,4 +1,7 @@
-from cStringIO import StringIO
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
 from textwrap import dedent
 import pytest
 from mock import Mock, patch, mock_open

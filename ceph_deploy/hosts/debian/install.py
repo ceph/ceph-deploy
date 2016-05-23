@@ -1,4 +1,7 @@
-from urlparse import urlparse
+try:
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse
 
 from ceph_deploy.util.paths import gpg
 from ceph_deploy.hosts.common import map_components

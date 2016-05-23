@@ -7,7 +7,10 @@ import sys
 import time
 from textwrap import dedent
 
-from cStringIO import StringIO
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 from ceph_deploy import conf, exc, hosts, mon
 from ceph_deploy.util import constants, system, packages

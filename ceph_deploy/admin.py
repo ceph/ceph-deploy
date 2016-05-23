@@ -1,6 +1,9 @@
 import logging
 
-from cStringIO import StringIO
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 from ceph_deploy import exc
 from ceph_deploy import conf

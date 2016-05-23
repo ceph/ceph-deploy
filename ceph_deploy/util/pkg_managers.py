@@ -1,5 +1,8 @@
 import os
-from urlparse import urlparse
+try:
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse
 
 from ceph_deploy.lib import remoto
 from ceph_deploy.util import templates
