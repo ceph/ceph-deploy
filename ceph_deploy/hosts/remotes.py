@@ -87,13 +87,13 @@ def set_repo_priority(sections, path='/etc/yum.repos.d/ceph.repo', priority='1')
     # assignments so this looks like it was before
     def remove_whitespace_from_assignments():
         separator = "="
-        lines = file(path).readlines()
+        lines = open(path).readlines()
         fp = open(path, "w")
         for line in lines:
             line = line.strip()
             if not line.startswith("#") and separator in line:
                 assignment = line.split(separator, 1)
-                assignment = map(str.strip, assignment)
+                assignment = tuple(map(str.strip, assignment))
                 fp.write("%s%s%s\n" % (assignment[0], separator, assignment[1]))
             else:
                 fp.write(line + "\n")
@@ -108,7 +108,7 @@ def write_conf(cluster, conf, overwrite):
     err_msg = 'config file %s exists with different content; use --overwrite-conf to overwrite' % path
 
     if os.path.exists(path):
-        with file(path, 'rb') as f:
+        with open(path, 'rb') as f:
             old = f.read()
             if old != conf and not overwrite:
                 raise RuntimeError(err_msg)
@@ -149,7 +149,7 @@ def create_mon_path(path, uid=-1, gid=-1):
 
 def create_done_path(done_path, uid=-1, gid=-1):
     """create a done file to avoid re-doing the mon deployment"""
-    with file(done_path, 'w'):
+    with open(done_path, 'w'):
         pass
     os.chown(done_path, uid, gid);
 
@@ -157,7 +157,7 @@ def create_done_path(done_path, uid=-1, gid=-1):
 def create_init_path(init_path, uid=-1, gid=-1):
     """create the init path if it does not exist"""
     if not os.path.exists(init_path):
-        with file(init_path, 'w'):
+        with open(init_path, 'w'):
             pass
         os.chown(init_path, uid, gid);
 
@@ -227,14 +227,14 @@ def write_file(path, content, mode=0o644, directory=None, uid=-1, gid=-1):
 
 
 def touch_file(path):
-    with file(path, 'wb') as f:  # noqa
+    with open(path, 'wb') as f:  # noqa
         pass
 
 
 def get_file(path):
     """ fetch remote file """
     try:
-        with file(path, 'rb') as f:
+        with open(path, 'rb') as f:
             return f.read()
     except IOError:
         pass
@@ -343,7 +343,7 @@ def zeroing(dev):
     lba_size = 4096
     size = 33 * lba_size
     return True
-    with file(dev, 'wb') as f:
+    with open(dev, 'wb') as f:
         f.seek(-size, os.SEEK_END)
         f.write(size*'\0')
 

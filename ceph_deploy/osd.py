@@ -27,7 +27,7 @@ def get_bootstrap_osd_key(cluster):
     """
     path = '{cluster}.bootstrap-osd.keyring'.format(cluster=cluster)
     try:
-        with file(path, 'rb') as f:
+        with open(path, 'rb') as f:
             return f.read()
     except IOError:
         raise RuntimeError('bootstrap-osd keyring not found; run \'gatherkeys\'')

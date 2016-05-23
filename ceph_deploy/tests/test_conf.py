@@ -67,5 +67,5 @@ def test_write_words_underscore():
     cfg.set('foo', 'bar thud quux', 'baz')
     f = StringIO()
     cfg.write(f)
-    f.reset()
+    f.seek(0)
     assert f.readlines() == ['[foo]\n', 'bar_thud_quux = baz\n','\n']

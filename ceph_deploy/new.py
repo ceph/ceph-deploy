@@ -198,7 +198,7 @@ def new(args):
 
     LOG.debug('Writing initial config to %s...', path)
     tmp = '%s.tmp' % path
-    with file(tmp, 'w') as f:
+    with open(tmp, 'w') as f:
         cfg.write(f)
     try:
         os.rename(tmp, path)

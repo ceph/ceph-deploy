@@ -4,7 +4,6 @@ import logging
 import textwrap
 import os
 import sys
-from string import join
 
 import ceph_deploy
 from ceph_deploy import exc, validate
@@ -162,7 +161,7 @@ def _main(args=None, namespace=None):
 
     LOG.info("Invoked (%s): %s" % (
         ceph_deploy.__version__,
-        join(sys.argv, " "))
+        ' '.join(sys.argv))
     )
     log_flags(args)
 

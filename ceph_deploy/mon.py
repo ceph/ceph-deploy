@@ -175,7 +175,7 @@ def mon_add(args):
     mon_host = args.mon[0]
 
     try:
-        with file('{cluster}.mon.keyring'.format(cluster=args.cluster),
+        with open('{cluster}.mon.keyring'.format(cluster=args.cluster),
                   'rb') as f:
             monitor_keyring = f.read()
     except IOError:

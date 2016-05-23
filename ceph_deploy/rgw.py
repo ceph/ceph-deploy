@@ -23,7 +23,7 @@ def get_bootstrap_rgw_key(cluster):
     """
     path = '{cluster}.bootstrap-rgw.keyring'.format(cluster=cluster)
     try:
-        with file(path, 'rb') as f:
+        with open(path, 'rb') as f:
             return f.read()
     except IOError:
         raise RuntimeError('bootstrap-rgw keyring not found; run \'gatherkeys\'')

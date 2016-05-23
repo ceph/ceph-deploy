@@ -15,6 +15,8 @@ class _TrimIndentFile(object):
         line = self.fp.readline()
         return line.lstrip(' \t')
 
+    def __iter__(self):
+        return iter(self.readline, '')
 
 class CephConf(configparser.RawConfigParser):
     def optionxform(self, s):
@@ -52,7 +54,7 @@ def load(args):
     path = args.ceph_conf or '{cluster}.conf'.format(cluster=args.cluster)
 
     try:
-        f = file(path)
+        f = open(path)
     except IOError as e:
         raise exc.ConfigError(
             "%s; has `ceph-deploy new` been run in this directory?" % e
@@ -88,11 +90,11 @@ def write_conf(cluster, conf, overwrite):
     tmp = '{path}.{pid}.tmp'.format(path=path, pid=os.getpid())
 
     if os.path.exists(path):
-        with file(path, 'rb') as f:
+        with open(path, 'rb') as f:
             old = f.read()
             if old != conf and not overwrite:
                 raise RuntimeError('config file %s exists with different content; use --overwrite-conf to overwrite' % path)
-    with file(tmp, 'w') as f:
+    with open(tmp, 'w') as f:
         f.write(conf)
         f.flush()
         os.fsync(f)
