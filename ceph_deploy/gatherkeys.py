@@ -140,9 +140,8 @@ def gatherkeys_with_mon(args, host, dest_dir):
     path_keytype_mon = "%s/keyring" % (dir_keytype_mon)
     mon_key = distro.conn.remote_module.get_file(path_keytype_mon)
     if mon_key is None:
-        LOG.warning("No mon key not found %s:%s", host, path_keytype_mon)
+        LOG.warning("No mon key found in host: %s", host)
         return False
-    LOG.info("Found keyring at %s:%s", host, path_keytype_mon)
     mon_name_local = keytype_path_to(args, "mon")
     mon_path_local = os.path.join(dest_dir, mon_name_local)
     with file(mon_path_local, 'w') as f:
