@@ -1,6 +1,7 @@
 import pytest
 
 from ceph_deploy.cli import get_parser
+from ceph_deploy.tests.util import assert_too_few_arguments
 
 SUBCMDS_WITH_ARGS = ['list', 'prepare', 'activate', 'zap']
 
@@ -38,7 +39,7 @@ class TestParserDisk(object):
         with pytest.raises(SystemExit):
             self.parser.parse_args('disk list'.split())
         out, err = capsys.readouterr()
-        assert 'too few arguments' in err
+        assert_too_few_arguments(err)
 
     def test_disk_list_single_host(self):
         args = self.parser.parse_args('disk list host1'.split())
@@ -99,7 +100,7 @@ class TestParserDisk(object):
         with pytest.raises(SystemExit):
             self.parser.parse_args('disk prepare'.split())
         out, err = capsys.readouterr()
-        assert 'too few arguments' in err
+        assert_too_few_arguments(err)
 
     def test_disk_prepare_single_host(self):
         args = self.parser.parse_args('disk prepare host1:sdb'.split())
@@ -122,7 +123,7 @@ class TestParserDisk(object):
         with pytest.raises(SystemExit):
             self.parser.parse_args('disk activate'.split())
         out, err = capsys.readouterr()
-        assert 'too few arguments' in err
+        assert_too_few_arguments(err)
 
     def test_disk_activate_single_host(self):
         args = self.parser.parse_args('disk activate host1:sdb1'.split())
@@ -145,7 +146,7 @@ class TestParserDisk(object):
         with pytest.raises(SystemExit):
             self.parser.parse_args('disk zap'.split())
         out, err = capsys.readouterr()
-        assert 'too few arguments' in err
+        assert_too_few_arguments(err)
 
     def test_disk_zap_single_host(self):
         args = self.parser.parse_args('disk zap host1:sdb'.split())

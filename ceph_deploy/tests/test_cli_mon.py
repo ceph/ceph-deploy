@@ -5,6 +5,7 @@ from mock import Mock, patch
 
 from ceph_deploy.cli import _main as main
 from ceph_deploy.tests.directory import directory
+from ceph_deploy.tests.util import assert_too_few_arguments
 
 
 #TODO: This test does check that things fail if the .conf file is missing
@@ -16,7 +17,7 @@ def test_bad_no_conf(tmpdir, cli):
             ) as p:
             result = p.stderr.read().decode('utf-8')
     assert 'usage: ceph-deploy' in result
-    assert 'too few arguments' in result
+    assert_too_few_arguments(result)
     assert err.value.status == 2
 
 

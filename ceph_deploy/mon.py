@@ -480,6 +480,7 @@ def make(parser):
     parser.formatter_class = ToggleRawTextHelpFormatter
 
     mon_parser = parser.add_subparsers(dest='subcommand')
+    mon_parser.required = True
 
     mon_add = mon_parser.add_parser(
         'add',

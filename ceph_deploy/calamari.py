@@ -85,6 +85,7 @@ def make(parser):
     (http://ceph.com/ceph-deploy/docs/conf.html)
     """
     calamari_parser = parser.add_subparsers(dest='subcommand')
+    calamari_parser.required = True
 
     calamari_connect = calamari_parser.add_parser(
         'connect',

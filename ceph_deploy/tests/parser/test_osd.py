@@ -1,6 +1,7 @@
 import pytest
 
 from ceph_deploy.cli import get_parser
+from ceph_deploy.tests.util import assert_too_few_arguments
 
 SUBCMDS_WITH_ARGS = ['list', 'create', 'prepare', 'activate']
 
@@ -38,7 +39,7 @@ class TestParserOSD(object):
         with pytest.raises(SystemExit):
             self.parser.parse_args('osd list'.split())
         out, err = capsys.readouterr()
-        assert 'too few arguments' in err
+        assert_too_few_arguments(err)
 
     def test_osd_list_single_host(self):
         args = self.parser.parse_args('osd list host1'.split())
@@ -61,7 +62,7 @@ class TestParserOSD(object):
         with pytest.raises(SystemExit):
             self.parser.parse_args('osd create'.split())
         out, err = capsys.readouterr()
-        assert 'too few arguments' in err
+        assert_too_few_arguments(err)
 
     def test_osd_create_single_host(self):
         args = self.parser.parse_args('osd create host1:sdb'.split())
@@ -160,7 +161,7 @@ class TestParserOSD(object):
         with pytest.raises(SystemExit):
             self.parser.parse_args('osd prepare'.split())
         out, err = capsys.readouterr()
-        assert 'too few arguments' in err
+        assert_too_few_arguments(err)
 
     def test_osd_prepare_single_host(self):
         args = self.parser.parse_args('osd prepare host1:sdb'.split())
@@ -183,7 +184,7 @@ class TestParserOSD(object):
         with pytest.raises(SystemExit):
             self.parser.parse_args('osd activate'.split())
         out, err = capsys.readouterr()
-        assert 'too few arguments' in err
+        assert_too_few_arguments(err)
 
     def test_osd_activate_single_host(self):
         args = self.parser.parse_args('osd activate host1:sdb1'.split())

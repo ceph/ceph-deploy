@@ -26,3 +26,8 @@ class Empty(object):
     def __init__(self, **kw):
         for k, v in kw.items():
             setattr(self, k, v)
+
+
+def assert_too_few_arguments(err):
+    assert ("error: too few arguments" in err or
+            "error: the following argument" in err)

@@ -84,6 +84,7 @@ def get_parser():
         metavar='COMMAND',
         help='description',
         )
+    sub.required = True
     entry_points = [
         (ep.name, ep.load())
         for ep in pkg_resources.iter_entry_points('ceph_deploy.cli')
@@ -103,6 +104,7 @@ def get_parser():
         # flag if the default release is being used
         p.set_defaults(default_release=False)
         fn(p)
+        p.required = True
     parser.set_defaults(
         cluster='ceph',
         )

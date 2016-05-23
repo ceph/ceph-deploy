@@ -230,6 +230,7 @@ def make(parser):
     Ceph MDS daemon management
     """
     mds_parser = parser.add_subparsers(dest='subcommand')
+    mds_parser.required = True
 
     mds_create = mds_parser.add_parser(
         'create',

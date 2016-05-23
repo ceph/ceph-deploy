@@ -685,6 +685,7 @@ def make(parser):
     parser.description = sub_command_help
 
     osd_parser = parser.add_subparsers(dest='subcommand')
+    osd_parser.required = True
 
     osd_list = osd_parser.add_parser(
         'list',
@@ -806,6 +807,7 @@ def make_disk(parser):
     Manage disks on a remote host.
     """
     disk_parser = parser.add_subparsers(dest='subcommand')
+    disk_parser.required = True
 
     disk_zap = disk_parser.add_parser(
         'zap',

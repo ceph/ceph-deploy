@@ -3,6 +3,7 @@ from mock import patch
 
 from ceph_deploy.cli import get_parser
 from ceph_deploy.tests.fakes import fake_arg_val_hostname
+from ceph_deploy.tests.util import assert_too_few_arguments
 
 @patch('ceph_deploy.util.arg_validators.Hostname.__call__', fake_arg_val_hostname)
 class TestParserNew(object):
@@ -70,7 +71,7 @@ class TestParserNew(object):
         with pytest.raises(SystemExit):
             self.parser.parse_args('new'.split())
         out, err = capsys.readouterr()
-        assert "error: too few arguments" in err
+        assert_too_few_arguments(err)
 
     def test_new_one_mon(self):
         hostnames = ['test1']

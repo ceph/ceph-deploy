@@ -221,6 +221,7 @@ def make(parser):
     Ceph RGW daemon management
     """
     rgw_parser = parser.add_subparsers(dest='subcommand')
+    rgw_parser.required = True
     rgw_create = rgw_parser.add_parser(
         'create',
         help='Create an RGW instance'

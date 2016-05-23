@@ -83,6 +83,7 @@ def make(parser):
     Copy ceph.conf to/from remote host(s)
     """
     config_parser = parser.add_subparsers(dest='subcommand')
+    config_parser.required = True
 
     config_push = config_parser.add_parser(
         'push',

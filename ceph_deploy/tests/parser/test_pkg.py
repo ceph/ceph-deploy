@@ -1,6 +1,7 @@
 import pytest
 
 from ceph_deploy.cli import get_parser
+from ceph_deploy.tests.util import assert_too_few_arguments
 
 
 class TestParserPkg(object):
@@ -20,7 +21,7 @@ class TestParserPkg(object):
         with pytest.raises(SystemExit):
             self.parser.parse_args('pkg --install pkg1'.split())
         out, err = capsys.readouterr()
-        assert "error: too few arguments" in err
+        assert_too_few_arguments(err)
 
     def test_pkg_install_one_host(self):
         args = self.parser.parse_args('pkg --install pkg1 host1'.split())
@@ -41,7 +42,7 @@ class TestParserPkg(object):
         with pytest.raises(SystemExit):
             self.parser.parse_args('pkg --remove pkg1'.split())
         out, err = capsys.readouterr()
-        assert "error: too few arguments" in err
+        assert_too_few_arguments(err)
 
     def test_pkg_remove_one_host(self):
         args = self.parser.parse_args('pkg --remove pkg1 host1'.split())
