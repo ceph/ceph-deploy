@@ -32,12 +32,12 @@ class TestCephVersion(object):
             assert c._get_version_output() == ''
 
     def test_output_is_unusable(self):
-        _check = Mock(return_value=('', '', 1))
+        _check = Mock(return_value=(b'', b'', 1))
         c = packages.Ceph(Mock(), _check=_check)
         assert c._get_version_output() == ''
 
     def test_output_usable(self):
-        version = 'ceph version 9.0.1-kjh234h123hd (asdf78asdjh234)'
-        _check = Mock(return_value=(version, '', 1))
+        version = b'ceph version 9.0.1-kjh234h123hd (asdf78asdjh234)'
+        _check = Mock(return_value=(version, b'', 1))
         c = packages.Ceph(Mock(), _check=_check)
         assert c._get_version_output() == '9.0.1-kjh234h123hd'

@@ -21,7 +21,7 @@ def fetch_file(args, frompath, topath, _hosts):
 
             if key is not None:
                 LOG.debug('Got %s key from %s.', topath, hostname)
-                with open(topath, 'w') as f:
+                with open(topath, 'wb') as f:
                     f.write(key)
                     return True
             distro.conn.exit()

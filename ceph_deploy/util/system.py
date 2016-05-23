@@ -55,8 +55,8 @@ def is_upstart(conn):
         conn,
         [initctl, 'version'],
     )
-    result_string = ' '.join(stdout)
-    if 'upstart' in result_string:
+    result_string = b' '.join(stdout)
+    if b'upstart' in result_string:
         return True
     return False
 

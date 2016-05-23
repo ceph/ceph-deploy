@@ -38,7 +38,7 @@ class TestIsUpstart(object):
         fake_conn = Mock()
         fake_conn.remote_module.grep = Mock(return_value=False)
         fake_conn.remote_module.which = Mock(return_value='/bin/initctl')
-        fake_stdout = (['init', '(upstart 1.12.1)'], [], 0)
+        fake_stdout = ([b'init', b'(upstart 1.12.1)'], [], 0)
         fake_check = Mock(return_value=fake_stdout)
         monkeypatch.setattr("ceph_deploy.util.system.remoto.process.check", lambda *a: fake_check())
 
@@ -49,7 +49,7 @@ class TestIsUpstart(object):
         fake_conn = Mock()
         fake_conn.remote_module.grep = Mock(return_value=False)
         fake_conn.remote_module.which = Mock(return_value='/bin/initctl')
-        fake_stdout = (['nosh', 'version', '1.14'], [], 0)
+        fake_stdout = ([b'nosh', b'version', b'1.14'], [], 0)
         fake_check = Mock(return_value=fake_stdout)
         monkeypatch.setattr("ceph_deploy.util.system.remoto.process.check", lambda *a: fake_check())
 

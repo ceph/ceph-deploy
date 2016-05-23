@@ -53,7 +53,7 @@ def connect(args):
         )
         distro.conn.remote_module.write_file(
             minion_config_file,
-            'master: %s\n' % args.master
+            ('master: %s\n' % args.master).encode('utf-8')
         )
 
         distro.packager.install('salt-minion')

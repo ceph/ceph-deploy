@@ -90,7 +90,7 @@ def write_conf(cluster, conf, overwrite):
     tmp = '{path}.{pid}.tmp'.format(path=path, pid=os.getpid())
 
     if os.path.exists(path):
-        with open(path, 'rb') as f:
+        with open(path) as f:
             old = f.read()
             if old != conf and not overwrite:
                 raise RuntimeError('config file %s exists with different content; use --overwrite-conf to overwrite' % path)

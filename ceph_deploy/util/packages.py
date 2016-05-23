@@ -46,7 +46,7 @@ class Ceph(object):
         command = [self.executable, '--version']
         out, _, _ = self._check(self.conn, command)
         try:
-            return out.split()[2]
+            return out.decode('utf-8').split()[2]
         except IndexError:
             return ''
 

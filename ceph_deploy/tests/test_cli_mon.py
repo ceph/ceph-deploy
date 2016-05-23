@@ -14,7 +14,7 @@ def test_bad_no_conf(tmpdir, cli):
             args=['ceph-deploy', 'mon'],
             stderr=subprocess.PIPE,
             ) as p:
-            result = p.stderr.read()
+            result = p.stderr.read().decode('utf-8')
     assert 'usage: ceph-deploy' in result
     assert 'too few arguments' in result
     assert err.value.status == 2

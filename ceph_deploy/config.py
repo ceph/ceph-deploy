@@ -55,7 +55,7 @@ def config_pull(args):
                             LOG.error('local config file %s exists with different content; use --overwrite-conf to overwrite' % topath)
                             raise
 
-                with open(topath, 'w') as f:
+                with open(topath, 'wb') as f:
                     f.write(conf_file_contents)
                 return
             distro.conn.exit()

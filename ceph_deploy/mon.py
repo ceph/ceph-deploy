@@ -44,7 +44,7 @@ def mon_status_check(conn, logger, hostname, args):
         logger.error(line)
 
     try:
-        return json.loads(''.join(out))
+        return json.loads(b''.join(out).decode('utf-8'))
     except ValueError:
         return {}
 
@@ -588,8 +588,8 @@ def is_running(conn, args):
         conn,
         args
     )
-    result_string = ' '.join(stdout)
-    for run_check in [': running', ' start/running']:
+    result_string = b' '.join(stdout)
+    for run_check in [b': running', b' start/running']:
         if run_check in result_string:
             return True
     return False

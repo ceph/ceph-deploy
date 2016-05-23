@@ -51,19 +51,19 @@ def write_sources_list(url, codename, filename='ceph.list', mode=0o644):
         url=url,
         codename=codename,
     )
-    write_file(repo_path, content, mode)
+    write_file(repo_path, content.encode('utf-8'), mode)
 
 
 def write_yum_repo(content, filename='ceph.repo'):
     """add yum repo file in /etc/yum.repos.d/"""
     repo_path = os.path.join('/etc/yum.repos.d', filename)
-    write_file(repo_path, content)
+    write_file(repo_path, content.encode('utf-8'))
 
 
 def set_apt_priority(fqdn, path='/etc/apt/preferences.d/ceph.pref'):
     template = "Package: *\nPin: origin {fqdn}\nPin-Priority: 999\n"
     content = template.format(fqdn=fqdn)
-    with open(path, 'wb') as fout:
+    with open(path, 'w') as fout:
         fout.write(content)
 
 
@@ -80,7 +80,7 @@ def set_repo_priority(sections, path='/etc/yum.repos.d/ceph.repo', priority='1')
             # we are able to find it if it is lower
             Config.set(section.lower(), 'priority', priority)
 
-    with open(path, 'wb') as fout:
+    with open(path, 'w') as fout:
         Config.write(fout)
 
     # And now, because ConfigParser is super duper, we need to remove the
@@ -104,11 +104,11 @@ def set_repo_priority(sections, path='/etc/yum.repos.d/ceph.repo', priority='1')
 def write_conf(cluster, conf, overwrite):
     """ write cluster configuration to /etc/ceph/{cluster}.conf """
     path = '/etc/ceph/{cluster}.conf'.format(cluster=cluster)
-    tmp_file = tempfile.NamedTemporaryFile(dir='/etc/ceph', delete=False)
+    tmp_file = tempfile.NamedTemporaryFile('w', dir='/etc/ceph', delete=False)
     err_msg = 'config file %s exists with different content; use --overwrite-conf to overwrite' % path
 
     if os.path.exists(path):
-        with open(path, 'rb') as f:
+        with open(path, 'r') as f:
             old = f.read()
             if old != conf and not overwrite:
                 raise RuntimeError(err_msg)
@@ -131,7 +131,7 @@ def write_keyring(path, key, uid=-1, gid=-1):
     # Note that we *require* to avoid deletion of the temp file
     # otherwise we risk not being able to copy the contents from
     # one file system to the other, hence the `delete=False`
-    tmp_file = tempfile.NamedTemporaryFile(delete=False)
+    tmp_file = tempfile.NamedTemporaryFile('wb', delete=False)
     tmp_file.write(key)
     tmp_file.close()
     keyring_dir = os.path.dirname(path)
@@ -149,7 +149,7 @@ def create_mon_path(path, uid=-1, gid=-1):
 
 def create_done_path(done_path, uid=-1, gid=-1):
     """create a done file to avoid re-doing the mon deployment"""
-    with open(done_path, 'w'):
+    with open(done_path, 'wb'):
         pass
     os.chown(done_path, uid, gid);
 
@@ -157,7 +157,7 @@ def create_done_path(done_path, uid=-1, gid=-1):
 def create_init_path(init_path, uid=-1, gid=-1):
     """create the init path if it does not exist"""
     if not os.path.exists(init_path):
-        with open(init_path, 'w'):
+        with open(init_path, 'wb'):
             pass
         os.chown(init_path, uid, gid);
 
@@ -221,7 +221,7 @@ def write_file(path, content, mode=0o644, directory=None, uid=-1, gid=-1):
     if os.path.exists(path):
         # Delete file in case we are changing its mode
         os.unlink(path)
-    with os.fdopen(os.open(path, os.O_WRONLY | os.O_CREAT, mode), 'w') as f:
+    with os.fdopen(os.open(path, os.O_WRONLY | os.O_CREAT, mode), 'wb') as f:
         f.write(content)
     os.chown(path, uid, gid)
 
@@ -345,7 +345,7 @@ def zeroing(dev):
     return True
     with open(dev, 'wb') as f:
         f.seek(-size, os.SEEK_END)
-        f.write(size*'\0')
+        f.write(size*b'\0')
 
 
 def enable_yum_priority_obsoletes(path="/etc/yum/pluginconf.d/priorities.conf"):
@@ -353,7 +353,7 @@ def enable_yum_priority_obsoletes(path="/etc/yum/pluginconf.d/priorities.conf"):
     config = configparser.ConfigParser()
     config.read(path)
     config.set('main', 'check_obsoletes', '1')
-    with open(path, 'wb') as fout:
+    with open(path, 'w') as fout:
         config.write(fout)
 
 
