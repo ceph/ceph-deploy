@@ -5,7 +5,6 @@ from mock import Mock, patch
 # https://github.com/pytest-dev/pytest/issues/1035
 import mock
 from ceph_deploy import mon
-from ceph_deploy.tests import fakes
 from ceph_deploy.hosts.common import mon_create
 from ceph_deploy.misc import mon_hosts, remote_shortname
 
@@ -32,10 +31,7 @@ class TestCreateMon(object):
         # passed in for remote execution. No other way around it.
         self.socket = Mock()
         self.socket.gethostname.return_value = 'hostname'
-        self.fake_write = Mock(name='fake_write')
-        self.fake_file = fakes.mock_open(data=self.fake_write)
-        self.fake_file.readline.return_value = self.fake_file
-        self.fake_file.readline.lstrip.return_value = ''
+        self.fake_file = mock.mock_open()
         self.distro = Mock()
         self.sprocess = Mock()
         self.paths = Mock()
