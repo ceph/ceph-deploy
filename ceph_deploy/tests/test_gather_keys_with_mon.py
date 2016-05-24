@@ -51,6 +51,9 @@ class mock_remote_module(object):
     def get_file(self, path):
         return self.get_file_result
 
+    def shortname(self):
+        hostname_split = self.longhostname.split('.')
+        return hostname_split[0]
 
 class mock_conn(object):
     def __init__(self):
@@ -66,12 +69,14 @@ def mock_hosts_get_file_key_content(host, **kwargs):
     output = mock_distro()
     mon_keyring = '[mon.]\nkey = %s\ncaps mon = allow *\n' % new.generate_auth_key()
     output.conn.remote_module.get_file_result = mon_keyring
+    output.conn.remote_module.longhostname = host
     return output
 
 
 def mock_hosts_get_file_key_content_none(host, **kwargs):
     output = mock_distro()
     output.conn.remote_module.get_file_result = None
+    output.conn.remote_module.longhostname = host
     return output
 
 
