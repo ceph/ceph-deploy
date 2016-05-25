@@ -8,13 +8,13 @@ import shutil
 
 
 def get_key_static(keytype, key_path):
-    with file(key_path, 'w') as f:
+    with open(key_path, 'w') as f:
         f.write("[%s]\n" % (gatherkeys.keytype_identity(keytype)))
         f.write("key=fred\n")
 
 
 def get_key_dynamic(keytype, key_path):
-    with open(key_path, 'w', 0600) as f:
+    with open(key_path, 'w', 0o600) as f:
         f.write("[%s]\n" % (gatherkeys.keytype_identity(keytype)))
         f.write("key='%s'" % (new.generate_auth_key()))
 

@@ -23,7 +23,7 @@ def _keyring_equivalent(keyring_one, keyring_two):
         They may have some values in quotes, so a safe way to compare is to
         extract the key.
         """
-        with file(file_path, 'r') as f:
+        with open(file_path) as f:
             for line in f:
                 content = line.strip()
                 if len(content) == 0:
@@ -125,9 +125,9 @@ def gatherkeys_missing(args, distro, rlogger, keypath, keytype, dest_dir):
         return False
     keyring_name_local = keytype_path_to(args, keytype)
     keyring_path_local = os.path.join(dest_dir, keyring_name_local)
-    with file(keyring_path_local, 'w') as f:
+    with open(keyring_path_local, 'wb') as f:
         for line in out:
-            f.write(line + '\n')
+            f.write(line + b'\n')
     return True
 
 
@@ -145,7 +145,7 @@ def gatherkeys_with_mon(args, host, dest_dir):
         return False
     mon_name_local = keytype_path_to(args, "mon")
     mon_path_local = os.path.join(dest_dir, mon_name_local)
-    with file(mon_path_local, 'w') as f:
+    with open(mon_path_local, 'wb') as f:
         f.write(mon_key)
     rlogger = logging.getLogger(host)
     path_asok = ceph_deploy.util.paths.mon.asok(args.cluster, remote_hostname)
@@ -167,7 +167,7 @@ def gatherkeys_with_mon(args, host, dest_dir):
             rlogger.debug(line)
         return False
     try:
-        mon_status = json.loads("".join(out))
+        mon_status = json.loads(b''.join(out).decode('utf-8'))
     except ValueError:
         rlogger.error('"ceph mon_status %s" output was not json', host)
         for line in out:

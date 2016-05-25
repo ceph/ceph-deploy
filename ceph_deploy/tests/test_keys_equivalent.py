@@ -7,25 +7,25 @@ import pytest
 
 def write_key_mon_with_caps(path, secret):
     mon_keyring = '[mon.]\nkey = %s\ncaps mon = allow *\n' % secret
-    with open(path, 'w', 0600) as f:
+    with open(path, 'w', 0o600) as f:
         f.write(mon_keyring)
 
 
 def write_key_mon_with_caps_with_tab(path, secret):
     mon_keyring = '[mon.]\n\tkey = %s\n\tcaps mon = allow *\n' % secret
-    with open(path, 'w', 0600) as f:
+    with open(path, 'w', 0o600) as f:
         f.write(mon_keyring)
 
 
 def write_key_mon_with_caps_with_tab_quote(path, secret):
     mon_keyring = '[mon.]\n\tkey = %s\n\tcaps mon = "allow *"\n' % secret
-    with open(path, 'w', 0600) as f:
+    with open(path, 'w', 0o600) as f:
         f.write(mon_keyring)
 
 
 def write_key_mon_without_caps(path, secret):
     mon_keyring = '[mon.]\nkey = %s\n' % secret
-    with open(path, 'w', 0600) as f:
+    with open(path, 'w', 0o600) as f:
         f.write(mon_keyring)
 
 

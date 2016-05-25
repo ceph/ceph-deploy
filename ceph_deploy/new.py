@@ -27,7 +27,7 @@ def generate_auth_key():
         0,                 # le32 created: nanoseconds,
         len(key),          # le16: len(key)
     )
-    return base64.b64encode(header + key)
+    return base64.b64encode(header + key).decode('utf-8')
 
 
 def ssh_copy_keys(hostname, username=None):

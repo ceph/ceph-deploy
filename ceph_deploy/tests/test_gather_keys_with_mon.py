@@ -68,7 +68,7 @@ class mock_distro(object):
 def mock_hosts_get_file_key_content(host, **kwargs):
     output = mock_distro()
     mon_keyring = '[mon.]\nkey = %s\ncaps mon = allow *\n' % new.generate_auth_key()
-    output.conn.remote_module.get_file_result = mon_keyring
+    output.conn.remote_module.get_file_result = mon_keyring.encode('utf-8')
     output.conn.remote_module.longhostname = host
     return output
 
@@ -90,50 +90,50 @@ def mock_gatherkeys_missing_fail(args, distro, rlogger, path_keytype_mon, keytyp
 
 def mock_remoto_process_check_success(conn, args):
     out = json.dumps(remoto_process_check_success_output,sort_keys=True, indent=4)
-    return out.split('\n'), "", 0
+    return out.encode('utf-8').split(b'\n'), [], 0
 
 
 def mock_remoto_process_check_rc_error(conn, args):
-    return [""], ["this failed\n"], 1
+    return [b""], [b"this failed\n"], 1
 
 
 def mock_remoto_process_check_out_not_json(conn, args):
-    return ["}bad output{"], [""], 0
+    return [b"}bad output{"], [b""], 0
 
 
 def mock_remoto_process_check_out_missing_quorum(conn, args):
     outdata = copy.deepcopy(remoto_process_check_success_output)
     del outdata["quorum"]
     out = json.dumps(outdata,sort_keys=True, indent=4)
-    return out.split('\n'), "", 0
+    return out.encode('utf-8').split(b'\n'), [], 0
 
 
 def mock_remoto_process_check_out_missing_quorum_1(conn, args):
     outdata = copy.deepcopy(remoto_process_check_success_output)
     del outdata["quorum"][1]
     out = json.dumps(outdata,sort_keys=True, indent=4)
-    return out.split('\n'), "", 0
+    return out.encode('utf-8').split(b'\n'), [], 0
 
 
 def mock_remoto_process_check_out_missing_monmap(conn, args):
     outdata = copy.deepcopy(remoto_process_check_success_output)
     del outdata["monmap"]
     out = json.dumps(outdata,sort_keys=True, indent=4)
-    return out.split('\n'), "", 0
+    return out.encode('utf-8').split(b'\n'), [], 0
 
 
 def mock_remoto_process_check_out_missing_mons(conn, args):
     outdata = copy.deepcopy(remoto_process_check_success_output)
     del outdata["monmap"]["mons"]
     out = json.dumps(outdata,sort_keys=True, indent=4)
-    return out.split('\n'), "", 0
+    return out.encode('utf-8').split(b'\n'), [], 0
 
 
 def mock_remoto_process_check_out_missing_monmap_host1(conn, args):
     outdata = copy.deepcopy(remoto_process_check_success_output)
     del outdata["monmap"]["mons"][1]
     out = json.dumps(outdata,sort_keys=True, indent=4)
-    return out.split('\n'), "", 0
+    return out.encode('utf-8').split(b'\n'), [], 0
 
 
 class TestGatherKeysWithMon(object):
