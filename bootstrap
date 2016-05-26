@@ -1,11 +1,19 @@
 #!/bin/sh
 set -e
 
+# Use `./bootstrap 3` for Python 3
+python_executable="python$1"
+if [ "$1" = "2" ]; then
+    python_package="python"
+else
+    python_package="python$1"
+fi
+
 if command -v lsb_release >/dev/null 2>&1; then
     case "$(lsb_release --id --short)" in
 	Ubuntu|Debian)
-	    for package in python-virtualenv; do
-		if [ "$(dpkg --status -- $package 2>/dev/null|sed -n 's/^Status: //p')" != "install ok installed" ]; then
+	    for package in "$python_package" python-virtualenv; do
+		if [ "$(dpkg --status -- "$package" 2>/dev/null|sed -n 's/^Status: //p')" != "install ok installed" ]; then
                     # add a space after old values
 		    missing="${missing:+$missing }$package"
 		fi
@@ -20,8 +28,8 @@ if command -v lsb_release >/dev/null 2>&1; then
 
     case "$(lsb_release --id --short | awk '{print $1}')" in
 	openSUSE|SUSE)
-	for package in python-virtualenv; do
-		if [ "$(rpm -qa $package 2>/dev/null)" == "" ]; then
+	for package in "$python_package" python-virtualenv; do
+		if [ "$(rpm -qa "$package" 2>/dev/null)" == "" ]; then
 			missing="${missing:+$missing }$package"
 		fi
 	done
@@ -37,8 +45,8 @@ else
 	if [ -f /etc/redhat-release ]; then
 		case "$(cat /etc/redhat-release | awk '{print $1}')" in
 			CentOS)
-				for package in python-virtualenv; do
-				if [ "$(rpm -qa $package 2>/dev/null)" == "" ]; then
+				for package in "$python_package" python-virtualenv; do
+				if [ "$(rpm -qa "$package" 2>/dev/null)" == "" ]; then
 		    			missing="${missing:+$missing }$package"
 				fi
 				done
@@ -52,6 +60,6 @@ else
 	fi
 fi
 
-test -d virtualenv || virtualenv virtualenv
+test -d virtualenv || virtualenv -p "$python_executable" virtualenv
 ./virtualenv/bin/python setup.py develop
 test -e ceph-deploy || ln -s virtualenv/bin/ceph-deploy .
