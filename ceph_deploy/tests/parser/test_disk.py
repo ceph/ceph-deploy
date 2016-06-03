@@ -69,9 +69,9 @@ class TestParserDisk(object):
         args = self.parser.parse_args('disk prepare host1:sdb'.split())
         assert args.fs_type == "xfs"
 
-    def test_disk_prepare_fstype_ext4(self):
-        args = self.parser.parse_args('disk prepare --fs-type ext4 host1:sdb'.split())
-        assert args.fs_type == "ext4"
+    def test_disk_prepare_fstype_btrfs(self):
+        args = self.parser.parse_args('disk prepare --fs-type btrfs host1:sdb'.split())
+        assert args.fs_type == "btrfs"
 
     def test_disk_prepare_fstype_invalid(self, capsys):
         with pytest.raises(SystemExit):
