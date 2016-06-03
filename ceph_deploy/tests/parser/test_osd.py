@@ -86,9 +86,9 @@ class TestParserOSD(object):
         args = self.parser.parse_args('osd create host1:sdb'.split())
         assert args.fs_type == "xfs"
 
-    def test_osd_create_fstype_ext4(self):
-        args = self.parser.parse_args('osd create --fs-type ext4 host1:sdb'.split())
-        assert args.fs_type == "ext4"
+    def test_osd_create_fstype_btrfs(self):
+        args = self.parser.parse_args('osd create --fs-type btrfs host1:sdb'.split())
+        assert args.fs_type == "btrfs"
 
     def test_osd_create_fstype_invalid(self, capsys):
         with pytest.raises(SystemExit):
@@ -129,10 +129,6 @@ class TestParserOSD(object):
     def test_osd_prepare_fstype_default_xfs(self):
         args = self.parser.parse_args('osd prepare host1:sdb'.split())
         assert args.fs_type == "xfs"
-
-    def test_osd_prepare_fstype_ext4(self):
-        args = self.parser.parse_args('osd prepare --fs-type ext4 host1:sdb'.split())
-        assert args.fs_type == "ext4"
 
     def test_osd_prepare_fstype_invalid(self, capsys):
         with pytest.raises(SystemExit):
