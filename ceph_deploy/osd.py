@@ -428,34 +428,6 @@ def disk_zap(args):
             ],
         )
 
-        # once all is done, call partprobe (or partx)
-        # On RHEL and CentOS distros, calling partprobe forces a reboot of the
-        # server. Since we are not resizing partitons we rely on calling
-        # partx
-        if distro.normalized_name.startswith(('centos', 'red')):
-            LOG.info('calling partx on zapped device %s', disk)
-            LOG.info('re-reading known partitions will display errors')
-            partx_executable = system.executable_path(distro.conn, 'partx')
-            remoto.process.run(
-                distro.conn,
-                [
-                    partx_executable,
-                    '-a',
-                    disk,
-                ],
-            )
-
-        else:
-            LOG.debug('Calling partprobe on zapped device %s', disk)
-            partprobe_executable = system.executable_path(distro.conn, 'partprobe')
-            remoto.process.run(
-                distro.conn,
-                [
-                    partprobe_executable,
-                    disk,
-                ],
-            )
-
         distro.conn.exit()
 
 
