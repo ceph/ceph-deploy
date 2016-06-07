@@ -4,6 +4,18 @@ Changelog
 1.5
 ---
 
+1.5.34
+^^^^^^
+07-Jun-2016
+
+* Do not call partx/partprobe when zapping disks
+* No longer allow using ext4
+* Default to systemd for SUSE
+* Remove usage of rcceph (for SUSE)
+* No longer depend on automatic ``ceph-create-keys``, use the monitors to fetch
+  keys.
+* Use ``0.0.28`` from remoto
+
 1.5.33
 ^^^^^^
 22-Apr-2016
