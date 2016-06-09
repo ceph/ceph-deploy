@@ -24,7 +24,7 @@ def choose_init(module):
         '12' : 'systemd',               # SLE_12
         '13.1' : 'systemd',             # openSUSE_13.1
         }
-    return init_mapping.get(release, 'sysvinit')
+    return init_mapping.get(release, 'systemd')
 
 
 def get_packager(module):

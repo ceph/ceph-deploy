@@ -8,7 +8,7 @@ class TestSuseInit(object):
     def test_choose_init_default(self):
         self.host.release = None
         init_type = self.host.choose_init(self.host)
-        assert init_type == "sysvinit"
+        assert init_type == "systemd"
 
     def test_choose_init_SLE_11(self):
         self.host.release = '11'

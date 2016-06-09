@@ -375,7 +375,7 @@ def activate(args, cfg):
 
         LOG.debug('activating host %s disk %s', hostname, disk)
         LOG.debug('will use init type: %s', distro.init)
-        
+
         ceph_disk_executable = system.executable_path(distro.conn, 'ceph-disk')
         remoto.process.run(
             distro.conn,
@@ -430,34 +430,6 @@ def disk_zap(args):
                 disk,
             ],
         )
-
-        # once all is done, call partprobe (or partx)
-        # On RHEL and CentOS distros, calling partprobe forces a reboot of the
-        # server. Since we are not resizing partitons we rely on calling
-        # partx
-        if distro.normalized_name.startswith(('centos', 'red')):
-            LOG.info('calling partx on zapped device %s', disk)
-            LOG.info('re-reading known partitions will display errors')
-            partx_executable = system.executable_path(distro.conn, 'partx')
-            remoto.process.run(
-                distro.conn,
-                [
-                    partx_executable,
-                    '-a',
-                    disk,
-                ],
-            )
-
-        else:
-            LOG.debug('Calling partprobe on zapped device %s', disk)
-            partprobe_executable = system.executable_path(distro.conn, 'partprobe')
-            remoto.process.run(
-                distro.conn,
-                [
-                    partprobe_executable,
-                    disk,
-                ],
-            )
 
         distro.conn.exit()
 
@@ -712,11 +684,10 @@ def make(parser):
         '--fs-type',
         metavar='FS_TYPE',
         choices=['xfs',
-                 'ext4',
                  'btrfs'
                  ],
         default='xfs',
-        help='filesystem to use to format DISK (xfs, btrfs, or ext4)',
+        help='filesystem to use to format DISK (xfs, btrfs)',
         )
     osd_create.add_argument(
         '--dmcrypt',
@@ -755,11 +726,10 @@ def make(parser):
         '--fs-type',
         metavar='FS_TYPE',
         choices=['xfs',
-                 'ext4',
                  'btrfs'
                  ],
         default='xfs',
-        help='filesystem to use to format DISK (xfs, btrfs, or ext4)',
+        help='filesystem to use to format DISK (xfs, btrfs)',
         )
     osd_prepare.add_argument(
         '--dmcrypt',
@@ -846,11 +816,10 @@ def make_disk(parser):
         '--fs-type',
         metavar='FS_TYPE',
         choices=['xfs',
-                 'ext4',
                  'btrfs'
                  ],
         default='xfs',
-        help='filesystem to use to format DISK (xfs, btrfs, or ext4)',
+        help='filesystem to use to format DISK (xfs, btrfs)',
         )
     disk_prepare.add_argument(
         '--dmcrypt',
