@@ -61,6 +61,7 @@ bar__ thud   quux = baz
     assert cfg.get('foo', 'bar_thud_quux') == 'baz'
     assert cfg.get('foo', 'bar thud quux') == 'baz'
 
+
 def test_write_words_underscore():
     cfg = conf.ceph.CephConf()
     cfg.add_section('foo')
@@ -69,3 +70,17 @@ def test_write_words_underscore():
     cfg.write(f)
     f.seek(0)
     assert f.readlines() == ['[foo]\n', 'bar_thud_quux = baz\n','\n']
+
+
+def test_section_repeat():
+    f = StringIO("""\
+[foo]
+bar = bez
+thud = quux
+
+[foo]
+bar = baz
+""")
+    cfg = conf.ceph.parse(f)
+    assert cfg.get('foo', 'bar') == 'baz'
+    assert cfg.get('foo', 'thud') == 'quux'

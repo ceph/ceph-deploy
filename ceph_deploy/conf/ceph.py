@@ -3,6 +3,7 @@ try:
 except ImportError:
     import ConfigParser as configparser
 import contextlib
+import sys
 
 from ceph_deploy import exc
 
@@ -19,6 +20,12 @@ class _TrimIndentFile(object):
         return iter(self.readline, '')
 
 class CephConf(configparser.RawConfigParser):
+    def __init__(self, *args, **kwargs):
+        if sys.version_info >= (3, 2):
+            kwargs.setdefault('strict', False)
+        # super() cannot be used with an old-style class
+        configparser.RawConfigParser.__init__(self, *args, **kwargs)
+
     def optionxform(self, s):
         s = s.replace('_', ' ')
         s = '_'.join(s.split())
