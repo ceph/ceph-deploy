@@ -147,6 +147,8 @@ def install(args):
             gpg_url = gpg_fallback
 
         if args.local_mirror:
+            if args.username:
+                hostname = "%s@%s" % (args.username, hostname)
             remoto.rsync(hostname, args.local_mirror, '/opt/ceph-deploy/repo', distro.conn.logger, sudo=True)
             repo_url = 'file:///opt/ceph-deploy/repo'
             gpg_url = 'file:///opt/ceph-deploy/repo/release.asc'
