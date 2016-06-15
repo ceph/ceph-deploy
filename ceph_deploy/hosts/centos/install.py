@@ -43,6 +43,8 @@ def install(distro, version_kind, version, adjust_repos, **kw):
         NON_SPLIT_PACKAGES,
         kw.pop('components', [])
     )
+
+    gpgcheck = kw.pop('gpgcheck', 1)
     logger = distro.conn.logger
     release = distro.release
     machine = distro.machine_type
@@ -96,7 +98,8 @@ def install(distro, version_kind, version, adjust_repos, **kw):
                     version=version),
                 gpg.url(key),
                 adjust_repos=True,
-                extra_installs=False
+                extra_installs=False,
+                gpgcheck=gpgcheck,
             )
 
         else:
@@ -117,6 +120,7 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos, extra_installs=True,
         kw.pop('components', [])
     )
     repo_url = repo_url.strip('/')  # Remove trailing slashes
+    gpgcheck = kw.pop('gpgcheck', 1)
 
     distro.packager.clean()
 
@@ -125,7 +129,8 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos, extra_installs=True,
 
         ceph_repo_content = templates.ceph_repo.format(
             repo_url=repo_url,
-            gpg_url=gpg_url
+            gpg_url=gpg_url,
+            gpgcheck=gpgcheck,
         )
 
         distro.conn.remote_module.write_yum_repo(ceph_repo_content)
