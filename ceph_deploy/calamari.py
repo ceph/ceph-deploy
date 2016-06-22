@@ -53,7 +53,7 @@ def connect(args):
         )
         distro.conn.remote_module.write_file(
             minion_config_file,
-            'master: %s\n' % args.master
+            ('master: %s\n' % args.master).encode('utf-8')
         )
 
         distro.packager.install('salt-minion')
@@ -85,6 +85,7 @@ def make(parser):
     (http://ceph.com/ceph-deploy/docs/conf.html)
     """
     calamari_parser = parser.add_subparsers(dest='subcommand')
+    calamari_parser.required = True
 
     calamari_connect = calamari_parser.add_parser(
         'connect',

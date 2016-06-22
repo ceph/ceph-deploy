@@ -1,57 +1,86 @@
 #!/bin/sh
 set -e
 
-if command -v lsb_release >/dev/null 2>&1; then
-    case "$(lsb_release --id --short)" in
-	Ubuntu|Debian)
-	    for package in python-virtualenv; do
-		if [ "$(dpkg --status -- $package 2>/dev/null|sed -n 's/^Status: //p')" != "install ok installed" ]; then
-                    # add a space after old values
-		    missing="${missing:+$missing }$package"
-		fi
-	    done
-	    if [ -n "$missing" ]; then
-			echo "$0: missing required packages, please install them:" 1>&2
-			echo "  sudo apt-get install $missing"
-			exit 1
-	    fi
-	    ;;
-    esac
+# Use `./bootstrap 3` for Python 3
+python_executable="python$1"
 
-    case "$(lsb_release --id --short | awk '{print $1}')" in
-	openSUSE|SUSE)
-	for package in python-virtualenv; do
-		if [ "$(rpm -qa $package 2>/dev/null)" == "" ]; then
-			missing="${missing:+$missing }$package"
-		fi
-	done
-	if [ -n "$missing" ]; then
-		echo "$0: missing required packages, please install them:" 1>&2
-		echo "  sudo zypper install $missing"
-		exit 1
-	fi
-	;;
-    esac
+if ! [ -d virtualenv ]; then
+    if command -v lsb_release >/dev/null 2>&1; then
+        if [ "$1" = "2" ]; then
+            python_package="python"
+        else
+            python_package="python$1"
+        fi
 
-else
-	if [ -f /etc/redhat-release ]; then
-		case "$(cat /etc/redhat-release | awk '{print $1}')" in
-			CentOS)
-				for package in python-virtualenv; do
-				if [ "$(rpm -qa $package 2>/dev/null)" == "" ]; then
-		    			missing="${missing:+$missing }$package"
-				fi
-				done
-				if [ -n "$missing" ]; then
-					echo "$0: missing required packages, please install them:" 1>&2
-					echo "  sudo yum install $missing"
-				exit 1
-				fi
-				;;
-		esac
-	fi
+        case "$(lsb_release --id --short)" in
+        Ubuntu|Debian)
+            for package in "$python_package" python-virtualenv; do
+            if [ "$(dpkg --status -- "$package" 2>/dev/null|sed -n 's/^Status: //p')" != "install ok installed" ]; then
+                # add a space after old values
+                missing="${missing:+$missing }$package"
+            fi
+            done
+            if [ -n "$missing" ]; then
+                echo "$0: missing required packages, please install them:" 1>&2
+                echo "  sudo apt-get install $missing"
+                exit 1
+            fi
+            ;;
+        esac
+
+        case "$(lsb_release --id --short | awk '{print $1}')" in
+        openSUSE|SUSE)
+            for package in "$python_package" python-virtualenv; do
+                if [ "$(rpm -qa "$package" 2>/dev/null)" == "" ]; then
+                    missing="${missing:+$missing }$package"
+                fi
+            done
+            if [ -n "$missing" ]; then
+                echo "$0: missing required packages, please install them:" 1>&2
+                echo "  sudo zypper install $missing"
+                exit 1
+            fi
+            ;;
+        esac
+    fi
+
+    if [ -f /etc/redhat-release ]; then
+        case "$(cat /etc/redhat-release | awk '{print $1}')" in
+        CentOS)
+            for package in python-virtualenv; do
+                if [ "$(rpm -qa "$package" 2>/dev/null)" == "" ]; then
+                    missing="${missing:+$missing }$package"
+                fi
+            done
+            if [ -n "$missing" ]; then
+                echo "$0: missing required packages, please install them:" 1>&2
+                echo "  sudo yum install $missing"
+                exit 1
+            fi
+
+            if [ "${1:-2}" -ge 3 ]; then
+                if ! command -v "$python_executable" >/dev/null 2>&1; then
+                    echo "$0: missing Python ($python_executable), please install it"
+                    exit 1
+                fi
+
+                # Make a temporary virtualenv to get a fresh version of virtualenv
+                # and use it to make a Python 3 virtualenv,
+                # because CentOS 7 has buggy old virtualenv (v1.10.1)
+                # https://github.com/pypa/virtualenv/issues/463
+
+                virtualenv virtualenv_tmp
+                virtualenv_tmp/bin/pip install --upgrade virtualenv
+                virtualenv_tmp/bin/virtualenv -p "$python_executable" virtualenv
+                rm -rf virtualenv_tmp
+            else
+                virtualenv virtualenv
+            fi
+            ;;
+        esac
+    fi
 fi
 
-test -d virtualenv || virtualenv virtualenv
+test -d virtualenv || virtualenv -p "$python_executable" virtualenv
 ./virtualenv/bin/python setup.py develop
 test -e ceph-deploy || ln -s virtualenv/bin/ceph-deploy .

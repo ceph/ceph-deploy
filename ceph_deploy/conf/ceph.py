@@ -1,5 +1,9 @@
-import ConfigParser
+try:
+    import configparser
+except ImportError:
+    import ConfigParser as configparser
 import contextlib
+import sys
 
 from ceph_deploy import exc
 
@@ -12,8 +16,16 @@ class _TrimIndentFile(object):
         line = self.fp.readline()
         return line.lstrip(' \t')
 
+    def __iter__(self):
+        return iter(self.readline, '')
 
-class CephConf(ConfigParser.RawConfigParser):
+class CephConf(configparser.RawConfigParser):
+    def __init__(self, *args, **kwargs):
+        if sys.version_info >= (3, 2):
+            kwargs.setdefault('strict', False)
+        # super() cannot be used with an old-style class
+        configparser.RawConfigParser.__init__(self, *args, **kwargs)
+
     def optionxform(self, s):
         s = s.replace('_', ' ')
         s = '_'.join(s.split())
@@ -28,9 +40,9 @@ class CephConf(ConfigParser.RawConfigParser):
         try:
             #Use full parent function so we can replace it in the class
             # if desired
-            return ConfigParser.RawConfigParser.get(self, section, key)
-        except (ConfigParser.NoSectionError,
-                ConfigParser.NoOptionError):
+            return configparser.RawConfigParser.get(self, section, key)
+        except (configparser.NoSectionError,
+                configparser.NoOptionError):
             return None
 
 
@@ -49,7 +61,7 @@ def load(args):
     path = args.ceph_conf or '{cluster}.conf'.format(cluster=args.cluster)
 
     try:
-        f = file(path)
+        f = open(path)
     except IOError as e:
         raise exc.ConfigError(
             "%s; has `ceph-deploy new` been run in this directory?" % e
@@ -85,11 +97,11 @@ def write_conf(cluster, conf, overwrite):
     tmp = '{path}.{pid}.tmp'.format(path=path, pid=os.getpid())
 
     if os.path.exists(path):
-        with file(path, 'rb') as f:
+        with open(path) as f:
             old = f.read()
             if old != conf and not overwrite:
                 raise RuntimeError('config file %s exists with different content; use --overwrite-conf to overwrite' % path)
-    with file(tmp, 'w') as f:
+    with open(tmp, 'w') as f:
         f.write(conf)
         f.flush()
         os.fsync(f)

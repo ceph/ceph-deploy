@@ -49,13 +49,13 @@ def config_pull(args):
             if conf_file_contents is not None:
                 LOG.debug('Got %s from %s', frompath, hostname)
                 if os.path.exists(topath):
-                    with file(topath, 'rb') as f:
+                    with open(topath, 'rb') as f:
                         existing = f.read()
                         if existing != conf_file_contents and not args.overwrite_conf:
                             LOG.error('local config file %s exists with different content; use --overwrite-conf to overwrite' % topath)
                             raise
 
-                with file(topath, 'w') as f:
+                with open(topath, 'wb') as f:
                     f.write(conf_file_contents)
                 return
             distro.conn.exit()
@@ -83,6 +83,7 @@ def make(parser):
     Copy ceph.conf to/from remote host(s)
     """
     config_parser = parser.add_subparsers(dest='subcommand')
+    config_parser.required = True
 
     config_push = config_parser.add_parser(
         'push',

@@ -1,6 +1,7 @@
 import pytest
 
 from ceph_deploy.cli import get_parser
+from ceph_deploy.tests.util import assert_too_few_arguments
 
 COMP_FLAGS = [
     'mon', 'mds', 'rgw', 'osd', 'common', 'all'
@@ -24,7 +25,7 @@ class TestParserInstall(object):
         with pytest.raises(SystemExit):
             self.parser.parse_args('install'.split())
         out, err = capsys.readouterr()
-        assert "error: too few arguments" in err
+        assert_too_few_arguments(err)
 
     def test_install_one_host(self):
         args = self.parser.parse_args('install host1'.split())

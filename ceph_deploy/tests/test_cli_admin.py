@@ -15,7 +15,7 @@ def test_bad_no_conf(tmpdir, cli):
             args=['ceph-deploy', 'admin', 'host1'],
             stderr=subprocess.PIPE,
             ) as p:
-            result = p.stderr.read()
+            result = p.stderr.read().decode('utf-8')
     assert 'No such file or directory: \'ceph.conf\'' in result
     assert err.value.status == 1
 
@@ -28,7 +28,7 @@ def test_bad_no_key(tmpdir, cli):
             args=['ceph-deploy', 'admin', 'host1'],
             stderr=subprocess.PIPE,
             ) as p:
-            result = p.stderr.read()
+            result = p.stderr.read().decode('utf-8')
     assert 'ceph.client.admin.keyring not found' in result
     assert err.value.status == 1
 
@@ -36,7 +36,7 @@ def test_bad_no_key(tmpdir, cli):
 def test_write_keyring(tmpdir):
     with tmpdir.join('ceph.conf').open('w'):
         pass
-    with tmpdir.join('ceph.client.admin.keyring').open('w'):
+    with tmpdir.join('ceph.client.admin.keyring').open('wb'):
         pass
 
     etc_ceph = os.path.join(str(tmpdir), 'etc', 'ceph')
@@ -44,7 +44,7 @@ def test_write_keyring(tmpdir):
 
     distro = MagicMock()
     distro.conn = MagicMock()
-    remotes.write_file.func_defaults = (0644, str(tmpdir), -1, -1)
+    remotes.write_file.__defaults__ = (0o644, str(tmpdir), -1, -1)
     distro.conn.remote_module = remotes
     distro.conn.remote_module.write_conf = Mock()
 
@@ -56,5 +56,5 @@ def test_write_keyring(tmpdir):
     keyring_file = os.path.join(etc_ceph, 'ceph.client.admin.keyring')
     assert os.path.exists(keyring_file)
 
-    file_mode = oct(os.stat(keyring_file).st_mode & 0777)
-    assert file_mode == oct(0600)
+    file_mode = oct(os.stat(keyring_file).st_mode & 0o777)
+    assert file_mode == oct(0o600)

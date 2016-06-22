@@ -1,4 +1,7 @@
-import ConfigParser
+try:
+    import configparser
+except ImportError:
+    import ConfigParser as configparser
 import errno
 import socket
 import os
@@ -41,56 +44,56 @@ def machine_type():
     return platform.machine()
 
 
-def write_sources_list(url, codename, filename='ceph.list', mode=0644):
+def write_sources_list(url, codename, filename='ceph.list', mode=0o644):
     """add deb repo to /etc/apt/sources.list.d/"""
     repo_path = os.path.join('/etc/apt/sources.list.d', filename)
     content = 'deb {url} {codename} main\n'.format(
         url=url,
         codename=codename,
     )
-    write_file(repo_path, content, mode)
+    write_file(repo_path, content.encode('utf-8'), mode)
 
 
 def write_yum_repo(content, filename='ceph.repo'):
     """add yum repo file in /etc/yum.repos.d/"""
     repo_path = os.path.join('/etc/yum.repos.d', filename)
-    write_file(repo_path, content)
+    write_file(repo_path, content.encode('utf-8'))
 
 
 def set_apt_priority(fqdn, path='/etc/apt/preferences.d/ceph.pref'):
     template = "Package: *\nPin: origin {fqdn}\nPin-Priority: 999\n"
     content = template.format(fqdn=fqdn)
-    with open(path, 'wb') as fout:
+    with open(path, 'w') as fout:
         fout.write(content)
 
 
 def set_repo_priority(sections, path='/etc/yum.repos.d/ceph.repo', priority='1'):
-    Config = ConfigParser.ConfigParser()
+    Config = configparser.ConfigParser()
     Config.read(path)
     Config.sections()
     for section in sections:
         try:
             Config.set(section, 'priority', priority)
-        except ConfigParser.NoSectionError:
+        except configparser.NoSectionError:
             # Emperor versions of Ceph used all lowercase sections
             # so lets just try again for the section that failed, maybe
             # we are able to find it if it is lower
             Config.set(section.lower(), 'priority', priority)
 
-    with open(path, 'wb') as fout:
+    with open(path, 'w') as fout:
         Config.write(fout)
 
     # And now, because ConfigParser is super duper, we need to remove the
     # assignments so this looks like it was before
     def remove_whitespace_from_assignments():
         separator = "="
-        lines = file(path).readlines()
+        lines = open(path).readlines()
         fp = open(path, "w")
         for line in lines:
             line = line.strip()
             if not line.startswith("#") and separator in line:
                 assignment = line.split(separator, 1)
-                assignment = map(str.strip, assignment)
+                assignment = tuple(map(str.strip, assignment))
                 fp.write("%s%s%s\n" % (assignment[0], separator, assignment[1]))
             else:
                 fp.write(line + "\n")
@@ -101,23 +104,23 @@ def set_repo_priority(sections, path='/etc/yum.repos.d/ceph.repo', priority='1')
 def write_conf(cluster, conf, overwrite):
     """ write cluster configuration to /etc/ceph/{cluster}.conf """
     path = '/etc/ceph/{cluster}.conf'.format(cluster=cluster)
-    tmp_file = tempfile.NamedTemporaryFile(dir='/etc/ceph', delete=False)
+    tmp_file = tempfile.NamedTemporaryFile('w', dir='/etc/ceph', delete=False)
     err_msg = 'config file %s exists with different content; use --overwrite-conf to overwrite' % path
 
     if os.path.exists(path):
-        with file(path, 'rb') as f:
+        with open(path, 'r') as f:
             old = f.read()
             if old != conf and not overwrite:
                 raise RuntimeError(err_msg)
         tmp_file.write(conf)
         tmp_file.close()
         shutil.move(tmp_file.name, path)
-        os.chmod(path, 0644)
+        os.chmod(path, 0o644)
         return
     if os.path.exists('/etc/ceph'):
         with open(path, 'w') as f:
             f.write(conf)
-        os.chmod(path, 0644)
+        os.chmod(path, 0o644)
     else:
         err_msg = '/etc/ceph/ does not exist - could not write config'
         raise RuntimeError(err_msg)
@@ -128,7 +131,7 @@ def write_keyring(path, key, uid=-1, gid=-1):
     # Note that we *require* to avoid deletion of the temp file
     # otherwise we risk not being able to copy the contents from
     # one file system to the other, hence the `delete=False`
-    tmp_file = tempfile.NamedTemporaryFile(delete=False)
+    tmp_file = tempfile.NamedTemporaryFile('wb', delete=False)
     tmp_file.write(key)
     tmp_file.close()
     keyring_dir = os.path.dirname(path)
@@ -146,7 +149,7 @@ def create_mon_path(path, uid=-1, gid=-1):
 
 def create_done_path(done_path, uid=-1, gid=-1):
     """create a done file to avoid re-doing the mon deployment"""
-    with file(done_path, 'w'):
+    with open(done_path, 'wb'):
         pass
     os.chown(done_path, uid, gid);
 
@@ -154,7 +157,7 @@ def create_done_path(done_path, uid=-1, gid=-1):
 def create_init_path(init_path, uid=-1, gid=-1):
     """create the init path if it does not exist"""
     if not os.path.exists(init_path):
-        with file(init_path, 'w'):
+        with open(init_path, 'wb'):
             pass
         os.chown(init_path, uid, gid);
 
@@ -207,10 +210,10 @@ def unlink(_file):
 
 def write_monitor_keyring(keyring, monitor_keyring, uid=-1, gid=-1):
     """create the monitor keyring file"""
-    write_file(keyring, monitor_keyring, 0600, None, uid, gid)
+    write_file(keyring, monitor_keyring, 0o600, None, uid, gid)
 
 
-def write_file(path, content, mode=0644, directory=None, uid=-1, gid=-1):
+def write_file(path, content, mode=0o644, directory=None, uid=-1, gid=-1):
     if directory:
         if path.startswith("/"):
             path = path[1:]
@@ -218,20 +221,20 @@ def write_file(path, content, mode=0644, directory=None, uid=-1, gid=-1):
     if os.path.exists(path):
         # Delete file in case we are changing its mode
         os.unlink(path)
-    with os.fdopen(os.open(path, os.O_WRONLY | os.O_CREAT, mode), 'w') as f:
+    with os.fdopen(os.open(path, os.O_WRONLY | os.O_CREAT, mode), 'wb') as f:
         f.write(content)
     os.chown(path, uid, gid)
 
 
 def touch_file(path):
-    with file(path, 'wb') as f:  # noqa
+    with open(path, 'wb') as f:  # noqa
         pass
 
 
 def get_file(path):
     """ fetch remote file """
     try:
-        with file(path, 'rb') as f:
+        with open(path, 'rb') as f:
             return f.read()
     except IOError:
         pass
@@ -297,7 +300,7 @@ def make_mon_removed_dir(path, file_name):
     """ move old monitor data """
     try:
         os.makedirs('/var/lib/ceph/mon-removed')
-    except OSError, e:
+    except OSError as e:
         if e.errno != errno.EEXIST:
             raise
     shutil.move(path, os.path.join('/var/lib/ceph/mon-removed/', file_name))
@@ -307,7 +310,7 @@ def safe_mkdir(path, uid=-1, gid=-1):
     """ create path if it doesn't exist """
     try:
         os.mkdir(path)
-    except OSError, e:
+    except OSError as e:
         if e.errno == errno.EEXIST:
             pass
         else:
@@ -319,7 +322,7 @@ def safe_makedirs(path, uid=-1, gid=-1):
     """ create path recursively if it doesn't exist """
     try:
         os.makedirs(path)
-    except OSError, e:
+    except OSError as e:
         if e.errno == errno.EEXIST:
             pass
         else:
@@ -340,17 +343,17 @@ def zeroing(dev):
     lba_size = 4096
     size = 33 * lba_size
     return True
-    with file(dev, 'wb') as f:
+    with open(dev, 'wb') as f:
         f.seek(-size, os.SEEK_END)
-        f.write(size*'\0')
+        f.write(size*b'\0')
 
 
 def enable_yum_priority_obsoletes(path="/etc/yum/pluginconf.d/priorities.conf"):
     """Configure Yum priorities to include obsoletes"""
-    config = ConfigParser.ConfigParser()
+    config = configparser.ConfigParser()
     config.read(path)
     config.set('main', 'check_obsoletes', '1')
-    with open(path, 'wb') as fout:
+    with open(path, 'w') as fout:
         config.write(fout)
 
 

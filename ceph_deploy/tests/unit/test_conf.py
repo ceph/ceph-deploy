@@ -1,22 +1,22 @@
-from cStringIO import StringIO
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
 from textwrap import dedent
 import pytest
-from mock import Mock, patch
+from mock import Mock, patch, mock_open
 from ceph_deploy import conf
-from ceph_deploy.tests import fakes
 
 
 class TestLocateOrCreate(object):
 
     def setup(self):
-        self.fake_write = Mock(name='fake_write')
-        self.fake_file = fakes.mock_open(data=self.fake_write)
-        self.fake_file.readline.return_value = self.fake_file
+        self.fake_file = mock_open()
 
     def test_no_conf(self):
         fake_path = Mock()
         fake_path.exists = Mock(return_value=False)
-        with patch('__builtin__.open', self.fake_file):
+        with patch('ceph_deploy.conf.cephdeploy.open', self.fake_file, create=True):
             with patch('ceph_deploy.conf.cephdeploy.path', fake_path):
                 conf.cephdeploy.location()
 

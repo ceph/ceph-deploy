@@ -1,6 +1,7 @@
 import pytest
 
 from ceph_deploy.cli import get_parser
+from ceph_deploy.tests.util import assert_too_few_arguments
 
 
 class TestParserCalamari(object):
@@ -28,7 +29,7 @@ class TestParserCalamari(object):
         with pytest.raises(SystemExit):
             self.parser.parse_args('calamari connect'.split())
         out, err = capsys.readouterr()
-        assert "error: too few arguments" in err
+        assert_too_few_arguments(err)
 
     def test_calamari_connect_one_host(self):
         args = self.parser.parse_args('calamari connect host1'.split())

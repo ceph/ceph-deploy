@@ -2,6 +2,8 @@ import pytest
 
 import ceph_deploy
 from ceph_deploy.cli import get_parser
+from ceph_deploy.tests.util import assert_too_few_arguments
+
 
 SUBCMDS_WITH_ARGS = [
     'new', 'install', 'rgw', 'mds', 'mon', 'gatherkeys', 'disk', 'osd',
@@ -41,7 +43,7 @@ class TestParserMain(object):
         with pytest.raises(SystemExit):
             self.parser.parse_args('--version'.split())
         out, err = capsys.readouterr()
-        assert err.strip() == ceph_deploy.__version__
+        assert ceph_deploy.__version__ in (out.strip(), err.strip())
 
     def test_custom_username(self):
         args = self.parser.parse_args('--username trhoden forgetkeys'.split())
@@ -87,7 +89,7 @@ class TestParserMain(object):
         with pytest.raises(SystemExit):
             self.parser.parse_args(['%s' % cmd])
         out, err = capsys.readouterr()
-        assert 'too few arguments' in err
+        assert_too_few_arguments(err)
         assert 'invalid choice' not in err
 
     @pytest.mark.parametrize('cmd', SUBCMDS_WITHOUT_ARGS)

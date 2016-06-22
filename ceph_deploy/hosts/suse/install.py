@@ -44,7 +44,7 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos, **kw):
         )
         distro.conn.remote_module.write_file(
             '/etc/zypp/repos.d/ceph.repo',
-            ceph_repo_content)
+            ceph_repo_content.encode('utf-8'))
         distro.packager.clean()
 
     if packages:
@@ -88,7 +88,7 @@ def repo_install(distro, reponame, baseurl, gpgkey, **kw):
 
     distro.conn.remote_module.write_file(
         '/etc/zypp/repos.d/%s' % (reponame),
-        repo_content
+        repo_content.encode('utf-8')
     )
 
     # Some custom repos do not need to install ceph

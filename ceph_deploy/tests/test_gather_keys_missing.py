@@ -26,11 +26,11 @@ class mock_rlogger(object):
 def mock_remoto_process_check_success(conn, args):
     secret = new.generate_auth_key()
     out = '[mon.]\nkey = %s\ncaps mon = allow *\n' % secret
-    return out.split('\n'), "", 0
+    return out.encode('utf-8').split(b'\n'), [], 0
 
 
 def mock_remoto_process_check_rc_error(conn, args):
-    return [""], ["this failed\n"], 1
+    return [b""], [b"this failed\n"], 1
 
 
 class TestGatherKeysMissing(object):

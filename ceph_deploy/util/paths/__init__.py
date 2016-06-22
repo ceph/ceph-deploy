@@ -1,3 +1,3 @@
-import mon # noqa
-import osd # noqa
-import gpg # noqa
+from . import mon # noqa
+from . import osd # noqa
+from . import gpg # noqa

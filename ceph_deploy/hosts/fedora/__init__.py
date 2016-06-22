@@ -1,7 +1,7 @@
-import mon  # noqa
+from . import mon  # noqa
 from ceph_deploy.hosts.centos.install import repo_install  # noqa
-from install import install, mirror_install  # noqa
-from uninstall import uninstall  # noqa
+from .install import install, mirror_install  # noqa
+from .uninstall import uninstall  # noqa
 from ceph_deploy.util import pkg_managers
 
 # Allow to set some information about this distro

@@ -4,7 +4,6 @@ import logging
 import textwrap
 import os
 import sys
-from string import join
 
 import ceph_deploy
 from ceph_deploy import exc, validate
@@ -85,12 +84,13 @@ def get_parser():
         metavar='COMMAND',
         help='description',
         )
+    sub.required = True
     entry_points = [
         (ep.name, ep.load())
         for ep in pkg_resources.iter_entry_points('ceph_deploy.cli')
         ]
     entry_points.sort(
-        key=lambda (name, fn): getattr(fn, 'priority', 100),
+        key=lambda name_fn: getattr(name_fn[1], 'priority', 100),
         )
     for (name, fn) in entry_points:
         p = sub.add_parser(
@@ -104,6 +104,7 @@ def get_parser():
         # flag if the default release is being used
         p.set_defaults(default_release=False)
         fn(p)
+        p.required = True
     parser.set_defaults(
         cluster='ceph',
         )
@@ -162,7 +163,7 @@ def _main(args=None, namespace=None):
 
     LOG.info("Invoked (%s): %s" % (
         ceph_deploy.__version__,
-        join(sys.argv, " "))
+        ' '.join(sys.argv))
     )
     log_flags(args)
 

@@ -21,7 +21,7 @@ def forgetkeys(args):
                     cluster=args.cluster,
                     what=f,
                     ))
-        except OSError, e:
+        except OSError as e:
             if e.errno == errno.ENOENT:
                 pass
             else:

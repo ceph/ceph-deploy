@@ -1,4 +1,7 @@
-from ConfigParser import SafeConfigParser, NoSectionError, NoOptionError
+try:
+    import configparser
+except ImportError:
+    import ConfigParser as configparser
 import logging
 import os
 from os import path
@@ -143,7 +146,7 @@ def override_subcommand(section_name, section_items, args):
     return args
 
 
-class Conf(SafeConfigParser):
+class Conf(configparser.SafeConfigParser):
     """
     Subclasses from SafeConfigParser to give a few helpers for the ceph-deploy
     configuration. Specifically, it addresses the need to work with custom
@@ -160,7 +163,7 @@ class Conf(SafeConfigParser):
         """
         try:
             return self.get(section, key)
-        except (NoSectionError, NoOptionError):
+        except (configparser.NoSectionError, configparser.NoOptionError):
             return default
 
     def get_repos(self):

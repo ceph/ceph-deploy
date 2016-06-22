@@ -1,6 +1,7 @@
 import pytest
 
 from ceph_deploy.cli import get_parser
+from ceph_deploy.tests.util import assert_too_few_arguments
 
 SUBCMDS_WITH_ARGS = ['push', 'pull']
 
@@ -32,7 +33,7 @@ class TestParserConfig(object):
         with pytest.raises(SystemExit):
             self.parser.parse_args('config push'.split())
         out, err = capsys.readouterr()
-        assert "error: too few arguments" in err
+        assert_too_few_arguments(err)
 
     def test_config_push_one_host(self):
         args = self.parser.parse_args('config push host1'.split())
@@ -47,7 +48,7 @@ class TestParserConfig(object):
         with pytest.raises(SystemExit):
             self.parser.parse_args('config pull'.split())
         out, err = capsys.readouterr()
-        assert "error: too few arguments" in err
+        assert_too_few_arguments(err)
 
     def test_config_pull_one_host(self):
         args = self.parser.parse_args('config pull host1'.split())

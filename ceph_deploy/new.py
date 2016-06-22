@@ -27,7 +27,7 @@ def generate_auth_key():
         0,                 # le32 created: nanoseconds,
         len(key),          # le16: len(key)
     )
-    return base64.b64encode(header + key)
+    return base64.b64encode(header + key).decode('utf-8')
 
 
 def ssh_copy_keys(hostname, username=None):
@@ -198,7 +198,7 @@ def new(args):
 
     LOG.debug('Writing initial config to %s...', path)
     tmp = '%s.tmp' % path
-    with file(tmp, 'w') as f:
+    with open(tmp, 'w') as f:
         cfg.write(f)
     try:
         os.rename(tmp, path)
@@ -216,11 +216,11 @@ def new_mon_keyring(args):
     keypath = '{name}.mon.keyring'.format(
         name=args.cluster,
         )
-    oldmask = os.umask(077)
+    oldmask = os.umask(0o77)
     LOG.debug('Writing monitor keyring to %s...', keypath)
     try:
         tmp = '%s.tmp' % keypath
-        with open(tmp, 'w', 0600) as f:
+        with open(tmp, 'w', 0o600) as f:
             f.write(mon_keyring)
         try:
             os.rename(tmp, keypath)

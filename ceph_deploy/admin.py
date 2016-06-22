@@ -1,6 +1,9 @@
 import logging
 
-from cStringIO import StringIO
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 from ceph_deploy import exc
 from ceph_deploy import conf
@@ -16,7 +19,7 @@ def admin(args):
     cfg.write(conf_data)
 
     try:
-        with file('%s.client.admin.keyring' % args.cluster, 'rb') as f:
+        with open('%s.client.admin.keyring' % args.cluster, 'rb') as f:
             keyring = f.read()
     except:
         raise RuntimeError('%s.client.admin.keyring not found' %
@@ -37,7 +40,7 @@ def admin(args):
             distro.conn.remote_module.write_file(
                 '/etc/ceph/%s.client.admin.keyring' % args.cluster,
                 keyring,
-                0600,
+                0o600,
             )
 
             distro.conn.exit()

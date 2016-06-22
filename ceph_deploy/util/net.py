@@ -79,8 +79,8 @@ def ip_addresses(conn, interface=None, include_loopback=False):
     if interface is None:
         target_ifaces = ifaces
     else:
-        target_ifaces = dict([(k, v) for k, v in ifaces.iteritems()
-                              if k == interface])
+        target_ifaces = dict((k, v) for k, v in ifaces.items()
+                             if k == interface)
         if not target_ifaces:
             LOG.error('Interface {0} not found.'.format(interface))
     for ipv4_info in target_ifaces.values():
@@ -150,7 +150,8 @@ def linux_interfaces(conn):
                 'show',
             ],
         )
-        ifaces = _interfaces_ip('\n'.join(cmd1) + '\n' + '\n'.join(cmd2))
+        ifaces = _interfaces_ip(b'\n'.join(cmd1).decode('utf-8') + '\n' +
+                                b'\n'.join(cmd2).decode('utf-8'))
     elif ifconfig_path:
         cmd, _, _ = remoto.process.check(
             conn,

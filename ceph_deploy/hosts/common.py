@@ -1,7 +1,10 @@
 from ceph_deploy.util import paths
 from ceph_deploy import conf
 from ceph_deploy.lib import remoto
-from StringIO import StringIO
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
 from ceph_deploy.util import constants
 
 

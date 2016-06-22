@@ -7,7 +7,10 @@ import sys
 import time
 from textwrap import dedent
 
-from cStringIO import StringIO
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 from ceph_deploy import conf, exc, hosts, mon
 from ceph_deploy.util import constants, system, packages
@@ -24,7 +27,7 @@ def get_bootstrap_osd_key(cluster):
     """
     path = '{cluster}.bootstrap-osd.keyring'.format(cluster=cluster)
     try:
-        with file(path, 'rb') as f:
+        with open(path, 'rb') as f:
             return f.read()
     except IOError:
         raise RuntimeError('bootstrap-osd keyring not found; run \'gatherkeys\'')
@@ -76,7 +79,7 @@ def osd_tree(conn, cluster):
     )
 
     try:
-        loaded_json = json.loads(''.join(out))
+        loaded_json = json.loads(b''.join(out).decode('utf-8'))
         # convert boolean strings to actual booleans because
         # --format=json fails to do this properly
         for k, v in loaded_json.items():
@@ -129,7 +132,7 @@ def osd_status_check(conn, cluster):
         return {}
 
     try:
-        loaded_json = json.loads(''.join(out))
+        loaded_json = json.loads(b''.join(out).decode('utf-8'))
         # convert boolean strings to actual booleans because
         # --format=json fails to do this properly
         for k, v in loaded_json.items():
@@ -654,6 +657,7 @@ def make(parser):
     parser.description = sub_command_help
 
     osd_parser = parser.add_subparsers(dest='subcommand')
+    osd_parser.required = True
 
     osd_list = osd_parser.add_parser(
         'list',
@@ -773,6 +777,7 @@ def make_disk(parser):
     Manage disks on a remote host.
     """
     disk_parser = parser.add_subparsers(dest='subcommand')
+    disk_parser.required = True
 
     disk_zap = disk_parser.add_parser(
         'zap',

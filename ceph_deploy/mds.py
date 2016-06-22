@@ -1,4 +1,7 @@
-from cStringIO import StringIO
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
 import errno
 import logging
 import os
@@ -20,7 +23,7 @@ def get_bootstrap_mds_key(cluster):
     """
     path = '{cluster}.bootstrap-mds.keyring'.format(cluster=cluster)
     try:
-        with file(path, 'rb') as f:
+        with open(path, 'rb') as f:
             return f.read()
     except IOError:
         raise RuntimeError('bootstrap-mds keyring not found; run \'gatherkeys\'')
@@ -227,6 +230,7 @@ def make(parser):
     Ceph MDS daemon management
     """
     mds_parser = parser.add_subparsers(dest='subcommand')
+    mds_parser.required = True
 
     mds_create = mds_parser.add_parser(
         'create',

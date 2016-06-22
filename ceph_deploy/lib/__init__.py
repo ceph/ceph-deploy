@@ -21,7 +21,7 @@ The expected way to import remoto would look like this::
 
 try:
     # vendored
-    from vendor import remoto
+    from .vendor import remoto
 except ImportError:
     # normally installed
     import remoto  # noqa
