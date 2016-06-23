@@ -14,3 +14,4 @@ Content Index
    pkg.rst
    repo.rst
    changelog.rst
+   admin.rst
