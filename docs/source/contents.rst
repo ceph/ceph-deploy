@@ -15,3 +15,4 @@ Content Index
    repo.rst
    changelog.rst
    admin.rst
+   gatherkeys.rst
