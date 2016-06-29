@@ -85,9 +85,6 @@ def install(args):
     if args.repo:
         return install_repo(args)
 
-    if args.nogpgcheck:
-        gpgcheck = 0
-
     if args.version_kind == 'stable':
         version = args.release
     else:
@@ -174,7 +171,6 @@ def install(args):
                 gpg_url,
                 args.adjust_repos,
                 components=components,
-                gpgcheck=gpgcheck,
             )
 
         # Detect and install custom repos here if needed
@@ -189,7 +185,6 @@ def install(args):
                 version,
                 args.adjust_repos,
                 components=components,
-                gpgcheck = gpgcheck,
             )
 
         # Check the ceph version we just installed
@@ -587,12 +582,6 @@ def make(parser):
         dest='gpg_url',
         help='specify a GPG key URL to be used with custom repos\
                 (defaults to ceph.com)'
-    )
-
-    parser.add_argument(
-        '--nogpgcheck',
-        action='store_true',
-        help='install packages without gpgcheck',
     )
 
     parser.set_defaults(

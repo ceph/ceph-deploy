@@ -12,8 +12,6 @@ def install(distro, version_kind, version, adjust_repos, **kw):
         NON_SPLIT_PACKAGES,
         kw.pop('components', [])
     )
-    gpgcheck = kw.pop('gpgcheck', 1)
-
     logger = distro.conn.logger
     release = distro.release
     machine = distro.machine_type
@@ -75,8 +73,7 @@ def install(distro, version_kind, version, adjust_repos, **kw):
                     version=version),
                 gpg.url(key),
                 adjust_repos=True,
-                extra_installs=False,
-                gpgcheck=gpgcheck,
+                extra_installs=False
             )
 
         else:

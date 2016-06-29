@@ -27,7 +27,6 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos, **kw):
     )
     repo_url = repo_url.strip('/')  # Remove trailing slashes
     gpg_url_path = gpg_url.split('file://')[-1]  # Remove file if present
-    gpgcheck = kw.pop('gpgcheck', 1)
 
     if adjust_repos:
         remoto.process.run(
@@ -41,8 +40,7 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos, **kw):
 
         ceph_repo_content = templates.zypper_repo.format(
             repo_url=repo_url,
-            gpg_url=gpg_url,
-            gpgcheck=gpgcheck,
+            gpg_url=gpg_url
         )
         distro.conn.remote_module.write_file(
             '/etc/zypp/repos.d/ceph.repo',
