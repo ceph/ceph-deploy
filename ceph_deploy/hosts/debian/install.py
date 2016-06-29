@@ -4,17 +4,10 @@ except ImportError:
     from urlparse import urlparse
 
 from ceph_deploy.util.paths import gpg
-from ceph_deploy.hosts.common import map_components
-
-
-NON_SPLIT_COMPONENTS = ['ceph-osd', 'ceph-mon']
 
 
 def install(distro, version_kind, version, adjust_repos, **kw):
-    packages = map_components(
-        NON_SPLIT_COMPONENTS,
-        kw.pop('components', [])
-    )
+    packages = kw.pop('components', [])
     codename = distro.codename
     machine = distro.machine_type
 
@@ -67,10 +60,7 @@ def install(distro, version_kind, version, adjust_repos, **kw):
 
 
 def mirror_install(distro, repo_url, gpg_url, adjust_repos, **kw):
-    packages = map_components(
-        NON_SPLIT_COMPONENTS,
-        kw.pop('components', [])
-    )
+    packages = kw.pop('components', [])
     repo_url = repo_url.strip('/')  # Remove trailing slashes
 
     if adjust_repos:
@@ -88,10 +78,7 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos, **kw):
 
 
 def repo_install(distro, repo_name, baseurl, gpgkey, **kw):
-    packages = map_components(
-        NON_SPLIT_COMPONENTS,
-        kw.pop('components', [])
-    )
+    packages = kw.pop('components', [])
     # Get some defaults
     safe_filename = '%s.list' % repo_name.replace(' ', '-')
     install_ceph = kw.pop('install_ceph', False)
