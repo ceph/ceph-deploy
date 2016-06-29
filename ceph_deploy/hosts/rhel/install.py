@@ -11,6 +11,7 @@ def mirror_install(distro, repo_url,
                    gpg_url, adjust_repos, extra_installs=True, **kw):
     packages = kw.get('components', [])
     repo_url = repo_url.strip('/')  # Remove trailing slashes
+    gpgcheck = kw.pop('gpgcheck', 1)
 
     distro.packager.clean()
 
@@ -19,7 +20,8 @@ def mirror_install(distro, repo_url,
 
         ceph_repo_content = templates.ceph_repo.format(
             repo_url=repo_url,
-            gpg_url=gpg_url
+            gpg_url=gpg_url,
+            gpgcheck=gpgcheck,
         )
 
         distro.conn.remote_module.write_yum_repo(ceph_repo_content)
