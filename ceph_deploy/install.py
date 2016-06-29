@@ -85,8 +85,7 @@ def install(args):
     if args.repo:
         return install_repo(args)
 
-    if args.nogpgcheck:
-        gpgcheck = 0
+    gpgcheck = 0 if args.nogpgcheck else 1
 
     if args.version_kind == 'stable':
         version = args.release
