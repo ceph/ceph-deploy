@@ -21,7 +21,7 @@ def choose_init(module):
     if module.normalized_release.int_major < 7:
         return 'sysvinit'
 
-    if not module.conn.remote_module.path_exists("/usr/lib/systemd/system/ceph.target"):
+    if not module.conn.remote_module.path_exists("/usr/lib/systemd"):
         return 'sysvinit'
 
     return 'systemd'
