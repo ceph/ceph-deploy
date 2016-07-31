@@ -10,7 +10,7 @@ def read(fname):
     f = open(path)
     return f.read()
 
-install_requires = []
+install_requires = ['SQLAlchemy >= 0.7.8']
 pyversion = sys.version_info[:2]
 if pyversion < (2, 7) or (3, 0) <= pyversion <= (3, 1):
     install_requires.append('argparse')
@@ -48,6 +48,8 @@ setup(
     tests_require=[
         'pytest >=2.1.3',
         'mock >=1.0b1',
+        'SQLAlchemy >= 0.7.8',
+
         ],
 
     entry_points={
