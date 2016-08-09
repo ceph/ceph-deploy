@@ -137,6 +137,39 @@ def create_rgw(distro, name, cluster, init):
         )
 
 
+def rgw_duplicate_port_check(cfg):
+    all_sections = cfg.sections()
+    host_port_mapping = {}
+    for section in all_sections:
+        if cfg.has_option(section, 'host') is False:
+            continue
+        if cfg.has_option(section, 'rgw_frontends') is False:
+            continue
+        host = cfg.get(section, 'host')
+        rgw_frontends = cfg.get(section, 'rgw_frontends')
+        port_num = None
+        for option in rgw_frontends.split(' '):
+            options_split = option.split('=')
+            if len(options_split) < 2:
+                continue
+            if options_split[0].strip() == 'port':
+                port_str = options_split[1].strip()
+                try:
+                    port_num = int(port_str)
+                except:
+                    continue
+        if port_num is None:
+            continue
+        old_num = host_port_mapping.get(host)
+        if old_num == None:
+           host_port_mapping[host] = port_num
+           continue
+        if old_num == port_num:
+            LOG.warning('Duplicate services for port %s on host %s.' % (port_num, host))
+            return True
+    return False
+
+
 def rgw_create(args):
     cfg = conf.ceph.load(args)
     LOG.debug(
@@ -197,6 +230,10 @@ def rgw_create(args):
     # If config file is changed save changes locally
     if changed_cfg is True:
         cfg_path = args.ceph_conf or '{cluster}.conf'.format(cluster=args.cluster)
+        if rgw_duplicate_port_check(cfg):
+            msg = "Refusing to modify config file '%s' as it would have duplicate a port" % (cfg_path)
+            LOG.error(msg)
+            raise RuntimeError(msg)
         if args.overwrite_conf is False:
             msg = "The local config file '%s' exists with content that must be changed; use --overwrite-conf to update" % (cfg_path)
             LOG.error(msg)
