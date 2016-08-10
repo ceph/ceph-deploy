@@ -24,6 +24,13 @@ class PackageManager(object):
             **kw
         )
 
+    def _check(self, cmd, **kw):
+        return remoto.process.check(
+            self.remote_conn,
+            cmd,
+            **kw
+        )
+
     def install(self, packages, **kw):
         """Install packages on remote node"""
         raise NotImplementedError()
@@ -306,8 +313,7 @@ class Zypper(PackageManager):
                 extra_flags = [extra_flags]
             cmd.extend(extra_flags)
         cmd.extend(packages)
-        stdout, stderr, exitrc = remoto.process.check(
-            self.remote_conn,
+        stdout, stderr, exitrc = self._check(
             cmd,
             **kw
         )
