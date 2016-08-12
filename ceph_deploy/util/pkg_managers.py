@@ -24,6 +24,13 @@ class PackageManager(object):
             **kw
         )
 
+    def _check(self, cmd, **kw):
+        return remoto.process.check(
+            self.remote_conn,
+            cmd,
+            **kw
+        )
+
     def install(self, packages, **kw):
         """Install packages on remote node"""
         raise NotImplementedError()
@@ -300,13 +307,20 @@ class Zypper(PackageManager):
             packages = [packages]
 
         extra_flags = kw.pop('extra_remove_flags', None)
-        cmd = self.executable + ['remove']
+        cmd = self.executable + ['--ignore-unknown', 'remove']
         if extra_flags:
             if isinstance(extra_flags, str):
                 extra_flags = [extra_flags]
             cmd.extend(extra_flags)
         cmd.extend(packages)
-        return self._run(cmd)
+        stdout, stderr, exitrc = self._check(
+            cmd,
+            **kw
+        )
+        # exitrc is 104 when package(s) not installed.
+        if not exitrc in [0, 104]:
+            raise RuntimeError("Failed to execute command: %s" % " ".join(cmd))
+        return
 
     def clean(self):
         cmd = self.executable + ['refresh']
