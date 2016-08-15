@@ -4,6 +4,27 @@ Changelog
 1.5
 ---
 
+1.5.35
+^^^^^^
+15-Aug-2016
+
+* Add compatibility for bytes/strings with Python 3
+* Fix errors in argparse default behavior (error messages, incomplete commands)
+* Add Python 3.4 to tox
+* Python 3 changes to workaround configparser issues
+* Use the configured username when using rsync to a remote host (local repo
+  support)
+* Install Python 3 with the bootstrap sciprt
+* Bump remoto requirement to 0.0.29
+* Include admin.rst and gatherkeys.rst in the TOC index
+* Handle Ceph package split in Ubuntu
+* Add a ``--nogpgcheck`` option to disable checks on local repos
+* Improve sysvinit/systemd checks by not including 'ceph' in the path
+* Install Diamond when calling ``ceph-deploy calamari connect``
+* Zypper fixes for purging: allows removal of multiple packages
+
+
+07-Jun-2016
 1.5.34
 ^^^^^^
 07-Jun-2016
