@@ -1,10 +1,6 @@
 from ceph_deploy.util import paths
 from ceph_deploy import conf
 from ceph_deploy.lib import remoto
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from io import StringIO
 from ceph_deploy.util import constants
 
 
@@ -24,14 +20,12 @@ def mon_create(distro, args, monitor_keyring, hostname):
     done_path = paths.mon.done(args.cluster, hostname)
     init_path = paths.mon.init(args.cluster, hostname, distro.init)
 
-    configuration = conf.ceph.load(args)
-    conf_data = StringIO()
-    configuration.write(conf_data)
+    conf_data = conf.ceph.load_raw(args)
 
     # write the configuration file
     distro.conn.remote_module.write_conf(
         args.cluster,
-        conf_data.getvalue(),
+        conf_data,
         args.overwrite_conf,
     )
 
@@ -90,14 +84,12 @@ def mon_add(distro, args, monitor_keyring):
     done_path = paths.mon.done(args.cluster, hostname)
     init_path = paths.mon.init(args.cluster, hostname, distro.init)
 
-    configuration = conf.ceph.load(args)
-    conf_data = StringIO()
-    configuration.write(conf_data)
+    conf_data = conf.ceph.load_raw(args)
 
     # write the configuration file
     distro.conn.remote_module.write_conf(
         args.cluster,
-        conf_data.getvalue(),
+        conf_data,
         args.overwrite_conf,
     )
 
