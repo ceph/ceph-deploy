@@ -1,7 +1,3 @@
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from io import StringIO
 import errno
 import logging
 import os
@@ -145,7 +141,7 @@ def create_mds(distro, name, cluster, init):
 
 
 def mds_create(args):
-    cfg = conf.ceph.load(args)
+    conf_data = conf.ceph.load_raw(args)
     LOG.debug(
         'Deploying mds, cluster %s hosts %s',
         args.cluster,
@@ -174,11 +170,9 @@ def mds_create(args):
             if hostname not in bootstrapped:
                 bootstrapped.add(hostname)
                 LOG.debug('deploying mds bootstrap to %s', hostname)
-                conf_data = StringIO()
-                cfg.write(conf_data)
                 distro.conn.remote_module.write_conf(
                     args.cluster,
-                    conf_data.getvalue(),
+                    conf_data,
                     args.overwrite_conf,
                 )
 

@@ -1,10 +1,4 @@
 import logging
-
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from io import StringIO
-
 from ceph_deploy import exc
 from ceph_deploy import conf
 from ceph_deploy.cliutil import priority
@@ -14,9 +8,7 @@ LOG = logging.getLogger(__name__)
 
 
 def admin(args):
-    cfg = conf.ceph.load(args)
-    conf_data = StringIO()
-    cfg.write(conf_data)
+    conf_data = conf.ceph.load_raw(args)
 
     try:
         with open('%s.client.admin.keyring' % args.cluster, 'rb') as f:
@@ -33,7 +25,7 @@ def admin(args):
 
             distro.conn.remote_module.write_conf(
                 args.cluster,
-                conf_data.getvalue(),
+                conf_data,
                 args.overwrite_conf,
             )
 
