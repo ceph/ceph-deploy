@@ -7,11 +7,6 @@ import sys
 import time
 from textwrap import dedent
 
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from io import StringIO
-
 from ceph_deploy import conf, exc, hosts, mon
 from ceph_deploy.util import constants, system, packages
 from ceph_deploy.cliutil import priority
@@ -305,11 +300,10 @@ def prepare(args, cfg, activate_prepared_disk):
                 bootstrapped.add(hostname)
                 LOG.debug('Deploying osd to %s', hostname)
 
-                conf_data = StringIO()
-                cfg.write(conf_data)
+                conf_data = conf.ceph.load_raw(args)
                 distro.conn.remote_module.write_conf(
                     args.cluster,
-                    conf_data.getvalue(),
+                    conf_data,
                     args.overwrite_conf
                 )
 
