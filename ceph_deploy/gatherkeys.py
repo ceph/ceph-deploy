@@ -1,3 +1,4 @@
+import errno
 import os.path
 import logging
 import json
@@ -96,7 +97,7 @@ def gatherkeys_missing(args, distro, rlogger, keypath, keytype, dest_dir):
     Get or create the keyring from the mon using the mon keyring by keytype and
     copy to dest_dir
     """
-    arguments = [
+    args_prefix = [
         '/usr/bin/ceph',
         '--connect-timeout=25',
         '--cluster={cluster}'.format(
@@ -104,22 +105,32 @@ def gatherkeys_missing(args, distro, rlogger, keypath, keytype, dest_dir):
         '--name', 'mon.',
         '--keyring={keypath}'.format(
             keypath=keypath),
-        'auth', 'get-or-create',
         ]
+
     identity = keytype_identity(keytype)
     if identity is None:
         raise RuntimeError('Could not find identity for keytype:%s' % keytype)
-    arguments.append(identity)
     capabilites = keytype_capabilities(keytype)
     if capabilites is None:
         raise RuntimeError('Could not find capabilites for keytype:%s' % keytype)
-    arguments.extend(capabilites)
+
+    # First try getting the key if it already exists, to handle the case where
+    # it exists but doesn't match the caps we would pass into get-or-create.
+    # This is the same behvaior as in newer ceph-create-keys
     out, err, code = remoto.process.check(
         distro.conn,
-        arguments
+        args_prefix + ['auth', 'get', identity]
         )
+    if code == errno.ENOENT:
+        out, err, code = remoto.process.check(
+            distro.conn,
+            args_prefix + ['auth', 'get-or-create', identity] + capabilites
+            )
     if code != 0:
-        rlogger.error('"ceph auth get-or-create for keytype %s returned %s', keytype, code)
+        rlogger.error(
+            '"ceph auth get-or-create for keytype %s returned %s',
+            keytype, code
+        )
         for line in err:
             rlogger.debug(line)
         return False
