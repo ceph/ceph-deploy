@@ -63,8 +63,11 @@ def detect_components(args, distro):
         defaults = default_components.rpm
     else:
         defaults = default_components.deb
-        # different naming convention for deb than rpm for radosgw
+        # different naming convention for deb than rpm for radosgw,
+        # OSD, and MON
         flags['install_rgw'] = 'radosgw'
+        flags['install_mon'] = 'ceph'
+        flags['install_osd'] = 'ceph'
 
     if args.install_all:
         return defaults
