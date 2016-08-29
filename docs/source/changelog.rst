@@ -4,6 +4,15 @@ Changelog
 1.5
 ---
 
+1.5.36
+^^^^^^
+29-Aug-2016
+
+* Prefer to use ``load_raw`` to avoid mangling ceph.conf content.
+* Improve systemd/sysvinit detection for both CentOS and RHEL
+* Gatherkeys should try to get an existing key without caps, in case they don't
+  match
+
 1.5.35
 ^^^^^^
 15-Aug-2016
