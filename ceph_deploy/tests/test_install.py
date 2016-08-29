@@ -64,7 +64,7 @@ class TestDetectComponents(object):
         self.distro.is_deb = True
         result = sorted(install.detect_components(self.args, self.distro))
         assert result == sorted([
-            'ceph-osd', 'ceph-mds', 'ceph-mon', 'radosgw'
+            'ceph', 'radosgw'
         ])
 
     def test_install_all_with_other_options_returns_all_packages_deb(self):
@@ -76,7 +76,7 @@ class TestDetectComponents(object):
         self.args.install_osd = True
         result = sorted(install.detect_components(self.args, self.distro))
         assert result == sorted([
-            'ceph-osd', 'ceph-mds', 'ceph-mon', 'radosgw'
+            'ceph', 'radosgw'
         ])
 
     def test_install_all_returns_all_packages_rpm(self):
