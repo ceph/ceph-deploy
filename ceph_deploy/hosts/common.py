@@ -116,6 +116,7 @@ def mon_add(distro, args, monitor_keyring):
             distro.conn,
             [
                 'ceph',
+                '--cluster', args.cluster,
                 'mon',
                 'getmap',
                 '-o',
@@ -158,6 +159,7 @@ def mon_add(distro, args, monitor_keyring):
         distro.conn,
         [
             'ceph-mon',
+            '--cluster', args.cluster,
             '-i',
             hostname,
             '--pid-file', pid_location,
