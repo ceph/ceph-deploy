@@ -46,8 +46,8 @@ setup(
         ] + install_requires,
 
     tests_require=[
-        'pytest >=2.1.3',
-        'mock >=1.0b1',
+        'pytest >=3.0.3',
+        'mock >=2.0.0',
         ],
 
     entry_points={
