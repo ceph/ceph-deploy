@@ -219,7 +219,7 @@ def mon_add(args):
         hostname_is_compatible(distro.conn, rlogger, mon_host)
         rlogger.debug('adding mon to %s', mon_host)
         args.address = mon_ip
-        distro.mon.add(distro, args, monitor_keyring)
+        hosts.common.mon_add(distro, args, monitor_keyring)
 
         # tell me the status of the deployed mon
         time.sleep(2)  # give some room to start
@@ -271,7 +271,12 @@ def mon_create(args):
             # ensure remote hostname is good to go
             hostname_is_compatible(distro.conn, rlogger, name)
             rlogger.debug('deploying mon to %s', name)
-            distro.mon.create(distro, args, monitor_keyring)
+
+            hostname = distro.conn.remote_module.shortname()
+            hosts.common.mon_create(distro, args, monitor_keyring, hostname)
+
+            distro.init.start('ceph-mon', cluster=args.cluster, name=hostname)
+            distro.init.enable('ceph-mon', name=hostname)
 
             # tell me the status of the deployed mon
             time.sleep(2)  # give some room to start

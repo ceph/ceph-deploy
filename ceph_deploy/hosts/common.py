@@ -18,7 +18,7 @@ def mon_create(distro, args, monitor_keyring, hostname):
     uid = distro.conn.remote_module.path_getuid(constants.base_path)
     gid = distro.conn.remote_module.path_getgid(constants.base_path)
     done_path = paths.mon.done(args.cluster, hostname)
-    init_path = paths.mon.init(args.cluster, hostname, distro.init)
+    init_path = paths.mon.init(args.cluster, hostname, distro.init.name)
 
     conf_data = conf.ceph.load_raw(args)
 
@@ -82,7 +82,7 @@ def mon_add(distro, args, monitor_keyring):
     gid = distro.conn.remote_module.path_getgid(constants.base_path)
     monmap_path = paths.mon.monmap(args.cluster, hostname)
     done_path = paths.mon.done(args.cluster, hostname)
-    init_path = paths.mon.init(args.cluster, hostname, distro.init)
+    init_path = paths.mon.init(args.cluster, hostname, distro.init.name)
 
     conf_data = conf.ceph.load_raw(args)
 

@@ -5,7 +5,6 @@ import os
 from ceph_deploy import conf
 from ceph_deploy import exc
 from ceph_deploy import hosts
-from ceph_deploy.util import system
 from ceph_deploy.lib import remoto
 from ceph_deploy.cliutil import priority
 
@@ -82,62 +81,10 @@ def create_mds(distro, name, cluster, init):
         )
 
     conn.remote_module.touch_file(os.path.join(path, 'done'))
-    conn.remote_module.touch_file(os.path.join(path, init))
+    conn.remote_module.touch_file(os.path.join(path, init.name))
 
-    if init == 'upstart':
-        remoto.process.run(
-            conn,
-            [
-                'initctl',
-                'emit',
-                'ceph-mds',
-                'cluster={cluster}'.format(cluster=cluster),
-                'id={name}'.format(name=name),
-            ],
-            timeout=7
-        )
-    elif init == 'sysvinit':
-        remoto.process.run(
-            conn,
-            [
-                'service',
-                'ceph',
-                'start',
-                'mds.{name}'.format(name=name),
-            ],
-            timeout=7
-        )
-        if distro.is_el:
-            system.enable_service(distro.conn)
-    elif init == 'systemd':
-        remoto.process.run(
-            conn,
-            [
-                'systemctl',
-                'enable',
-                'ceph-mds@{name}'.format(name=name),
-            ],
-            timeout=7
-        )
-        remoto.process.run(
-            conn,
-            [
-                'systemctl',
-                'start',
-                'ceph-mds@{name}'.format(name=name),
-            ],
-            timeout=7
-        )
-        remoto.process.run(
-            conn,
-            [
-                'systemctl',
-                'enable',
-                'ceph.target',
-            ],
-            timeout=7
-        )
-
+    distro.init.start('ceph-mds', cluster=cluster, name=name)
+    distro.init.enable('ceph-mds', name=name)
 
 
 def mds_create(args):

@@ -145,7 +145,7 @@ def new(args):
         remote_ips = net.ip_addresses(distro.conn)
 
         # custom cluster names on sysvinit hosts won't work
-        if distro.init == 'sysvinit' and args.cluster != 'ceph':
+        if distro.init.name == 'sysvinit' and args.cluster != 'ceph':
             LOG.error('custom cluster names are not supported on sysvinit hosts')
             raise exc.ClusterNameError(
                 'host %s does not support custom cluster names' % host
