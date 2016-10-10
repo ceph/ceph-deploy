@@ -389,6 +389,10 @@ class TestGetDistro(object):
         result = hosts._get_distro('Scientific')
         assert result.__name__.endswith('centos')
 
+    def test_get_oracle(self):
+        result = hosts._get_distro('Oracle Linux Server')
+        assert result.__name__.endswith('centos')
+
     def test_get_redhat(self):
         result = hosts._get_distro('RedHat')
         assert result.__name__.endswith('centos')
