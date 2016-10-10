@@ -66,9 +66,9 @@ def get(hostname,
     module.normalized_name = _normalized_distro_name(distro_name)
     module.normalized_release = _normalized_release(release)
     module.distro = module.normalized_name
-    module.is_el = module.normalized_name in ['redhat', 'centos', 'fedora', 'scientific']
+    module.is_el = module.normalized_name in ['redhat', 'centos', 'fedora', 'scientific', 'oracle']
     module.is_rpm = module.normalized_name in ['redhat', 'centos',
-                                               'fedora', 'scientific', 'suse']
+                                               'fedora', 'scientific', 'suse', 'oracle']
     module.is_deb = not module.is_rpm
     module.release = release
     module.codename = codename
@@ -93,6 +93,7 @@ def _get_distro(distro, fallback=None, use_rhceph=False):
         'ubuntu': debian,
         'centos': centos,
         'scientific': centos,
+        'oracle' : centos,
         'redhat': centos,
         'fedora': fedora,
         'suse': suse,
@@ -110,6 +111,8 @@ def _normalized_distro_name(distro):
         return 'redhat'
     elif distro.startswith(('scientific', 'scientific linux')):
         return 'scientific'
+    elif distro.startswith('oracle'):
+        return 'oracle'
     elif distro.startswith(('suse', 'opensuse')):
         return 'suse'
     elif distro.startswith('centos'):
