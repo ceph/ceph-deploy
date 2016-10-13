@@ -2,6 +2,7 @@ from ceph_deploy.util import paths
 from ceph_deploy import conf
 from ceph_deploy.lib import remoto
 from ceph_deploy.util import constants
+from ceph_deploy.util import system
 
 
 def ceph_version(conn):
@@ -11,7 +12,8 @@ def ceph_version(conn):
     return remoto.process.run(conn, ['ceph', '--version'])
 
 
-def mon_create(distro, args, monitor_keyring, hostname):
+def mon_create(distro, args, monitor_keyring):
+    hostname = distro.conn.remote_module.shortname()
     logger = distro.conn.logger
     logger.debug('remote hostname: %s' % hostname)
     path = paths.mon.path(args.cluster, hostname)
@@ -72,6 +74,9 @@ def mon_create(distro, args, monitor_keyring, hostname):
 
     # create init path
     distro.conn.remote_module.create_init_path(init_path, uid, gid)
+
+    # start mon service
+    start_mon_service(distro, args.cluster, hostname)
 
 
 def mon_add(distro, args, monitor_keyring):
@@ -153,20 +158,8 @@ def mon_add(distro, args, monitor_keyring):
     # create init path
     distro.conn.remote_module.create_init_path(init_path, uid, gid)
 
-    # start the mon using the address
-    pid_location = "/var/run/ceph/mon.%s.pid" % hostname
-    remoto.process.run(
-        distro.conn,
-        [
-            'ceph-mon',
-            '--cluster', args.cluster,
-            '-i',
-            hostname,
-            '--pid-file', pid_location,
-            '--public-addr',
-            args.address,
-        ],
-    )
+    # start mon service
+    start_mon_service(distro, args.cluster, hostname)
 
 
 def map_components(notsplit_packages, components):
@@ -187,3 +180,69 @@ def map_components(notsplit_packages, components):
             packages.add(c)
 
     return list(packages)
+
+
+def start_mon_service(distro, cluster, hostname):
+    """
+    start mon service depending on distro init
+    """
+    if distro.init == 'sysvinit':
+        service = distro.conn.remote_module.which_service()
+        remoto.process.run(
+            distro.conn,
+            [
+                service,
+                'ceph',
+                '-c',
+                '/etc/ceph/{cluster}.conf'.format(cluster=cluster),
+                'start',
+                'mon.{hostname}'.format(hostname=hostname)
+            ],
+            timeout=7,
+        )
+        system.enable_service(distro.conn)
+
+    elif distro.init == 'upstart':
+        remoto.process.run(
+             distro.conn,
+             [
+                 'initctl',
+                 'emit',
+                 'ceph-mon',
+                 'cluster={cluster}'.format(cluster=cluster),
+                 'id={hostname}'.format(hostname=hostname),
+             ],
+             timeout=7,
+         )
+
+    elif distro.init == 'systemd':
+       # enable ceph target for this host (in case it isn't already enabled)
+        remoto.process.run(
+            distro.conn,
+            [
+                'systemctl',
+                'enable',
+                'ceph.target'
+            ],
+            timeout=7,
+        )
+
+        # enable and start this mon instance
+        remoto.process.run(
+            distro.conn,
+            [
+                'systemctl',
+                'enable',
+                'ceph-mon@{hostname}'.format(hostname=hostname),
+            ],
+            timeout=7,
+        )
+        remoto.process.run(
+            distro.conn,
+            [
+                'systemctl',
+                'start',
+                'ceph-mon@{hostname}'.format(hostname=hostname),
+            ],
+            timeout=7,
+        )
