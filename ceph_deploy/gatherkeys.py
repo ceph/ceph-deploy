@@ -210,7 +210,7 @@ def gatherkeys_with_mon(args, host, dest_dir):
     for keytype in ["admin", "mds", "osd", "rgw"]:
         if not gatherkeys_missing(args, distro, rlogger, path_keytype_mon, keytype, dest_dir):
             # We will return failure if we fail to gather any key
-            rlogger.error("Failed to return '%s' key from host ", keytype, host)
+            rlogger.error("Failed to return '%s' key from host %s", keytype, host)
             return False
     return True
 
