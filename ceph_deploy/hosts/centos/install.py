@@ -8,7 +8,7 @@ NON_SPLIT_PACKAGES = ['ceph-osd', 'ceph-mon', 'ceph-mds']
 
 
 def rpm_dist(distro):
-    if distro.normalized_name in ['redhat', 'centos', 'scientific'] and distro.normalized_release.int_major >= 6:
+    if distro.normalized_name in ['redhat', 'centos', 'scientific', 'oracle'] and distro.normalized_release.int_major >= 6:
         return 'el' + distro.normalized_release.major
     return 'el6'
 
@@ -32,7 +32,7 @@ def repository_url_part(distro):
     if distro.normalized_release.int_major >= 6:
         if distro.normalized_name == 'redhat':
             return 'rhel' + distro.normalized_release.major
-        if distro.normalized_name in ['centos', 'scientific']:
+        if distro.normalized_name in ['centos', 'scientific', 'oracle']:
             return 'el' + distro.normalized_release.major
 
     return 'el6'

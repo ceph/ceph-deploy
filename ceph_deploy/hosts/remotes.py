@@ -31,6 +31,8 @@ def platform_information(_linux_distribution=None):
                 codename = minor
             else:
                 codename = major
+    if not codename and 'oracle' in distro.lower(): # this could be an empty string in Oracle linux
+        codename = 'oracle'
 
     return (
         str(distro).rstrip(),
