@@ -8,4 +8,4 @@ def test_rgw_prefix_auto():
 
 def test_rgw_prefix_custom():
     daemon = rgw.colon_separated("hostname:mydaemon")
-    assert daemon == ("hostname", "rgw.mydaemon")
+    assert daemon == ("hostname", "mydaemon")
