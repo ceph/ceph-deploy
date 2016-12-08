@@ -2,8 +2,12 @@ try:
     from urllib.parse import urlparse
 except ImportError:
     from urlparse import urlparse
-
+import logging
 from ceph_deploy.util.paths import gpg
+from ceph_deploy.util import net
+
+
+LOG = logging.getLogger(__name__)
 
 
 def install(distro, version_kind, version, adjust_repos, **kw):
@@ -23,31 +27,42 @@ def install(distro, version_kind, version, adjust_repos, **kw):
         protocol = 'https'
         if codename == 'wheezy':
             protocol = 'http'
-        distro.packager.add_repo_gpg_key(gpg.url(key, protocol=protocol))
 
-        if version_kind == 'stable':
-            url = '{protocol}://download.ceph.com/debian-{version}/'.format(
-                protocol=protocol,
-                version=version,
+        if version_kind in ['dev', 'dev_commit']:
+            shaman_url = 'https://shaman.ceph.com/api/repos/ceph/{version}/{sha1}/{distro}/{distro_version}/repo/?arch={arch}'.format(
+                distro=distro.normalized_name,
+                distro_version=distro.codename,
+                version=kw['args'].dev,
+                sha1=kw['args'].dev_commit or 'latest',
+                arch=machine
                 )
-        elif version_kind == 'testing':
-            url = '{protocol}://download.ceph.com/debian-testing/'.format(
-                protocol=protocol,
-                )
-        elif version_kind in ['dev', 'dev_commit']:
-            url = 'http://gitbuilder.ceph.com/ceph-deb-{codename}-{machine}-basic/{sub}/{version}'.format(
-                codename=codename,
-                machine=machine,
-                sub='ref' if version_kind == 'dev' else 'sha1',
-                version=version,
-                )
+            LOG.debug('fetching repo information from: %s' % shaman_url)
+            chacra_url = net.get_request(shaman_url).geturl()
+            content = net.get_chacra_repo(shaman_url)
+            # set the repo priority for the right domain
+            fqdn = urlparse(chacra_url).hostname
+            distro.conn.remote_module.set_apt_priority(fqdn)
+            distro.conn.remote_module.write_sources_list_content(content)
+            extra_install_flags = ['-o', 'Dpkg::Options::=--force-confnew', '--allow-unauthenticated']
         else:
-            raise RuntimeError('Unknown version kind: %r' % version_kind)
+            distro.packager.add_repo_gpg_key(gpg.url(key, protocol=protocol))
+            if version_kind == 'stable':
+                url = '{protocol}://download.ceph.com/debian-{version}/'.format(
+                    protocol=protocol,
+                    version=version,
+                    )
+            elif version_kind == 'testing':
+                url = '{protocol}://download.ceph.com/debian-testing/'.format(
+                    protocol=protocol,
+                    )
+            else:
+                raise RuntimeError('Unknown version kind: %r' % version_kind)
 
-        # set the repo priority for the right domain
-        fqdn = urlparse(url).hostname
-        distro.conn.remote_module.set_apt_priority(fqdn)
-        distro.conn.remote_module.write_sources_list(url, codename)
+            # set the repo priority for the right domain
+            fqdn = urlparse(url).hostname
+            distro.conn.remote_module.set_apt_priority(fqdn)
+            distro.conn.remote_module.write_sources_list(url, codename)
+            extra_install_flags = ['-o', 'Dpkg::Options::=--force-confnew']
 
     distro.packager.clean()
 
@@ -55,7 +70,7 @@ def install(distro, version_kind, version, adjust_repos, **kw):
     if packages:
         distro.packager.install(
             packages,
-            extra_install_flags=['-o', 'Dpkg::Options::=--force-confnew']
+            extra_install_flags=extra_install_flags
         )
 
 
