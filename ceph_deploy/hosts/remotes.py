@@ -56,6 +56,12 @@ def write_sources_list(url, codename, filename='ceph.list', mode=0o644):
     write_file(repo_path, content.encode('utf-8'), mode)
 
 
+def write_sources_list_content(content, filename='ceph.list', mode=0o644):
+    """add deb repo to /etc/apt/sources.list.d/ from content"""
+    repo_path = os.path.join('/etc/apt/sources.list.d', filename)
+    write_file(repo_path, content.encode('utf-8'), mode)
+
+
 def write_yum_repo(content, filename='ceph.repo'):
     """add yum repo file in /etc/yum.repos.d/"""
     repo_path = os.path.join('/etc/yum.repos.d', filename)
