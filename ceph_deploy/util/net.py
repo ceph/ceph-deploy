@@ -1,3 +1,9 @@
+try:
+    from urllib.request import urlopen
+    from urllib.error import HTTPError
+except ImportError:
+    from urllib2 import urlopen, HTTPError
+
 from ceph_deploy import exc
 import logging
 import re
@@ -362,3 +368,23 @@ def cidr_to_ipv4_netmask(cidr_bits):
             netmask += '{0:d}'.format(256 - (2 ** (8 - cidr_bits)))
             cidr_bits = 0
     return netmask
+
+
+def get_request(url):
+    try:
+        return urlopen(url)
+    except HTTPError as err:
+        LOG.error('repository might not be available yet')
+        raise RuntimeError('%s, failed to fetch %s' % (err, url))
+
+
+def get_chacra_repo(shaman_url):
+    """
+    From a Shaman URL, get the chacra url for a repository, read the
+    contents that point to the repo and return it as a string.
+    """
+    shaman_response = get_request(shaman_url)
+    chacra_url = shaman_response.geturl()
+    chacra_response = get_request(chacra_url)
+
+    return chacra_response.read()
