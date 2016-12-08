@@ -174,6 +174,7 @@ def install(args):
                 args.adjust_repos,
                 components=components,
                 gpgcheck=gpgcheck,
+                args=args
             )
 
         # Detect and install custom repos here if needed
@@ -189,6 +190,7 @@ def install(args):
                 args.adjust_repos,
                 components=components,
                 gpgcheck = gpgcheck,
+                args=args
             )
 
         # Check the ceph version we just installed
