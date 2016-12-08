@@ -470,12 +470,12 @@ def make(parser):
         help='install a bleeding edge build from Git branch\
                 or tag (default: %(default)s)',
     )
-    version.add_argument(
+    parser.add_argument(
         '--dev-commit',
         nargs='?',
         action=StoreVersion,
         metavar='COMMIT',
-        help='install a bleeding edge build from Git commit',
+        help='install a bleeding edge build from Git commit (defaults to master branch)',
     )
 
     version.set_defaults(
