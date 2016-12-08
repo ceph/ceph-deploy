@@ -1,3 +1,13 @@
+try:
+    from urllib.error import HTTPError
+except ImportError:
+    from urllib2 import HTTPError
+
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
+
 from ceph_deploy.util import net
 from ceph_deploy.tests import util
 import pytest
@@ -30,3 +40,14 @@ class TestIpInSubnet(object):
     @pytest.mark.parametrize('ip', util.generate_ips("10.9.8.0", "10.9.8.255"))
     def test_false_for_24_subnets(self, ip):
         assert net.ip_in_subnet(ip, "10.9.1.0/24") is False
+
+
+class TestGetRequest(object):
+
+    def test_urlopen_fails(self, monkeypatch):
+        def bad_urlopen(url):
+            raise HTTPError('url', 500, 'error', '', StringIO())
+
+        monkeypatch.setattr(net, 'urlopen', bad_urlopen)
+        with pytest.raises(RuntimeError):
+            net.get_request('https://example.ceph.com')
