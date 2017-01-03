@@ -4,6 +4,20 @@ Changelog
 1.5
 ---
 
+1.5.37
+^^^^^^
+03-Jan-2017
+
+* Use the ``--cluster`` flag on monitor commands (defaulting to 'ceph' if
+  unspecfied)
+* After adding a monitor, ensure it is started regardless of init system
+* Allow Oracle Linux Server to be deployed to.
+* Fix issue when calling gatherkeys where a log argument was missing
+* Use the new development services for installation (from chacra.ceph.com and
+  shaman.ceph.com URLs)
+* Try to decode bytes only on Python 3 when writing files on remote hosts
+
+
 1.5.36
 ^^^^^^
 29-Aug-2016
