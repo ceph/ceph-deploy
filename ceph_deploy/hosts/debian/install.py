@@ -14,6 +14,7 @@ def install(distro, version_kind, version, adjust_repos, **kw):
     packages = kw.pop('components', [])
     codename = distro.codename
     machine = distro.machine_type
+    extra_install_flags = []
 
     if version_kind in ['stable', 'testing']:
         key = 'release'
