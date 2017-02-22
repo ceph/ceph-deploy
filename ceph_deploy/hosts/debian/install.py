@@ -76,6 +76,7 @@ def install(distro, version_kind, version, adjust_repos, **kw):
 
 def mirror_install(distro, repo_url, gpg_url, adjust_repos, **kw):
     packages = kw.pop('components', [])
+    version_kind = kw['args'].version_kind
     repo_url = repo_url.strip('/')  # Remove trailing slashes
 
     if adjust_repos:
@@ -87,9 +88,13 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos, **kw):
 
         distro.conn.remote_module.write_sources_list(repo_url, distro.codename)
 
+    extra_install_flags = ['--allow-unauthenticated'] if version_kind in 'dev' else []
+
     if packages:
         distro.packager.clean()
-        distro.packager.install(packages)
+        distro.packager.install(
+            packages,
+            extra_install_flags=extra_install_flags)
 
 
 def repo_install(distro, repo_name, baseurl, gpgkey, **kw):
