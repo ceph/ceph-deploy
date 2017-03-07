@@ -316,6 +316,13 @@ def prepare(args, cfg, activate_prepared_disk):
             if args.bluestore:
                 storetype = 'bluestore'
 
+            if args.fs_type == 'ext4' and not args.yes_i_really_mean_it:
+                LOG.error('Warning! The ceph-osd daemon will refuse to start or may have difficult '
+                          'to diagnose errors if it cannot safely store long object names on ext4.')
+                LOG.error('Add --yes-i-really-mean-it if you are certain.')
+                errors += 1
+                continue
+
             prepare_disk(
                 distro.conn,
                 cluster=args.cluster,
@@ -678,6 +685,7 @@ def make(parser):
         '--fs-type',
         metavar='FS_TYPE',
         choices=['xfs',
+                 'ext4',
                  'btrfs'
                  ],
         default='xfs',
@@ -698,6 +706,11 @@ def make(parser):
         '--bluestore',
         action='store_true', default=None,
         help='bluestore objectstore',
+        )
+    osd_create.add_argument(
+        '--yes-i-really-mean-it',
+        action='store_true', default=None,
+        help='enable experimental or deprecated features',
         )
     osd_create.add_argument(
         'disk',
@@ -720,6 +733,7 @@ def make(parser):
         '--fs-type',
         metavar='FS_TYPE',
         choices=['xfs',
+                 'ext4',
                  'btrfs'
                  ],
         default='xfs',
@@ -740,6 +754,11 @@ def make(parser):
         '--bluestore',
         action='store_true', default=None,
         help='bluestore objectstore',
+        )
+    osd_prepare.add_argument(
+        '--yes-i-really-mean-it',
+        action='store_true', default=None,
+        help='enable experimental or deprecated features',
         )
     osd_prepare.add_argument(
         'disk',
@@ -810,6 +829,7 @@ def make_disk(parser):
         '--fs-type',
         metavar='FS_TYPE',
         choices=['xfs',
+                 'ext4',
                  'btrfs'
                  ],
         default='xfs',
@@ -830,6 +850,11 @@ def make_disk(parser):
         '--bluestore',
         action='store_true', default=None,
         help='bluestore objectstore',
+        )
+    disk_prepare.add_argument(
+        '--yes-i-really-mean-it',
+        action='store_true', default=None,
+        help='enable experimental or deprecated features',
         )
     disk_prepare.add_argument(
         'disk',
