@@ -77,7 +77,8 @@ def keytype_capabilities(keytype):
         'admin' : [
             'osd', 'allow *',
             'mds', 'allow *',
-            'mon', 'allow *'
+            'mon', 'allow *',
+            'mgr', 'allow *'
             ],
         'mds' : [
             'mon', 'allow profile bootstrap-mds'
