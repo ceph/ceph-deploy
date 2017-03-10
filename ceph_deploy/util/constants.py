@@ -11,12 +11,15 @@ tmp_path = join(base_path, 'tmp')
 
 mon_path = join(base_path, 'mon')
 
+mgr_path = join(base_path, 'mgr')
+
 mds_path = join(base_path, 'mds')
 
 osd_path = join(base_path, 'osd')
 
 # Default package components to install
 _base_components = [
+    'ceph',
     'ceph-osd',
     'ceph-mds',
     'ceph-mon',
