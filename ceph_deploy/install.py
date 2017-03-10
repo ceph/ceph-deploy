@@ -36,6 +36,7 @@ def detect_components(args, distro):
 
     * ceph
     * ceph-mon
+    * ceph-mgr
     * ceph-osd
     * ceph-mds
 
@@ -55,6 +56,7 @@ def detect_components(args, distro):
         'install_rgw': 'ceph-radosgw',
         'install_mds': 'ceph-mds',
         'install_mon': 'ceph-mon',
+        'install_mgr': 'ceph-mgr',
         'install_common': 'ceph-common',
         'install_tests': 'ceph-test',
     }
@@ -490,6 +492,13 @@ def make(parser):
         dest='install_mon',
         action='store_true',
         help='install the mon component only',
+    )
+
+    parser.add_argument(
+        '--mgr',
+        dest='install_mgr',
+        action='store_true',
+        help='install the mgr component only',
     )
 
     parser.add_argument(
