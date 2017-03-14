@@ -1,4 +1,3 @@
-import errno
 import logging
 import os
 
@@ -56,7 +55,7 @@ def create_mds(distro, name, cluster, init):
             os.path.join(keypath),
         ]
     )
-    if returncode > 0 and returncode != errno.EACCES:
+    if returncode > 0:
         for line in stderr:
             conn.logger.error(line)
         for line in stdout:
@@ -64,22 +63,6 @@ def create_mds(distro, name, cluster, init):
             conn.logger.error(line)
         conn.logger.error('exit code from command was: %s' % returncode)
         raise RuntimeError('could not create mds')
-
-        remoto.process.check(
-            conn,
-            [
-                'ceph',
-                '--cluster', cluster,
-                '--name', 'client.bootstrap-mds',
-                '--keyring', bootstrap_keyring,
-                'auth', 'get-or-create', 'mds.{name}'.format(name=name),
-                'osd', 'allow *',
-                'mds', 'allow',
-                'mon', 'allow rwx',
-                '-o',
-                os.path.join(keypath),
-            ]
-        )
 
     conn.remote_module.touch_file(os.path.join(path, 'done'))
     conn.remote_module.touch_file(os.path.join(path, init))
