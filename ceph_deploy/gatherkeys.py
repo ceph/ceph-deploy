@@ -62,6 +62,7 @@ def keytype_identity(keytype):
     ident_dict = {
         'admin' : 'client.admin',
         'mds' : 'client.bootstrap-mds',
+        'mgr' : 'client.bootstrap-mgr',
         'osd' : 'client.bootstrap-osd',
         'rgw' : 'client.bootstrap-rgw',
         'mon' : 'mon.'
@@ -82,6 +83,9 @@ def keytype_capabilities(keytype):
             ],
         'mds' : [
             'mon', 'allow profile bootstrap-mds'
+            ],
+        'mgr' : [
+            'mon', 'allow profile bootstrap-mgr'
             ],
         'osd' : [
             'mon', 'allow profile bootstrap-osd'
@@ -208,7 +212,7 @@ def gatherkeys_with_mon(args, host, dest_dir):
     if not mon_number in mon_quorum:
         rlogger.error("Not yet quorum for '%s'", host)
         return False
-    for keytype in ["admin", "mds", "osd", "rgw"]:
+    for keytype in ["admin", "mds", "mgr", "osd", "rgw"]:
         if not gatherkeys_missing(args, distro, rlogger, path_keytype_mon, keytype, dest_dir):
             # We will return failure if we fail to gather any key
             rlogger.error("Failed to return '%s' key from host %s", keytype, host)
@@ -237,7 +241,7 @@ def gatherkeys(args):
                 raise RuntimeError('Failed to connect any mon')
             had_error = False
             date_string = time.strftime("%Y%m%d%H%M%S")
-            for keytype in ["admin", "mds", "mon", "osd", "rgw"]:
+            for keytype in ["admin", "mds", "mgr", "mon", "osd", "rgw"]:
                 filename = keytype_path_to(args, keytype)
                 tmp_path = os.path.join(tmpd, filename)
                 if not os.path.exists(tmp_path):
