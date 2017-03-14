@@ -88,6 +88,22 @@ class TestGatherKeysMissing(object):
         assert os.path.isfile(keypath_gen)
 
     @mock.patch('ceph_deploy.lib.remoto.process.check', mock_remoto_process_check_success)
+    def test_success_mgr(self):
+        keytype = 'mgr'
+        rc = gatherkeys.gatherkeys_missing(
+            self.args,
+            self.distro,
+            self.rlogger,
+            self.keypath_remote,
+            keytype,
+            self.test_dir
+            )
+        assert rc is True
+        keyname = gatherkeys.keytype_path_to(self.args, keytype)
+        keypath_gen = os.path.join(self.test_dir, keyname)
+        assert os.path.isfile(keypath_gen)
+        
+    @mock.patch('ceph_deploy.lib.remoto.process.check', mock_remoto_process_check_success)
     def test_success_osd(self):
         keytype = 'osd'
         rc = gatherkeys.gatherkeys_missing(
