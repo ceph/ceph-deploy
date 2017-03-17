@@ -12,29 +12,29 @@ from ceph_deploy.cliutil import priority
 LOG = logging.getLogger(__name__)
 
 
-def get_bootstrap_mds_key(cluster):
+def get_bootstrap_mgr_key(cluster):
     """
-    Read the bootstrap-mds key for `cluster`.
+    Read the bootstrap-mgr key for `cluster`.
     """
-    path = '{cluster}.bootstrap-mds.keyring'.format(cluster=cluster)
+    path = '{cluster}.bootstrap-mgr.keyring'.format(cluster=cluster)
     try:
         with open(path, 'rb') as f:
             return f.read()
     except IOError:
-        raise RuntimeError('bootstrap-mds keyring not found; run \'gatherkeys\'')
+        raise RuntimeError('bootstrap-mgr keyring not found; run \'gatherkeys\'')
 
 
-def create_mds(distro, name, cluster, init):
+def create_mgr(distro, name, cluster, init):
     conn = distro.conn
 
-    path = '/var/lib/ceph/mds/{cluster}-{name}'.format(
+    path = '/var/lib/ceph/mgr/{cluster}-{name}'.format(
         cluster=cluster,
         name=name
         )
 
     conn.remote_module.safe_mkdir(path)
 
-    bootstrap_keyring = '/var/lib/ceph/bootstrap-mds/{cluster}.keyring'.format(
+    bootstrap_keyring = '/var/lib/ceph/bootstrap-mgr/{cluster}.keyring'.format(
         cluster=cluster
         )
 
@@ -45,12 +45,10 @@ def create_mds(distro, name, cluster, init):
         [
             'ceph',
             '--cluster', cluster,
-            '--name', 'client.bootstrap-mds',
+            '--name', 'client.bootstrap-mgr',
             '--keyring', bootstrap_keyring,
-            'auth', 'get-or-create', 'mds.{name}'.format(name=name),
-            'osd', 'allow rwx',
-            'mds', 'allow',
-            'mon', 'allow profile mds',
+            'auth', 'get-or-create', 'mgr.{name}'.format(name=name),
+            'mon', 'allow profile mgr',
             '-o',
             os.path.join(keypath),
         ]
@@ -62,7 +60,7 @@ def create_mds(distro, name, cluster, init):
             # yes stdout as err because this is an error
             conn.logger.error(line)
         conn.logger.error('exit code from command was: %s' % returncode)
-        raise RuntimeError('could not create mds')
+        raise RuntimeError('could not create mgr')
 
     conn.remote_module.touch_file(os.path.join(path, 'done'))
     conn.remote_module.touch_file(os.path.join(path, init))
@@ -73,7 +71,7 @@ def create_mds(distro, name, cluster, init):
             [
                 'initctl',
                 'emit',
-                'ceph-mds',
+                'ceph-mgr',
                 'cluster={cluster}'.format(cluster=cluster),
                 'id={name}'.format(name=name),
             ],
@@ -86,7 +84,7 @@ def create_mds(distro, name, cluster, init):
                 'service',
                 'ceph',
                 'start',
-                'mds.{name}'.format(name=name),
+                'mgr.{name}'.format(name=name),
             ],
             timeout=7
         )
@@ -98,7 +96,7 @@ def create_mds(distro, name, cluster, init):
             [
                 'systemctl',
                 'enable',
-                'ceph-mds@{name}'.format(name=name),
+                'ceph-mgr@{name}'.format(name=name),
             ],
             timeout=7
         )
@@ -107,7 +105,7 @@ def create_mds(distro, name, cluster, init):
             [
                 'systemctl',
                 'start',
-                'ceph-mds@{name}'.format(name=name),
+                'ceph-mgr@{name}'.format(name=name),
             ],
             timeout=7
         )
@@ -123,21 +121,21 @@ def create_mds(distro, name, cluster, init):
 
 
 
-def mds_create(args):
+def mgr_create(args):
     conf_data = conf.ceph.load_raw(args)
     LOG.debug(
-        'Deploying mds, cluster %s hosts %s',
+        'Deploying mgr, cluster %s hosts %s',
         args.cluster,
-        ' '.join(':'.join(x or '' for x in t) for t in args.mds),
+        ' '.join(':'.join(x or '' for x in t) for t in args.mgr),
         )
 
-    key = get_bootstrap_mds_key(cluster=args.cluster)
+    key = get_bootstrap_mgr_key(cluster=args.cluster)
 
     bootstrapped = set()
     errors = 0
     failed_on_rhel = False
 
-    for hostname, name in args.mds:
+    for hostname, name in args.mgr:
         try:
             distro = hosts.get(hostname, username=args.username)
             rlogger = distro.conn.logger
@@ -152,22 +150,22 @@ def mds_create(args):
 
             if hostname not in bootstrapped:
                 bootstrapped.add(hostname)
-                LOG.debug('deploying mds bootstrap to %s', hostname)
+                LOG.debug('deploying mgr bootstrap to %s', hostname)
                 distro.conn.remote_module.write_conf(
                     args.cluster,
                     conf_data,
                     args.overwrite_conf,
                 )
 
-                path = '/var/lib/ceph/bootstrap-mds/{cluster}.keyring'.format(
+                path = '/var/lib/ceph/bootstrap-mgr/{cluster}.keyring'.format(
                     cluster=args.cluster,
                 )
 
                 if not distro.conn.remote_module.path_exists(path):
-                    rlogger.warning('mds keyring does not exist yet, creating one')
+                    rlogger.warning('mgr keyring does not exist yet, creating one')
                     distro.conn.remote_module.write_keyring(path, key)
 
-            create_mds(distro, name, args.cluster, distro.init)
+            create_mgr(distro, name, args.cluster, distro.init)
             distro.conn.exit()
         except RuntimeError as e:
             if distro.normalized_name == 'redhat':
@@ -180,15 +178,15 @@ def mds_create(args):
         if failed_on_rhel:
             # because users only read the last few lines :(
             LOG.error(
-                'RHEL RHCS systems do not have the ability to deploy MDS yet'
+                'RHEL RHCS systems do not have the ability to deploy MGR yet'
             )
 
-        raise exc.GenericError('Failed to create %d MDSs' % errors)
+        raise exc.GenericError('Failed to create %d MGRs' % errors)
 
 
-def mds(args):
+def mgr(args):
     if args.subcommand == 'create':
-        mds_create(args)
+        mgr_create(args)
     else:
         LOG.error('subcommand %s not implemented', args.subcommand)
 
@@ -204,22 +202,22 @@ def colon_separated(s):
 @priority(30)
 def make(parser):
     """
-    Ceph MDS daemon management
+    Ceph MGR daemon management
     """
-    mds_parser = parser.add_subparsers(dest='subcommand')
-    mds_parser.required = True
+    mgr_parser = parser.add_subparsers(dest='subcommand')
+    mgr_parser.required = True
 
-    mds_create = mds_parser.add_parser(
+    mgr_create = mgr_parser.add_parser(
         'create',
-        help='Deploy Ceph MDS on remote host(s)'
+        help='Deploy Ceph MGR on remote host(s)'
     )
-    mds_create.add_argument(
-        'mds',
+    mgr_create.add_argument(
+        'mgr',
         metavar='HOST[:NAME]',
         nargs='+',
         type=colon_separated,
         help='host (and optionally the daemon name) to deploy on',
         )
     parser.set_defaults(
-        func=mds,
+        func=mgr,
         )

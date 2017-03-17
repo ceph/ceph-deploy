@@ -28,7 +28,7 @@ def mock_get_keys_fail(args, host, dest_dir):
 
 
 def mock_get_keys_sucess_static(args, host, dest_dir):
-    for keytype in ["admin", "mon", "osd", "mds", "rgw"]:
+    for keytype in ["admin", "mon", "osd", "mds", "mgr", "rgw"]:
         keypath = gatherkeys.keytype_path_to(args, keytype)
         path = "%s/%s" % (dest_dir, keypath)
         get_key_static(keytype, path)
@@ -36,7 +36,7 @@ def mock_get_keys_sucess_static(args, host, dest_dir):
 
 
 def mock_get_keys_sucess_dynamic(args, host, dest_dir):
-    for keytype in ["admin", "mon", "osd", "mds", "rgw"]:
+    for keytype in ["admin", "mon", "osd", "mds", "mgr", "rgw"]:
         keypath = gatherkeys.keytype_path_to(args, keytype)
         path = "%s/%s" % (dest_dir, keypath)
         get_key_dynamic(keytype, path)
@@ -91,21 +91,22 @@ class TestGatherKeys(object):
         dir_content = os.listdir(self.test_dir)
         assert "ceph.client.admin.keyring" in dir_content
         assert "ceph.bootstrap-mds.keyring" in dir_content
+        assert "ceph.bootstrap-mgr.keyring" in dir_content
         assert "ceph.mon.keyring" in dir_content
         assert "ceph.bootstrap-osd.keyring" in dir_content
         assert "ceph.bootstrap-rgw.keyring" in dir_content
-        assert len(dir_content) == 5
+        assert len(dir_content) == 6
         # Now we repeat as no new keys are generated
         gatherkeys.gatherkeys(args)
         dir_content = os.listdir(self.test_dir)
-        assert len(dir_content) == 5
+        assert len(dir_content) == 6
 
 
     @mock.patch('ceph_deploy.gatherkeys.time.strftime', mock_time_strftime)
     @mock.patch('ceph_deploy.gatherkeys.gatherkeys_with_mon', mock_get_keys_sucess_dynamic)
     def test_gatherkeys_backs_up(self):
         """
-        Test 'gatherkeys' succeeds when getinig keys that are always different.
+        Test 'gatherkeys' succeeds when getting keys that are always different.
         Test 'gatherkeys' does backup keys that are not identical.
         """
         args = mock.Mock()
@@ -115,10 +116,11 @@ class TestGatherKeys(object):
         dir_content = os.listdir(self.test_dir)
         assert "ceph.client.admin.keyring" in dir_content
         assert "ceph.bootstrap-mds.keyring" in dir_content
+        assert "ceph.bootstrap-mgr.keyring" in dir_content
         assert "ceph.mon.keyring" in dir_content
         assert "ceph.bootstrap-osd.keyring" in dir_content
         assert "ceph.bootstrap-rgw.keyring" in dir_content
-        assert len(dir_content) == 5
+        assert len(dir_content) == 6
         # Now we repeat as new keys are generated and old
         # are backed up
         gatherkeys.gatherkeys(args)
@@ -126,12 +128,14 @@ class TestGatherKeys(object):
         mocked_time = mock_time_strftime(None)
         assert "ceph.client.admin.keyring" in dir_content
         assert "ceph.bootstrap-mds.keyring" in dir_content
+        assert "ceph.bootstrap-mgr.keyring" in dir_content
         assert "ceph.mon.keyring" in dir_content
         assert "ceph.bootstrap-osd.keyring" in dir_content
         assert "ceph.bootstrap-rgw.keyring" in dir_content
         assert "ceph.client.admin.keyring-%s" % (mocked_time) in dir_content
         assert "ceph.bootstrap-mds.keyring-%s" % (mocked_time) in dir_content
+        assert "ceph.bootstrap-mgr.keyring-%s" % (mocked_time) in dir_content
         assert "ceph.mon.keyring-%s" % (mocked_time) in dir_content
         assert "ceph.bootstrap-osd.keyring-%s" % (mocked_time) in dir_content
         assert "ceph.bootstrap-rgw.keyring-%s" % (mocked_time) in dir_content
-        assert len(dir_content) == 10
+        assert len(dir_content) == 12
