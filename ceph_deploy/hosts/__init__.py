@@ -66,9 +66,9 @@ def get(hostname,
     module.normalized_name = _normalized_distro_name(distro_name)
     module.normalized_release = _normalized_release(release)
     module.distro = module.normalized_name
-    module.is_el = module.normalized_name in ['redhat', 'centos', 'fedora', 'scientific', 'oracle']
+    module.is_el = module.normalized_name in ['redhat', 'centos', 'fedora', 'scientific', 'oracle', 'virtuozzo']
     module.is_rpm = module.normalized_name in ['redhat', 'centos',
-                                               'fedora', 'scientific', 'suse', 'oracle']
+                                               'fedora', 'scientific', 'suse', 'oracle', 'virtuozzo']
     module.is_deb = not module.is_rpm
     module.release = release
     module.codename = codename
@@ -97,6 +97,7 @@ def _get_distro(distro, fallback=None, use_rhceph=False):
         'redhat': centos,
         'fedora': fedora,
         'suse': suse,
+        'virtuozzo' : centos
         }
 
     if distro == 'redhat' and use_rhceph:
@@ -119,6 +120,8 @@ def _normalized_distro_name(distro):
         return 'centos'
     elif distro.startswith('linuxmint'):
         return 'ubuntu'
+    elif distro.startswith('virtuozzo'):
+        return 'virtuozzo'
     return distro
 
 
