@@ -49,6 +49,8 @@ def create_mgr(distro, name, cluster, init):
             '--keyring', bootstrap_keyring,
             'auth', 'get-or-create', 'mgr.{name}'.format(name=name),
             'mon', 'allow profile mgr',
+            'osd', 'allow *',
+            'mds', 'allow *',
             '-o',
             os.path.join(keypath),
         ]
