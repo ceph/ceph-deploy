@@ -4,6 +4,22 @@ Changelog
 1.5
 ---
 
+1.5.38
+^^^^^^
+19-May-2017
+
+* Allow unsigned deb packages from mirrors
+* Detect systemd before sysvinit in centos
+* Fix UnboundLocalError when installing in debian with custom repo flags
+* gatherkeys to give mgr "allow * " permissions
+* specify block.db and block.wal for bluestore
+* be able to install ceph-mgr
+* bootstrap mgr keys
+* cleanup mds key creation
+* Virtuozzo Linux support
+* update osd and mds caps
+
+
 1.5.37
 ^^^^^^
 03-Jan-2017
