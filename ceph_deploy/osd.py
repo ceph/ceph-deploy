@@ -390,6 +390,8 @@ def activate(args, cfg):
                 'activate',
                 '--mark-init',
                 distro.init,
+                '--cluster',
+                args.cluster,
                 '--mount',
                 disk,
             ],
