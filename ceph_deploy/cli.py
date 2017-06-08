@@ -69,12 +69,6 @@ def get_parser():
         help='overwrite an existing conf file on remote host (if present)',
         )
     parser.add_argument(
-        '--cluster',
-        metavar='NAME',
-        help='name of the cluster',
-        type=validate.alphanumeric,
-        )
-    parser.add_argument(
         '--ceph-conf',
         dest='ceph_conf',
         help='use (or reuse) a given ceph.conf file',
