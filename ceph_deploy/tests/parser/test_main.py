@@ -65,17 +65,6 @@ class TestParserMain(object):
         args = self.parser.parse_args('forgetkeys'.split())
         assert args.cluster == 'ceph'
 
-    def test_custom_cluster_name(self):
-        args = self.parser.parse_args('--cluster myhugecluster forgetkeys'.split())
-        assert args.cluster == 'myhugecluster'
-
-    def test_custom_cluster_name_bad(self, capsys):
-        with pytest.raises(SystemExit):
-            self.parser.parse_args('--cluster=/evil-this-should-not-be-created'.split())
-        out, err = capsys.readouterr()
-        assert ('--cluster: argument must start with a letter and contain only '
-                'letters and numbers') in err
-
     def test_default_ceph_conf_is_none(self):
         args = self.parser.parse_args('forgetkeys'.split())
         assert args.ceph_conf is None
