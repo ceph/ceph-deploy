@@ -324,6 +324,8 @@ def prepare(args, cfg, activate_prepared_disk):
             storetype = None
             if args.bluestore:
                 storetype = 'bluestore'
+            if args.filestore:
+                storetype = 'filestore'
 
             prepare_disk(
                 distro.conn,
@@ -704,6 +706,11 @@ def make(parser):
         metavar='KEYDIR',
         default='/etc/ceph/dmcrypt-keys',
         help='directory where dm-crypt keys are stored',
+        )
+    osd_create.add_argument(
+        '--filestore',
+        action='store_true', default=None,
+        help='filestore objectstore',
         )
     osd_create.add_argument(
         '--bluestore',
