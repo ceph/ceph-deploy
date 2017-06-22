@@ -6,7 +6,7 @@ import os
 import sys
 
 import ceph_deploy
-from ceph_deploy import exc, validate
+from ceph_deploy import exc
 from ceph_deploy.util import log
 from ceph_deploy.util.decorators import catches
 
