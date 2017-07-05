@@ -874,6 +874,11 @@ def make_disk(parser):
         help='bluestore objectstore',
         )
     disk_prepare.add_argument(
+        '--filestore',
+        action='store_true', default=None,
+        help='filestore objectstore',
+        )
+    disk_prepare.add_argument(
         '--block-db',
         default=None,
         help='bluestore block.db path'
