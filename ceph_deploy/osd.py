@@ -734,10 +734,14 @@ def make(parser):
         type=colon_separated,
         help='host and disk to prepare',
         )
-
     osd_prepare = osd_parser.add_parser(
         'prepare',
         help='Prepare a disk for use as Ceph OSD by formatting/partitioning disk'
+        )
+    osd_prepare.add_argument(
+        '--filestore',
+        action='store_true', default=None,
+        help='filestore objectstore',
         )
     osd_prepare.add_argument(
         '--zap-disk',
