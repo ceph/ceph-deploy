@@ -16,6 +16,7 @@ def platform_information(_linux_distribution=None):
     distro, release, codename = linux_distribution()
     if not codename and 'debian' in distro.lower():  # this could be an empty string in Debian
         debian_codenames = {
+            '9': 'stretch',
             '8': 'jessie',
             '7': 'wheezy',
             '6': 'squeeze',
