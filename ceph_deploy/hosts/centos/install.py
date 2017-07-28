@@ -78,12 +78,22 @@ def install(distro, version_kind, version, adjust_repos, **kw):
             elif version_kind == 'testing':
                 url = 'https://download.ceph.com/rpm-testing/{repo}/'.format(repo=repo_part)
 
+            # remove any old ceph-release package from prevoius release
             remoto.process.run(
                 distro.conn,
                 [
-                    'rpm',
-                    '-Uvh',
-                    '--replacepkgs',
+                    'yum',
+                    'remove',
+                    '-y',
+                    'ceph-release'
+                ],
+            )
+            remoto.process.run(
+                distro.conn,
+                [
+                    'yum',
+                    'install',
+                    '-y',
                     '{url}noarch/ceph-release-1-0.{dist}.noarch.rpm'.format(url=url, dist=dist),
                 ],
             )
