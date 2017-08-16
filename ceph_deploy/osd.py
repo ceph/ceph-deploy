@@ -481,6 +481,12 @@ def osd_list(args, cfg):
     tree = osd_tree(distro.conn, args.cluster)
     distro.conn.exit()
 
+    # get id of osds on this host
+    for blob in tree['nodes']:
+        if blob.get('name') == hostname:
+            osds_id = blob.get('children')
+            break
+
     interesting_files = ['active', 'magic', 'whoami', 'journal_uuid']
 
     for hostname, disk, journal in args.disk:
@@ -501,6 +507,10 @@ def osd_list(args, cfg):
             osd_path = os.path.join(constants.osd_path, _osd)
             journal_path = os.path.join(osd_path, 'journal')
             _id = int(_osd.split('-')[-1])  # split on dash, get the id
+            # if _id is not in osds_id, showing _id is not a osd id any more
+            if _id not in osds_id:
+                continue
+
             osd_name = 'osd.%s' % _id
             metadata = {}
             json_blob = {}
