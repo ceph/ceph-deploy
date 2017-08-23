@@ -188,6 +188,7 @@ def prepare_disk(
         dmcrypt,
         dmcrypt_dir,
         storetype,
+        block,
         block_wal,
         block_db):
     """
@@ -226,6 +227,11 @@ def prepare_disk(
 
     if journal is not None:
         args.append(journal)
+
+    if block is not None:
+        # The null string is necessary for 'ceph-disk'.
+        args.append("")
+        args.append(block)
 
     remoto.process.run(
         conn,
@@ -322,8 +328,11 @@ def prepare(args, cfg, activate_prepared_disk):
                       hostname, disk, journal, activate_prepared_disk)
 
             storetype = None
+            block = None
             if args.bluestore:
                 storetype = 'bluestore'
+                block = journal
+                journal = None
             if args.filestore:
                 storetype = 'filestore'
 
@@ -339,6 +348,7 @@ def prepare(args, cfg, activate_prepared_disk):
                 dmcrypt=args.dmcrypt,
                 dmcrypt_dir=args.dmcrypt_key_dir,
                 storetype=storetype,
+                block=block,
                 block_wal=args.block_wal,
                 block_db=args.block_db
             )
@@ -673,7 +683,7 @@ def make(parser):
     osd_list.add_argument(
         'disk',
         nargs='+',
-        metavar='HOST:DISK[:JOURNAL]',
+        metavar='HOST:DISK[:JOURNAL or BLOCK]',
         type=colon_separated,
         help='remote host to list OSDs from'
         )
@@ -730,7 +740,7 @@ def make(parser):
     osd_create.add_argument(
         'disk',
         nargs='+',
-        metavar='HOST:DISK[:JOURNAL]',
+        metavar='HOST:DISK[:JOURNAL or BLOCK]',
         type=colon_separated,
         help='host and disk to prepare',
         )
@@ -786,7 +796,7 @@ def make(parser):
     osd_prepare.add_argument(
         'disk',
         nargs='+',
-        metavar='HOST:DISK[:JOURNAL]',
+        metavar='HOST:DISK[:JOURNAL or BLOCK]',
         type=colon_separated,
         help='host and disk to prepare',
         )
@@ -798,7 +808,7 @@ def make(parser):
     osd_activate.add_argument(
         'disk',
         nargs='+',
-        metavar='HOST:DISK[:JOURNAL]',
+        metavar='HOST:DISK[:JOURNAL or BLOCK]',
         type=colon_separated,
         help='host and disk to activate',
         )
