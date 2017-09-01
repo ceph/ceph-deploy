@@ -4,6 +4,17 @@ Changelog
 1.5
 ---
 
+1.5.39
+^^^^^^
+1-Sep-2017
+
+* Remove ``--cluster`` options, default to ``ceph`` always
+* Add ``--filestore`` since ``ceph-disk`` defaults to bluestore
+* Start testing against Python 3.5
+* Support Debian 9 and 10 intalls
+* Better handling on package conflicts when upgrading/re-installing
+
+
 1.5.38
 ^^^^^^
 19-May-2017
