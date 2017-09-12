@@ -20,7 +20,6 @@ URL:            http://ceph.com/
 Source0:        %{name}-%{version}.tar.bz2
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 BuildRequires:  python-devel
-BuildRequires:  python-distribute
 BuildRequires:  python-setuptools
 BuildRequires:  python-virtualenv
 BuildRequires:  python-mock
@@ -32,7 +31,6 @@ BuildRequires:  pytest
 %endif
 BuildRequires:  git
 Requires:       python-argparse
-Requires:       python-distribute
 #Requires:      lsb-release
 #Requires:      ceph
 %if 0%{?suse_version} && 0%{?suse_version} <= 1110
