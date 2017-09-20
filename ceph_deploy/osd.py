@@ -196,6 +196,7 @@ def prepare_disk(
     ceph_disk_executable = system.executable_path(conn, 'ceph-disk')
     args = [
         ceph_disk_executable,
+        '--log-stdout',
         '-v',
         'prepare',
         ]
