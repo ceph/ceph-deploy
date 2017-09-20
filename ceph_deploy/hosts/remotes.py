@@ -8,12 +8,15 @@ import os
 import shutil
 import tempfile
 import platform
+import re
 
 
 def platform_information(_linux_distribution=None):
     """ detect platform information from remote host """
     linux_distribution = _linux_distribution or platform.linux_distribution
     distro, release, codename = linux_distribution()
+    if not distro:
+        distro, release, codename = parse_os_release()
     if not codename and 'debian' in distro.lower():  # this could be an empty string in Debian
         debian_codenames = {
             '10': 'buster',
@@ -44,6 +47,34 @@ def platform_information(_linux_distribution=None):
         str(codename).rstrip()
     )
 
+
+def parse_os_release(release_path='/etc/os-release'):
+    """ Extract (distro, release, codename) from /etc/os-release if present """
+    release_info = {}
+    if os.path.isfile(release_path):
+        for line in open(release_path, 'r').readlines():
+            line = line.strip()
+            if line.startswith('#'):
+                continue
+            parts = line.split('=')
+            if len(parts) != 2:
+                continue
+            release_info[parts[0].strip()] = parts[1].strip("\"'\n\t ")
+    # In theory, we want ID/NAME, VERSION_ID and VERSION_CODENAME (with a
+    # possible fallback to VERSION on the latter), based on information at:
+    # https://www.freedesktop.org/software/systemd/man/os-release.html
+    # However, after reviewing several distros /etc/os-release, getting
+    # the codename is a bit of a mess.  It's usually in parentheses in
+    # VERSION, with some exceptions.
+    distro = release_info.get('ID', '')
+    release = release_info.get('VERSION_ID', '')
+    codename = release_info.get('UBUNTU_CODENAME', release_info.get('VERSION', ''))
+    match = re.match(r'^[^(]+ \(([^)]+)\)', codename)
+    if match:
+        codename = match.group(1).lower()
+    if not codename and release_info.get('NAME', '') == 'openSUSE Tumbleweed':
+        codename = 'tumbleweed'
+    return (distro, release, codename)
 
 def machine_type():
     """ detect machine type """
