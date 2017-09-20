@@ -405,6 +405,8 @@ def activate(args, cfg):
         elif distro.init == 'sysvinit':
             system.enable_service(distro.conn, "ceph")
 
+        if distro.distro == 'suse':
+            system.enable_service(distro.conn, 'ceph')
         distro.conn.exit()
 
 
