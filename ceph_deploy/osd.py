@@ -488,6 +488,9 @@ def osd_list(args, cfg):
         remote_module = distro.conn.remote_module
         osds = distro.conn.remote_module.listdir(constants.osd_path)
 
+        osd_id = r'{cluster}-(\d+)'.format(cluster=args.cluster)
+        osds = filter(lambda osd: re.match(osd_id, osd), osds)
+
         ceph_disk_executable = system.executable_path(distro.conn, 'ceph-disk')
         output, err, exit_code = remoto.process.check(
             distro.conn,
