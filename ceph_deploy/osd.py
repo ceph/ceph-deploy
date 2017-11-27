@@ -620,28 +620,6 @@ def disk(args):
         sys.exit(1)
 
 
-def colon_separated(s):
-    journal = None
-    disk = None
-    host = None
-    if s.count(':') == 2:
-        (host, disk, journal) = s.split(':')
-    elif s.count(':') == 1:
-        (host, disk) = s.split(':')
-    elif s.count(':') == 0:
-        (host) = s
-    else:
-        raise argparse.ArgumentTypeError('must be in form HOST:DISK[:JOURNAL]')
-
-    if disk:
-        # allow just "sdb" to mean /dev/sdb
-        disk = os.path.join('/dev', disk)
-        if journal is not None:
-            journal = os.path.join('/dev', journal)
-
-    return (host, disk, journal)
-
-
 @priority(50)
 def make(parser):
     """
