@@ -187,7 +187,8 @@ def prepare_disk(
         dmcrypt_dir,
         storetype,
         block_wal,
-        block_db):
+        block_db,
+        create=False):
     """
     Run on osd node, prepares a data disk for use.
     """
@@ -196,7 +197,7 @@ def prepare_disk(
         ceph_volume_executable,
         '--cluster', cluster,
         'lvm',
-        'prepare',
+        'create' if create else 'prepare',
         '--%s' % storetype,
         '--data', data
         ]
@@ -226,7 +227,7 @@ def prepare_disk(
     )
 
 
-def prepare(args, cfg):
+def prepare(args, cfg, create=False):
     LOG.debug(
         'Preparing cluster %s on data device %s',
         args.cluster,
@@ -287,7 +288,8 @@ def prepare(args, cfg):
             dmcrypt_dir=args.dmcrypt_key_dir,
             storetype=storetype,
             block_wal=args.block_wal,
-            block_db=args.block_db
+            block_db=args.block_db,
+            create=create,
         )
 
         # give the OSD a few seconds to start
@@ -542,9 +544,9 @@ def osd(args):
     if args.subcommand == 'list':
         osd_list(args, cfg)
     elif args.subcommand == 'prepare':
-        prepare(args, cfg, activate_prepared_disk=False)
+        prepare(args, cfg, create=False)
     elif args.subcommand == 'create':
-        prepare(args, cfg, activate_prepared_disk=True)
+        prepare(args, cfg, create=True)
     elif args.subcommand == 'activate':
         activate(args, cfg)
     else:
@@ -558,7 +560,9 @@ def disk(args):
     if args.subcommand == 'list':
         disk_list(args, cfg)
     elif args.subcommand == 'prepare':
-        prepare(args, cfg)
+        prepare(args, cfg, create=False)
+    elif args.subcommand == 'create':
+        prepare(args, cfg, create=True)
     elif args.subcommand == 'activate':
         activate(args, cfg)
     elif args.subcommand == 'zap':
