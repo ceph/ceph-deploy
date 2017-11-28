@@ -179,10 +179,8 @@ def catch_osd_errors(conn, logger, args):
 def prepare_disk(
         conn,
         cluster,
-        disk,
+        data,
         journal,
-        activate_prepared_disk,
-        init,
         zap,
         fs_type,
         dmcrypt,
@@ -196,8 +194,11 @@ def prepare_disk(
     ceph_volume_executable = system.executable_path(conn, 'ceph-volume')
     args = [
         ceph_volume_executable,
-        'lvm'
+        '--cluster', cluster,
+        'lvm',
         'prepare',
+        '--%s' % storetype,
+        '--data', data
         ]
     if zap:
         logger.warning('zapping is no longer supported when preparing')
@@ -205,6 +206,7 @@ def prepare_disk(
         args.append('--dmcrypt')
         # TODO: re-enable dmcrypt support once ceph-volume grows it
         logger.warning('dmcrypt is currently not supported')
+
     if storetype == 'bluestore':
         if block_wal:
             args.append('--block.wal')
@@ -212,18 +214,10 @@ def prepare_disk(
         if block_db:
             args.append('--block.db')
             args.append(block_db)
-    if storetype:
-        args.append('--' + storetype)
-    args.extend([
-        '--cluster',
-        cluster,
-        '--fs-type',
-        fs_type,
-        '--',
-        disk,
-    ])
-
-    if journal is not None:
+    elif storetype == 'filestore':
+        if not journal:
+            raise RuntimeError('A journal lv or GPT partition must be specified when using filestore')
+        args.append('--journal')
         args.append(journal)
 
     remoto.process.run(
@@ -231,126 +225,80 @@ def prepare_disk(
         args
     )
 
-    if activate_prepared_disk:
-        # we don't simply run activate here because we don't know
-        # which partition ceph-disk prepare created as the data
-        # volume.  instead, we rely on udev to do the activation and
-        # just give it a kick to ensure it wakes up.  we also enable
-        # ceph.target, the other key piece of activate.
-        if init == 'systemd':
-            system.enable_service(conn, "ceph.target")
-        elif init == 'sysvinit':
-            system.enable_service(conn, "ceph")
 
-
-def exceeds_max_osds(args, reasonable=20):
-    """
-    A very simple function to check against multiple OSDs getting created and
-    warn about the possibility of more than the recommended which would cause
-    issues with max allowed PIDs in a system.
-
-    The check is done against the ``args.disk`` object that should look like::
-
-        [
-            ('cephnode-01', '/dev/sdb', '/dev/sda5'),
-            ('cephnode-01', '/dev/sdc', '/dev/sda6'),
-            ...
-        ]
-    """
-    hosts = [item[0] for item in args.disk]
-    per_host_count = dict(
-        (
-            (h, hosts.count(h)) for h in set(hosts)
-            if hosts.count(h) > reasonable
-        )
-    )
-
-    return per_host_count
-
-
-def prepare(args, cfg, activate_prepared_disk):
+def prepare(args, cfg):
     LOG.debug(
-        'Preparing cluster %s disks %s',
+        'Preparing cluster %s on data device %s',
         args.cluster,
-        ' '.join(':'.join(x or '' for x in t) for t in args.disk),
+        args.data
         )
-
-    hosts_in_danger = exceeds_max_osds(args)
-
-    if hosts_in_danger:
-        LOG.warning('if ``kernel.pid_max`` is not increased to a high enough value')
-        LOG.warning('the following hosts will encounter issues:')
-        for host, count in hosts_in_danger.items():
-            LOG.warning('Host: %8s, OSDs: %s' % (host, count))
 
     key = get_bootstrap_osd_key(cluster=args.cluster)
 
     bootstrapped = set()
     errors = 0
-    for hostname, disk, journal in args.disk:
-        try:
-            if disk is None:
-                raise exc.NeedDiskError(hostname)
+    hostname = args.host
 
-            distro = hosts.get(
-                hostname,
-                username=args.username,
-                callbacks=[packages.ceph_is_installed]
-            )
-            LOG.info(
-                'Distro info: %s %s %s',
-                distro.name,
-                distro.release,
-                distro.codename
-            )
+    try:
+        if args.data is None:
+            raise exc.NeedDiskError(hostname)
 
-            if hostname not in bootstrapped:
-                bootstrapped.add(hostname)
-                LOG.debug('Deploying osd to %s', hostname)
+        distro = hosts.get(
+            hostname,
+            username=args.username,
+            callbacks=[packages.ceph_is_installed]
+        )
+        LOG.info(
+            'Distro info: %s %s %s',
+            distro.name,
+            distro.release,
+            distro.codename
+        )
 
-                conf_data = conf.ceph.load_raw(args)
-                distro.conn.remote_module.write_conf(
-                    args.cluster,
-                    conf_data,
-                    args.overwrite_conf
-                )
+        if hostname not in bootstrapped:
+            bootstrapped.add(hostname)
+            LOG.debug('Deploying osd to %s', hostname)
 
-                create_osd_keyring(distro.conn, args.cluster, key)
-
-            LOG.debug('Preparing host %s disk %s journal %s activate %s',
-                      hostname, disk, journal, activate_prepared_disk)
-
-            storetype = None
-            if args.bluestore:
-                storetype = 'bluestore'
-            if args.filestore:
-                storetype = 'filestore'
-
-            prepare_disk(
-                distro.conn,
-                cluster=args.cluster,
-                disk=disk,
-                journal=journal,
-                activate_prepared_disk=activate_prepared_disk,
-                init=distro.init,
-                zap=args.zap_disk,
-                fs_type=args.fs_type,
-                dmcrypt=args.dmcrypt,
-                dmcrypt_dir=args.dmcrypt_key_dir,
-                storetype=storetype,
-                block_wal=args.block_wal,
-                block_db=args.block_db
+            conf_data = conf.ceph.load_raw(args)
+            distro.conn.remote_module.write_conf(
+                args.cluster,
+                conf_data,
+                args.overwrite_conf
             )
 
-            # give the OSD a few seconds to start
-            time.sleep(5)
-            catch_osd_errors(distro.conn, distro.conn.logger, args)
-            LOG.debug('Host %s is now ready for osd use.', hostname)
-            distro.conn.exit()
+            create_osd_keyring(distro.conn, args.cluster, key)
 
-        except RuntimeError as e:
-            LOG.error(e)
-            errors += 1
+        LOG.debug('Preparing host %s data %s',
+                  hostname, args.data)# , journal, activate_prepared_disk)
+
+        # default to bluestore unless explicitly told not to
+        storetype = 'bluestore'
+        if args.filestore:
+            storetype = 'filestore'
+
+        prepare_disk(
+            distro.conn,
+            cluster=args.cluster,
+            data=args.data,
+            journal=args.journal,
+            zap=args.zap_disk,
+            fs_type=args.fs_type,
+            dmcrypt=args.dmcrypt,
+            dmcrypt_dir=args.dmcrypt_key_dir,
+            storetype=storetype,
+            block_wal=args.block_wal,
+            block_db=args.block_db
+        )
+
+        # give the OSD a few seconds to start
+        time.sleep(5)
+        catch_osd_errors(distro.conn, distro.conn.logger, args)
+        LOG.debug('Host %s is now ready for osd use.', hostname)
+        distro.conn.exit()
+
+    except RuntimeError as e:
+        LOG.error(e)
+        errors += 1
 
     if errors:
         raise exc.GenericError('Failed to create %d OSDs' % errors)
@@ -610,7 +558,7 @@ def disk(args):
     if args.subcommand == 'list':
         disk_list(args, cfg)
     elif args.subcommand == 'prepare':
-        prepare(args, cfg, activate_prepared_disk=False)
+        prepare(args, cfg)
     elif args.subcommand == 'activate':
         activate(args, cfg)
     elif args.subcommand == 'zap':
@@ -649,7 +597,7 @@ def make(parser):
         )
     osd_list.add_argument(
         'host',
-        nargs='+',
+        nargs='?',
         metavar='HOST',
         help='remote host to list OSDs from'
         )
@@ -663,6 +611,10 @@ def make(parser):
         metavar='DATA',
         help='The OSD data logical volume (vg/lv) or device'
     )
+    osd_create.add_argument(
+        '--journal',
+        help='Logical Volume (vg/lv) or path to GPT partition',
+        )
     osd_create.add_argument(
         '--zap-disk',
         action='store_true',
@@ -710,7 +662,7 @@ def make(parser):
         )
     osd_create.add_argument(
         'host',
-        nargs='+',
+        nargs='?',
         metavar='HOST',
         help='Remote host to connect'
         )
@@ -764,13 +716,17 @@ def make(parser):
         help='bluestore block.wal path'
         )
     osd_prepare.add_argument(
+        '--journal',
+        help='Logical Volume (vg/lv) or path to GPT partition',
+        )
+    osd_prepare.add_argument(
         '--data',
         metavar='DATA',
         help='Logical Volume (vg/lv) or path to device',
         )
     osd_prepare.add_argument(
         'host',
-        nargs='+',
+        nargs='?',
         metavar='HOST',
         help='Remote host to connect'
         )
@@ -790,7 +746,7 @@ def make(parser):
         )
     osd_activate.add_argument(
         'host',
-        nargs='+',
+        nargs='?',
         metavar='HOST',
         help='Remote host to connect'
         )
@@ -813,7 +769,7 @@ def make_disk(parser):
         )
     disk_zap.add_argument(
         'host',
-        nargs='+',
+        nargs='?',
         metavar='HOST',
         help='Remote host to connect'
         )
@@ -879,7 +835,7 @@ def make_disk(parser):
         )
     disk_prepare.add_argument(
         'host',
-        nargs='+',
+        nargs='?',
         metavar='HOST',
         help='Remote host to connect'
         )
@@ -890,7 +846,7 @@ def make_disk(parser):
         )
     disk_activate.add_argument(
         'host',
-        nargs='+',
+        nargs='?',
         metavar='HOST',
         help='Remote host to connect'
         )
