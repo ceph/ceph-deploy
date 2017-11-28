@@ -391,7 +391,25 @@ def disk_zap(args):
 
 
 def disk_list(args, cfg):
-    for hostname, disk, journal in args.disk:
+    command = ['fdisk', '-l']
+
+    for hostname in args.host:
+        distro = hosts.get(
+            hostname,
+            username=args.username,
+            callbacks=[packages.ceph_is_installed]
+        )
+        out, err, code = remoto.process.check(
+            distro.conn,
+            command,
+        )
+        for line in out:
+            if line.startswith('Disk /'):
+                distro.conn.logger(line)
+
+
+def osd_list(args, cfg):
+    for hostname in args.host:
         distro = hosts.get(
             hostname,
             username=args.username,
@@ -405,83 +423,15 @@ def disk_list(args, cfg):
         )
 
         LOG.debug('Listing disks on {hostname}...'.format(hostname=hostname))
-        ceph_disk_executable = system.executable_path(distro.conn, 'ceph-disk')
+        ceph_volume_executable = system.executable_path(distro.conn, 'ceph-volume')
         remoto.process.run(
             distro.conn,
             [
-                ceph_disk_executable,
+                ceph_volume_executable,
+                'lvm',
                 'list',
             ],
         )
-        distro.conn.exit()
-
-
-def osd_list(args, cfg):
-    monitors = mon.get_mon_initial_members(args, error_on_empty=True, _cfg=cfg)
-
-    # get the osd tree from a monitor host
-    mon_host = monitors[0]
-    distro = hosts.get(
-        mon_host,
-        username=args.username,
-        callbacks=[packages.ceph_is_installed]
-    )
-
-    tree = osd_tree(distro.conn, args.cluster)
-    distro.conn.exit()
-
-    interesting_files = ['active', 'magic', 'whoami', 'journal_uuid']
-
-    for hostname, disk, journal in args.disk:
-        distro = hosts.get(hostname, username=args.username)
-        remote_module = distro.conn.remote_module
-        osds = distro.conn.remote_module.listdir(constants.osd_path)
-
-        ceph_disk_executable = system.executable_path(distro.conn, 'ceph-disk')
-        output, err, exit_code = remoto.process.check(
-            distro.conn,
-            [
-                ceph_disk_executable,
-                'list',
-            ]
-        )
-
-        for _osd in osds:
-            osd_path = os.path.join(constants.osd_path, _osd)
-            journal_path = os.path.join(osd_path, 'journal')
-            _id = int(_osd.split('-')[-1])  # split on dash, get the id
-            osd_name = 'osd.%s' % _id
-            metadata = {}
-            json_blob = {}
-
-            # piggy back from ceph-disk and get the mount point
-            device = get_osd_mount_point(output, osd_name)
-            if device:
-                metadata['device'] = device
-
-            # read interesting metadata from files
-            for f in interesting_files:
-                osd_f_path = os.path.join(osd_path, f)
-                if remote_module.path_exists(osd_f_path):
-                    metadata[f] = remote_module.readline(osd_f_path)
-
-            # do we have a journal path?
-            if remote_module.path_exists(journal_path):
-                metadata['journal path'] = remote_module.get_realpath(journal_path)
-
-            # is this OSD in osd tree?
-            for blob in tree['nodes']:
-                if blob.get('id') == _id:  # matches our OSD
-                    json_blob = blob
-
-            print_osd(
-                distro.conn.logger,
-                hostname,
-                osd_path,
-                json_blob,
-                metadata,
-            )
-
         distro.conn.exit()
 
 
@@ -601,9 +551,9 @@ def make(parser):
         )
     osd_list.add_argument(
         'host',
-        nargs='?',
+        nargs='+',
         metavar='HOST',
-        help='remote host to list OSDs from'
+        help='remote host(s) to list OSDs from'
         )
 
     osd_create = osd_parser.add_parser(
@@ -784,8 +734,9 @@ def make_disk(parser):
         )
     disk_list.add_argument(
         'host',
+        nargs='+',
         metavar='HOST',
-        help='Remote host to list OSDs from'
+        help='Remote HOST(s) to list OSDs from'
         )
 
     disk_prepare = disk_parser.add_parser(
