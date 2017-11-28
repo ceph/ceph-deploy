@@ -41,6 +41,74 @@ def create_osd_keyring(conn, cluster, key):
         conn.remote_module.write_keyring(path, key)
 
 
+def identify_osd(conn, cluster, paths=None, _id=None, fsid=None):
+    """
+    List all available OSDs that are configured in the system, and check which
+    one will have a data ``path`` that matches.
+    Calling out to ceph-volume lvm list will produce a data structure like::
+
+        {
+            "0": [
+                {
+                    "lv_name": "lv1",
+                    "lv_path": "/dev/ceph/lv1",
+                    "lv_tags": "ceph.block_device=/dev/ceph/lv1[...]",
+                    "lv_uuid": "dSySBP-Ha7S-j3GC-4peu-Lk1g-YB8r-zf6EsT",
+                    "name": "lv1",
+                    "path": "/dev/ceph/lv1",
+                    "tags": {
+                        "ceph.block_device": "/dev/ceph/lv1",
+                        "ceph.block_uuid": "dSySBP-Ha7S-j3GC-4peu-Lk1g-YB8r-zf6EsT",
+                        "ceph.cluster_fsid": "c92fc9eb-0610-4363-aafc-81ddf70aaf1b",
+                        "ceph.cluster_name": "ceph",
+                        "ceph.db_device": "/dev/ceph/lv2",
+                        "ceph.db_uuid": "9dimyA-5WwW-oIYY-WyHL-url6-eJYZ-7D13vF",
+                        "ceph.osd_fsid": "7df9e11c-5677-4569-b416-3d503779c64c",
+                        "ceph.osd_id": "0",
+                        "ceph.type": "block"
+                    },
+                    "type": "block",
+                    "vg_name": "ceph"
+                },
+            ...
+        }
+    """
+    ceph_volume_executable = system.executable_path(conn, 'ceph-volume')
+    command = [
+        ceph_volume_executable,
+        '--cluster={cluster}'.format(cluster=cluster),
+        'lvm',
+        'list',
+        '--format=json',
+    ]
+
+    out, err, code = remoto.process.check(
+        conn,
+        command,
+    )
+    identifiers = []
+    try:
+        loaded_json = json.loads(b''.join(out).decode('utf-8'))
+    except ValueError:
+        return {}
+    for osd_id, osd_metadata in loaded_json.items():
+        for device_metadata in osd_metadata:
+            device_type = device_metadata['tags']['ceph.type']
+            if device_type not in ['data', 'block']:
+                continue
+            if paths:
+                for path in paths:
+                    if device_metadata['path'] == path:
+                        identifiers.append([osd_id, device_metadata['tags']['ceph.osd_fsid']])
+            elif _id or fsid:
+                osd_id =  device_metadata['tags']['ceph.osd_id']
+                osd_fsid =  device_metadata['tags']['ceph.osd_fsid']
+                # this is very loose, we are trusting that the IDs and FSIDs will match
+                if osd_id == _id or osd_fsid == fsid:
+                    identifiers.append([osd_id, device_metadata['tags']['ceph.osd_fsid']])
+    return identifiers
+
+
 def osd_tree(conn, cluster):
     """
     Check the status of an OSD. Make sure all are up and in
@@ -307,42 +375,44 @@ def prepare(args, cfg, create=False):
 
 
 def activate(args, cfg):
-    LOG.debug(
-        'Activating cluster %s disks %s',
-        args.cluster,
-        # join elements of t with ':', t's with ' '
-        # allow None in elements of t; print as empty
-        ' '.join(':'.join((s or '') for s in t) for t in args.disk),
-        )
+    if args.device:
+        LOG.debug('Activating cluster %s disk: %s', args.cluster, args.device)
+    else:
+        LOG.debug('Activating cluster %s OSD: %s', args.id)
+    hostname = args.host
 
-    for hostname, disk, journal in args.disk:
+    distro = hosts.get(
+        hostname,
+        username=args.username,
+        callbacks=[packages.ceph_is_installed]
+    )
+    LOG.info(
+        'Distro info: %s %s %s',
+        distro.name,
+        distro.release,
+        distro.codename
+    )
 
-        distro = hosts.get(
-            hostname,
-            username=args.username,
-            callbacks=[packages.ceph_is_installed]
-        )
-        LOG.info(
-            'Distro info: %s %s %s',
-            distro.name,
-            distro.release,
-            distro.codename
-        )
+    if not args.device:
+        if not args.fsid or not args.id:
+            raise RuntimeError('If a path is not provided, --fsid or --id is required')
+        identifiers = identify_osd(distro.conn, args.cluster, _id=args.id, fsid=args.fsid)
+    else:
+        identifiers = identify_osd(distro.conn, args.cluster, paths=args.device)
 
-        LOG.debug('activating host %s disk %s', hostname, disk)
+    for _id, fsid in identifiers:
+        LOG.debug('activating host %s OSD ID %s', hostname,  _id)
         LOG.debug('will use init type: %s', distro.init)
 
-        ceph_disk_executable = system.executable_path(distro.conn, 'ceph-disk')
+        ceph_volume_executable = system.executable_path(distro.conn, 'ceph-volume')
         remoto.process.run(
             distro.conn,
             [
-                ceph_disk_executable,
-                '-v',
+                ceph_volume_executable,
+                'lvm',
                 'activate',
-                '--mark-init',
-                distro.init,
-                '--mount',
-                disk,
+                '--auto-detect-objectstore',
+                _id, fsid
             ],
         )
         # give the OSD a few seconds to start
@@ -354,7 +424,7 @@ def activate(args, cfg):
         elif distro.init == 'sysvinit':
             system.enable_service(distro.conn, "ceph")
 
-        distro.conn.exit()
+    distro.conn.exit()
 
 
 def disk_zap(args):
@@ -691,12 +761,12 @@ def make(parser):
         help='Start (activate) Ceph OSD that was previously prepared'
         )
     osd_activate.add_argument(
-        '--osd-fsid',
+        '--fsid',
         metavar='FSID',
         help='The FSID of the previously prepared OSD'
         )
     osd_activate.add_argument(
-        '--osd-id',
+        '--id',
         metavar='ID',
         help='The ID of the previously prepared OSD'
         )
@@ -705,6 +775,12 @@ def make(parser):
         nargs='?',
         metavar='HOST',
         help='Remote host to connect'
+        )
+    osd_activate.add_argument(
+        'device',
+        nargs='*',
+        metavar='DEVICE',
+        help='Absolute paths to devices to activate'
         )
     parser.set_defaults(
         func=osd,
@@ -811,6 +887,22 @@ def make_disk(parser):
         nargs='?',
         metavar='HOST',
         help='Remote host to connect'
+        )
+    disk_activate.add_argument(
+        '--fsid',
+        metavar='FSID',
+        help='The FSID of the previously prepared OSD'
+        )
+    disk_activate.add_argument(
+        '--id',
+        metavar='ID',
+        help='The ID of the previously prepared OSD'
+        )
+    disk_activate.add_argument(
+        'device',
+        nargs='*',
+        metavar='DEVICE',
+        help='Absolute paths to devices to activate'
         )
     parser.set_defaults(
         func=disk,
