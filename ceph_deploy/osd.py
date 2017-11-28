@@ -41,74 +41,6 @@ def create_osd_keyring(conn, cluster, key):
         conn.remote_module.write_keyring(path, key)
 
 
-def identify_osd(conn, cluster, paths=None, _id=None, fsid=None):
-    """
-    List all available OSDs that are configured in the system, and check which
-    one will have a data ``path`` that matches.
-    Calling out to ceph-volume lvm list will produce a data structure like::
-
-        {
-            "0": [
-                {
-                    "lv_name": "lv1",
-                    "lv_path": "/dev/ceph/lv1",
-                    "lv_tags": "ceph.block_device=/dev/ceph/lv1[...]",
-                    "lv_uuid": "dSySBP-Ha7S-j3GC-4peu-Lk1g-YB8r-zf6EsT",
-                    "name": "lv1",
-                    "path": "/dev/ceph/lv1",
-                    "tags": {
-                        "ceph.block_device": "/dev/ceph/lv1",
-                        "ceph.block_uuid": "dSySBP-Ha7S-j3GC-4peu-Lk1g-YB8r-zf6EsT",
-                        "ceph.cluster_fsid": "c92fc9eb-0610-4363-aafc-81ddf70aaf1b",
-                        "ceph.cluster_name": "ceph",
-                        "ceph.db_device": "/dev/ceph/lv2",
-                        "ceph.db_uuid": "9dimyA-5WwW-oIYY-WyHL-url6-eJYZ-7D13vF",
-                        "ceph.osd_fsid": "7df9e11c-5677-4569-b416-3d503779c64c",
-                        "ceph.osd_id": "0",
-                        "ceph.type": "block"
-                    },
-                    "type": "block",
-                    "vg_name": "ceph"
-                },
-            ...
-        }
-    """
-    ceph_volume_executable = system.executable_path(conn, 'ceph-volume')
-    command = [
-        ceph_volume_executable,
-        '--cluster={cluster}'.format(cluster=cluster),
-        'lvm',
-        'list',
-        '--format=json',
-    ]
-
-    out, err, code = remoto.process.check(
-        conn,
-        command,
-    )
-    identifiers = []
-    try:
-        loaded_json = json.loads(b''.join(out).decode('utf-8'))
-    except ValueError:
-        return {}
-    for osd_id, osd_metadata in loaded_json.items():
-        for device_metadata in osd_metadata:
-            device_type = device_metadata['tags']['ceph.type']
-            if device_type not in ['data', 'block']:
-                continue
-            if paths:
-                for path in paths:
-                    if device_metadata['path'] == path:
-                        identifiers.append([osd_id, device_metadata['tags']['ceph.osd_fsid']])
-            elif _id or fsid:
-                osd_id =  device_metadata['tags']['ceph.osd_id']
-                osd_fsid =  device_metadata['tags']['ceph.osd_fsid']
-                # this is very loose, we are trusting that the IDs and FSIDs will match
-                if osd_id == _id or osd_fsid == fsid:
-                    identifiers.append([osd_id, device_metadata['tags']['ceph.osd_fsid']])
-    return identifiers
-
-
 def osd_tree(conn, cluster):
     """
     Check the status of an OSD. Make sure all are up and in
@@ -244,7 +176,7 @@ def catch_osd_errors(conn, logger, args):
         logger.warning('OSDs are near full!')
 
 
-def prepare_disk(
+def create_osd(
         conn,
         cluster,
         data,
@@ -255,17 +187,16 @@ def prepare_disk(
         dmcrypt_dir,
         storetype,
         block_wal,
-        block_db,
-        create=False):
+        block_db):
     """
-    Run on osd node, prepares a data disk for use.
+    Run on osd node, creates an OSD from a data disk.
     """
     ceph_volume_executable = system.executable_path(conn, 'ceph-volume')
     args = [
         ceph_volume_executable,
         '--cluster', cluster,
         'lvm',
-        'create' if create else 'prepare',
+        'create',
         '--%s' % storetype,
         '--data', data
         ]
@@ -295,9 +226,9 @@ def prepare_disk(
     )
 
 
-def prepare(args, cfg, create=False):
+def create(args, cfg, create=False):
     LOG.debug(
-        'Preparing cluster %s on data device %s',
+        'Creating OSD on cluster %s with data device %s',
         args.cluster,
         args.data
         )
@@ -337,15 +268,12 @@ def prepare(args, cfg, create=False):
 
             create_osd_keyring(distro.conn, args.cluster, key)
 
-        LOG.debug('Preparing host %s data %s',
-                  hostname, args.data)# , journal, activate_prepared_disk)
-
         # default to bluestore unless explicitly told not to
         storetype = 'bluestore'
         if args.filestore:
             storetype = 'filestore'
 
-        prepare_disk(
+        create_osd(
             distro.conn,
             cluster=args.cluster,
             data=args.data,
@@ -357,7 +285,6 @@ def prepare(args, cfg, create=False):
             storetype=storetype,
             block_wal=args.block_wal,
             block_db=args.block_db,
-            create=create,
         )
 
         # give the OSD a few seconds to start
@@ -372,59 +299,6 @@ def prepare(args, cfg, create=False):
 
     if errors:
         raise exc.GenericError('Failed to create %d OSDs' % errors)
-
-
-def activate(args, cfg):
-    if args.device:
-        LOG.debug('Activating cluster %s disk: %s', args.cluster, args.device)
-    else:
-        LOG.debug('Activating cluster %s OSD: %s', args.id)
-    hostname = args.host
-
-    distro = hosts.get(
-        hostname,
-        username=args.username,
-        callbacks=[packages.ceph_is_installed]
-    )
-    LOG.info(
-        'Distro info: %s %s %s',
-        distro.name,
-        distro.release,
-        distro.codename
-    )
-
-    if not args.device:
-        if not args.fsid or not args.id:
-            raise RuntimeError('If a path is not provided, --fsid or --id is required')
-        identifiers = identify_osd(distro.conn, args.cluster, _id=args.id, fsid=args.fsid)
-    else:
-        identifiers = identify_osd(distro.conn, args.cluster, paths=args.device)
-
-    for _id, fsid in identifiers:
-        LOG.debug('activating host %s OSD ID %s', hostname,  _id)
-        LOG.debug('will use init type: %s', distro.init)
-
-        ceph_volume_executable = system.executable_path(distro.conn, 'ceph-volume')
-        remoto.process.run(
-            distro.conn,
-            [
-                ceph_volume_executable,
-                'lvm',
-                'activate',
-                '--auto-detect-objectstore',
-                _id, fsid
-            ],
-        )
-        # give the OSD a few seconds to start
-        time.sleep(5)
-        catch_osd_errors(distro.conn, distro.conn.logger, args)
-
-        if distro.init == 'systemd':
-            system.enable_service(distro.conn, "ceph.target")
-        elif distro.init == 'sysvinit':
-            system.enable_service(distro.conn, "ceph")
-
-    distro.conn.exit()
 
 
 def disk_zap(args):
@@ -507,70 +381,13 @@ def osd_list(args, cfg):
         distro.conn.exit()
 
 
-def get_osd_mount_point(output, osd_name):
-    """
-    piggy back from `ceph-disk list` output and get the mount point
-    by matching the line where the partition mentions the OSD name
-
-    For example, if the name of the osd is `osd.1` and the output from
-    `ceph-disk list` looks like this::
-
-        /dev/sda :
-         /dev/sda1 other, ext2, mounted on /boot
-         /dev/sda2 other
-         /dev/sda5 other, LVM2_member
-        /dev/sdb :
-         /dev/sdb1 ceph data, active, cluster ceph, osd.1, journal /dev/sdb2
-         /dev/sdb2 ceph journal, for /dev/sdb1
-        /dev/sr0 other, unknown
-        /dev/sr1 other, unknown
-
-    Then `/dev/sdb1` would be the right mount point. We piggy back like this
-    because ceph-disk does *a lot* to properly calculate those values and we
-    don't want to re-implement all the helpers for this.
-
-    :param output: A list of lines from stdout
-    :param osd_name: The actual osd name, like `osd.1`
-    """
-    for line in output:
-        line_parts = re.split(r'[,\s]+', line)
-        for part in line_parts:
-            mount_point = line_parts[1]
-            if osd_name == part:
-                return mount_point
-
-
-def print_osd(logger, hostname, osd_path, json_blob, metadata, journal=None):
-    """
-    A helper to print OSD metadata
-    """
-    logger.info('-'*40)
-    logger.info('%s' % osd_path.split('/')[-1])
-    logger.info('-'*40)
-    logger.info('%-14s %s' % ('Path', osd_path))
-    logger.info('%-14s %s' % ('ID', json_blob.get('id')))
-    logger.info('%-14s %s' % ('Name', json_blob.get('name')))
-    logger.info('%-14s %s' % ('Status', json_blob.get('status')))
-    logger.info('%-14s %s' % ('Reweight', json_blob.get('reweight')))
-    if journal:
-        logger.info('Journal: %s' % journal)
-    for k, v in metadata.items():
-        logger.info("%-13s  %s" % (k.capitalize(), v))
-
-    logger.info('-'*40)
-
-
 def osd(args):
     cfg = conf.ceph.load(args)
 
     if args.subcommand == 'list':
         osd_list(args, cfg)
-    elif args.subcommand == 'prepare':
-        prepare(args, cfg, create=False)
     elif args.subcommand == 'create':
-        prepare(args, cfg, create=True)
-    elif args.subcommand == 'activate':
-        activate(args, cfg)
+        create(args, cfg)
     else:
         LOG.error('subcommand %s not implemented', args.subcommand)
         sys.exit(1)
@@ -581,12 +398,8 @@ def disk(args):
 
     if args.subcommand == 'list':
         disk_list(args, cfg)
-    elif args.subcommand == 'prepare':
-        prepare(args, cfg, create=False)
     elif args.subcommand == 'create':
-        prepare(args, cfg, create=True)
-    elif args.subcommand == 'activate':
-        activate(args, cfg)
+        create(args, cfg)
     elif args.subcommand == 'zap':
         disk_zap(args)
     else:
@@ -600,15 +413,20 @@ def make(parser):
     Prepare a data disk on remote host.
     """
     sub_command_help = dedent("""
-    Manage OSDs by preparing a data disk on remote host.
+    Create OSDs from a data disk on a remote host:
 
-    For paths, first prepare and then activate:
+        ceph-deploy osd create {node} --data /path/to/device
 
-        ceph-deploy osd prepare {osd-node-name}:/path/to/osd
-        ceph-deploy osd activate {osd-node-name}:/path/to/osd
+    For bluestore, optional devices can be used::
 
-    For disks or journals the `create` command will do prepare and activate
-    for you.
+        ceph-deploy osd create {node} --data /path/to/data --block-db /path/to/db-device
+        ceph-deploy osd create {node} --data /path/to/data --block-wal /path/to/wal-device
+        ceph-deploy osd create {node} --data /path/to/data --block-db /path/to/db-device --block-wal /path/to/wal-device
+
+    For filestore, the journal must be specified, as well as the objectstore::
+
+        ceph-deploy osd create {node} --filestore --data /path/to/data --journal /path/to/journal
+
     """
     )
     parser.formatter_class = argparse.RawDescriptionHelpFormatter
@@ -692,96 +510,6 @@ def make(parser):
         metavar='HOST',
         help='Remote host to connect'
         )
-    osd_prepare = osd_parser.add_parser(
-        'prepare',
-        help='Prepare an LV or device for use as Ceph OSD'
-        )
-    osd_prepare.add_argument(
-        '--filestore',
-        action='store_true', default=None,
-        help='filestore objectstore',
-        )
-    osd_prepare.add_argument(
-        '--zap-disk',
-        action='store_true',
-        help='destroy existing content for DEVICE',
-        )
-    osd_prepare.add_argument(
-        '--fs-type',
-        metavar='FS_TYPE',
-        choices=['xfs',
-                 'btrfs'
-                 ],
-        default='xfs',
-        help='filesystem to use to format DEVICE (xfs, btrfs)',
-        )
-    osd_prepare.add_argument(
-        '--dmcrypt',
-        action='store_true',
-        help='use dm-crypt on DEVICE',
-        )
-    osd_prepare.add_argument(
-        '--dmcrypt-key-dir',
-        metavar='KEYDIR',
-        default='/etc/ceph/dmcrypt-keys',
-        help='directory where dm-crypt keys are stored',
-        )
-    osd_prepare.add_argument(
-        '--bluestore',
-        action='store_true', default=None,
-        help='bluestore objectstore',
-        )
-    osd_prepare.add_argument(
-        '--block-db',
-        default=None,
-        help='bluestore block.db path'
-        )
-    osd_prepare.add_argument(
-        '--block-wal',
-        default=None,
-        help='bluestore block.wal path'
-        )
-    osd_prepare.add_argument(
-        '--journal',
-        help='Logical Volume (vg/lv) or path to GPT partition',
-        )
-    osd_prepare.add_argument(
-        '--data',
-        metavar='DATA',
-        help='Logical Volume (vg/lv) or path to device',
-        )
-    osd_prepare.add_argument(
-        'host',
-        nargs='?',
-        metavar='HOST',
-        help='Remote host to connect'
-        )
-    osd_activate = osd_parser.add_parser(
-        'activate',
-        help='Start (activate) Ceph OSD that was previously prepared'
-        )
-    osd_activate.add_argument(
-        '--fsid',
-        metavar='FSID',
-        help='The FSID of the previously prepared OSD'
-        )
-    osd_activate.add_argument(
-        '--id',
-        metavar='ID',
-        help='The ID of the previously prepared OSD'
-        )
-    osd_activate.add_argument(
-        'host',
-        nargs='?',
-        metavar='HOST',
-        help='Remote host to connect'
-        )
-    osd_activate.add_argument(
-        'device',
-        nargs='*',
-        metavar='DEVICE',
-        help='Absolute paths to devices to activate'
-        )
     parser.set_defaults(
         func=osd,
         )
@@ -820,89 +548,6 @@ def make_disk(parser):
         nargs='+',
         metavar='HOST',
         help='Remote HOST(s) to list OSDs from'
-        )
-
-    disk_prepare = disk_parser.add_parser(
-        'prepare',
-        help='Prepare a disk for use as Ceph OSD'
-        )
-    disk_prepare.add_argument(
-        '--zap-disk',
-        action='store_true',
-        help='DEPRECATED - no longer zaps before preparing',
-        )
-    disk_prepare.add_argument(
-        '--fs-type',
-        metavar='FS_TYPE',
-        choices=['xfs',
-                 'btrfs'
-                 ],
-        default='xfs',
-        help='filesystem to use to format DEVICE (xfs, btrfs)',
-        )
-    disk_prepare.add_argument(
-        '--dmcrypt',
-        action='store_true',
-        help='use dm-crypt on DEVICE',
-        )
-    disk_prepare.add_argument(
-        '--dmcrypt-key-dir',
-        metavar='KEYDIR',
-        default='/etc/ceph/dmcrypt-keys',
-        help='directory where dm-crypt keys are stored',
-        )
-    disk_prepare.add_argument(
-        '--bluestore',
-        action='store_true', default=None,
-        help='bluestore objectstore',
-        )
-    disk_prepare.add_argument(
-        '--filestore',
-        action='store_true', default=None,
-        help='filestore objectstore',
-        )
-    disk_prepare.add_argument(
-        '--block-db',
-        default=None,
-        help='bluestore block.db path'
-        )
-    disk_prepare.add_argument(
-        '--block-wal',
-        default=None,
-        help='bluestore block.wal path'
-        )
-    disk_prepare.add_argument(
-        'host',
-        nargs='?',
-        metavar='HOST',
-        help='Remote host to connect'
-        )
-
-    disk_activate = disk_parser.add_parser(
-        'activate',
-        help='Start (activate) Ceph OSD from disk that was previously prepared'
-        )
-    disk_activate.add_argument(
-        'host',
-        nargs='?',
-        metavar='HOST',
-        help='Remote host to connect'
-        )
-    disk_activate.add_argument(
-        '--fsid',
-        metavar='FSID',
-        help='The FSID of the previously prepared OSD'
-        )
-    disk_activate.add_argument(
-        '--id',
-        metavar='ID',
-        help='The ID of the previously prepared OSD'
-        )
-    disk_activate.add_argument(
-        'device',
-        nargs='*',
-        metavar='DEVICE',
-        help='Absolute paths to devices to activate'
         )
     parser.set_defaults(
         func=disk,
