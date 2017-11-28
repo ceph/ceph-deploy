@@ -359,7 +359,8 @@ def activate(args, cfg):
 
 def disk_zap(args):
 
-    for hostname, disk, journal in args.disk:
+    hostname = args.host
+    for disk in args.disk:
         if not disk or not hostname:
             raise RuntimeError('zap command needs both HOSTNAME and DISK but got "%s %s"' % (hostname, disk))
         LOG.debug('zapping %s on %s', disk, hostname)
@@ -377,11 +378,12 @@ def disk_zap(args):
 
         distro.conn.remote_module.zeroing(disk)
 
-        ceph_disk_executable = system.executable_path(distro.conn, 'ceph-disk')
+        ceph_volume_executable = system.executable_path(distro.conn, 'ceph-volume')
         remoto.process.run(
             distro.conn,
             [
-                ceph_disk_executable,
+                ceph_volume_executable,
+                'lvm',
                 'zap',
                 disk,
             ],
@@ -725,9 +727,14 @@ def make_disk(parser):
         'host',
         nargs='?',
         metavar='HOST',
-        help='Remote host to connect'
+        help='Remote HOST(s) to connect'
         )
-
+    disk_zap.add_argument(
+        'disk',
+        nargs='+',
+        metavar='DISK',
+        help='Disk(s) to zap'
+        )
     disk_list = disk_parser.add_parser(
         'list',
         help='List disk info from remote host(s)'
