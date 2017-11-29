@@ -225,6 +225,8 @@ def create_osd(
 
 
 def create(args, cfg, create=False):
+    if not args.host:
+        raise RuntimeError('Required host was not specified as a positional argument')
     LOG.debug(
         'Creating OSD on cluster %s with data device %s',
         args.cluster,
