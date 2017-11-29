@@ -1,14 +1,12 @@
 import argparse
 import json
 import logging
-import os
-import re
 import sys
 import time
 from textwrap import dedent
 
-from ceph_deploy import conf, exc, hosts, mon
-from ceph_deploy.util import constants, system, packages
+from ceph_deploy import conf, exc, hosts
+from ceph_deploy.util import system, packages
 from ceph_deploy.cliutil import priority
 from ceph_deploy.lib import remoto
 
@@ -35,7 +33,7 @@ def create_osd_keyring(conn, cluster, key):
     logger = conn.logger
     path = '/var/lib/ceph/bootstrap-osd/{cluster}.keyring'.format(
         cluster=cluster,
-        )
+    )
     if not conn.remote_module.path_exists(path):
         logger.warning('osd keyring does not exist yet, creating one')
         conn.remote_module.write_keyring(path, key)
@@ -199,13 +197,13 @@ def create_osd(
         'create',
         '--%s' % storetype,
         '--data', data
-        ]
+    ]
     if zap:
-        logger.warning('zapping is no longer supported when preparing')
+        LOG.warning('zapping is no longer supported when preparing')
     if dmcrypt:
         args.append('--dmcrypt')
         # TODO: re-enable dmcrypt support once ceph-volume grows it
-        logger.warning('dmcrypt is currently not supported')
+        LOG.warning('dmcrypt is currently not supported')
 
     if storetype == 'bluestore':
         if block_wal:
@@ -427,6 +425,9 @@ def make(parser):
 
         ceph-deploy osd create {node} --filestore --data /path/to/data --journal /path/to/journal
 
+    For data devices, it can be an existing logical volume in the format of:
+    vg/lv, or a device. For other OSD components like wal, db, and journal, it
+    can be logical volume (in vg/lv format) or it must be a GPT partition.
     """
     )
     parser.formatter_class = argparse.RawDescriptionHelpFormatter
@@ -453,7 +454,7 @@ def make(parser):
     osd_create.add_argument(
         '--data',
         metavar='DATA',
-        help='The OSD data logical volume (vg/lv) or device'
+        help='The OSD data logical volume (vg/lv) or absolute path to device'
     )
     osd_create.add_argument(
         '--journal',
