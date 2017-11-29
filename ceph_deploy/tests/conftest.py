@@ -2,6 +2,7 @@ import logging
 import os
 import subprocess
 import sys
+import pytest
 
 
 LOG = logging.getLogger(__name__)
@@ -85,7 +86,8 @@ class CLITester(object):
         return CLIProcess(**kw)
 
 
-def pytest_funcarg__cli(request):
+@pytest.fixture
+def cli(request):
     """
     Test command line behavior.
     """
