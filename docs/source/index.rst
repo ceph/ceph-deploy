@@ -36,10 +36,6 @@ If you are familiar with Python install tools (like ``pip`` and
 
     pip install ceph-deploy
 
-or::
-
-    easy_install ceph-deploy
-
 
 It should grab all the dependencies for you and install into the current user's
 environment.
@@ -236,24 +232,21 @@ For detailed information on ``admin`` subcommand refer to the
 Deploying OSDs
 ==============
 
-To prepare a node for running OSDs, run::
+To create an OSD on a remote node, run::
 
-  ceph-deploy osd create HOST:DISK[:JOURNAL] [HOST:DISK[:JOURNAL] ...]
+  ceph-deploy osd create HOST --data /path/to/device
 
-After that, the hosts will be running OSDs for the given data disks.
-If you specify a raw disk (e.g., ``/dev/sdb``), partitions will be
-created and GPT labels will be used to mark and automatically activate
-OSD volumes.  If an existing partition is specified, the partition
-table will not be modified.  If you want to destroy the existing
-partition table on DISK first, you can include the ``--zap-disk``
-option.
+Alternatively, ``--data`` can accept a logical volume in the format of
+``vg/lv``
 
-If there is already a prepared disk or directory that is ready to become an
-OSD, you can also do::
+After that, the hosts will be running OSDs for the given data disks or logical
+volumes. For other OSD devices like journals (when using ``--filestore``) or
+``block.db``, and ``block.wal``, these need to be logical volumes or GPT
+partitions.
 
-    ceph-deploy osd activate HOST:DIR[:JOURNAL] [...]
+.. note:: Partitions aren't created by this tool, they must be created
+          beforehand
 
-This is useful when you are managing the mounting of volumes yourself.
 
 Forget keys
 ===========
