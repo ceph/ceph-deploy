@@ -185,7 +185,8 @@ def create_osd(
         dmcrypt_dir,
         storetype,
         block_wal,
-        block_db):
+        block_db,
+        **kw):
     """
     Run on osd node, creates an OSD from a data disk.
     """
@@ -218,10 +219,18 @@ def create_osd(
         args.append('--journal')
         args.append(journal)
 
-    remoto.process.run(
-        conn,
-        args
-    )
+    if kw.get('debug'):
+        remoto.process.run(
+            conn,
+            args,
+            env={'CEPH_VOLUME_DEBUG': '1'}
+        )
+
+    else:
+        remoto.process.run(
+            conn,
+            args
+        )
 
 
 def create(args, cfg, create=False):
@@ -285,6 +294,7 @@ def create(args, cfg, create=False):
             storetype=storetype,
             block_wal=args.block_wal,
             block_db=args.block_db,
+            debug=args.debug,
         )
 
         # give the OSD a few seconds to start
@@ -323,15 +333,27 @@ def disk_zap(args):
         distro.conn.remote_module.zeroing(disk)
 
         ceph_volume_executable = system.executable_path(distro.conn, 'ceph-volume')
-        remoto.process.run(
-            distro.conn,
-            [
-                ceph_volume_executable,
-                'lvm',
-                'zap',
-                disk,
-            ],
-        )
+        if args.debug:
+            remoto.process.run(
+                distro.conn,
+                [
+                    ceph_volume_executable,
+                    'lvm',
+                    'zap',
+                    disk,
+                ],
+                env={'CEPH_VOLUME_DEBUG': '1'}
+            )
+        else:
+            remoto.process.run(
+                distro.conn,
+                [
+                    ceph_volume_executable,
+                    'lvm',
+                    'zap',
+                    disk,
+                ],
+            )
 
         distro.conn.exit()
 
@@ -370,14 +392,26 @@ def osd_list(args, cfg):
 
         LOG.debug('Listing disks on {hostname}...'.format(hostname=hostname))
         ceph_volume_executable = system.executable_path(distro.conn, 'ceph-volume')
-        remoto.process.run(
-            distro.conn,
-            [
-                ceph_volume_executable,
-                'lvm',
-                'list',
-            ],
-        )
+        if args.debug:
+            remoto.process.run(
+                distro.conn,
+                [
+                    ceph_volume_executable,
+                    'lvm',
+                    'list',
+                ],
+                env={'CEPH_VOLUME_DEBUG': '1'}
+
+            )
+        else:
+            remoto.process.run(
+                distro.conn,
+                [
+                    ceph_volume_executable,
+                    'lvm',
+                    'list',
+                ],
+            )
         distro.conn.exit()
 
 
@@ -448,7 +482,11 @@ def make(parser):
         metavar='HOST',
         help='remote host(s) to list OSDs from'
         )
-
+    osd_list.add_argument(
+        '--debug',
+        action='store_true',
+        help='Enable debug mode on remote ceph-volume calls',
+        )
     osd_create = osd_parser.add_parser(
         'create',
         help='Create new Ceph OSD daemon by preparing and activating a device'
@@ -513,6 +551,11 @@ def make(parser):
         metavar='HOST',
         help='Remote host to connect'
         )
+    osd_create.add_argument(
+        '--debug',
+        action='store_true',
+        help='Enable debug mode on remote ceph-volume calls',
+        )
     parser.set_defaults(
         func=osd,
         )
@@ -551,6 +594,11 @@ def make_disk(parser):
         nargs='+',
         metavar='HOST',
         help='Remote HOST(s) to list OSDs from'
+        )
+    disk_list.add_argument(
+        '--debug',
+        action='store_true',
+        help='Enable debug mode on remote ceph-volume calls',
         )
     parser.set_defaults(
         func=disk,
