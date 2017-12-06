@@ -448,7 +448,11 @@ def make(parser):
         metavar='HOST',
         help='remote host(s) to list OSDs from'
         )
-
+    osd_list.add_argument(
+        '--debug',
+        action='store_true',
+        help='Enable debug mode on remote ceph-volume calls',
+        )
     osd_create = osd_parser.add_parser(
         'create',
         help='Create new Ceph OSD daemon by preparing and activating a device'
@@ -513,6 +517,11 @@ def make(parser):
         metavar='HOST',
         help='Remote host to connect'
         )
+    osd_create.add_argument(
+        '--debug',
+        action='store_true',
+        help='Enable debug mode on remote ceph-volume calls',
+        )
     parser.set_defaults(
         func=osd,
         )
@@ -551,6 +560,11 @@ def make_disk(parser):
         nargs='+',
         metavar='HOST',
         help='Remote HOST(s) to list OSDs from'
+        )
+    disk_list.add_argument(
+        '--debug',
+        action='store_true',
+        help='Enable debug mode on remote ceph-volume calls',
         )
     parser.set_defaults(
         func=disk,
