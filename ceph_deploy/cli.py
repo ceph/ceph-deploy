@@ -37,10 +37,12 @@ def log_flags(args, logger=None):
 
 
 def get_parser():
+    epilog_text = "See 'ceph-deploy <command> --help' for help on a specific command"
     parser = argparse.ArgumentParser(
         prog='ceph-deploy',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description='Easy Ceph deployment\n\n%s' % __header__,
+        epilog=epilog_text
         )
     verbosity = parser.add_mutually_exclusive_group(required=False)
     verbosity.add_argument(
