@@ -1,6 +1,21 @@
 Changelog
 =========
 
+2.0
+---
+
+2.0.0
+^^^^^
+16-Jan-2018
+
+* Backward incompatible API changes for OSD creation - will use ceph-volume and
+  no longer consume ceph-disk.
+* Remove python-distribute dependency
+* Use /etc/os-release as a fallback when ``linux_distribution()`` doesn't work
+* Drop dmcrypt support (unsupported by ceph-volume for now)
+* Allow debug modes for ceph-volume
+
+
 1.5
 ---
 
