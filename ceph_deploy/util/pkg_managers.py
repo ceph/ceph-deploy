@@ -325,3 +325,55 @@ class Zypper(PackageManager):
     def clean(self):
         cmd = self.executable + ['refresh']
         return self._run(cmd)
+
+
+class Pacman(PackageManager):
+    """
+    Pacman package management
+    """
+
+    executable = [
+        'pacman',
+        '--noconfirm',
+    ]
+    name = 'pacman'
+
+    def install(self, packages, **kw):
+        if isinstance(packages, str):
+            packages = [packages]
+
+        extra_flags = kw.pop('extra_install_flags', None)
+        cmd = self.executable + [
+            '-Sy',
+        ]
+
+        if extra_flags:
+            if isinstance(extra_flags, str):
+                extra_flags = [extra_flags]
+            cmd.extend(extra_flags)
+        cmd.extend(packages)
+        return self._run(cmd)
+
+    def remove(self, packages, **kw):
+        if isinstance(packages, str):
+            packages = [packages]
+
+        extra_flags = kw.pop('extra_remove_flags', None)
+        cmd = self.executable + [
+            '-R'
+        ]
+        if extra_flags:
+            if isinstance(extra_flags, str):
+                extra_flags = [extra_flags]
+            cmd.extend(extra_flags)
+
+        cmd.extend(packages)
+        return self._run(cmd)
+
+    def clean(self):
+        cmd = self.executable + ['-Syy']
+        return self._run(cmd)
+
+    def add_repo_gpg_key(self, url):
+        cmd = ['pacman-key', '-a', url]
+        self._run(cmd)
