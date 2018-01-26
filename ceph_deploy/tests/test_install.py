@@ -63,6 +63,7 @@ class TestDetectComponents(object):
         self.args.install_all = True
         self.distro.is_rpm = False
         self.distro.is_deb = True
+        self.distro.is_pkgtarxz = False
         result = sorted(install.detect_components(self.args, self.distro))
         assert result == sorted([
             'ceph-osd', 'ceph-mds', 'ceph', 'ceph-mon', 'radosgw'
@@ -71,6 +72,7 @@ class TestDetectComponents(object):
     def test_install_all_with_other_options_returns_all_packages_deb(self):
         self.distro.is_rpm = False
         self.distro.is_deb = True
+        self.distro.is_pkgtarxz = False
         self.args.install_all = True
         self.args.install_mds = True
         self.args.install_mgr = True
@@ -97,6 +99,30 @@ class TestDetectComponents(object):
         result = sorted(install.detect_components(self.args, self.distro))
         assert result == sorted([
             'ceph-osd', 'ceph-mds', 'ceph', 'ceph-mon', 'ceph-radosgw'
+        ])
+
+    def test_install_all_returns_all_packages_pkgtarxz(self):
+        self.args.install_all = True
+        self.distro.is_rpm = False
+        self.distro.is_deb = False
+        self.distro.is_pkgtarxz = True
+        result = sorted(install.detect_components(self.args, self.distro))
+        assert result == sorted([
+            'ceph',
+        ])
+
+    def test_install_all_with_other_options_returns_all_packages_pkgtarxz(self):
+        self.distro.is_rpm = False
+        self.distro.is_deb = False
+        self.distro.is_pkgtarxz = True
+        self.args.install_all = True
+        self.args.install_mds = True
+        self.args.install_mgr = True
+        self.args.install_mon = True
+        self.args.install_osd = True
+        result = sorted(install.detect_components(self.args, self.distro))
+        assert result == sorted([
+            'ceph',
         ])
 
     def test_install_only_one_component(self):
