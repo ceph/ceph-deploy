@@ -70,14 +70,14 @@ def in_subnet(cidr, addrs=None):
 
 def ip_addresses(conn, interface=None, include_loopback=False):
     """
-    Returns a list of IPv4 addresses assigned to the host. 127.0.0.1 is
+    Returns a list of IPv4/IPv6 addresses assigned to the host. 127.0.0.1/::1 is
     ignored, unless 'include_loopback=True' is indicated. If 'interface' is
     provided, then only IP addresses from that interface will be returned.
 
     Example output looks like::
 
         >>> ip_addresses(conn)
-        >>> ['192.168.1.111', '10.0.1.12']
+        >>> ['192.168.1.111', '10.0.1.12', '2001:db8::100']
 
     """
     ret = set()
@@ -89,16 +89,25 @@ def ip_addresses(conn, interface=None, include_loopback=False):
                              if k == interface)
         if not target_ifaces:
             LOG.error('Interface {0} not found.'.format(interface))
-    for ipv4_info in target_ifaces.values():
-        for ipv4 in ipv4_info.get('inet', []):
+    for info in target_ifaces.values():
+        for ipv4 in info.get('inet', []):
             loopback = in_subnet('127.0.0.0/8', [ipv4.get('address')]) or ipv4.get('label') == 'lo'
             if not loopback or include_loopback:
                 ret.add(ipv4['address'])
-        for secondary in ipv4_info.get('secondary', []):
+        for secondary in info.get('secondary', []):
             addr = secondary.get('address')
             if addr and secondary.get('type') == 'inet':
                 if include_loopback or (not include_loopback and not in_subnet('127.0.0.0/8', [addr])):
                     ret.add(addr)
+        for ipv6 in info.get('inet6', []):
+            # When switching to Python 3 the IPAddress module can do all this work for us
+            if ipv6.get('address').startswith('fe80::'):
+                continue
+
+            if not include_loopback and '::1' == ipv6.get('address'):
+                continue
+
+            ret.add(ipv6['address'])
     if ret:
         conn.logger.debug('IP addresses found: %s' % str(list(ret)))
     return sorted(list(ret))
