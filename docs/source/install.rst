@@ -15,6 +15,7 @@ Supported distributions:
 * CentOS
 * Suse
 * Scientific Linux
+* Arch Linux
 
 Before any action is taken, a platform detection call is done to make sure that
 the platform that will get ceph installed is the correct one. If the platform

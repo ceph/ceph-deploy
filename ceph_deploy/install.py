@@ -63,6 +63,18 @@ def detect_components(args, distro):
 
     if distro.is_rpm:
         defaults = default_components.rpm
+    elif distro.is_pkgtarxz:
+        # archlinux doesn't have components!
+        flags = {
+            'install_osd': 'ceph',
+            'install_rgw': 'ceph',
+            'install_mds': 'ceph',
+            'install_mon': 'ceph',
+            'install_mgr': 'ceph',
+            'install_common': 'ceph',
+            'install_tests': 'ceph',
+        }
+        defaults = default_components.pkgtarxz
     else:
         defaults = default_components.deb
         # different naming convention for deb than rpm for radosgw
