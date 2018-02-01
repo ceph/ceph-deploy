@@ -44,6 +44,12 @@ class TestParserDisk(object):
     def test_disk_list_single_host(self):
         args = self.parser.parse_args('disk list host1'.split())
         assert args.host[0] == 'host1'
+        assert args.debug is False
+
+    def test_disk_list_single_host_debug(self):
+        args = self.parser.parse_args('disk list --debug host1'.split())
+        assert args.host[0] == 'host1'
+        assert args.debug is True
 
     def test_disk_list_multi_host(self):
         hostnames = ['host1', 'host2', 'host3']
@@ -66,9 +72,17 @@ class TestParserDisk(object):
         args = self.parser.parse_args('disk zap host1 /dev/sdb'.split())
         assert args.disk[0] == '/dev/sdb'
         assert args.host == 'host1'
+        assert args.debug is False
 
     def test_disk_zap_multi_host(self):
         host = 'host1'
         disks = ['/dev/sda1', '/dev/sda2']
         args = self.parser.parse_args(['disk', 'zap', host] + disks)
         assert args.disk == disks
+
+    def test_disk_zap_debug_true(self):
+        args = \
+            self.parser.parse_args('disk zap --debug host1 /dev/sdb'.split())
+        assert args.disk[0] == '/dev/sdb'
+        assert args.host == 'host1'
+        assert args.debug is True
