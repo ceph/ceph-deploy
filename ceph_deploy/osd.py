@@ -585,6 +585,11 @@ def make_disk(parser):
         metavar='DISK',
         help='Disk(s) to zap'
         )
+    disk_zap.add_argument(
+        '--debug',
+        action='store_true',
+        help='Enable debug mode on remote ceph-volume calls',
+        )
     disk_list = disk_parser.add_parser(
         'list',
         help='List disk info from remote host(s)'
