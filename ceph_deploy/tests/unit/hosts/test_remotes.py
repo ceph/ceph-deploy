@@ -17,3 +17,21 @@ class TestObjectGrep(object):
 
     def test_does_not_find_anything(self):
         assert remotes.object_grep('bar', self.file_object) is False
+
+
+class TestWhich(object):
+
+    def test_executable_is_a_directory(self, monkeypatch):
+        monkeypatch.setattr(remotes.os.path, 'exists', lambda x: True)
+        monkeypatch.setattr(remotes.os.path, 'isfile', lambda x: False)
+        assert remotes.which('foo') is None
+
+    def test_executable_does_not_exist(self, monkeypatch):
+        monkeypatch.setattr(remotes.os.path, 'exists', lambda x: False)
+        monkeypatch.setattr(remotes.os.path, 'isfile', lambda x: True)
+        assert remotes.which('foo') is None
+
+    def test_executable_exists_as_file(self, monkeypatch):
+        monkeypatch.setattr(remotes.os.path, 'exists', lambda x: True)
+        monkeypatch.setattr(remotes.os.path, 'isfile', lambda x: True)
+        assert remotes.which('foo') == '/usr/local/bin/foo'
