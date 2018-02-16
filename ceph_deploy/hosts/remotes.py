@@ -339,7 +339,7 @@ def which(executable):
 
     for location in locations:
         executable_path = os.path.join(location, executable)
-        if os.path.exists(executable_path):
+        if os.path.exists(executable_path) and os.path.isfile(executable_path):
             return executable_path
 
 
@@ -364,6 +364,7 @@ def safe_mkdir(path, uid=-1, gid=-1):
             raise
     else:
         os.chown(path, uid, gid)
+
 
 def safe_makedirs(path, uid=-1, gid=-1):
     """ create path recursively if it doesn't exist """
