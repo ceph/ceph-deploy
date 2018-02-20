@@ -21,6 +21,7 @@ def install(distro, version_kind, version, adjust_repos, **kw):
     else:
         key = 'autobuild'
 
+    distro.packager.clean()
     distro.packager.install(['ca-certificates', 'apt-transport-https'])
 
     if adjust_repos:
