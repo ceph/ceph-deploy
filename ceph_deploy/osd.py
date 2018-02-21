@@ -373,7 +373,7 @@ def disk_list(args, cfg):
         )
         for line in out:
             if line.startswith('Disk /'):
-                distro.conn.logger(line)
+                distro.conn.logger.info(line)
 
 
 def osd_list(args, cfg):
