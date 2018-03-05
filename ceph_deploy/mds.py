@@ -139,6 +139,7 @@ def mds_create(args):
 
     for hostname, name in args.mds:
         try:
+            distro = None
             distro = hosts.get(hostname, username=args.username)
             rlogger = distro.conn.logger
             LOG.info(
@@ -170,7 +171,7 @@ def mds_create(args):
             create_mds(distro, name, args.cluster, distro.init)
             distro.conn.exit()
         except RuntimeError as e:
-            if distro.normalized_name == 'redhat':
+            if distro and distro.normalized_name == 'redhat':
                 LOG.error('this feature may not yet available for %s %s' % (distro.name, distro.release))
                 failed_on_rhel = True
             LOG.error(e)
