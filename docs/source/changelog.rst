@@ -4,6 +4,22 @@ Changelog
 2.0
 ---
 
+2.0.1
+^^^^^
+19-Jun-2018
+
+* Add support for archlinux
+* Support IPV6 addresses in monitors
+* Add debug argument when calling disk zap
+* Ensure remote executables are files (vs. possible dirs)
+* Run ``apt-get update`` before installs
+* Default to mimic release
+* Use INFO log levels for disk list
+* Fix ``UnboundLocalError`` when createing mds/mgr with bad hosts
+* Improve distro detection for Arch Linux
+* Add epilog text
+
+
 2.0.0
 ^^^^^
 16-Jan-2018
