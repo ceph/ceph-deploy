@@ -33,3 +33,11 @@ def choose_init(module):
 
 def get_packager(module):
     return pkg_managers.Apt(module)
+
+
+def service_mapping(service):
+    """
+    Select the service name
+    """
+    service_mapping = { }
+    return service_mapping.get(service,service)
