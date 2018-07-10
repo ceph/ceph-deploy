@@ -223,7 +223,7 @@ def create_osd(
         remoto.process.run(
             conn,
             args,
-            env={'CEPH_VOLUME_DEBUG': '1'}
+            extend_env={'CEPH_VOLUME_DEBUG': '1'}
         )
 
     else:
