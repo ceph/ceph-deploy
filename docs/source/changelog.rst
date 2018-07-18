@@ -4,6 +4,13 @@ Changelog
 2.0
 ---
 
+2.0.2
+^^^^^
+16-Jul-2018
+
+* Bump the ``remoto`` requirement that fixes the ``expand_env`` bug
+
+
 2.0.1
 ^^^^^
 19-Jun-2018
