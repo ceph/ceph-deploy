@@ -7,7 +7,7 @@ from ceph_deploy.tests.util import assert_too_few_arguments
 
 SUBCMDS_WITH_ARGS = [
     'new', 'install', 'rgw', 'mds', 'mon', 'gatherkeys', 'disk', 'osd',
-    'admin', 'config', 'uninstall', 'purgedata', 'purge', 'pkg', 'calamari'
+    'admin', 'config', 'uninstall', 'purgedata', 'purge', 'pkg'
 ]
 SUBCMDS_WITHOUT_ARGS = ['forgetkeys']
 
