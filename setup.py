@@ -72,7 +72,6 @@ setup(
             'config = ceph_deploy.config:make',
             'admin = ceph_deploy.admin:make',
             'pkg = ceph_deploy.pkg:make',
-            'calamari = ceph_deploy.calamari:make',
             'rgw = ceph_deploy.rgw:make',
             'repo = ceph_deploy.repo:make',
             ],
