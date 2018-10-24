@@ -193,6 +193,7 @@ def mon_add(args):
     )
 
     mon_section = 'mon.%s' % mon_host
+    (name, host) = next(mon_hosts(args.mon))
     cfg_mon_addr = cfg.safe_get(mon_section, 'mon addr')
 
     if args.address:
@@ -223,8 +224,8 @@ def mon_add(args):
 
         # tell me the status of the deployed mon
         time.sleep(2)  # give some room to start
-        catch_mon_errors(distro.conn, rlogger, mon_host, cfg, args)
-        mon_status(distro.conn, rlogger, mon_host, args)
+        mon_status(distro.conn, rlogger, name, args)
+        catch_mon_errors(distro.conn, rlogger, name, cfg, args)
         distro.conn.exit()
 
     except RuntimeError as e:
