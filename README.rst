@@ -14,7 +14,7 @@ documentation please go to http://ceph.com/ceph-deploy/docs
 
 .. _what this tool is not:
 
-What this tool is not
+What this tool is not ?
 ---------------------
 It is not a generic deployment system, it is only for Ceph, and is designed
 for users who want to quickly get Ceph running with sensible initial settings
@@ -365,7 +365,7 @@ Submitting Patches
 ------------------
 Please add test cases to cover any code you add. You can test your changes
 by running ``tox`` (You will also need ``mock`` and ``pytest`` ) from inside
-the git clone
+the git clone.
 
 When creating a commit message please use ``git commit -s`` or otherwise add
 ``Signed-off-by: Your Name <email@address.dom>`` to your commit message.
