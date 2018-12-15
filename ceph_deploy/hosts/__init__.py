@@ -7,7 +7,7 @@ on the type of distribution/version we are dealing with.
 import logging
 from ceph_deploy import exc
 from ceph_deploy.util import versions
-from ceph_deploy.hosts import debian, centos, fedora, suse, remotes, rhel, arch
+from ceph_deploy.hosts import debian, centos, fedora, suse, remotes, rhel, arch, alt
 from ceph_deploy.connection import get_connection
 
 logger = logging.getLogger()
@@ -68,7 +68,7 @@ def get(hostname,
     module.distro = module.normalized_name
     module.is_el = module.normalized_name in ['redhat', 'centos', 'fedora', 'scientific', 'oracle', 'virtuozzo']
     module.is_rpm = module.normalized_name in ['redhat', 'centos',
-                                               'fedora', 'scientific', 'suse', 'oracle', 'virtuozzo']
+                                               'fedora', 'scientific', 'suse', 'oracle', 'virtuozzo', 'alt']
     module.is_deb = module.normalized_name in ['debian', 'ubuntu']
     module.is_pkgtarxz = module.normalized_name in ['arch']
     module.release = release
@@ -99,7 +99,8 @@ def _get_distro(distro, fallback=None, use_rhceph=False):
         'fedora': fedora,
         'suse': suse,
         'virtuozzo': centos,
-        'arch': arch
+        'arch': arch,
+        'alt': alt
         }
 
     if distro == 'redhat' and use_rhceph:
@@ -126,6 +127,8 @@ def _normalized_distro_name(distro):
         return 'virtuozzo'
     elif distro.startswith('arch'):
         return 'arch'
+    elif distro.startswith(('alt', 'altlinux', 'basealt', 'alt linux')):
+        return 'alt'
     return distro
 
 
