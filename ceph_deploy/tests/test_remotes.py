@@ -234,3 +234,22 @@ UBUNTU_CODENAME=xenial
         assert distro == 'ubuntu'
         assert release == '16.04'
         assert codename == 'xenial'
+
+    def test_handles_alt_8_2(self, tmpdir):
+        path = str(tmpdir.join('os_release'))
+        with open(path, 'w') as os_release:
+            os_release.write("""
+NAME="ALT"
+VERSION="8.2 "
+ID=altlinux
+VERSION_ID=8.2
+PRETTY_NAME="ALT Workstation K 8.2  (Centaurea Ruthenica)"
+ANSI_COLOR="1;33"
+CPE_NAME="cpe:/o:alt:kworkstation:8.2"
+HOME_URL="http://www.basealt.ru"
+BUG_REPORT_URL="https://bugs.altlinux.org/"
+""")
+        distro, release, codename = parse_os_release(path)
+        assert distro == 'altlinux'
+        assert release == '8.2'
+        assert codename == '8.2'
