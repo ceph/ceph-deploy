@@ -2,7 +2,6 @@ from setuptools import setup, find_packages
 import os
 import sys
 import ceph_deploy
-from vendor import vendorize, clean_vendor
 
 
 def read(fname):
@@ -10,22 +9,11 @@ def read(fname):
     f = open(path)
     return f.read()
 
-install_requires = []
+
+install_requires = ['remoto']
 pyversion = sys.version_info[:2]
 if pyversion < (2, 7) or (3, 0) <= pyversion <= (3, 1):
     install_requires.append('argparse')
-
-#
-# Add libraries that are not part of install_requires but only if we really
-# want to, specified by the environment flag
-#
-
-if os.environ.get('CEPH_DEPLOY_NO_VENDOR'):
-    clean_vendor('remoto')
-else:
-    vendorize([
-        ('remoto', '0.0.33', ['python', 'vendor.py']),
-    ])
 
 
 setup(
