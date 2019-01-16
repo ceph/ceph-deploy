@@ -24,8 +24,7 @@ def test_write_global_conf_section(tmpdir):
 
 
 @pytest.fixture
-def newcfg(request):
-    tmpdir = request.getfuncargvalue('tmpdir')
+def newcfg(request, tmpdir):
     fake_ip_addresses = lambda x: ['10.0.0.1']
 
     def new(*args):
