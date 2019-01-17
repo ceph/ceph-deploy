@@ -87,7 +87,7 @@ class CLITester(object):
 
 
 @pytest.fixture
-def cli(request):
+def cli(request, tmpdir):
     """
     Test command line behavior.
     """
@@ -95,6 +95,4 @@ def cli(request):
     # the tmpdir here will be the same value as the test function
     # sees; we rely on that to let caller prepare and introspect
     # any files the cli tool will read or create
-    tmpdir = request.getfuncargvalue('tmpdir')
-
     return CLITester(tmpdir=tmpdir)
