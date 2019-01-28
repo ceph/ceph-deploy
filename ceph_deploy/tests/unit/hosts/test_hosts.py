@@ -427,3 +427,7 @@ class TestGetDistro(object):
     def test_get_arch(self):
         result = hosts._get_distro('Arch Linux')
         assert result.__name__.endswith('arch')
+
+    def test_get_altlinux(self):
+        result = hosts._get_distro('ALT Linux')
+        assert result.__name__.endswith('alt')
