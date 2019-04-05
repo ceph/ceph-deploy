@@ -17,7 +17,7 @@ def sanitize_args(args):
     not well suited for.
     """
     if args.release is None:
-        args.release = 'mimic'
+        args.release = 'nautilus'
         args.default_release = True
 
     # XXX This whole dance is because --stable is getting deprecated
