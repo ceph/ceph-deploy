@@ -18,6 +18,7 @@ def make_fake_conn(receive_returns=None):
     conn.receive = Mock(return_value=receive_returns)
     conn.gateway.remote_exec = conn.receive
     conn.result = Mock(return_value=conn)
+    conn.cmd = lambda x: x
     return conn
 
 
