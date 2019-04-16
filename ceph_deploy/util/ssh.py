@@ -18,7 +18,7 @@ def can_connect_passwordless(hostname):
     logger = logging.getLogger(hostname)
     with get_local_connection(logger) as conn:
         # Check to see if we can login, disabling password prompts
-        command = ['ssh', '-CT', '-o', 'BatchMode=yes', hostname]
+        command = ['ssh', '-CT', '-o', 'BatchMode=yes', hostname, 'true']
         out, err, retval = remoto.process.check(conn, command, stop_on_error=False)
         permission_denied_error = b'Permission denied '
         host_key_verify_error = b'Host key verification failed.'
