@@ -12,16 +12,16 @@ def can_connect_passwordless(hostname):
     denied`` message or a``Host key verification failed`` message.
     """
     # Ensure we are not doing this for local hosts
-    if not remoto.connection.needs_ssh(hostname):
+    if not remoto.backends.needs_ssh(hostname):
         return True
 
     logger = logging.getLogger(hostname)
     with get_local_connection(logger) as conn:
         # Check to see if we can login, disabling password prompts
-        command = ['ssh', '-CT', '-o', 'BatchMode=yes', hostname]
+        command = ['ssh', '-CT', '-o', 'BatchMode=yes', hostname, 'true']
         out, err, retval = remoto.process.check(conn, command, stop_on_error=False)
-        permission_denied_error = b'Permission denied '
-        host_key_verify_error = b'Host key verification failed.'
+        permission_denied_error = 'Permission denied '
+        host_key_verify_error = 'Host key verification failed.'
         has_key_error = False
         for line in err:
             if permission_denied_error in line or host_key_verify_error in line:
