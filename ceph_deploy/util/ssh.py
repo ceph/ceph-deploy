@@ -12,7 +12,7 @@ def can_connect_passwordless(hostname):
     denied`` message or a``Host key verification failed`` message.
     """
     # Ensure we are not doing this for local hosts
-    if not remoto.connection.needs_ssh(hostname):
+    if not remoto.backends.needs_ssh(hostname):
         return True
 
     logger = logging.getLogger(hostname)
