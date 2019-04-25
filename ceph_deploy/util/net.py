@@ -165,8 +165,8 @@ def linux_interfaces(conn):
                 'show',
             ],
         )
-        ifaces = _interfaces_ip(b'\n'.join(cmd1).decode('utf-8') + '\n' +
-                                b'\n'.join(cmd2).decode('utf-8'))
+        ifaces = _interfaces_ip('\n'.join(cmd1) + '\n' +
+                                '\n'.join(cmd2))
     elif ifconfig_path:
         cmd, _, _ = remoto.process.check(
             conn,
