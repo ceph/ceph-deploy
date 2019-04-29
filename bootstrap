@@ -85,6 +85,7 @@ if ! [ -d virtualenv ]; then
                 # https://github.com/pypa/virtualenv/issues/463
 
                 virtualenv virtualenv_tmp
+                virtualenv_tmp/bin/pip install --upgrade setuptools
                 virtualenv_tmp/bin/pip install --upgrade virtualenv
                 virtualenv_tmp/bin/virtualenv -p "$python_executable" virtualenv
                 rm -rf virtualenv_tmp
@@ -97,5 +98,6 @@ if ! [ -d virtualenv ]; then
 fi
 
 test -d virtualenv || virtualenv -p "$python_executable" virtualenv
+./virtualenv/bin/pip install --upgrade setuptools
 ./virtualenv/bin/python setup.py develop
 test -e ceph-deploy || ln -s virtualenv/bin/ceph-deploy .
