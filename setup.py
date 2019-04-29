@@ -10,7 +10,7 @@ def read(fname):
     return f.read()
 
 
-install_requires = ['remoto']
+install_requires = ['remoto>=1.1.4']
 pyversion = sys.version_info[:2]
 if pyversion < (2, 7) or (3, 0) <= pyversion <= (3, 1):
     install_requires.append('argparse')
