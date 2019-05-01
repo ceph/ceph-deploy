@@ -143,7 +143,7 @@ def gatherkeys_missing(args, distro, rlogger, keypath, keytype, dest_dir):
     keyring_path_local = os.path.join(dest_dir, keyring_name_local)
     with open(keyring_path_local, 'wb') as f:
         for line in out:
-            f.write(line + b'\n')
+            f.write(line.decode('utf-8') + '\n')
     return True
 
 
@@ -183,7 +183,7 @@ def gatherkeys_with_mon(args, host, dest_dir):
             rlogger.debug(line)
         return False
     try:
-        mon_status = json.loads(b''.join(out).decode('utf-8'))
+        mon_status = json.loads(''.join(out))
     except ValueError:
         rlogger.error('"ceph mon_status %s" output was not json', host)
         for line in out:
