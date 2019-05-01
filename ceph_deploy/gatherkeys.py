@@ -141,9 +141,9 @@ def gatherkeys_missing(args, distro, rlogger, keypath, keytype, dest_dir):
         return False
     keyring_name_local = keytype_path_to(args, keytype)
     keyring_path_local = os.path.join(dest_dir, keyring_name_local)
-    with open(keyring_path_local, 'wb') as f:
+    with open(keyring_path_local, 'w') as f:
         for line in out:
-            f.write(line.decode('utf-8') + '\n')
+            f.write(line + '\n')
     return True
 
 
@@ -161,7 +161,7 @@ def gatherkeys_with_mon(args, host, dest_dir):
         return False
     mon_name_local = keytype_path_to(args, "mon")
     mon_path_local = os.path.join(dest_dir, mon_name_local)
-    with open(mon_path_local, 'wb') as f:
+    with open(mon_path_local, 'w') as f:
         f.write(mon_key)
     rlogger = logging.getLogger(host)
     path_asok = ceph_deploy.util.paths.mon.asok(args.cluster, remote_hostname)
