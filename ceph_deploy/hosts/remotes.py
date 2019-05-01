@@ -161,6 +161,10 @@ def write_conf(cluster, conf, overwrite):
     tmp_file = tempfile.NamedTemporaryFile('w', dir='/etc/ceph', delete=False)
     err_msg = 'config file %s exists with different content; use --overwrite-conf to overwrite' % path
 
+    if not os.path.isdir('/etc/ceph'):
+        err_msg = '/etc/ceph/ does not exist - could not write config'
+        raise RuntimeError(err_msg)
+
     if os.path.exists(path):
         with open(path, 'r') as f:
             old = f.read()
@@ -169,15 +173,10 @@ def write_conf(cluster, conf, overwrite):
         tmp_file.write(conf)
         tmp_file.close()
         shutil.move(tmp_file.name, path)
-        os.chmod(path, 0o644)
-        return
-    if os.path.exists('/etc/ceph'):
+    else:
         with open(path, 'w') as f:
             f.write(conf)
-        os.chmod(path, 0o644)
-    else:
-        err_msg = '/etc/ceph/ does not exist - could not write config'
-        raise RuntimeError(err_msg)
+    os.chmod(path, 0o644)
 
 
 def write_keyring(path, key, uid=-1, gid=-1):
