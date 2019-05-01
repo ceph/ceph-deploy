@@ -26,11 +26,11 @@ class mock_rlogger(object):
 def mock_remoto_process_check_success(conn, args):
     secret = new.generate_auth_key()
     out = '[mon.]\nkey = %s\ncaps mon = allow *\n' % secret
-    return out.encode('utf-8').split(b'\n'), [], 0
+    return out.split('\n'), [], 0
 
 
 def mock_remoto_process_check_rc_error(conn, args):
-    return [b""], [b"this failed\n"], 1
+    return [""], ["this failed\n"], 1
 
 
 class TestGatherKeysMissing(object):
@@ -102,7 +102,7 @@ class TestGatherKeysMissing(object):
         keyname = gatherkeys.keytype_path_to(self.args, keytype)
         keypath_gen = os.path.join(self.test_dir, keyname)
         assert os.path.isfile(keypath_gen)
-        
+
     @mock.patch('ceph_deploy.lib.remoto.process.check', mock_remoto_process_check_success)
     def test_success_osd(self):
         keytype = 'osd'
