@@ -9,6 +9,7 @@ import time
 from ceph_deploy import hosts
 from ceph_deploy.cliutil import priority
 from ceph_deploy.lib import remoto
+from ceph_deploy.util import as_string
 import ceph_deploy.util.paths.mon
 
 LOG = logging.getLogger(__name__)
@@ -143,7 +144,7 @@ def gatherkeys_missing(args, distro, rlogger, keypath, keytype, dest_dir):
     keyring_path_local = os.path.join(dest_dir, keyring_name_local)
     with open(keyring_path_local, 'w') as f:
         for line in out:
-            f.write(line + '\n')
+            f.write(as_string(line) + '\n')
     return True
 
 
@@ -162,7 +163,7 @@ def gatherkeys_with_mon(args, host, dest_dir):
     mon_name_local = keytype_path_to(args, "mon")
     mon_path_local = os.path.join(dest_dir, mon_name_local)
     with open(mon_path_local, 'w') as f:
-        f.write(mon_key)
+        f.write(as_string(mon_key))
     rlogger = logging.getLogger(host)
     path_asok = ceph_deploy.util.paths.mon.asok(args.cluster, remote_hostname)
     out, err, code = remoto.process.check(
