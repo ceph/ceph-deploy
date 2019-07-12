@@ -11,8 +11,10 @@ def make_fake_conf():
 # and make it even more generic
 
 def make_fake_conn(receive_returns=None):
-    receive_returns = receive_returns or ([b'{}'], [], 0)
+    receive_returns = receive_returns or (['{}'], [], 0)
     conn = Mock()
+    conn.cmd = lambda x: x
+    conn.sudo = ''
     conn.return_value = conn
     conn.execute = conn
     conn.receive = Mock(return_value=receive_returns)

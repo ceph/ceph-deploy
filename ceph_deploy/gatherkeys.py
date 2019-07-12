@@ -9,6 +9,7 @@ import time
 from ceph_deploy import hosts
 from ceph_deploy.cliutil import priority
 from ceph_deploy.lib import remoto
+from ceph_deploy.util import as_string
 import ceph_deploy.util.paths.mon
 
 LOG = logging.getLogger(__name__)
@@ -141,9 +142,9 @@ def gatherkeys_missing(args, distro, rlogger, keypath, keytype, dest_dir):
         return False
     keyring_name_local = keytype_path_to(args, keytype)
     keyring_path_local = os.path.join(dest_dir, keyring_name_local)
-    with open(keyring_path_local, 'wb') as f:
+    with open(keyring_path_local, 'w') as f:
         for line in out:
-            f.write(line + b'\n')
+            f.write(as_string(line) + '\n')
     return True
 
 
@@ -161,8 +162,8 @@ def gatherkeys_with_mon(args, host, dest_dir):
         return False
     mon_name_local = keytype_path_to(args, "mon")
     mon_path_local = os.path.join(dest_dir, mon_name_local)
-    with open(mon_path_local, 'wb') as f:
-        f.write(mon_key)
+    with open(mon_path_local, 'w') as f:
+        f.write(as_string(mon_key))
     rlogger = logging.getLogger(host)
     path_asok = ceph_deploy.util.paths.mon.asok(args.cluster, remote_hostname)
     out, err, code = remoto.process.check(
@@ -183,7 +184,7 @@ def gatherkeys_with_mon(args, host, dest_dir):
             rlogger.debug(line)
         return False
     try:
-        mon_status = json.loads(b''.join(out).decode('utf-8'))
+        mon_status = json.loads(''.join(out))
     except ValueError:
         rlogger.error('"ceph mon_status %s" output was not json', host)
         for line in out:

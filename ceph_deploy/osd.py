@@ -72,7 +72,7 @@ def osd_tree(conn, cluster):
     )
 
     try:
-        loaded_json = json.loads(b''.join(out).decode('utf-8'))
+        loaded_json = json.loads(''.join(out))
         # convert boolean strings to actual booleans because
         # --format=json fails to do this properly
         for k, v in loaded_json.items():
@@ -125,7 +125,7 @@ def osd_status_check(conn, cluster):
         return {}
 
     try:
-        loaded_json = json.loads(b''.join(out).decode('utf-8'))
+        loaded_json = json.loads(''.join(out))
         # convert boolean strings to actual booleans because
         # --format=json fails to do this properly
         for k, v in loaded_json.items():
