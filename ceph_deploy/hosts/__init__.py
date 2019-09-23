@@ -66,9 +66,10 @@ def get(hostname,
     module.normalized_name = _normalized_distro_name(distro_name)
     module.normalized_release = _normalized_release(release)
     module.distro = module.normalized_name
-    module.is_el = module.normalized_name in ['redhat', 'centos', 'fedora', 'scientific', 'oracle', 'virtuozzo']
-    module.is_rpm = module.normalized_name in ['redhat', 'centos',
-                                               'fedora', 'scientific', 'suse', 'oracle', 'virtuozzo', 'alt']
+    module.is_el = module.normalized_name in ['redhat', 'centos', 'fedora', 'scientific', 'oracle', 'virtuozzo',
+                                              'eurolinux']
+    module.is_rpm = module.normalized_name in ['redhat', 'centos', 'fedora', 'scientific', 'suse', 'oracle',
+                                               'virtuozzo', 'alt', 'eurolinux']
     module.is_deb = module.normalized_name in ['debian', 'ubuntu']
     module.is_pkgtarxz = module.normalized_name in ['arch']
     module.release = release
@@ -100,7 +101,8 @@ def _get_distro(distro, fallback=None, use_rhceph=False):
         'suse': suse,
         'virtuozzo': centos,
         'arch': arch,
-        'alt': alt
+        'alt': alt,
+        'eurolinux': centos,
         }
 
     if distro == 'redhat' and use_rhceph:
@@ -129,6 +131,8 @@ def _normalized_distro_name(distro):
         return 'arch'
     elif distro.startswith(('alt', 'altlinux', 'basealt', 'alt linux')):
         return 'alt'
+    elif distro.startswith('eurolinux'):
+        return 'eurolinux'
     return distro
 
 

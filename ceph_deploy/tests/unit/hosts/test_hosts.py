@@ -35,6 +35,10 @@ class TestNormalized(object):
         result = hosts._normalized_distro_name('Virtuozzo Linux')
         assert result == 'virtuozzo'
 
+    def test_get_eurolinux(self):
+        result = hosts._normalized_distro_name('EuroLinux')
+        assert result == 'eurolinux'
+
     def test_get_arch(self):
         result = hosts._normalized_distro_name('Arch Linux')
         assert result == 'arch'
@@ -431,3 +435,7 @@ class TestGetDistro(object):
     def test_get_altlinux(self):
         result = hosts._get_distro('ALT Linux')
         assert result.__name__.endswith('alt')
+
+    def test_get_eurolinux(self):
+        result = hosts._get_distro('EuroLinux')
+        assert result.__name__.endswith('centos')

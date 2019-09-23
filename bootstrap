@@ -61,7 +61,7 @@ if ! [ -d virtualenv ]; then
 
     if [ -f /etc/redhat-release ]; then
         case "$(cat /etc/redhat-release | awk '{print $1}')" in
-        CentOS)
+        CentOS|EuroLinux)
             for package in python-virtualenv; do
                 if [ "$(rpm -qa "$package" 2>/dev/null)" == "" ]; then
                     missing="${missing:+$missing }$package"

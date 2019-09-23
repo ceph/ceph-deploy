@@ -8,6 +8,7 @@
 *.pyc
 *.pyo
 *.egg-info
+/.eggs
 /build
 /dist
 build
@@ -20,3 +21,6 @@ build
 
 */lib/vendor/remoto
 remoto
+
+# Ignore all (Idea) PyCharm stuff
+.idea/*
