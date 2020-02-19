@@ -12,7 +12,7 @@
 #################################################################################
 Name:           ceph-deploy
 Version:       2.0.1
-Release:        1
+Release:        2
 Summary:        Admin and deploy tool for Ceph
 License:        MIT
 Group:          System/Filesystems

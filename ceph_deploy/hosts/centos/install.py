@@ -5,7 +5,6 @@ from ceph_deploy.hosts.common import map_components
 from ceph_deploy.util.paths import gpg
 from ceph_deploy.util import net
 
-
 LOG = logging.getLogger(__name__)
 NON_SPLIT_PACKAGES = ['ceph-osd', 'ceph-mon', 'ceph-mds']
 
@@ -69,35 +68,18 @@ def install(distro, version_kind, version, adjust_repos, **kw):
 
     if adjust_repos:
         if version_kind in ['stable', 'testing']:
-            distro.packager.add_repo_gpg_key(gpg.url(key))
-
-            if version_kind == 'stable':
-                url = 'https://download.ceph.com/rpm-{version}/{repo}/'.format(
-                    version=version,
-                    repo=repo_part,
-                    )
-            elif version_kind == 'testing':
-                url = 'https://download.ceph.com/rpm-testing/{repo}/'.format(repo=repo_part)
-
-            # remove any old ceph-release package from prevoius release
-            remoto.process.run(
-                distro.conn,
-                [
-                    'yum',
-                    'remove',
-                    '-y',
-                    'ceph-release'
-                ],
-            )
-            remoto.process.run(
-                distro.conn,
-                [
-                    'yum',
-                    'install',
-                    '-y',
-                    '{url}noarch/ceph-release-1-0.{dist}.noarch.rpm'.format(url=url, dist=dist),
-                ],
-            )
+            repo_suffix = 'el' if distro.normalized_name == 'eurolinux' else 'lp'
+            repo_mapping = {
+                'name': 'ceph-{suffix}'.format(suffix=repo_suffix),
+                'baseurl': 'https://repo.eurolinux.local/ceph/14_{suffix}/prod/'.format(suffix=repo_suffix),
+                'gpgcheck': '1',
+                # actually it's prefix but nvm
+                'gpgkey_url': 'https://repo.eurolinux.local/ceph/{suffix}_gpg.key'.format(suffix=repo_suffix),
+                'ssl_verify': '0'
+            }
+            yum_repo_text = '[{name}]\nname=Ceph {name}\nbaseurl={baseurl}' + \
+                            '\ngpgcheck={gpgcheck}\ngpgkey={gpgkey_url}\nsslverify={ssl_verify}'
+            distro.conn.remote_module.write_yum_repo(yum_repo_text)
 
         elif version_kind in ['dev', 'dev_commit']:
             logger.info('skipping install of ceph-release package')
@@ -108,7 +90,7 @@ def install(distro, version_kind, version, adjust_repos, **kw):
                 version=kw['args'].dev,
                 sha1=kw['args'].dev_commit or 'latest',
                 arch=machine
-                )
+            )
             LOG.debug('fetching repo information from: %s' % shaman_url)
             content = net.get_chacra_repo(shaman_url)
             mirror_install(
@@ -161,7 +143,6 @@ def mirror_install(distro, repo_url, gpg_url, adjust_repos, extra_installs=True,
         distro.conn.remote_module.set_repo_priority(['Ceph', 'Ceph-noarch', 'ceph-source'])
         distro.conn.logger.warning('altered ceph.repo priorities to contain: priority=1')
 
-
     if extra_installs and packages:
         distro.packager.install(packages)
 
@@ -177,7 +158,7 @@ def repo_install(distro, reponame, baseurl, gpgkey, **kw):
     enabled = kw.pop('enabled', 1)
     gpgcheck = kw.pop('gpgcheck', 1)
     install_ceph = kw.pop('install_ceph', False)
-    proxy = kw.pop('proxy', '') # will get ignored if empty
+    proxy = kw.pop('proxy', '')  # will get ignored if empty
     _type = 'repo-md'
     baseurl = baseurl.strip('/')  # Remove trailing slashes
 
