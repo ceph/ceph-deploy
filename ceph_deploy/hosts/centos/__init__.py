@@ -18,6 +18,13 @@ def choose_init(module):
 
     Returns the name of a init system (upstart, sysvinit ...).
     """
+    with open("/etc/rpm/macros.dist", 'r') as file:
+        lines = file.readlines()
+        for line in lines:
+            if 'centos' in line:
+                release_info = line.split()[1]
+                if release_info.isdigit() and int(release_info) >= 7:
+                    return 'systemd'
 
     if module.normalized_release.int_major < 7:
         return 'sysvinit'
