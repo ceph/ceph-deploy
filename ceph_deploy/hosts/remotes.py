@@ -13,8 +13,13 @@ import re
 
 def platform_information(_linux_distribution=None):
     """ detect platform information from remote host """
-    linux_distribution = _linux_distribution or platform.linux_distribution
-    distro, release, codename = linux_distribution()
+    distro = release = codename = None
+    try:
+        linux_distribution = _linux_distribution or platform.linux_distribution
+        distro, release, codename = linux_distribution()
+    except AttributeError:
+        # NOTE: py38 does not have platform.linux_distribution
+        pass
     if not distro:
         distro, release, codename = parse_os_release()
     if not codename and 'debian' in distro.lower():  # this could be an empty string in Debian
