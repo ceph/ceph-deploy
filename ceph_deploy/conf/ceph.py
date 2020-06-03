@@ -1,6 +1,5 @@
 import configparser
 import contextlib
-import sys
 
 from ceph_deploy import exc
 
