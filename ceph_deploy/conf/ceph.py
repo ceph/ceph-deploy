@@ -17,10 +17,9 @@ class _TrimIndentFile(object):
         return iter(self.readline, '')
 
 class CephConf(configparser.RawConfigParser):
-    def __init__(self, *args, **kwargs):
-        kwargs.setdefault('strict', False)
+    def __init__(self):
         # super() cannot be used with an old-style class
-        configparser.RawConfigParser.__init__(self, *args, **kwargs)
+        configparser.RawConfigParser.__init__(self, strict=False)
 
     def optionxform(self, s):
         s = s.replace('_', ' ')
