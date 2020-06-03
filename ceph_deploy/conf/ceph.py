@@ -1,7 +1,4 @@
-try:
-    import configparser
-except ImportError:
-    import ConfigParser as configparser
+import configparser
 import contextlib
 import sys
 
@@ -21,8 +18,7 @@ class _TrimIndentFile(object):
 
 class CephConf(configparser.RawConfigParser):
     def __init__(self, *args, **kwargs):
-        if sys.version_info >= (3, 2):
-            kwargs.setdefault('strict', False)
+        kwargs.setdefault('strict', False)
         # super() cannot be used with an old-style class
         configparser.RawConfigParser.__init__(self, *args, **kwargs)
 

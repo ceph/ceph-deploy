@@ -31,6 +31,7 @@ BuildRequires:  pytest
 %endif
 BuildRequires:  git
 Requires:       python-argparse
+Requires:       python-configparser
 Requires:       python-remoto
 %if 0%{?suse_version} && 0%{?suse_version} <= 1110
 %{!?python_sitelib: %global python_sitelib %(python -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
