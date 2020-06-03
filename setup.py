@@ -14,8 +14,6 @@ install_requires = ['remoto>=1.1.4']
 pyversion = sys.version_info[:2]
 if pyversion < (2, 7) or (3, 0) <= pyversion <= (3, 1):
     install_requires.append('argparse')
-if pyversion < (3, 0):
-    install_requires.append('configparser')
 
 setup(
     name='ceph-deploy',
