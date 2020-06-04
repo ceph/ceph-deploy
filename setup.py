@@ -15,7 +15,6 @@ pyversion = sys.version_info[:2]
 if pyversion < (2, 7) or (3, 0) <= pyversion <= (3, 1):
     install_requires.append('argparse')
 
-
 setup(
     name='ceph-deploy',
     version=ceph_deploy.__version__,

@@ -1,7 +1,4 @@
-try:
-    import configparser
-except ImportError:
-    import ConfigParser as configparser
+import configparser
 import logging
 import os
 from os import path
@@ -32,7 +29,7 @@ cd_conf_template = """
 # yum repos:
 # [myrepo]
 # baseurl = http://gitbuilder.ceph.com/ceph-rpm-centos7-x86_64-basic/ref/hammer
-# gpgurl = https://download.ceph.com/keys/autobuild.asc
+# gpgurl = {gpg_url_autobuild}
 # default = True
 # extra-repos = cephrepo  # will install the cephrepo file too
 #
@@ -42,19 +39,20 @@ cd_conf_template = """
 # enabled=1
 # gpgcheck=1
 # type=rpm-md
-# gpgkey=https://download.ceph.com/keys/release.asc
+# gpgkey={gpg_url_release}
 
 # apt repos:
 # [myrepo]
 # baseurl = http://gitbuilder.ceph.com/ceph-deb-trusty-x86_64-basic/ref/hammer
-# gpgurl = https://download.ceph.com/keys/autobuild.asc
+# gpgurl = {gpg_url_autobuild}
 # default = True
 # extra-repos = cephrepo  # will install the cephrepo file too
 #
 # [cephrepo]
 # baseurl=http://download.ceph.com/debian-hammer
-# gpgkey=https://download.ceph.com/keys/release.asc
-""".format(gpgurl=gpg.url('release'))
+# gpgkey={gpg_url_release}
+""".format(gpg_url_release=gpg.url('release'),
+           gpg_url_autobuild=gpg.url('autobuild'))
 
 
 def location():
@@ -146,9 +144,9 @@ def override_subcommand(section_name, section_items, args):
     return args
 
 
-class Conf(configparser.SafeConfigParser):
+class Conf(configparser.ConfigParser):
     """
-    Subclasses from SafeConfigParser to give a few helpers for the ceph-deploy
+    Subclasses from ConfigParser to give a few helpers for the ceph-deploy
     configuration. Specifically, it addresses the need to work with custom
     sections that signal the usage of custom repositories.
     """
