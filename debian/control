@@ -14,7 +14,7 @@ Package: ceph-deploy
 Architecture: all
 Depends: python,
          python-argparse,
-         python-configparser
+         python-configparser,
          python-setuptools,
          python-remoto,
          ${misc:Depends},
