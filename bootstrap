@@ -8,13 +8,15 @@ if ! [ -d virtualenv ]; then
     if command -v lsb_release >/dev/null 2>&1; then
         if [ "$1" = "2" ]; then
             python_package="python"
+            python_virtualenv_package="python-virtualenv"
         else
             python_package="python$1"
+            python_virtualenv_package="python$1-virtualenv"
         fi
 
         case "$(lsb_release --id --short)" in
         Ubuntu|Debian)
-            for package in "$python_package" python-virtualenv; do
+            for package in "$python_package" "$python_virtualenv_package"; do
             if [ "$(dpkg --status -- "$package" 2>/dev/null|sed -n 's/^Status: //p')" != "install ok installed" ]; then
                 # add a space after old values
                 missing="${missing:+$missing }$package"
