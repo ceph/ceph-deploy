@@ -434,4 +434,4 @@ class TestGetDistro(object):
 
     def test_get_openeulerlinux(self):
         result = hosts._get_distro('Openeuler')
-        assert result.__name__.endswith('fedora')
+        assert result.__name__.endswith('centos')

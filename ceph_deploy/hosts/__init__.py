@@ -97,7 +97,7 @@ def _get_distro(distro, fallback=None, use_rhceph=False):
         'oracle': centos,
         'redhat': centos,
         'fedora': fedora,
-        'openeuler':fedora,
+        'openeuler': centos,
         'suse': suse,
         'virtuozzo': centos,
         'arch': arch,
