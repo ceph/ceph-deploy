@@ -12,8 +12,6 @@ def read(fname):
 
 install_requires = [
     "remoto >= 1.1.4",
-    "argparse;python_version<'2.7'",
-    "argparse;'3.0'<=python_version<'3.2'",
     "configparser;python_version<'3.0'",
     "setuptools < 45.0.0;python_version<'3.0'",
     "setuptools;python_version>='3.0'"]
