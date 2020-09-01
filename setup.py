@@ -10,13 +10,13 @@ def read(fname):
     return f.read()
 
 
-install_requires = ['remoto>=1.1.4']
-pyversion = sys.version_info[:2]
-if pyversion < (2, 7) or (3, 0) <= pyversion <= (3, 1):
-    install_requires.append('argparse')
-if pyversion < (3, 0):
-    install_requires.append('configparser')
-
+install_requires = [
+    "remoto >= 1.1.4",
+    "argparse;python_version<'2.7'",
+    "argparse;'3.0'<=python_version<'3.2'",
+    "configparser;python_version<'3.0'",
+    "setuptools < 45.0.0;python_version<'3.0'",
+    "setuptools;python_version>='3.0'"]
 
 setup(
     name='ceph-deploy',
@@ -31,9 +31,7 @@ setup(
     keywords='ceph deploy',
     url="https://github.com/ceph/ceph-deploy",
 
-    install_requires=[
-        'setuptools',
-        ] + install_requires,
+    install_requires=install_requires,
 
     tests_require=[
         'pytest >=2.1.3',
