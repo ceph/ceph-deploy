@@ -43,7 +43,7 @@ class CephConf(configparser.RawConfigParser):
 def parse(fp):
     cfg = CephConf()
     ifp = _TrimIndentFile(fp)
-    cfg.readfp(ifp)
+    cfg.read_file(ifp)
     return cfg
 
 

@@ -82,7 +82,7 @@ class TestConfGetList(object):
         [foo]
         key =
         """))
-        cfg.readfp(conf_file)
+        cfg.read_file(conf_file)
         assert cfg.get_list('foo', 'key') == ['']
 
     def test_get_list_empty_when_no_key(self):
@@ -90,7 +90,7 @@ class TestConfGetList(object):
         conf_file = StringIO(dedent("""
         [foo]
         """))
-        cfg.readfp(conf_file)
+        cfg.read_file(conf_file)
         assert cfg.get_list('foo', 'key') == []
 
     def test_get_list_if_value_is_one_item(self):
@@ -99,7 +99,7 @@ class TestConfGetList(object):
         [foo]
         key = 1
         """))
-        cfg.readfp(conf_file)
+        cfg.read_file(conf_file)
         assert cfg.get_list('foo', 'key') == ['1']
 
     def test_get_list_with_mutltiple_items(self):
@@ -108,7 +108,7 @@ class TestConfGetList(object):
         [foo]
         key = 1, 3, 4
         """))
-        cfg.readfp(conf_file)
+        cfg.read_file(conf_file)
         assert cfg.get_list('foo', 'key') == ['1', '3', '4']
 
     def test_get_rid_of_comments(self):
@@ -117,7 +117,7 @@ class TestConfGetList(object):
         [foo]
         key = 1, 3, 4 # this is a wonderful comment y'all
         """))
-        cfg.readfp(conf_file)
+        cfg.read_file(conf_file)
         assert cfg.get_list('foo', 'key') == ['1', '3', '4']
 
     def test_get_rid_of_whitespace(self):
@@ -126,7 +126,7 @@ class TestConfGetList(object):
         [foo]
         key = 1,   3     ,        4
         """))
-        cfg.readfp(conf_file)
+        cfg.read_file(conf_file)
         assert cfg.get_list('foo', 'key') == ['1', '3', '4']
 
     def test_get_default_repo(self):
@@ -135,7 +135,7 @@ class TestConfGetList(object):
         [foo]
         default = True
         """))
-        cfg.readfp(conf_file)
+        cfg.read_file(conf_file)
         assert cfg.get_default_repo() == 'foo'
 
     def test_get_default_repo_fails_non_truthy(self):
@@ -144,7 +144,7 @@ class TestConfGetList(object):
         [foo]
         default = 0
         """))
-        cfg.readfp(conf_file)
+        cfg.read_file(conf_file)
         assert cfg.get_default_repo() is False
 
 
