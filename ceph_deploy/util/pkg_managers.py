@@ -427,3 +427,53 @@ class AptRpm(PackageManager):
     def clean(self):
         cmd = self.executable + ['update']
         return self._run(cmd)
+
+
+class Swupd(PackageManager):
+    """
+    Swupd package manager from ClearLinux distribution
+    """
+
+    executable = [
+        'swupd',
+        ]
+    name = 'swupd'
+
+    def install(self, packages, **kw):
+        if isinstance(packages, str):
+            packages = [packages]
+
+        extra_flags = kw.pop('extra_install_flags', None)
+        # Prior to installing packages, make sure we create folders for ceph
+        # config and logging which do not exist in Clear
+        cmd = ['mkdir', '-p', '/etc/ceph/']
+        self._run(cmd)
+        cmd = ['mkdir', '-p', '/var/log/ceph/']
+        self._run(cmd)
+
+        cmd = self.executable + ['bundle-add']
+
+        if extra_flags:
+            if isinstance(extra_flags, str):
+                extra_flags = [extra_flags]
+            cmd.extend(extra_flags)
+        cmd.extend(packages)
+        return self._run(cmd)
+
+    def remove(self, packages, **kw):
+        if isinstance(packages, str):
+            packages = [packages]
+
+        extra_flags = kw.pop('extra_remove_flags', None)
+        cmd = self.executable + ['bundle-remove']
+
+        if extra_flags:
+            if isinstance(extra_flags, str):
+                extra_flags = [extra_flags]
+            cmd.extend(extra_flags)
+        cmd.extend(packages)
+        return self._run(cmd)
+
+    def clean(self):
+        cmd = self.executable + ['clean']
+        return self._run(cmd)
