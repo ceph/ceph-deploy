@@ -1,11 +1,11 @@
 #!/usr/bin/make -f
 
-# Uncomment this to turn on verbose mode.
-export DH_VERBOSE=1
-export DEB_PYTHON_INSTALL_ARGS_ALL += --install-lib=/usr/share/ceph-deploy
+#export DH_VERBOSE=1
+export PYBUILD_NAME=ceph-deploy
+export PYBUILD_INSTALL_ARGS_python3=--install-lib=/usr/share/ceph-deploy
 
 %:
-	dh $@ --buildsystem python_distutils --with python2
+	dh $@ --buildsystem pybuild --with python3
 
 override_dh_clean:
 	rm -rf ceph_deploy/lib/remoto
