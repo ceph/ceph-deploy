@@ -18,7 +18,7 @@
 # common
 #################################################################################
 Name:           ceph-deploy
-Version:       2.0.2
+Version:       2.1.0
 Release:        0
 Summary:        Admin and deploy tool for Ceph
 License:        MIT
