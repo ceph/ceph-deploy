@@ -3,22 +3,26 @@ Maintainer: Sage Weil <sage@newdream.net>
 Uploaders: Sage Weil <sage@newdream.net>
 Section: admin
 Priority: optional
-Build-Depends: debhelper (>= 7), python-setuptools, git
-X-Python-Version: >= 2.6
-Standards-Version: 3.9.2
+Build-Depends: debhelper (>= 10),
+               dh-python,
+               python3,
+               python3-mock,
+               python3-remoto
+X-Python-Version: >= 3.7
+Standards-Version: 4.2.1
 Homepage: http://ceph.com/
 Vcs-Git: git://github.com/ceph/ceph-deploy.git
 Vcs-Browser: https://github.com/ceph/ceph-deploy
 
 Package: ceph-deploy
 Architecture: all
-Depends: python,
-         python-argparse,
-         python-configparser,
-         python-setuptools,
-         python-remoto,
+Depends: python3,
+         python3-argparse,
+         python3-configparser,
+         python3-setuptools,
+         python3-remoto,
          ${misc:Depends},
-         ${python:Depends}
+         ${python3:Depends}
 Description:  Ceph-deploy is an easy to use configuration tool
  for the Ceph distributed storage system.
  .
