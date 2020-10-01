@@ -1,6 +1,16 @@
 Changelog
 =========
 
+2.1
+---
+
+2.1.0
+^^^^^
+02-Oct-2020
+
+* add Python3 support
+* build python2-ceph-deploy and python3-ceph-deply rpm packages
+
 2.0
 ---
 
