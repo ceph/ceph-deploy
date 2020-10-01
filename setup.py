@@ -2,7 +2,8 @@ from setuptools import setup, find_packages
 import os
 import sys
 import ceph_deploy
-
+import pkg_resources
+import setuptools
 
 def read(fname):
     path = os.path.join(os.path.dirname(__file__), fname)
@@ -10,11 +11,18 @@ def read(fname):
     return f.read()
 
 
-install_requires = [
-    "remoto >= 1.1.4",
-    "configparser;python_version<'3.0'",
-    "setuptools < 45.0.0;python_version<'3.0'",
-    "setuptools;python_version>='3.0'"]
+if (pkg_resources.parse_version(setuptools.__version__) >=
+    pkg_resources.parse_version('36.2.0')):
+    install_requires = [
+        "remoto >= 1.1.4",
+        "configparser;python_version<'3.0'",
+        "setuptools < 45.0.0;python_version<'3.0'",
+        "setuptools;python_version>='3.0'"]
+else:
+    install_requires = [
+        "remoto >= 1.1.4",
+        "configparser",
+        "setuptools < 45.0.0"]
 
 setup(
     name='ceph-deploy',
