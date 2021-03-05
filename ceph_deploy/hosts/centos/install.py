@@ -94,7 +94,7 @@ def install(distro, version_kind, version, adjust_repos, **kw):
                     'yum',
                     'install',
                     '-y',
-                    '{url}noarch/ceph-release-1-0.{dist}.noarch.rpm'.format(url=url, dist=dist),
+                    '{url}noarch/ceph-release-1-1.{dist}.noarch.rpm'.format(url=url, dist=dist),
                 ],
             )
 
