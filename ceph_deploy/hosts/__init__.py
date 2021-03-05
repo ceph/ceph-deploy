@@ -92,7 +92,9 @@ def _get_distro(distro, fallback=None, use_rhceph=False):
     distro = _normalized_distro_name(distro)
     distributions = {
         'debian': debian,
+        'deepin': debian,
         'ubuntu': debian,
+        'uos': debian,
         'centos': centos,
         'scientific': centos,
         'oracle': centos,
