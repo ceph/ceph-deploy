@@ -38,7 +38,7 @@ def get_nonlocal_ip(host, subnet=None):
 
             return ip
 
-        if not ip.startswith('127.'):
+        if not ip.startswith('127.') and not ip.startswith('::1'):
             if subnet:
                 LOG.warning('could not match ip (%s) for host (%s) for cluster subnet (%s)' % (
                     ip,
