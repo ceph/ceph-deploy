@@ -45,6 +45,8 @@ def platform_information(_linux_distribution=None):
         codename = 'oracle'
     if not codename and 'virtuozzo linux' in distro.lower():  # this could be an empty string in Virtuozzo linux
         codename = 'virtuozzo'
+    if not codename and 'endeavouros' in distro.lower():  # this could be an empty string in Arch linux
+        codename = 'arch'
     if not codename and 'arch' in distro.lower():  # this could be an empty string in Arch linux
         codename = 'arch'
 

@@ -70,7 +70,7 @@ def get(hostname,
     module.is_rpm = module.normalized_name in ['redhat', 'centos',
                                                'fedora', 'scientific', 'suse', 'oracle', 'virtuozzo', 'alt']
     module.is_deb = module.normalized_name in ['debian', 'ubuntu']
-    module.is_pkgtarxz = module.normalized_name in ['arch']
+    module.is_pkgtarxz = module.normalized_name in ['arch', 'endeavouros']
     module.is_swupd = module.normalized_name in ['clear']
     module.release = release
     module.codename = codename
@@ -102,6 +102,7 @@ def _get_distro(distro, fallback=None, use_rhceph=False):
         'suse': suse,
         'virtuozzo': centos,
         'arch': arch,
+        'endeavouros': arch,
         'alt': alt,
         'clear': clear
         }
@@ -128,7 +129,7 @@ def _normalized_distro_name(distro):
         return 'ubuntu'
     elif distro.startswith('virtuozzo'):
         return 'virtuozzo'
-    elif distro.startswith('arch'):
+    elif distro.startswith(('arch', 'endeavouros')):
         return 'arch'
     elif distro.startswith(('alt', 'altlinux', 'basealt', 'alt linux')):
         return 'alt'
