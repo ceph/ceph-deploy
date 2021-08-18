@@ -98,6 +98,7 @@ def _get_distro(distro, fallback=None, use_rhceph=False):
         'oracle': centos,
         'redhat': centos,
         'fedora': fedora,
+        'uos': centos,
         'openeuler': centos,
         'suse': suse,
         'virtuozzo': centos,
@@ -122,7 +123,7 @@ def _normalized_distro_name(distro):
         return 'oracle'
     elif distro.startswith(('suse', 'opensuse', 'sles')):
         return 'suse'
-    elif distro.startswith(('centos', 'euleros', 'openeuler')):
+    elif distro.startswith(('centos', 'euleros', 'openeuler', 'uos')):
         return 'centos'
     elif distro.startswith(('linuxmint', 'kylin')):
         return 'ubuntu'
