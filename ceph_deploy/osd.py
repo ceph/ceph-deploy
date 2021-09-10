@@ -199,6 +199,8 @@ def create_osd(
         '--%s' % storetype,
         '--data', data
     ]
+    if not system.is_systemd(conn):
+        args.append('--no-systemd')
     if zap:
         LOG.warning('zapping is no longer supported when preparing')
     if dmcrypt:
