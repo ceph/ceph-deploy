@@ -8,6 +8,7 @@ import os
 import shutil
 import tempfile
 import platform
+import distro as dis
 import re
 
 
@@ -15,7 +16,7 @@ def platform_information(_linux_distribution=None):
     """ detect platform information from remote host """
     distro = release = codename = None
     try:
-        linux_distribution = _linux_distribution or platform.linux_distribution
+        linux_distribution = _linux_distribution or dis.linux_distribution
         distro, release, codename = linux_distribution()
     except AttributeError:
         # NOTE: py38 does not have platform.linux_distribution
